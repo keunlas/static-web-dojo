@@ -64,7 +64,7 @@ async function main() {
   const MARKERS = `JSON.stringify({
     sidebar: document.querySelectorAll('#sidebar .side-chapters a').length,
     offcanvas: !!document.getElementById('sidebar-offcanvas'),
-    topbar: !!document.querySelector('.mobile-topbar'),
+    topbar: !!document.querySelector('.topbar'),
     header: !!document.querySelector('.chapter-header'),
     codeblocks: document.querySelectorAll('.codeblock').length,
     toc: !!document.querySelector('.toc'),

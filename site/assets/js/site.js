@@ -7,7 +7,8 @@
  *   3. 为分卷页自动生成章节列表
  *   4. 从正文 h2/h3 生成右侧迷你目录（TOC）
  *   5. 渲染页脚与“上一式 / 下一式”翻页
- *   6. 触发代码高亮
+ *   6. 明暗主题切换（按钮注入 + localStorage 持久化）
+ *   7. 触发代码高亮
  *
  * 新增章节时只需在下面的 CHAPTERS 里加一条，
  * 侧边栏、分卷列表、翻页顺序会自动更新。
@@ -140,12 +141,7 @@
 
   function renderSidebar(pageId) {
     var html = '';
-    html += '<a class="site-brand" href="' + url('index.html') + '">'
-          +   '<span class="seal">行</span>'
-          +   '<span><span class="brand-title">' + T.title + '</span>'
-          +   '<span class="brand-sub">' + T.tagline + '</span></span>'
-          + '</a>';
-
+    // 侧边栏只渲染章节目录：品牌 / 搜索 / 主题切换已整体上移到页面级吸顶顶栏（.topbar）
     SECTIONS.forEach(function (sec) {
       html += '<nav class="side-section">';
       var secActive = sec.id === pageId ? ' class="active"' : '';
@@ -298,7 +294,7 @@
       + '<input type="search" id="site-search" class="form-control form-control-sm" placeholder="搜索全站 · 按 / 聚焦" aria-label="全站搜索">'
       + '<div class="search-results" id="search-results" hidden></div>'
       + '</div>');
-    $('#sidebar').prepend($wrap);
+    $('.topbar-search').append($wrap);
 
     var $input = $('#site-search');
     var $res = $('#search-results');
@@ -363,6 +359,52 @@
     });
   }
 
+  // ================= 明暗主题切换 =================
+  // 开关是 <html data-bs-theme="...">（Bootstrap 5.3 官方主题属性）；
+  // loader.js 在 <head> 中已尽早应用（localStorage 或系统偏好），
+  // 这里负责按钮 UI 的注入与切换、持久化。
+
+  var THEME_KEY = 'dojo-theme';
+
+  function isDarkTheme() {
+    return document.documentElement.getAttribute('data-bs-theme') === 'dark';
+  }
+
+  // 同步所有切换按钮的图标与提示（日间显示月亮，夜间显示太阳）
+  function syncThemeUI() {
+    var dark = isDarkTheme();
+    var label = dark ? '切换到浅色模式' : '切换到暗色模式';
+    $('.theme-toggle').each(function () {
+      var $btn = $(this);
+      $btn.html(dark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>');
+      $btn.attr('aria-pressed', dark ? 'true' : 'false');
+      $btn.attr('aria-label', label);
+      $btn.attr('title', label);
+    });
+  }
+
+  function toggleTheme() {
+    var next = isDarkTheme() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-bs-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* 隐私模式等场景下静默失败 */ }
+    syncThemeUI();
+  }
+
+  // 系统明暗偏好变化时自动跟随（仅当用户从未手动选择过——手动选择后以用户为准）
+  function initTheme() {
+    syncThemeUI();
+    var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq && typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', function (e) {
+        var saved = null;
+        try { saved = localStorage.getItem(THEME_KEY); } catch (err) { /* 忽略 */ }
+        if (saved === 'light' || saved === 'dark') return;
+        document.documentElement.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+        syncThemeUI();
+      });
+    }
+  }
+
   // ================= 初始化 =================
 
   function init() {
@@ -372,7 +414,6 @@
     // 侧边栏（桌面 + 移动端 offcanvas 共用同一份渲染结果）
     var sidebarHtml = renderSidebar(pageId);
     $('#sidebar').html(sidebarHtml);
-    initSearch();
 
     var $oc = $('<div class="offcanvas offcanvas-start sidebar-offcanvas" tabindex="-1" id="sidebar-offcanvas">'
               +   '<div class="offcanvas-header"><span class="offcanvas-title brand-title">' + T.title + '</span>'
@@ -380,10 +421,22 @@
               +   '<div class="offcanvas-body">' + sidebarHtml + '</div>'
               + '</div>').appendTo('body');
 
-    var $top = $('<div class="mobile-topbar">'
+    // 页面级吸顶顶栏：品牌 + 全站搜索（桌面）+ 明暗切换，全尺寸共用一条。
+    // 移动端 <992px 时搜索框收起来，hamburger 展开 offcanvas 目录。
+    var $top = $('<header class="topbar">'
               + '<button type="button" class="hamburger" data-bs-toggle="offcanvas" data-bs-target="#sidebar-offcanvas" aria-label="打开目录"><i class="bi bi-list"></i></button>'
-              + '<a class="mobile-brand" href="' + url('index.html') + '">' + T.title + '</a>'
-              + '</div>').prependTo('body');
+              + '<a class="topbar-brand" href="' + url('index.html') + '">'
+              +   '<span class="seal">行</span>'
+              +   '<span class="brand-title">' + T.title + '</span>'
+              + '</a>'
+              + '<div class="topbar-search"></div>'
+              + '<button type="button" class="theme-toggle theme-toggle-top" aria-pressed="false" aria-label="切换明暗主题" title="切换明暗主题"></button>'
+              + '</header>').prependTo('body');
+    initSearch();
+
+    // 明暗主题切换：绑定（事件委托）+ 同步初始状态
+    $(document).on('click', '.theme-toggle', toggleTheme);
+    initTheme();
 
     // 当前页在侧边栏中滚动到可见位置
     var $active = $('#sidebar .side-chapters a.active');

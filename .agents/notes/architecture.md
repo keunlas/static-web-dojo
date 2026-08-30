@@ -40,9 +40,12 @@ site/                        # 部署根目录（唯一需要上传的部分）
 每页 `<head>` 只写一行 `<script src=".../assets/js/loader.js"></script>`，其余公共资源由 loader 按序注入：
 
 1. 用 `document.currentScript.src` 反推站点根目录（file:// 与 http:// 通用），存入 `window.SITE_ROOT`；
-2. 注入 favicon（内嵌 SVG data URI，朱砂印章，零网络请求）；
-3. 注入 3 个 `<link>`（bootstrap.min.css → bootstrap-icons.min.css → site.css，顺序即优先级）；
-4. **链式顺序加载** 5 个脚本：jquery → bootstrap.bundle → highlight.js → search-index.js → site.js。
+2. **尽早应用明暗主题**：读 `localStorage['dojo-theme']`（用户手动选择），没有则跟随
+   `prefers-color-scheme`，把结果写到 `<html data-bs-theme="light|dark">`——
+   赶在注入任何 CSS 之前执行，页面不会闪错配色；这是全站明暗模式的唯一开关；
+3. 注入 favicon（内嵌 SVG data URI，朱砂印章，零网络请求）；
+4. 注入 3 个 `<link>`（bootstrap.min.css → bootstrap-icons.min.css → site.css，顺序即优先级）；
+5. **链式顺序加载** 5 个脚本：jquery → bootstrap.bundle → highlight.js → search-index.js → site.js。
    **必须链式**（onload 后才加载下一个）：动态插入的脚本不保证按插入顺序执行，
    直接 forEach 追加会随机出现 `$ is not defined`（这是本项目修过的真实 bug）。
 5. **jQuery 排队桩**：在真实 jQuery 到达前，loader 先定义 `window.$ = window.jQuery = stub(fn)`，
@@ -62,9 +65,18 @@ site/                        # 部署根目录（唯一需要上传的部分）
   - `playground`（练功场，独立 PAGES 条目，无对应 SECTIONS 回）
 - 章节条目支持 `pageId` 字段：藏经阁这类无编号条目（离线文档/示例集/图标大全）用它指定
   data-page；无 `num` 且无 `pageId` 的条目只进侧边栏、不进翻页顺序。
-- site.js 在 `$(init)` 里完成七件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆 + 顶栏）、
-  初始化全站搜索框、注入章节页头（印章 + 章回 + h1，`home`/`archive` 除外）、生成分卷页章节列表（`#chapter-list` 占位）、
+- site.js 在 `$(init)`里完成七件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆）、
+  注入**页面级吸顶顶栏**（`.topbar`：品牌 + 全站搜索 + 明暗切换，全尺寸共用一条）、
+  注入章节页头（印章 + 章回 + h1，`home`/`archive` 除外）、生成分卷页章节列表（`#chapter-list` 占位）、
   生成正文 TOC、渲染页脚与翻页、执行 `HL.enhance` 与 `DOJO._flush`。
+- **页面级吸顶顶栏（`.topbar`，`--topbar-h:3.6rem`）**：品牌（印章 + 站名）、全站搜索框（桌面；
+  `<992px` 收起）、明暗切换按钮；`position: sticky; top: 0`，页面滚动时钉在顶部。
+  底色用**新纸** `--paper-card`，与侧边栏**旧纸** `--paper-2` 区分，固定区与滚动目录
+  一眼可分。侧边栏 `.sidebar` 的 `top` 与 `.layout` 的 `min-height` 都由 `--topbar-h` 驱动；
+  移动端顶栏保留 hamburger（展开 offcanvas 目录），搜索隐藏。
+  明暗主题切换按钮（`.theme-toggle-top`）安静静默（透明无边框、悬停才浮现），
+  `toggleTheme()` 写 `data-bs-theme` + `localStorage`，事件委托到 `document`；
+  未手动选择过时跟随系统偏好实时变化。
 - **TOC 层级类名用 `l2`/`l3`，绝不能用 `h2`/`h3`**：Bootstrap 自带 `.h2`/`.h3` 标题类，
   曾导致右侧目录链接渲染成 32px 巨型标题（本项目修过的真实 bug）。
 
@@ -90,12 +102,20 @@ site/                        # 部署根目录（唯一需要上传的部分）
 
 - 调色板（CSS 变量）：宣纸底 `--paper:#faf6ec`、墨字 `--ink:#2b2a26`、朱砂 `--cinnabar:#b03a2e`、
   墨夜代码底 `--night:#20242e`、淡墨线 `--line:#e3dcc8`。
+- **暗色模式（暗夜纸墨）**：全部颜色通过变量取色，`site.css` 在 `html[data-bs-theme="dark"]`
+  下一个块整体重定义配色（纸→#17181d、墨→#e6e1d2、朱砂→#d46a5d 等）；Bootstrap 自身的
+  `data-bs-theme="dark"` 让组件（nav/accordion/form/modal…）自动适配，本站只需覆盖
+  `--bs-body-*`/`--bs-primary*` 等少数全局变量，并给写死色值的处所（印章字色、透明度底色、
+  warn 警示色、`.btn-primary` 白字用深一档朱砂 `#c14f43` 等）补暗版覆盖。
 - 字体全部系统栈：正文无衬线（含 PingFang SC / Microsoft YaHei）、标题宋体系（Songti SC / SimSun）、代码等宽栈。
-- 布局：侧边栏 fixed 280px（<992px 收进 offcanvas + 顶栏）；正文 max-width 46rem；
+- 布局：页面级吸顶顶栏（`--topbar-h`，搜索/品牌/主题切换都在这里）+ 侧边栏 fixed 280px
+  顶到顶栏之下（<992px 收进 offcanvas，顶栏保留 hamburger）；正文 max-width 46rem；
   右侧 TOC 仅 ≥1400px 出现（grid：46rem + 14rem）。
 - 图标大全页样式：`.icon-toolbar`（输入组 +「清空」按钮，按钮 nowrap 防折行）、
   `.icons-grid` / `.icon-cell` 网格与点击复制反馈（.copied）。
 - Bootstrap 主题变量被覆盖为朱砂系（`--bs-primary` 等），`btn-primary` 即朱砂按钮。
+- 例外约定：练功场预览 iframe 刻意保持白底（它渲染的是用户的代码，代表浏览器默认画布）；
+  `demo/` 下的整页示例不随站内主题（它们是独立成品，未用 loader）。
 
 ## 6. 离线约束（file:// 兼容清单）
 
@@ -109,6 +129,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 决策 | 理由 |
 | --- | --- |
 | 不用构建工具、JS 运行时注入导航 | 与教程哲学一致；file:// 可用；单一数据源改一处生效 |
+| 明暗模式用 Bootstrap 的 `data-bs-theme` 作唯一开关 | 组件暗色适配零成本；loader 里尽早应用避免闪色；只重定义 CSS 变量即可整体换肤 |
+| 品牌/搜索/主题切换整体上移到页面级顶栏 | 固定区与滚动目录在空间与用色上双重区分（新纸顶栏 vs 旧纸目录）；桌机移动机共用一条 |
 | vendor 入库、archive 脚本生成并 gitignore | 仓库精简（约 24MB 生成物不重复入库），部署前跑一条 sync 脚本 |
 | 每页一行 loader 引入 | 版本升级只改一处；杜绝多页面路径写错 |
 | 演示用 `$(function(){})` + DOJO.ready | 演示代码即教学代码，且异步加载下不报错 |

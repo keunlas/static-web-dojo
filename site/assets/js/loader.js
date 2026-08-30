@@ -22,6 +22,21 @@
 (function () {
   'use strict';
 
+  // —— 明暗主题：尽早应用，避免页面闪一下错误配色 ——
+  // 开关用 Bootstrap 5.3 官方的 data-bs-theme 属性（唯一真源），
+  // site.css 在 html[data-bs-theme="dark"] 下覆盖纸墨调色板为暗夜版。
+  // 用户手动选择存在 localStorage；从未选过则跟随系统 prefers-color-scheme。
+  (function () {
+    var KEY = 'dojo-theme';
+    var mode = null;
+    try { mode = localStorage.getItem(KEY); } catch (e) { /* file:// 或隐私模式可能不可用 */ }
+    if (mode !== 'light' && mode !== 'dark') {
+      mode = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-bs-theme', mode);
+  })();
+
   var me = document.currentScript;
   if (!me || !me.src) {
     console.warn('[loader] 无法定位 loader.js 的路径，公共资源未能自动加载。');
