@@ -3,7 +3,7 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：终验通过）
+## 当前状态（全站完成 ✅ · 最后更新：图标大全体验优化完成）
 
 ### ✅ 已完成（全部）
 
@@ -33,7 +33,32 @@
   portfolio 移动端汉堡折叠、图标过滤 heart→55、练功场 srcdoc 组装——
   全部通过
 
-### 🔧 最新一轮修复（用户报告两处问题）
+### 🧭 最新一轮修复（图标大全体验优化，含视觉审查）
+
+用户反馈“图标大全的使用方式被埋在 2078 个图标最底部”，本轮由有视觉能力的模型
+截图（HTTP 桌面/移动 + 1600px TOC 页）逐页审查后修复：
+
+- **图标大全改为“用法先行”**：`tools/gen-icons-page.py` 模板把「使用方式」代码块 +
+  「使用提示」提示框从页面底部移到 chapter-lead 之后、过滤工具栏之前，并重新生成
+  `site/archive/icons/index.html`。用户打开页面第一眼即会用法，再往下逛图标。
+  （用户反馈移至顶部后与导语无空隙：`.chapter-lead` 下边距为 0 而 `.codeblock` 无 margin，
+  章节页无感是因为代码块前都是带下边距的 `<p>`；`site.css` 补
+  `.chapter-lead + .codeblock { margin-top: 1.2rem }`，仅对“导语后直接跟代码块”生效。）
+- **图标页「清空」按钮文字竖排**：`.icon-toolbar` 内按钮被压缩后“清空”折成两行。
+  `site.css` 补 `.icon-toolbar .input-group { flex:1 1 auto; min-width:0 }` 与
+  `.icon-toolbar .btn { white-space:nowrap; flex-shrink:0 }`。（Site.css 属公共文件，
+  本次因用户明确要求体验优化而改动，改动范围仅此一处。）
+- **藏经阁卷首缺「图标大全」入口**：`archive/index.html` 的 realm-grid 只有文档/示例
+  两张卡，图标大全仅存在于侧边栏；补了第三张“图”字卡，并把「使用建议」里的
+  “翻 Bootstrap Icons”改为指向 `icons/index.html` 的链接。
+- 视觉复检：首页、三分卷卷首、基础篇、第 8/14/16 式、jQuery 卷首与第 5 式、
+  练功场、藏经阁、图标大全（桌面+移动）、portfolio/todo 示例页——布局无溢出、
+  TOC 无重叠、移动端工具栏正常。
+- 复验：check-offline ✔、check-links ✔ 35 页、CDP http 与 file:// 均零报错、
+  图标过滤 heart→55 / 复制类名 / 清空 2078 交互实测通过；搜索索引重新生成
+  （图标页与藏经阁文案变化）。
+
+### 🔧 上一轮修复（用户报告两处问题）
 
 - **宽屏正文 + 右侧目录错乱**：根因 `main { margin: 0 auto }` 在 has-toc 网格下
   被 fit-content 定宽，长代码行把正文撑到 923px 压住 TOC 列。修复

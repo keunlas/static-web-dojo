@@ -93,6 +93,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 - 字体全部系统栈：正文无衬线（含 PingFang SC / Microsoft YaHei）、标题宋体系（Songti SC / SimSun）、代码等宽栈。
 - 布局：侧边栏 fixed 280px（<992px 收进 offcanvas + 顶栏）；正文 max-width 46rem；
   右侧 TOC 仅 ≥1400px 出现（grid：46rem + 14rem）。
+- 图标大全页样式：`.icon-toolbar`（输入组 +「清空」按钮，按钮 nowrap 防折行）、
+  `.icons-grid` / `.icon-cell` 网格与点击复制反馈（.copied）。
 - Bootstrap 主题变量被覆盖为朱砂系（`--bs-primary` 等），`btn-primary` 即朱砂按钮。
 
 ## 6. 离线约束（file:// 兼容清单）

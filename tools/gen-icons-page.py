@@ -42,19 +42,6 @@ page = f"""<!doctype html>
         在输入框里敲名字即可过滤，点击图标可复制类名。
       </p>
 
-      <div class="icon-toolbar">
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="search" id="icon-filter" class="form-control" placeholder="输入图标名过滤，如 heart、house、arrow…" aria-label="过滤图标">
-        </div>
-        <button type="button" id="icon-clear" class="btn btn-outline-primary">清空</button>
-      </div>
-      <p class="icon-count" id="icon-count">显示 {len(names)} / {len(names)}</p>
-
-      <div class="icons-grid" id="icons-grid">
-{cells}
-      </div>
-
       <script type="text/plain" data-lang="html" data-title="使用方式">
         <!-- 引入（css 与 fonts 目录必须在一起）-->
         <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
@@ -70,6 +57,19 @@ page = f"""<!doctype html>
           <li>常用：<code>bi-house</code>、<code>bi-search</code>、<code>bi-heart-fill</code>、<code>bi-trash</code>、<code>bi-pencil</code>；</li>
           <li>教程第十四式《图标库》有完整的引入讲解。</li>
         </ul>
+      </div>
+
+      <div class="icon-toolbar">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="search" id="icon-filter" class="form-control" placeholder="输入图标名过滤，如 heart、house、arrow…" aria-label="过滤图标">
+        </div>
+        <button type="button" id="icon-clear" class="btn btn-outline-primary">清空</button>
+      </div>
+      <p class="icon-count" id="icon-count">显示 {len(names)} / {len(names)}</p>
+
+      <div class="icons-grid" id="icons-grid">
+{cells}
       </div>
 
       <script>
