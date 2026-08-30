@@ -25,6 +25,9 @@
 
 - `data-lang` 支持 `html` / `css` / `js`；`data-title` 是代码块顶栏标题（如“页面结构”“交互脚本”）。
 - 内容**不需要**转义 `<`、`&`（text/plain 不解析），高亮器自动处理。
+- ⚠️ **也不要写 HTML 实体（`&lt;` 等）**：script 是 raw text，实体不会被解码，
+  高亮器会再转义一次，读者会看到字面 `&lt;`（坑档案
+  `bug-fix/raw-codeblock-double-escape.md`）。需要展示 `<` 就直接写 `<`。
 - ⚠️ 唯一例外：源码内出现 `</script>` 必须写 `<\/script>`，否则该 text/plain 会被
   当作真 script 提前闭合。高亮器展示时自动还原为 `</script>`。
 - 一个 `.demo-source` 可放多个源码块（如“页面结构”+“交互脚本”），按执行顺序排列。

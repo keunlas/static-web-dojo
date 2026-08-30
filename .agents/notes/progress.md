@@ -18,7 +18,7 @@
 - 工具：check-offline.sh、check-links.py、gen-icons-page.py、gen-search-index.py、
   verify-cdp.js、page-template.html
 - AI 代理文档体系：AGENTS.md + notes（architecture / conventions / style-guide /
-  progress / **bug-fix 坑档案一坑一文件 × 6**）+ 7 篇 skills（含 doc-sync 纪律与
+  progress / **bug-fix 坑档案一坑一文件 × 8**）+ 7 篇 skills（含 doc-sync 纪律与
   “用户指令优先”铁律）
 - README：教程定位 + 网站构建/部署/检查说明（nginx 示例）
 
@@ -33,6 +33,20 @@
   portfolio 移动端汉堡折叠、图标过滤 heart→55、练功场 srcdoc 组装——
   全部通过
 
+### 🔧 最新一轮修复（用户报告两处问题）
+
+- **宽屏正文 + 右侧目录错乱**：根因 `main { margin: 0 auto }` 在 has-toc 网格下
+  被 fit-content 定宽，长代码行把正文撑到 923px 压住 TOC 列。修复
+  `site.css` ≥1400px 媒体查询补 `margin: 0; min-width: 0`（main 与 site-footer）。
+  CDP 复测 33 个手写页 1600px 宽：main/footer 全部 736px、TOC 就位、零报错。
+  坑档案：`bug-fix/has-toc-main-margin-auto-overflow.md`。
+- **图标大全代码块双重转义**：`gen-icons-page.py` 把 HTML 实体写进了
+  text/plain 源码块，script raw text 不解码实体 + 高亮器再转义 → 显示字面
+  `&lt;`。修复生成器模板为原始源码并重新生成页面；全站扫描确认其余
+  text/plain 块无此问题。坑档案：`bug-fix/raw-codeblock-double-escape.md`。
+- 复验：check-links ✔ 35 页、check-offline ✔、file:// CDP 抽查零报错、
+  搜索索引已重新生成（无 diff）。
+
 ### 遗留说明（非阻塞）
 
 - `site/archive/bootstrap-docs/` 镜像内自带的文档站内搜索依赖第三方索引，可能不可用，
@@ -41,18 +55,9 @@
   双击即可用；
 - 三个写作子代理的收尾报告均已回收，其建议已全部沉淀进 `.agents/` 文档。
 
-### 📝 待办（按顺序）
+### 📝 待办
 
-1. **Bootstrap 02–16 共 15 章**（文件见下表，slug 已登记、文件未建）——7 个写作代理并行进行中
-2. **jQuery 02–10 共 9 章**——并行进行中
-3. 整页示例：`site/demo/portfolio/index.html`、`site/demo/todo/index.html`——并行进行中
-4. `site/data/notes.json`（jQuery Ajax 章演示数据）——并行进行中
-5. ~~藏经阁图标大全~~ ✅ 已完成
-6. ~~练功场~~ ✅ 已完成
-7. ~~全站搜索~~ ✅ 已完成（新增页面后记得重跑 gen-search-index.py）
-8. ~~tools/check-offline.sh 与链接检查器~~ ✅ 已完成
-9. ~~README 部署说明~~ ✅ 已完成
-10. 全站终验：所有页面 CDP 双模式 + 链接 + 离线纯净（章节批量完成后执行）
+- 无阻塞项。全部页面已完成并通过双模式终验（见上）。
 
 ## 章节登记清单（site.js SECTIONS）
 

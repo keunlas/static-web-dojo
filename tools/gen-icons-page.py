@@ -56,11 +56,11 @@ page = f"""<!doctype html>
       </div>
 
       <script type="text/plain" data-lang="html" data-title="使用方式">
-        &lt;!-- 引入（css 与 fonts 目录必须在一起）--&gt;
-        &lt;link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css"&gt;
+        <!-- 引入（css 与 fonts 目录必须在一起）-->
+        <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
 
-        &lt;!-- 使用 --&gt;
-        &lt;i class="bi bi-heart-fill"&gt;&lt;/i&gt;
+        <!-- 使用 -->
+        <i class="bi bi-heart-fill"></i>
       </script>
 
       <div class="callout">

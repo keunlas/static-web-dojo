@@ -124,6 +124,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 宽屏 grid 页脚收缩错位 | `bug-fix/footer-grid-margin-shrink.md` |
 | jQuery 文件名带版本号写错 | `bug-fix/jquery-filename-with-version.md` |
 | site.js 用 `$.trim` 致全站搜索静默失效 | `bug-fix/site-js-used-removed-jquery-trim.md` |
+| has-toc 网格下正文 `margin:0 auto` 致 fit-content 撑破列宽、压住右侧 TOC | `bug-fix/has-toc-main-margin-auto-overflow.md` |
+| text/plain 源码块写 HTML 实体致代码块双重转义 | `bug-fix/raw-codeblock-double-escape.md` |
 | 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。

@@ -503,7 +503,10 @@ details.answer[open] summary { margin-bottom: .5rem; }
     justify-content: center;
     gap: 3rem;
   }
-  .content.has-toc main { grid-column: 1; max-width: none; }
+  /* margin: 0 必须显式给出：grid 子项带 auto 边距会被 fit-content 定宽，
+     正文里若代码行较长，main 会撑破 46rem 列、压到右侧目录上。
+     min-width: 0 同时解除 auto 最小尺寸，双保险。 */
+  .content.has-toc main { grid-column: 1; max-width: none; margin: 0; min-width: 0; }
   .content.has-toc .toc {
     display: block;
     grid-column: 2;
@@ -513,7 +516,7 @@ details.answer[open] summary { margin-bottom: .5rem; }
     top: 1.6rem;
     font-size: .85rem;
   }
-  .content.has-toc .site-footer { grid-column: 1; margin: 0; }
+  .content.has-toc .site-footer { grid-column: 1; margin: 0; min-width: 0; }
 }
 
 .toc-title {
