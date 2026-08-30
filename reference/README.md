@@ -8,16 +8,16 @@
 
 ```
 reference/
-├── bootstrap/                  # Bootstrap 相关资源
-│   ├── bootstrap-5.3.8-dist/   # 编译好的 CSS 与 JS 文件
-│   ├── bootstrap-5.3.8-examples/  # 官方示例（相册、博客、轮播等）
-│   ├── bootstrap-icons-1.13.1/    # Bootstrap 图标库
-│   └── bootstrap-offline-docs-5.3/  # Bootstrap 离线文档
-└── jquery/                     # jQuery 相关资源
-    ├── jquery-4.0.0.js         # 完整版
-    ├── jquery-4.0.0.min.js     # 压缩版
-    ├── jquery-4.0.0.slim.js    # 精简版（不含 Ajax）
-    └── jquery-4.0.0.slim.min.js  # 精简压缩版
+├── bootstrap/                        # Bootstrap 相关资源
+│   ├── bootstrap-5.3.8-dist/           # 编译好的 CSS 与 JS 文件
+│   ├── bootstrap-5.3.8-examples/       # 官方示例（相册、博客、轮播等）
+│   ├── bootstrap-icons-1.13.1/         # Bootstrap 图标库
+│   └── bootstrap-offline-docs-5.3/     # Bootstrap 离线文档
+└── jquery/                           # jQuery 相关资源
+    ├── jquery-4.0.0.js                 # 完整版
+    ├── jquery-4.0.0.min.js             # 压缩版
+    ├── jquery-4.0.0.slim.js            # 精简版（不含 Ajax）
+    └── jquery-4.0.0.slim.min.js        # 精简压缩版
 ```
 
 ## Bootstrap 5.3.8
