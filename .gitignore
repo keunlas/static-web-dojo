@@ -1,0 +1,3 @@
+# 藏经阁大体积资源由 tools/sync-assets.sh 从 reference/ 生成，不入库
+site/archive/bootstrap-docs/
+site/archive/examples/

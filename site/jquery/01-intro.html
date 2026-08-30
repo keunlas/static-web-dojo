@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一式 · 引子·轻剑快马 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="为什么还要学 jQuery、如何本地引入、认识 $(document).ready 并写出第一个交互。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-01">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        剑客有剑，书生有笔。写网页的人，也需要一件趁手的兵器。
+        jQuery 就是这样一柄轻剑——快、轻、不啰嗦，让“找到元素、操作元素”这件事变得干净利落。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 jQuery 解决什么问题、为什么今天仍然值得学</li>
+          <li>会从本地文件引入 jQuery，并掌握正确的引入顺序</li>
+          <li>认识 <code>$(document).ready</code>，写出自己的第一个交互</li>
+        </ul>
+      </div>
+
+      <h2>为什么是 jQuery</h2>
+      <p>
+        <strong>jQuery</strong> 诞生于 2006 年，曾是最流行的 JavaScript 库：它把浏览器之间不一致的细节抹平，
+        提供了一套极其简洁的 API。本教程使用它的最新版 <strong>4.0.0</strong>。
+      </p>
+      <p>如今原生 JavaScript 已经强大许多，但我们仍然推荐你学 jQuery，理由有三：</p>
+      <ul>
+        <li><strong>存量项目遍地都是</strong>——无数网站、后台系统、WordPress 插件仍在用它，会 jQuery 才能维护它们；</li>
+        <li><strong>它是理解 DOM 的绝佳桥梁</strong>——jQuery 的“选择器”与 CSS 选择器一一对应，学一遍等于把 DOM 的核心概念重新嚼碎；</li>
+        <li><strong>写起来真的爽</strong>——链式调用、隐式遍历，几行代码能顶原生十几行。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：jQuery 与 Bootstrap 互不需要</div>
+        <p style="margin:0">
+          正如第二回第一式所说，Bootstrap 5 不依赖 jQuery；反过来，jQuery 也不依赖 Bootstrap。
+          它们一个是“样式与组件库”，一个是“DOM 操作库”，各司其职。本回最后一式，我们会让两者合璧。
+        </p>
+      </div>
+
+      <h2>引入本地文件</h2>
+      <p>
+        jQuery 只有一个文件：<code>jquery-4.0.0.min.js</code>（<code>min</code> 表示压缩版，用于生产环境；
+        开发学习想读源码的话可以用未压缩版 <code>jquery-4.0.0.js</code>）。
+        同样放在 <code>&lt;/body&gt;</code> 之前，并且<strong>必须排在你自己的脚本之前</strong>——
+        因为你的脚本要使用 <code>$</code>，就得等它先登场。
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="标准引入方式（本地文件）">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>我的第一个 jQuery 页面</title>
+        </head>
+        <body>
+          <h1>你好，江湖！</h1>
+
+          <!-- 1. 先引入 jQuery -->
+          <script src="libs/jquery-4.0.0.min.js"><\/script>
+          <!-- 2. 再引入自己的脚本 -->
+          <script src="js/app.js"><\/script>
+        </body>
+        </html>
+      </script>
+
+      <h2>认识 $(document).ready</h2>
+      <p>
+        还记得上一回的思考题吗？“脚本放在 <code>&lt;head&gt;</code> 里会找不到元素”。
+        jQuery 提供了一个更优雅的解法——<strong>就绪事件</strong>：把代码交给它，
+        等整个页面解析完毕后再执行，脚本从此可以放心地放在任何位置。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="就绪事件的两种写法">
+        // 写法一：完整版
+        $(document).ready(function () {
+          // 页面就绪后，这里的代码才开始执行
+          console.log('页面就绪，可以动手了！');
+        });
+
+        // 写法二：简写版（更常用，作用完全相同）
+        $(function () {
+          console.log('简写版，江湖上最流行。');
+        });
+      </script>
+
+      <p>两个小知识：</p>
+      <ul>
+        <li>“就绪”指的是 DOM 树解析完成，不一定等图片全部加载完——所以页面秒开，交互先行；</li>
+        <li><code>$</code> 就是 <code>jQuery</code> 的别名，两者完全等价，写哪个都行。</li>
+      </ul>
+
+      <h2>第一个交互</h2>
+      <p>接下来是本回的第一招：点击按钮，改变一段文字。先看效果——</p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 点击按钮，改变文字</div>
+        <div class="demo-preview">
+          <button id="btn-hello" type="button" class="btn btn-primary">点我</button>
+          <p id="msg-hello" class="mt-3 mb-0">这里还没有动静……</p>
+          <script>
+            $(function () {
+              $('#btn-hello').on('click', function () {
+                $('#msg-hello').text('你好，江湖！');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button id="btn-hello" type="button" class="btn btn-primary">点我</button>
+            <p id="msg-hello" class="mt-3 mb-0">这里还没有动静……</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#btn-hello').on('click', function () {
+              $('#msg-hello').text('你好，江湖！');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>拆解这两行代码：</p>
+      <ul>
+        <li><code>$('#btn-hello')</code>——用选择器 <code>#btn-hello</code>（即 id 为 btn-hello 的元素）找到按钮；</li>
+        <li><code>.on('click', fn)</code>——给它绑定点击事件，点击时执行后面的函数；</li>
+        <li><code>$('#msg-hello').text('……')</code>——找到段落，把它的文字替换成新内容。</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-title">心法：链式调用</div>
+        <p style="margin:0">
+          jQuery 的大多数方法都会返回“自己”，因此可以把操作串成一条链，例如
+          <code>$('#btn-hello').addClass('btn-lg').text('换件衣裳')</code>——
+          同一行里先加大号样式、再改文字。第四式讲样式操作时，你会越来越喜欢这种写法。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第一式</div>
+        <ol>
+          <li>用简写版 <code>$(function () { … })</code> 把例 1 的脚本重写一遍，再点击试试。</li>
+          <li>新写一个页面：两个段落、一个按钮，点击按钮后让<strong>两个段落同时</strong>变成红色文字。</li>
+          <li>思考题：把绑定事件的代码放在 <code>$(document).ready</code> 里，与放在 <code>&lt;/body&gt;</code> 末尾直接执行，效果一样吗？为什么？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="简写版">
+            $(function () {
+              $('#btn-hello').on('click', function () {
+                $('#msg-hello').text('你好，江湖！');
+              });
+            });
+          </script>
+          <p>
+            效果完全一致。养成习惯：<strong>自己的脚本整体包在 <code>$(function () { … })</code> 里</strong>，
+            就再也不用操心脚本位置与加载顺序的问题。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="两个段落一起变色">
+            $(function () {
+              $('#btn-all').on('click', function () {
+                $('p').css('color', 'red');
+              });
+            });
+          </script>
+          <p>
+            注意这里的选择器是 <code>$('p')</code>——没有 <code>#</code> 前缀，选中的是<strong>页面上所有段落</strong>。
+            jQuery 会对选中的每个元素都执行操作，这就是它的“隐式遍历”。下一式我们专门修炼选择器。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            在这个例子中效果一样：脚本放在 <code>&lt;/body&gt;</code> 末尾时，元素已经解析完毕，直接绑定即可。
+            但 <code>ready</code> 更稳——无论脚本放哪、无论元素后面才被动态添加，只要“页面就绪”就动手，
+            而且一个页面可以注册多个 ready 回调，互不干扰。江湖规矩：<strong>能包 ready 就包 ready</strong>。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>jQuery 是一柄轻剑：用选择器找元素，用方法操作元素；</li>
+        <li>引入时先 jQuery、后自己的脚本，放在 <code>&lt;/body&gt;</code> 之前；</li>
+        <li><code>$(function () { … })</code> 是就绪事件的简写，也是今后每页代码的“标准外套”。</li>
+      </ul>
+
+      <blockquote>下一式，修炼轻剑的第一式剑诀——选择器。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

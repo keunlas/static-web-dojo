@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__ | 纯静态网页的修行</title>
+<meta name="description" content="__DESC__">
+<script src="__ROOT__assets/js/loader.js"></script>
+</head>
+<body data-page="__PAGE_ID__">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+      <!--
+        【作者模板 · 使用说明】
+
+        1. 复制本文件到对应章节位置，替换所有 __XXX__ 占位符：
+           __TITLE__   页面标题，如：第二式 · 容器与栅格（上）
+           __DESC__    一句话简介（用于 <meta name="description">）
+           __ROOT__    站点根目录前缀：根目录下页面留空，一层子目录写 ../，两层写 ../../
+           __PAGE_ID__ 章节编号，如 bootstrap-02、jquery-03（与 site/assets/js/site.js 里的数据一致）
+
+        2. 页头（印章 + 章回 + 大标题）由 site.js 自动注入，正文从这里直接写
+           “章首语”即可；正文的 h2 / h3 会自动生成右侧迷你目录。
+
+        3. 演示区块的标准写法（预览 + 源码）：
+             <div class="demo">
+               <div class="demo-caption">例 1 · 说明文字</div>
+               <div class="demo-preview"> ……真实可运行的代码…… </div>
+               <div class="demo-source">
+                 <script type="text/plain" data-lang="html" data-title="页面结构">
+                   ……源码，无需手动转义……
+                 </script>
+               </div>
+             </div>
+           data-lang 支持 html / css / js。
+           ⚠️ 源码中若出现 </script>，必须写成 <\/script>（HTML 解析器限制），
+              高亮器展示时会自动还原。
+           ⚠️ 演示里的 jQuery 代码请统一用 $(function(){…}) 包裹（loader.js 的
+              “排队桩”会等 jQuery 就绪后放行，这也是本教程教的就绪事件写法）。
+
+        4. 练功题用 .practice + <details class="answer">（参考答案默认折叠，无需 JS）。
+
+        5. 所有外部链接（如 MDN）可以用 https:// 绝对地址；除此之外的
+           站内资源一律相对路径，保证离线可用。
+      -->
+
+      <p class="chapter-lead">（章首语：一两句有味道的开场）</p>
+
+      <h2>第一个小节</h2>
+      <p>正文……</p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第 X 式</div>
+        <ol>
+          <li>练功题一</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>答案……</p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>要点一</li>
+      </ul>
+
+      <blockquote>下一式，……</blockquote>
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

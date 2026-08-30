@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一式 · 初入江湖 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="Bootstrap 是什么、如何本地引入、写出第一个 Bootstrap 页面。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-01">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖传言，写网页有三苦：布局易散、样式难调、兼容难测。
+        有一位前辈不忍后辈受苦，把毕生招式编成一部宝典，供天下人取用——这部宝典，名叫 Bootstrap。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 Bootstrap 是什么、能帮我们解决什么问题</li>
+          <li>会从本地文件引入 Bootstrap 的 CSS 与 JS</li>
+          <li>能写出自己的第一个 Bootstrap 页面</li>
+        </ul>
+      </div>
+
+      <h2>Bootstrap 是什么</h2>
+      <p>
+        <strong>Bootstrap</strong> 是一套开源的前端组件库，最初由 Twitter 的工程师打造，
+        现在是 GitHub 上星标最多的开源项目之一。本教程使用它的最新稳定版 <strong>5.3.8</strong>。
+      </p>
+      <p>它把写网页最常用、最重复的工作，封装成了拿来就用的类名，主要包括：</p>
+      <ul>
+        <li><strong>一套响应式栅格系统</strong>——不用自己写 Flex/Grid，也能排出整齐的多栏布局（第二、三式专讲）；</li>
+        <li><strong>一大筐现成组件</strong>——按钮、表单、卡片、导航、模态框、轮播……几乎覆盖日常页面的全部需要；</li>
+        <li><strong>一套统一的视觉基础</strong>——字号、间距、颜色都有默认值，页面天生整齐耐看。</li>
+      </ul>
+      <p>
+        你只需要在 HTML 里给元素加上对应的 class（类名），比如给按钮写
+        <code>class="btn btn-primary"</code>，一个像模像样的按钮就出现了。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：Bootstrap 5 不依赖 jQuery</div>
+        <p style="margin:0">
+          老版本（Bootstrap 4 及以前）需要先引入 jQuery 才能用它的交互组件；
+          从 Bootstrap 5 开始，它改用原生 JavaScript 重写，<strong>不再依赖 jQuery</strong>。
+          第三回的 jQuery 是另一套独立的工具，两者可以同台，但互不需要。
+        </p>
+      </div>
+
+      <h2>引入本地文件</h2>
+      <p>Bootstrap 分为两个部分，都要引入：</p>
+      <ul>
+        <li><strong>样式</strong>：<code>bootstrap.min.css</code>，放在 <code>&lt;head&gt;</code> 里；</li>
+        <li><strong>脚本</strong>：<code>bootstrap.bundle.min.js</code>，放在 <code>&lt;/body&gt;</code> 之前。</li>
+      </ul>
+      <p>
+        “bundle”意为“捆绑包”——它已经内置了弹出层、下拉菜单等组件依赖的
+        <strong>Popper 定位库</strong>，初学者用 bundle 版一步到位，不必再单独引入。
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="标准引入方式（本地文件）">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>我的第一个 Bootstrap 页面</title>
+          <!-- 1. 样式：放在 head 里 -->
+          <link rel="stylesheet" href="libs/bootstrap.min.css">
+        </head>
+        <body>
+          <h1>你好，江湖！</h1>
+
+          <!-- 2. 脚本：放在 body 末尾，bundle 版内含 Popper -->
+          <script src="libs/bootstrap.bundle.min.js"><\/script>
+        </body>
+        </html>
+      </script>
+
+      <p>两个细节值得记住：</p>
+      <ul>
+        <li><strong>为什么脚本放在 body 末尾？</strong>因为脚本要操作页面元素，必须先等元素解析出来；放在末尾最稳妥。</li>
+        <li><strong>那个 <code>meta viewport</code> 是什么？</strong>它告诉手机浏览器按真实宽度渲染页面，是响应式设计的第一块基石，几乎每个页面都要写。</li>
+      </ul>
+
+      <p>
+        顺带一提：<strong>本教程网站自己</strong>就运行在 Bootstrap 上。你查看本站任意页面的源码会发现，
+        我们只用了一行 <code>&lt;script src="../assets/js/loader.js"&gt;&lt;/script&gt;</code>
+        就引入了 Bootstrap、图标库和本站皮肤——那是我们用十几行 JavaScript 写的一个小加载器，
+        等你在第三回学会 jQuery 后，回头再看它的源码会心一笑。
+      </p>
+
+      <h2>第一个页面</h2>
+      <p>万事俱备，来看一个完整的例子：一个容器里放上标题、段落、按钮和一个提示框。</p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 第一个 Bootstrap 页面</div>
+        <div class="demo-preview">
+          <div class="container">
+            <h1 class="display-6">你好，江湖！</h1>
+            <p class="lead">这是我用 Bootstrap 写出的第一个页面。</p>
+            <button type="button" class="btn btn-primary">点我一下</button>
+            <div class="alert alert-primary mt-3 mb-0" role="alert">
+              提示框说：你已经迈出了第一步！
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="container">
+              <h1 class="display-6">你好，江湖！</h1>
+              <p class="lead">这是我用 Bootstrap 写出的第一个页面。</p>
+              <button type="button" class="btn btn-primary">点我一下</button>
+              <div class="alert alert-primary mt-3 mb-0" role="alert">
+                提示框说：你已经迈出了第一步！
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>这里的每个类名都是 Bootstrap 的招式：</p>
+      <ul>
+        <li><code>container</code>——内容容器，让内容居中并留出两侧呼吸空间（第二式详讲）；</li>
+        <li><code>display-6</code>——一种更大、更轻的大标题样式；</li>
+        <li><code>lead</code>——稍大一号的引导段落；</li>
+        <li><code>btn btn-primary</code>——按钮本体 + 主题色；</li>
+        <li><code>alert alert-primary</code>——提示框本体 + 主题色；</li>
+        <li><code>mt-3</code>——margin-top（上外边距）为 3 档，用来拉开距离；<code>mb-0</code> 则把下外边距清零。</li>
+      </ul>
+
+      <h2>常用类名速览</h2>
+      <p>下面这些类名几乎每页都会用到，先混个脸熟，后面的章节会逐一展开：</p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>作用</th><th>详讲章节</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>container</code></td><td>页面内容容器</td><td>第二式</td></tr>
+          <tr><td><code>row</code> / <code>col</code></td><td>栅格布局的行与列</td><td>第二、三式</td></tr>
+          <tr><td><code>btn</code> / <code>badge</code> / <code>alert</code></td><td>按钮、徽章、提示框</td><td>第五式</td></tr>
+          <tr><td><code>card</code></td><td>卡片容器</td><td>第六式</td></tr>
+          <tr><td><code>form-control</code></td><td>表单控件</td><td>第八式</td></tr>
+          <tr><td><code>navbar</code></td><td>导航栏</td><td>第九式</td></tr>
+          <tr><td><code>d-flex</code></td><td>开启 Flex 布局</td><td>第十五式</td></tr>
+          <tr><td><code>text-center</code> / <code>mt-*</code> / <code>p-*</code></td><td>对齐与间距工具类</td><td>第四式</td></tr>
+        </tbody>
+      </table>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第一式</div>
+        <ol>
+          <li>把例 1 里的按钮类名从 <code>btn btn-primary</code> 改成 <code>btn btn-outline-danger</code>，观察按钮的变化。</li>
+          <li>在提示框下方再添加一个 <code>alert alert-warning</code>，里面写一句给自己的话。</li>
+          <li>思考题：为什么脚本要放在 <code>&lt;/body&gt;</code> 之前，而不是 <code>&lt;head&gt;</code> 里？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            <code>btn-outline-danger</code> 是“描边样式 + 危险红”的组合：按钮会从实心蓝变成白底红字的描边按钮。
+            这说明 Bootstrap 的类名遵循 <strong>“本体类 + 修饰类”</strong> 的规律：<code>btn</code> 定身份，
+            <code>btn-primary</code>、<code>btn-outline-danger</code> 等负责外观。第三、四式会专门讲这套颜色体系。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="再添一个提示框">
+            <div class="container">
+              <h1 class="display-6">你好，江湖！</h1>
+              <p class="lead">这是我用 Bootstrap 写出的第一个页面。</p>
+              <button type="button" class="btn btn-primary">点我一下</button>
+              <div class="alert alert-primary mt-3 mb-0" role="alert">
+                提示框说：你已经迈出了第一步！
+              </div>
+              <div class="alert alert-warning mt-3 mb-0" role="alert">
+                修行路上，日拱一卒。
+              </div>
+            </div>
+          </script>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            浏览器是按顺序解析页面的：放在 <code>&lt;head&gt;</code> 里的脚本执行时，页面正文还没被解析出来，
+            脚本里如果去“找元素”就会扑空。放在 <code>&lt;/body&gt;</code> 之前，则执行时正文元素都已就绪。
+            第三回学 jQuery 时，你会见到另一种解法：<code>$(document).ready</code>——它能让脚本“等页面就绪再动手”。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>Bootstrap 是一套开源前端组件库，本教程使用 5.3.8；</li>
+        <li>样式放 <code>&lt;head&gt;</code>，脚本放 <code>&lt;/body&gt;</code> 前，bundle 版一步到位；</li>
+        <li>它的核心玩法就是“给元素加类名”，第二式起，我们正式开始学招式。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼 Bootstrap 的看家本领——十二列栅格系统。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>
