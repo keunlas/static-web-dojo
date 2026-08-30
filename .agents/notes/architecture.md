@@ -12,23 +12,27 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ├── jquery/                  # 第三回 · jQuery 篇（10 式）
 ├── archive/                 # 第四回 · 藏经阁（离线文档/示例集/图标大全）
 │   ├── index.html           # 藏经阁卷首（手写，入库）
+│   ├── icons/index.html     # 图标大全（tools/gen-icons-page.py 生成）
 │   ├── bootstrap-docs/      # Bootstrap 离线文档镜像（脚本生成，gitignore）
 │   └── examples/            # 官方示例集（脚本生成，gitignore）
 ├── demo/                    # 整页示例（综合修炼章配套，独立打开）
 ├── data/                    # Ajax 章用的本地 JSON 数据
-├── playground/              # 练功场（代码编辑器 + 实时预览）
+├── playground/index.html    # 练功场（data-page="playground"，页头自写）
 └── assets/
     ├── css/site.css         # 纸墨风皮肤（全站唯一自定义样式）
     ├── js/loader.js         # 公共资源加载器（每页 <head> 只引它一行）
-    ├── js/site.js           # 全站目录数据 + 导航/TOC/页脚注入
+    ├── js/site.js           # 全站目录数据 + 导航/TOC/页脚/搜索注入
     ├── js/highlight.js      # 迷你代码高亮器 + 复制按钮
+    ├── js/search-index.js   # 全站搜索索引（tools/gen-search-index.py 生成）
     └── vendor/              # 本地库（入库、由 sync-assets.sh 从 reference 复制）
         ├── bootstrap/bootstrap.min.css、bootstrap.bundle.min.js
         ├── bootstrap-icons/bootstrap-icons.min.css、fonts/
         └── jquery/jquery-4.0.0.min.js
 ```
 
-- `tools/sync-assets.sh`：从 `reference/` 复制 vendor 与藏经阁，并生成示例集索引页。
+- `tools/` 一览：`sync-assets.sh`（同步 vendor/藏经阁）、`gen-icons-page.py`（图标大全）、
+  `gen-search-index.py`（搜索索引）、`check-offline.sh`（离线纯净扫描）、
+  `check-links.py`（内部链接检查）、`page-template.html`（作者模板）。
 - 页面深度 → loader 引入前缀：根目录页面 `assets/js/loader.js`；一层子目录 `../assets/js/loader.js`；两层 `../../assets/js/loader.js`。
 
 ## 2. 加载机制（loader.js）
@@ -38,7 +42,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 1. 用 `document.currentScript.src` 反推站点根目录（file:// 与 http:// 通用），存入 `window.SITE_ROOT`；
 2. 注入 favicon（内嵌 SVG data URI，朱砂印章，零网络请求）；
 3. 注入 3 个 `<link>`（bootstrap.min.css → bootstrap-icons.min.css → site.css，顺序即优先级）；
-4. **链式顺序加载** 4 个脚本：jquery → bootstrap.bundle → highlight.js → site.js。
+4. **链式顺序加载** 5 个脚本：jquery → bootstrap.bundle → highlight.js → search-index.js → site.js。
    **必须链式**（onload 后才加载下一个）：动态插入的脚本不保证按插入顺序执行，
    直接 forEach 追加会随机出现 `$ is not defined`（这是本项目修过的真实 bug）。
 5. **jQuery 排队桩**：在真实 jQuery 到达前，loader 先定义 `window.$ = window.jQuery = stub(fn)`，
@@ -54,11 +58,24 @@ site/                        # 部署根目录（唯一需要上传的部分）
 - 页面通过 `<body data-page="...">` 声明身份，id 规则：
   - `home`、`basics`、`bootstrap`、`jquery`、`archive`（卷首/分卷页）
   - `bootstrap-01`…`bootstrap-16`、`jquery-01`…`jquery-10`（章节页，与 slug 一致）
-- site.js 在 `$(init)` 里完成六件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆 + 顶栏）、
-  注入章节页头（印章 + 章回 + h1，`home`/`archive` 除外）、生成分卷页章节列表（`#chapter-list` 占位）、
+  - `archive-icons`（藏经阁·图标大全，登记时用章节条目的 `pageId` 字段指定）
+  - `playground`（练功场，独立 PAGES 条目，无对应 SECTIONS 回）
+- 章节条目支持 `pageId` 字段：藏经阁这类无编号条目（离线文档/示例集/图标大全）用它指定
+  data-page；无 `num` 且无 `pageId` 的条目只进侧边栏、不进翻页顺序。
+- site.js 在 `$(init)` 里完成七件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆 + 顶栏）、
+  初始化全站搜索框、注入章节页头（印章 + 章回 + h1，`home`/`archive` 除外）、生成分卷页章节列表（`#chapter-list` 占位）、
   生成正文 TOC、渲染页脚与翻页、执行 `HL.enhance` 与 `DOJO._flush`。
 - **TOC 层级类名用 `l2`/`l3`，绝不能用 `h2`/`h3`**：Bootstrap 自带 `.h2`/`.h3` 标题类，
   曾导致右侧目录链接渲染成 32px 巨型标题（本项目修过的真实 bug）。
+
+## 3.5 全站搜索（离线可用）
+
+- 索引：`site/assets/js/search-index.js` 由 `tools/gen-search-index.py` 扫描本站手写页面生成
+  （排除第三方镜像），输出 `window.DOJO_SEARCH = [{url,title,text},…]`。
+  它是 **JS 文件而非 JSON**，所以 file:// 双击打开也能搜索（不经过 fetch）。
+- UI：site.js 的 `initSearch()` 在侧边栏顶部注入搜索框；输入即过滤（标题命中 3 分、正文 1 分），
+  结果以下拉列表显示；快捷键 `/` 聚焦、`Esc` 关闭。
+- **新增/修改页面后必须重跑 `python3 tools/gen-search-index.py`**，否则搜不到。
 
 ## 4. 代码高亮（highlight.js）
 

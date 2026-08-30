@@ -27,13 +27,13 @@
 
 ## 2. 登记非章节页面（藏经阁条目、练功场等）
 
-- 藏经阁条目：加进 `archive` 的 `chapters` 数组，`num` 留空字符串：
+- 藏经阁条目：加进 `archive` 的 `chapters` 数组。无编号条目用 `pageId` 指定 data-page：
   ```js
-  { num: '', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
+  { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
   ```
-- 练功场等独立工具页：在 `SECTIONS` 之后追加 `PAGES` 条目并给 `data-page`，
-  页面自身 `<body data-page="playground">`，侧边栏如需入口可在 `renderSidebar` 中加链接。
-- 非章节页的翻页顺序：`PAGES` 数组按阅读顺序平铺，手动插入即可。
+  无 `num` 且无 `pageId` 的条目（如离线文档、示例集）只进侧边栏、不进翻页顺序。
+- 练功场等独立工具页：在 `SECTIONS` 之后向 `PAGES` 数组手动追加条目，
+  页面自身 `<body data-page="playground">`，页头需自写（site.js 只给有对应“回”的页面注入页头）。
 
 ## 3. 验证
 

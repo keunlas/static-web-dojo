@@ -9,6 +9,8 @@
 bash tools/sync-assets.sh            # 同步全部（vendor + 藏经阁）
 bash tools/sync-assets.sh vendor     # 只同步 vendor 库文件
 bash tools/sync-assets.sh archive    # 只同步藏经阁（离线文档 + 示例集 + 索引）
+python3 tools/gen-icons-page.py      # 再生成藏经阁图标大全页（2078 个图标）
+python3 tools/gen-search-index.py    # 再生成全站搜索索引（新增页面后必跑）
 ```
 
 ## 脚本行为（tools/sync-assets.sh）
@@ -17,8 +19,9 @@ bash tools/sync-assets.sh archive    # 只同步藏经阁（离线文档 + 示�
   `bootstrap-icons.min.css` + `fonts/*.woff(2)`、`jquery-4.0.0.min.js`
   复制到 `site/assets/vendor/`（幂等，可重复执行）。
 - `archive`：整体重建 `site/archive/bootstrap-docs/` 与 `site/archive/examples/`
-  （**先删后复制**），并用目录循环重新生成 `examples/index.html` 索引页
-  （该索引页为本站手写的离线极简样式，不含任何 CDN）。
+  （**先删后复制**），用目录循环重新生成 `examples/index.html` 索引页
+  （该索引页为本站手写的离线极简样式，不含任何 CDN），并调用
+  `gen-icons-page.py` 再生成图标大全页。
 
 ## 注意事项
 

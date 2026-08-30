@@ -13,14 +13,15 @@ node --check site/assets/js/loader.js
 node --check site/assets/js/site.js
 node --check site/assets/js/highlight.js
 
-# b) 离线纯净：站内资源类外链必须为空（允许 <a> 文字外链）
-grep -rnE '<(link|script|img|iframe|source|video|audio)[^>]+(src|href)="https?://' \
-  site/index.html site/basics site/bootstrap site/jquery site/archive/index.html site/playground 2>/dev/null
-# 注：site/archive/bootstrap-docs 与 examples 是第三方镜像，不纳入本检查
+# b) 离线纯净 + 内部链接（现成脚本，一站式）
+bash tools/check-offline.sh
+python3 tools/check-links.py
 
-# c) 禁用的模块/网络 API 扫描（应无输出）
-grep -rnE 'type="module"|fetch\(|XMLHttpRequest' site/index.html site/basics site/bootstrap site/jquery || true
+# c) 搜索索引与图标页是否最新（新增页面后）
+python3 tools/gen-search-index.py && git status --short site/assets/js/search-index.js
 ```
+
+> check-offline.sh 已排除第三方镜像；<a> 文字外链会列出供人工核对。
 
 ## 2. 本地服务器验证
 
