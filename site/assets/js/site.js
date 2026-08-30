@@ -310,7 +310,8 @@
     }
 
     function run() {
-      var q = $.trim($input.val()).toLowerCase();
+      // 注意：jQuery 4 已移除 $.trim，这里用原生 String#trim
+      var q = ($input.val() || '').trim().toLowerCase();
       if (q.length < 1) { $res.attr('hidden', true); return; }
       var terms = q.split(/\s+/);
       var hits = [];

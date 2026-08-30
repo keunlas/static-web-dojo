@@ -13,9 +13,13 @@ node --check site/assets/js/loader.js
 node --check site/assets/js/site.js
 node --check site/assets/js/highlight.js
 
-# b) 离线纯净 + 内部链接（现成脚本，一站式）
+# b) 离线纯净 + 内部链接 + 公共 JS 禁用 API（现成脚本，一站式）
 bash tools/check-offline.sh
 python3 tools/check-links.py
+
+# b2) check-offline.sh 的 2b 项已覆盖：公共 JS 里 jQuery 4 已移除 API
+#     （$.trim/.bind/.live/.delegate）——站点自己的 JS 也要守这条红线，
+#     曾因 site.js 用 $.trim 导致全站搜索静默失效。
 
 # c) 搜索索引与图标页是否最新（新增页面后）
 python3 tools/gen-search-index.py && git status --short site/assets/js/search-index.js

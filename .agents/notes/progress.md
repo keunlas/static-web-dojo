@@ -17,7 +17,8 @@
 - 整页示例：`demo/portfolio`、`demo/todo`（独立页、含内嵌 favicon）；`data/notes.json`
 - 工具：check-offline.sh、check-links.py、gen-icons-page.py、gen-search-index.py、
   verify-cdp.js、page-template.html
-- AI 代理文档体系：AGENTS.md + 4 篇 notes + 7 篇 skills（含 doc-sync 纪律与
+- AI 代理文档体系：AGENTS.md + notes（architecture / conventions / style-guide /
+  progress / **bug-fix 坑档案一坑一文件 × 6**）+ 7 篇 skills（含 doc-sync 纪律与
   “用户指令优先”铁律）
 - README：教程定位 + 网站构建/部署/检查说明（nginx 示例）
 

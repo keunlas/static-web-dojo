@@ -33,6 +33,16 @@ while IFS= read -r f; do
   fi
 done <<< "$files"
 
+echo "==> 2b) 公共 JS 禁用 API 扫描（jQuery 4 已移除 $.trim/.bind/.live/.delegate，应为空）"
+for f in "$SITE/assets/js/loader.js" "$SITE/assets/js/site.js" "$SITE/assets/js/highlight.js"; do
+  hits=$(grep -nE '\\\$\.(trim|proxy)\b|\.(bind|unbind|live|die|delegate|undelegate)\(' "$f" || true)
+  if [ -n "$hits" ]; then
+    FAIL=1
+    echo "✘ $f"
+    echo "$hits" | sed 's/^/    /'
+  fi
+done
+
 echo "==> 3) 允许的站外文字链接（仅 <a>，供人工核对）"
 grep -rhoE '<a [^>]*href="https?://[^"]*"[^>]*>[^<]*</a>' $files 2>/dev/null | sort -u || true
 

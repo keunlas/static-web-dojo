@@ -113,9 +113,17 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 习题答案用原生 `<details>` | 零 JS 依赖，任何环境可展开 |
 | 藏经阁打包离线文档（20MB） | 用户拍板：站内离线查阅优先于体积 |
 
-## 8. 已修复的坑（复现时不要重蹈）
+## 8. 踩坑索引
 
-1. 动态注入脚本乱序执行 → loader 改链式加载 + jQuery 排队桩；
-2. TOC 链接用 `class="h2"` 撞上 Bootstrap `.h2` 标题类（32px 巨型字）→ 改 `l2/l3`；
-3. 宽屏 grid 下 `.site-footer` 因 `margin:0 auto` 收缩到 652px 与正文错位 → grid 内 `margin:0`；
-4. jQuery 文件名是 `jquery-4.0.0.min.js`（带版本号），sync 脚本里写错过 `jquery.min.js`。
+每个坑的详细档案（现象/根因/复现/修复/预防）见 **`bug-fix/` 目录，一坑一文件**：
+
+| 坑 | 档案 |
+| --- | --- |
+| 动态注入脚本乱序执行 | `bug-fix/dynamic-script-order.md` |
+| TOC 链接撞 Bootstrap `.h2` 标题类（32px 巨字） | `bug-fix/toc-bootstrap-h2-class-collision.md` |
+| 宽屏 grid 页脚收缩错位 | `bug-fix/footer-grid-margin-shrink.md` |
+| jQuery 文件名带版本号写错 | `bug-fix/jquery-filename-with-version.md` |
+| site.js 用 `$.trim` 致全站搜索静默失效 | `bug-fix/site-js-used-removed-jquery-trim.md` |
+| 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
+
+新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。
