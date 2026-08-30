@@ -114,9 +114,13 @@ site/                        # 部署根目录（唯一需要上传的部分）
   主题变量，明暗自动切换）+ `::-webkit-scrollbar` 兜底老 Blink；全站（页面/侧边栏/代码块/
   搜索下拉/练功场编辑器）都inherit，无需逐处设置。
 - 字体全部系统栈：正文无衬线（含 PingFang SC / Microsoft YaHei）、标题宋体系（Songti SC / SimSun）、代码等宽栈。
-- 布局：页面级吸顶顶栏（`--topbar-h`，搜索/品牌/主题切换都在这里）+ 侧边栏 fixed 280px
-  顶到顶栏之下（<992px 收进 offcanvas，顶栏保留 hamburger）；正文 max-width 46rem；
-  右侧 TOC 仅 ≥1400px 出现（grid：46rem + 14rem）。
+- 布局：页面级吸顶顶栏（`--topbar-h`，搜索/品牌/主题切换都在这里）+ 侧边栏 fixed **240px**
+  顶到顶栏之下（<992px 收进 offcanvas，顶栏保留 hamburger）；正文最大宽度
+  `--content-max: clamp(46rem, (100vw-侧栏)*86%, 64rem)` —— 随屏宽增长、广屏不再窄窄居中；
+  右侧 TOC **仅 ≥1600px** 出现（grid：`minmax(0, var(--content-max)) + 14rem`、gap 2rem）——
+  阈值不能低于 1600：1400–1550px 区间装不下完整组合，主列会被压窄并紧贴侧栏、
+  目录顶到右缘，视觉失衡左倾（用户 1412px 实测反馈；1600px 起正文不再被压缩、
+  整个组合居中、左右余量对称）。
 - 图标大全页样式：`.icon-toolbar`（输入组 +「清空」按钮，按钮 nowrap 防折行）、
   `.icons-grid` / `.icon-cell` 网格与点击复制反馈（.copied）。
 - Bootstrap 主题变量被覆盖为朱砂系（`--bs-primary` 等），`btn-primary` 即朱砂按钮。

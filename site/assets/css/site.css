@@ -48,8 +48,10 @@
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas,
           "Liberation Mono", monospace;
 
-  --sidebar-w: 280px;
+  --sidebar-w: 240px;
   --topbar-h: 3.6rem;        /* 页面级顶栏高度（侧边栏与内容随之偏移） */
+  /* 正文最大宽度：随屏宽增长（约内容区 86%），至多 64rem —— 广屏时正文铺开而非窄窄居中 */
+  --content-max: clamp(46rem, calc((100vw - var(--sidebar-w)) * .86), 64rem);
 
   /* —— 覆盖 Bootstrap 主题变量，把默认蓝换成朱砂 —— */
   --bs-body-bg: var(--paper);
@@ -285,7 +287,7 @@ html {
 .content { margin-left: var(--sidebar-w); }
 
 main {
-  max-width: 46rem;
+  max-width: var(--content-max);
   margin: 0 auto;
   padding: 2.4rem 1.6rem 4rem;
 }
@@ -451,7 +453,7 @@ body[data-page="home"] main { max-width: none; padding: 0; }
 .hero .tagline { color: var(--ink-soft); font-size: 1.06rem; max-width: 36rem; margin: 0 auto; }
 .hero .hero-actions { margin-top: 2rem; display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; }
 
-.home-body { max-width: 46rem; margin: 0 auto; padding: 2.6rem 1.6rem 4rem; }
+.home-body { max-width: var(--content-max); margin: 0 auto; padding: 2.6rem 1.6rem 4rem; }
 
 .feature-grid {
   display: grid;
@@ -632,15 +634,19 @@ details.answer[open] summary { margin-bottom: .5rem; }
 
 .toc { display: none; }
 
-@media (min-width: 1400px) {
+/* 右侧目录只在“内容区能装下完整组合（正文最大宽 + 目录 + 间隔）且留出对称余量”
+   时才出现：若在 1400px 就出现，主列会被压窄并紧贴侧栏、目录顶到右缘，
+   看起来整体失衡左倾（用户实测 1412px 反馈）。1600px 起出现后，正文不再被压缩，
+   整个组合居中、左右余量对称。 */
+@media (min-width: 1600px) {
   .content.has-toc {
     display: grid;
-    grid-template-columns: minmax(0, 46rem) 14rem;
+    grid-template-columns: minmax(0, var(--content-max)) 14rem;
     justify-content: center;
-    gap: 3rem;
+    gap: 2rem;
   }
   /* margin: 0 必须显式给出：grid 子项带 auto 边距会被 fit-content 定宽，
-     正文里若代码行较长，main 会撑破 46rem 列、压到右侧目录上。
+     正文里若代码行较长，main 会撑破内容列、压到右侧目录上。
      min-width: 0 同时解除 auto 最小尺寸，双保险。 */
   .content.has-toc main { grid-column: 1; max-width: none; margin: 0; min-width: 0; }
   .content.has-toc .toc {
@@ -676,7 +682,7 @@ details.answer[open] summary { margin-bottom: .5rem; }
 /* ============ 页脚与翻页 ============ */
 
 .site-footer {
-  max-width: 46rem;
+  max-width: var(--content-max);
   margin: 0 auto;
   padding: 0 1.6rem 3rem;
 }
