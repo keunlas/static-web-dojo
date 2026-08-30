@@ -120,7 +120,9 @@ site/                        # 部署根目录（唯一需要上传的部分）
   右侧 TOC **仅 ≥1600px** 出现（grid：`minmax(0, var(--content-max)) + 14rem`、gap 2rem）——
   阈值不能低于 1600：1400–1550px 区间装不下完整组合，主列会被压窄并紧贴侧栏、
   目录顶到右缘，视觉失衡左倾（用户 1412px 实测反馈；1600px 起正文不再被压缩、
-  整个组合居中、左右余量对称）。
+  整个组合居中、左右余量对称）。`.toc` 吸顶位置为 `top: calc(var(--topbar-h) + 2.4rem)`：
+  初始与正文 padding-top 对齐，滚动时停在顶栏之下——顶栏上线后必须让位，否则
+  目录“挨着顶部”且滚动时钻到顶栏底下（已修）。练功场 `.pg-preview` 同理。
 - 图标大全页样式：`.icon-toolbar`（输入组 +「清空」按钮，按钮 nowrap 防折行）、
   `.icons-grid` / `.icon-cell` 网格与点击复制反馈（.copied）。
 - Bootstrap 主题变量被覆盖为朱砂系（`--bs-primary` 等），`btn-primary` 即朱砂按钮。

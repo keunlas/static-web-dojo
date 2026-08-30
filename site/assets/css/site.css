@@ -655,7 +655,8 @@ details.answer[open] summary { margin-bottom: .5rem; }
     grid-row: 1 / span 2;
     align-self: start;
     position: sticky;
-    top: 1.6rem;
+    /* 让出页面级顶栏：初始与正文 padding-top(2.4rem) 对齐，滚动时也始终停在顶栏之下 */
+    top: calc(var(--topbar-h) + 2.4rem);
     font-size: .85rem;
   }
   .content.has-toc .site-footer { grid-column: 1; margin: 0; min-width: 0; }
@@ -842,7 +843,8 @@ html[data-bs-theme="dark"] .search-results { box-shadow: 0 14px 24px -12px rgba(
 }
 .pg-editor textarea:focus { outline: 2px solid var(--cinnabar); outline-offset: -2px; }
 .pg-preview {
-  position: sticky; top: 1rem;
+  /* 让出页面级顶栏：吸顶时停在顶栏之下，不被盖住 */
+  position: sticky; top: calc(var(--topbar-h) + 1rem);
   border: 1px solid var(--line);
   border-radius: 10px;
   overflow: hidden;
