@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十二式 · 轮播与杂项 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="用 carousel 轮播纯色内容块，顺手收下 progress 进度条、pagination 分页与 spinner 加载动画。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-12">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        招式学到这里，剩下几件“小兵器”虽不起眼，却常伴左右：轮播、进度条、分页、加载动画。
+        本式一并授你——都是几行类名的事。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>掌握 <code>carousel</code> 的完整结构：内层轨道、页面项、控制按钮、指示器、说明文字</li>
+          <li>会配 <code>data-bs-ride="carousel"</code> 自动播放与 <code>data-bs-interval</code> 播放间隔</li>
+          <li><code>progress</code> 进度条：数值宽度与多段组合</li>
+          <li><code>pagination</code> 分页（active / disabled）与 <code>spinner</code> 加载动画</li>
+        </ul>
+      </div>
+
+      <h2>轮播 carousel：会自己翻页的展台</h2>
+      <p>
+        <strong>轮播（carousel）</strong>是一个循环播放的幻灯片展台：一页页内容定时轮转，
+        访客也可以手动前后翻。它的结构件件有名有姓：
+      </p>
+      <ul>
+        <li>外层 <code>carousel slide</code>——展台本体，<code>data-bs-ride="carousel"</code> 让它在页面加载后自动开播；</li>
+        <li><code>carousel-inner</code>——内层轨道，里面放 <code>carousel-item</code>，第一页必须加 <code>active</code>；</li>
+        <li><code>carousel-control-prev</code> / <code>carousel-control-next</code>——左右控制按钮，
+          带 <code>data-bs-target="#展台id"</code> 与 <code>data-bs-slide="prev|next"</code>；</li>
+        <li><code>carousel-indicators</code>——底部指示器，每个按钮带 <code>data-bs-slide-to="页号"</code>；</li>
+        <li><code>carousel-caption</code>——每页底部的说明文字。</li>
+      </ul>
+      <p>
+        自动播放的间隔由 <code>data-bs-interval</code> 指定，单位毫秒——<code>3000</code> 就是 3 秒翻一页。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：轮播不一定要图片</div>
+        <p style="margin:0">
+          <code>carousel-item</code> 里放什么都可以——图片、卡片、甚至纯文字。
+          本站坚持零外链图片，所以演示用<strong>纯色背景块 + 图标 + 文字</strong>做“页”。
+          你把背景块换成自己的 <code>&lt;img&gt;</code>，就是货真价实的轮播图。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 三页轮播：纯色块 + 图标，每 3 秒自动翻页</div>
+        <div class="demo-preview">
+          <div class="carousel slide" id="bs12-demo1" data-bs-ride="carousel" data-bs-interval="3000">
+            <div class="carousel-indicators">
+              <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="0" class="active" aria-current="true" aria-label="第一页"></button>
+              <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="1" aria-label="第二页"></button>
+              <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="2" aria-label="第三页"></button>
+            </div>
+            <div class="carousel-inner">
+              <div class="carousel-item active">
+                <div class="bg-primary text-white text-center py-5">
+                  <i class="bi bi-moon-stars display-4"></i>
+                  <h5 class="mt-3 mb-0">静夜思 · 打坐</h5>
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">戌时静坐，气沉丹田</p>
+                  </div>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bg-success text-white text-center py-5">
+                  <i class="bi bi-sunrise display-4"></i>
+                  <h5 class="mt-3 mb-0">破晓 · 晨练</h5>
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">闻鸡起舞，挥剑三百</p>
+                  </div>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="text-center py-5" style="background-color:#6f4e37">
+                  <i class="bi bi-stars display-4 text-white"></i>
+                  <h5 class="mt-3 mb-0 text-white">藏经阁 · 抄经</h5>
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">午后抄经，字字入心</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#bs12-demo1" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">上一页</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#bs12-demo1" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">下一页</span>
+            </button>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="carousel slide" id="bs12-demo1" data-bs-ride="carousel" data-bs-interval="3000">
+              <!-- 指示器：data-bs-slide-to 直达对应页，active 标记当前页 -->
+              <div class="carousel-indicators">
+                <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="0" class="active" aria-current="true" aria-label="第一页"></button>
+                <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="1" aria-label="第二页"></button>
+                <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="2" aria-label="第三页"></button>
+              </div>
+              <!-- 内层轨道：每页一个 carousel-item，第一页加 active -->
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                  <div class="bg-primary text-white text-center py-5">
+                    <i class="bi bi-moon-stars display-4"></i>
+                    <h5 class="mt-3 mb-0">静夜思 · 打坐</h5>
+                    <div class="carousel-caption d-none d-md-block">
+                      <p class="mb-0">戌时静坐，气沉丹田</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="bg-success text-white text-center py-5">
+                    <i class="bi bi-sunrise display-4"></i>
+                    <h5 class="mt-3 mb-0">破晓 · 晨练</h5>
+                    <div class="carousel-caption d-none d-md-block">
+                      <p class="mb-0">闻鸡起舞，挥剑三百</p>
+                    </div>
+                  </div>
+                </div>
+                <!-- 第三页略：结构相同，换配色与文案 -->
+              </div>
+              <!-- 左右控制按钮 -->
+              <button class="carousel-control-prev" type="button" data-bs-target="#bs12-demo1" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">上一页</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#bs12-demo1" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">下一页</span>
+              </button>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        例 1 里每个 <code>carousel-item</code> 都指向同一个 <code>#bs12-demo1</code>——
+        这是轮播的“中枢点名”：指示器、控制按钮、翻页动作全靠它对上号。
+        图标 <code>bi bi-*</code> 是 Bootstrap Icons 的写法，下一式之后我们专门修炼。
+      </p>
+
+      <h2>进度条 progress</h2>
+      <p>
+        <strong>进度条（progress）</strong>用来直观展示完成度。结构很简单：
+        <code>progress</code> 是浅色的轨道，里面放一根 <code>progress-bar</code> 填充条，
+        宽度由行内样式 <code>style="width: 70%"</code> 决定。
+        条上还能直接写字——把文字放进 <code>progress-bar</code> 即可。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 数值进度条：剑术修为 70%</div>
+        <div class="demo-preview">
+          <div class="progress" role="progressbar" aria-label="剑术修为" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" style="width: 70%">剑术修为 70%</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="progress" role="progressbar" aria-label="剑术修为"
+                 aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" style="width: 70%">剑术修为 70%</div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        一条轨道也可以装<strong>多段</strong>进度——用 <code>progress-stacked</code> 把多根
+        <code>progress-bar</code> 包起来，配不同的 <code>bg-*</code> 颜色，各段宽度加起来不超过 100% 即可。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 组合进度条：三门功课各占一段</div>
+        <div class="demo-preview">
+          <div class="progress-stacked">
+            <div class="progress" role="progressbar" aria-label="外功" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-primary" style="width: 50%">外功 50%</div>
+            </div>
+            <div class="progress" role="progressbar" aria-label="内功" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-success" style="width: 30%">内功 30%</div>
+            </div>
+            <div class="progress" role="progressbar" aria-label="轻功" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-warning" style="width: 15%">轻功 15%</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- progress-stacked 把多条进度条拼成一根 -->
+            <div class="progress-stacked">
+              <div class="progress" role="progressbar" aria-label="外功"
+                   aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-primary" style="width: 50%">外功 50%</div>
+              </div>
+              <div class="progress" role="progressbar" aria-label="内功"
+                   aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-success" style="width: 30%">内功 30%</div>
+              </div>
+              <div class="progress" role="progressbar" aria-label="轻功"
+                   aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-warning" style="width: 15%">轻功 15%</div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>分页 pagination</h2>
+      <p>
+        <strong>分页（pagination）</strong>给多页内容编号导航。结构是
+        <code>pagination</code> 列表里放 <code>page-item</code>，每项包一个 <code>page-link</code>；
+        当前页给 <code>page-item</code> 加 <code>active</code>，不可点的项加 <code>disabled</code>。
+        外层用 <code>&lt;nav aria-label="…"&gt;</code> 包裹，读屏软件才知道这是一组页码。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 分页：当前页高亮，上一页禁用</div>
+        <div class="demo-preview">
+          <nav aria-label="藏经阁书目分页">
+            <ul class="pagination mb-0">
+              <li class="page-item disabled">
+                <a class="page-link" href="#bs12-demo4-p0">上一页</a>
+              </li>
+              <li class="page-item active" aria-current="page">
+                <a class="page-link" href="#bs12-demo4-p1">1</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#bs12-demo4-p2">2</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#bs12-demo4-p3">3</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#bs12-demo4-p2">下一页</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <nav aria-label="藏经阁书目分页">
+              <ul class="pagination mb-0">
+                <li class="page-item disabled">
+                  <a class="page-link" href="#bs12-demo4-p0">上一页</a>
+                </li>
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="#bs12-demo4-p1">1</a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo4-p2">2</a></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo4-p3">3</a></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo4-p2">下一页</a></li>
+              </ul>
+            </nav>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        真实项目里，每个 <code>page-link</code> 的 <code>href</code> 指向对应页面的地址（如
+        <code>list-2.html</code>）；演示里用 <code>#…</code> 这类不存在的锚点占位，点击不会让页面跳走。
+      </p>
+
+      <h2>加载动画 spinner</h2>
+      <p>
+        <strong>加载动画（spinner）</strong>告诉访客“稍等，正在处理”。两种样式：
+        <code>spinner-border</code> 转圈，<code>spinner-grow</code> 呼吸闪烁；
+        颜色随 <code>text-*</code>，尺寸用 <code>spinner-border-sm</code> 或行内
+        <code>style="width:…;height:…"</code>。它们是纯 CSS 动画，不消耗 JavaScript。
+        每个 spinner 都要配一句 <code>visually-hidden</code> 的状态说明，供屏幕阅读器朗读。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · spinner 三兄弟 + 按钮内嵌加载态</div>
+        <div class="demo-preview">
+          <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">加载中…</span>
+            </div>
+            <div class="spinner-grow text-success" role="status">
+              <span class="visually-hidden">加载中…</span>
+            </div>
+            <div class="spinner-border spinner-border-sm text-secondary" role="status">
+              <span class="visually-hidden">加载中…</span>
+            </div>
+            <button class="btn btn-primary" type="button" disabled>
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+              <span class="visually-hidden">加载中…</span>
+              <span>正在传书…</span>
+            </button>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+              <!-- 转圈：默认尺寸，主色 -->
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中…</span>
+              </div>
+              <!-- 呼吸小球：绿色 -->
+              <div class="spinner-grow text-success" role="status">
+                <span class="visually-hidden">加载中…</span>
+              </div>
+              <!-- 转圈：小号 -->
+              <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                <span class="visually-hidden">加载中…</span>
+              </div>
+              <!-- 按钮里嵌一个：常见于“提交中”状态 -->
+              <button class="btn btn-primary" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden">加载中…</span>
+                <span>正在传书…</span>
+              </button>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十二式</div>
+        <ol>
+          <li>给例 1 的轮播加上<strong>第四页</strong>（提示：<code>carousel-indicators</code> 与
+            <code>carousel-inner</code> 里都要加）。</li>
+          <li>把例 2 的进度条改成<strong>条纹动画版</strong>：在 <code>progress-bar</code> 上追加
+            <code>progress-bar-striped</code> 与 <code>progress-bar-animated</code> 两个类。</li>
+          <li>思考题：分页为什么要用 <code>&lt;nav aria-label="…"&gt;</code> 包裹、spinner 为什么要配
+            <code>visually-hidden</code> 文字？这些“看不见”的东西是给谁用的？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="加第四页（节选）">
+            <!-- 指示器里加第四个按钮 -->
+            <button type="button" data-bs-target="#bs12-demo1" data-bs-slide-to="3" aria-label="第四页"></button>
+
+            <!-- 内层轨道里加第四页，注意不要写 active -->
+            <div class="carousel-item">
+              <div class="bg-danger text-white text-center py-5">
+                <i class="bi bi-fire display-4"></i>
+                <h5 class="mt-3 mb-0">灶房 · 晚课</h5>
+                <div class="carousel-caption d-none d-md-block">
+                  <p class="mb-0">自己动手，丰衣足食</p>
+                </div>
+              </div>
+            </div>
+          </script>
+          <p>
+            页号从 0 数起：第四页是 <code>data-bs-slide-to="3"</code>。新页<strong>不要加</strong>
+            <code>active</code>——一个轮播里只能有一个当前页，加了会打乱开播顺序。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="条纹动画进度条">
+            <div class="progress" role="progressbar" aria-label="剑术修为"
+                 aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 70%">
+                剑术修为 70%
+              </div>
+            </div>
+          </script>
+          <p>
+            <code>progress-bar-striped</code> 画出斜向条纹，<code>progress-bar-animated</code>
+            让条纹流动起来——两者叠加，就是“正在加载”的经典样式，适合用在实时刷新的进度上。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            这些“看不见”的属性是给<strong>屏幕阅读器</strong>用的：视障用户靠朗读浏览网页，
+            一个光秃秃的转圈对他们来说什么都不是。所以：<code>&lt;nav aria-label&gt;</code>
+            让读屏软件把一列页码读成“藏经阁书目分页”，而不是一串莫名链接；
+            <code>visually-hidden</code> 的文字视觉上隐藏、朗读时照读，补上“加载中”的状态说明。
+            看不见的讲究，恰恰是专业与业余的分水岭。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>轮播五件套：<code>carousel slide</code> / <code>carousel-inner</code> / <code>carousel-item active</code> / 控制按钮 / 指示器；</li>
+        <li><code>data-bs-ride="carousel"</code> 自动播放，<code>data-bs-interval</code> 定间隔，<code>carousel-caption</code> 配说明；</li>
+        <li>进度条：<code>progress</code> 轨道 + <code>progress-bar</code> 填充，多段用 <code>progress-stacked</code>；</li>
+        <li>分页 <code>active</code> / <code>disabled</code>，spinner 有 <code>spinner-border</code> 与 <code>spinner-grow</code> 两种样式。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼提示与浮层——tooltip、popover 与 toast 三位浮空侠客，并第一次亲手 new 一个 Bootstrap 组件。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

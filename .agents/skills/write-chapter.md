@@ -27,6 +27,8 @@
 5. **登记**：确认 slug 已在 site.js（新页面才需要登记，见 `skills/register-chapter.md`）。
 6. **自查**：跑 conventions.md 第 7 节的检查命令；浏览器双模式验证（`skills/verify-offline.md`）。
 7. **更新** `.agents/notes/progress.md` 中对应章节状态为 ✅。
+   **注意**：并行多代理场景下，共享文档（含 progress.md）一律由协调者（父代理）统一更新，
+   子代理只在自己的交付报告里说明，不要直接改（见 `skills/doc-sync.md`）；独立单人工作时可自行更新。
 
 ## 验收清单（全部满足才算完成）
 

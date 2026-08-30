@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第五式 · 按钮·徽章·提示框 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="btn 按钮与八色体系、按钮组、badge 徽章与 alert 提示框。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-05">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        布局与文字都齐了，接下来是页面上的“行动点”：按钮让人点，徽章给人看数字，提示框给人递消息。
+        三件套一起练，页面就有了生气。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li><code>btn</code> 本体类必须配配色类，8 色各有语义</li>
+          <li><code>btn-outline-*</code> 描边变体、<code>btn-lg/btn-sm</code> 尺寸、<code>disabled</code> 与 <code>active</code> 状态</li>
+          <li><code>btn-group</code> 按钮组与 <code>badge</code> 徽章的配色、胶囊与嵌套</li>
+          <li><code>alert</code> 提示框：8 色、<code>role="alert"</code> 与可关闭写法</li>
+        </ul>
+      </div>
+
+      <h2>按钮：btn 与八色</h2>
+      <p>
+        按钮的写法是“<strong>本体 + 配色</strong>”：<code>btn</code> 负责造型（圆角、内边距、悬停效果），
+        <code>btn-*</code> 负责颜色。只写 <code>btn</code> 是灰白色裸按钮。8 色各有用武之地：
+      </p>
+      <table>
+        <thead>
+          <tr><th>配色类</th><th>语义</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>btn-primary</code></td><td>主操作、品牌色（本站皮肤把它染成了朱砂）</td></tr>
+          <tr><td><code>btn-secondary</code></td><td>次要操作，低调陪衬</td></tr>
+          <tr><td><code>btn-success</code></td><td>成功、保存、确认</td></tr>
+          <tr><td><code>btn-danger</code></td><td>危险动作：删除、退出登录</td></tr>
+          <tr><td><code>btn-warning</code></td><td>提醒：可能有风险，先确认</td></tr>
+          <tr><td><code>btn-info</code></td><td>说明、中性提示</td></tr>
+          <tr><td><code>btn-light</code></td><td>浅色按钮，适合深色背景上</td></tr>
+          <tr><td><code>btn-dark</code></td><td>深色按钮，稳重</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 全套按钮色卡：上排实心，下排描边</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-primary">primary</button>
+            <button type="button" class="btn btn-secondary">secondary</button>
+            <button type="button" class="btn btn-success">success</button>
+            <button type="button" class="btn btn-danger">danger</button>
+            <button type="button" class="btn btn-warning">warning</button>
+            <button type="button" class="btn btn-info">info</button>
+            <button type="button" class="btn btn-light">light</button>
+            <button type="button" class="btn btn-dark">dark</button>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary">outline-primary</button>
+            <button type="button" class="btn btn-outline-secondary">outline-secondary</button>
+            <button type="button" class="btn btn-outline-success">outline-success</button>
+            <button type="button" class="btn btn-outline-danger">outline-danger</button>
+            <button type="button" class="btn btn-outline-warning">outline-warning</button>
+            <button type="button" class="btn btn-outline-info">outline-info</button>
+            <button type="button" class="btn btn-outline-light">outline-light</button>
+            <button type="button" class="btn btn-outline-dark">outline-dark</button>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <button type="button" class="btn btn-primary">primary</button>
+            <button type="button" class="btn btn-danger">danger</button>
+            <!-- 其余六色同理：secondary / success / warning / info / light / dark -->
+
+            <button type="button" class="btn btn-outline-primary">outline-primary</button>
+            <button type="button" class="btn btn-outline-danger">outline-danger</button>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        <code>btn-outline-*</code> 是描边变体：白底彩边，悬停时才填色。它视觉上更轻，
+        适合与主按钮同台的次要动作——一个页面里“实心”最好只有一枚，其余用描边。
+        （<code>outline-light</code> 是浅色描边，本页浅底上看不清，深色页面上才会用它。）
+      </p>
+
+      <h2>尺寸与状态</h2>
+      <p>
+        尺寸三档：<code>btn-lg</code> 大、<code>btn-sm</code> 小，什么都不写是默认中号。
+        状态两种：<code>disabled</code> 禁用（普通 <code>button</code> 元素直接用
+        <code>disabled</code> 属性）；<code>active</code> 表示“当前选中 / 按下”，
+        常配 <code>aria-pressed="true"</code> 让读屏知道这是按下状态。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：链接式按钮的禁用三件套</div>
+        <p style="margin:0">
+          如果按钮是用 <code>&lt;a&gt;</code> 标签做的（如 <code>&lt;a class="btn btn-primary"&gt;</code>），
+          它没有 <code>disabled</code> 属性。要写三件套：<code>class="btn disabled"</code> 管样式、
+          <code>aria-disabled="true"</code> 告诉读屏、<code>tabindex="-1"</code> 挡开键盘焦点。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 尺寸三档与两种状态</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <button type="button" class="btn btn-primary btn-lg">大按钮 btn-lg</button>
+            <button type="button" class="btn btn-primary">默认按钮</button>
+            <button type="button" class="btn btn-primary btn-sm">小按钮 btn-sm</button>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" disabled>禁用按钮</button>
+            <button type="button" class="btn btn-primary active" aria-pressed="true">选中按钮</button>
+            <a href="#" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true">链接式禁用</a>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="btn btn-primary btn-lg">大按钮 btn-lg</button>
+            <button type="button" class="btn btn-primary">默认按钮</button>
+            <button type="button" class="btn btn-primary btn-sm">小按钮 btn-sm</button>
+
+            <button type="button" class="btn btn-primary" disabled>禁用按钮</button>
+            <button type="button" class="btn btn-primary active" aria-pressed="true">选中按钮</button>
+            <a href="#" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true">链接式禁用</a>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        摸一下那枚“链接式禁用”：鼠标点不动、Tab 键也到不了——这就是三件套的完整效果。
+        只写 <code>disabled</code> 类的话，键盘照样能聚焦并触发它。
+      </p>
+
+      <h2>按钮组：btn-group</h2>
+      <p>
+        把一组相关的按钮包进 <code>btn-group</code>，它们会拼成一条，圆角只留在两端。
+        无障碍建议加 <code>role="group"</code> 与 <code>aria-label</code> 说明用途；
+        整组尺寸用 <code>btn-group-lg</code> / <code>btn-group-sm</code> 控制。
+        按钮组里嵌徽章是最常见的组合——工具栏按钮带未读数。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 按钮组 + 徽章组合</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap gap-3">
+            <div class="btn-group" role="group" aria-label="视图切换">
+              <button type="button" class="btn btn-outline-primary">日</button>
+              <button type="button" class="btn btn-outline-primary active" aria-pressed="true">周</button>
+              <button type="button" class="btn btn-outline-primary">月</button>
+            </div>
+            <div class="btn-group" role="group" aria-label="工具栏">
+              <button type="button" class="btn btn-primary">收件箱 <span class="badge text-bg-light">9</span></button>
+              <button type="button" class="btn btn-primary">草稿 <span class="badge text-bg-warning">3</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="btn-group" role="group" aria-label="视图切换">
+              <button type="button" class="btn btn-outline-primary">日</button>
+              <button type="button" class="btn btn-outline-primary active" aria-pressed="true">周</button>
+              <button type="button" class="btn btn-outline-primary">月</button>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="工具栏">
+              <button type="button" class="btn btn-primary">收件箱 <span class="badge text-bg-light">9</span></button>
+              <button type="button" class="btn btn-primary">草稿 <span class="badge text-bg-warning">3</span></button>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        第一组是“单选切换”的雏形（<code>active</code> 标记当前项），第二组是带计数的工具栏。
+        <code>btn-group</code> 里的按钮要挨在一起，所以不要给中间的按钮加外间距。
+      </p>
+
+      <h2>徽章：badge</h2>
+      <p>
+        <code>badge</code> 是行内的小标记，写法同样是“本体 + 配色”。Bootstrap 5.2 起推荐
+        <code>text-bg-*</code>——背景色与文字色一次配好，自动保证对比度。加 <code>rounded-pill</code>
+        变胶囊形。徽章可以嵌进标题、按钮、列表项里。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 徽章三态：嵌标题、八色、胶囊</div>
+        <div class="demo-preview">
+          <p class="h5">修行进度 <span class="badge text-bg-secondary">第 5 式</span></p>
+          <p class="mb-3">
+            <span class="badge text-bg-primary">primary</span>
+            <span class="badge text-bg-secondary">secondary</span>
+            <span class="badge text-bg-success">success</span>
+            <span class="badge text-bg-danger">danger</span>
+            <span class="badge text-bg-warning">warning</span>
+            <span class="badge text-bg-info">info</span>
+            <span class="badge text-bg-light">light</span>
+            <span class="badge text-bg-dark">dark</span>
+          </p>
+          <p class="mb-0">
+            胶囊徽章：
+            <span class="badge rounded-pill text-bg-danger">99+</span>
+            <span class="badge rounded-pill text-bg-success">已完成</span>
+          </p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="h5">修行进度 <span class="badge text-bg-secondary">第 5 式</span></p>
+
+            <span class="badge text-bg-primary">primary</span>
+            <span class="badge text-bg-danger">danger</span>
+            <!-- 其余六色同理 -->
+
+            <span class="badge rounded-pill text-bg-danger">99+</span>
+            <span class="badge rounded-pill text-bg-success">已完成</span>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        嵌在标题里的徽章会跟着标题字号缩小一圈，所以 <code>badge</code> 不需要单独调字号；
+        未读数、状态标签、版本号，都是它的经典岗位。
+      </p>
+
+      <h2>提示框：alert</h2>
+      <p>
+        <code>alert</code> 是横贯一行的消息横幅，写法仍是“本体 + 配色”（<code>alert</code> +
+        <code>alert-success</code> 等 8 色，语义与按钮色一致）。务必加 <code>role="alert"</code>——
+        它告诉屏幕阅读器“这是重要消息，请立即播报”，是提示框无障碍的命门。
+      </p>
+      <p>
+        可关闭版三件套：<code>alert-dismissible</code>（给关闭按钮留出位置）+ 关闭按钮
+        （<code>btn-close</code> 加 <code>data-bs-dismiss="alert"</code>）+ 可选 <code>fade show</code>
+        （出现与关闭时淡入淡出）。<code>data-bs-*</code> 机制由 bootstrap bundle 自动接管，一行 JS 都不用写。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 可关闭提示框：点右侧 × 试试</div>
+        <div class="demo-preview">
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            保存成功！你的修炼进度已记录。
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+          </div>
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            心法提示：这一式需要动手敲，光看不练等于没学。
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+          </div>
+          <div class="alert alert-danger mb-0" role="alert">
+            这条没有关闭按钮，会一直挂在页面上。
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              保存成功！你的修炼进度已记录。
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+            </div>
+
+            <div class="alert alert-danger" role="alert">
+              这条没有关闭按钮，会一直挂在页面上。
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        拆解一下：<code>btn-close</code> 是 Bootstrap 内置的 × 按钮；<code>data-bs-dismiss="alert"</code>
+        把它指向所在的提示框（点击即关闭，无需 JS）；<code>aria-label="关闭"</code> 让读屏用户知道这个 × 是干什么的。
+        提示框里放链接可以加 <code>alert-link</code>，颜色会自动跟随配色。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第五式</div>
+        <ol>
+          <li>给例 1 的色卡加一枚 <code>btn-lg</code> 的 primary 主按钮，并把“收件箱”按钮里的徽章改成 <code>rounded-pill</code> 胶囊形。</li>
+          <li>动手：做一个三键按钮组（预览 / 复制 / 下载），中间按钮里嵌一个胶囊徽章 <code>99+</code>，整组用 <code>btn-group-lg</code>。</li>
+          <li>思考题：链接式按钮（<code>&lt;a&gt;</code>）禁用时，为什么只加 <code>disabled</code> 类不够，还要 <code>aria-disabled="true"</code> 和 <code>tabindex="-1"</code>？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="加主按钮与胶囊徽章">
+            <button type="button" class="btn btn-primary btn-lg">开始修炼</button>
+
+            <button type="button" class="btn btn-primary">
+              收件箱 <span class="badge rounded-pill text-bg-light">9</span>
+            </button>
+          </script>
+          <p>
+            徽章圆角由 <code>rounded-pill</code> 决定，与按钮圆角无关；徽章底色 <code>text-bg-light</code>
+            在朱砂主色按钮上很醒目。胶囊徽章适合“计数”，普通直角徽章适合“标签”。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="三键按钮组">
+            <div class="btn-group btn-group-lg" role="group" aria-label="文章操作">
+              <button type="button" class="btn btn-outline-primary">预览</button>
+              <button type="button" class="btn btn-primary">
+                复制 <span class="badge rounded-pill text-bg-light">99+</span>
+              </button>
+              <button type="button" class="btn btn-outline-primary">下载</button>
+            </div>
+          </script>
+          <p>
+            中间用实心 <code>btn-primary</code>、两侧用描边，主次一目了然；<code>btn-group-lg</code>
+            挂在组上，三个按钮一起变大，不必逐个写 <code>btn-lg</code>。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>disabled</code> 类只管“看起来灰了”和“挡住鼠标点击”，但 <code>&lt;a&gt;</code>
+            没有 <code>disabled</code> 属性，键盘用户仍能 Tab 聚焦它、按回车触发跳转，屏幕阅读器
+            也不会播报“已禁用”。三件套各司其职：<code>disabled</code> 管样式与鼠标，
+            <code>aria-disabled="true"</code> 让读屏宣告状态，<code>tabindex="-1"</code> 把它移出
+            Tab 顺序挡开键盘。缺一件，禁用就不完整。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>按钮 = <code>btn</code> 本体 + 配色类，8 色各有语义，页面里实心主按钮一枚为宜；</li>
+        <li><code>btn-outline-*</code> 描边、<code>btn-lg/btn-sm</code> 尺寸、<code>disabled</code> 与 <code>active</code>（配 <code>aria-pressed</code>）状态；</li>
+        <li>链接式按钮禁用要三件套：<code>disabled</code> + <code>aria-disabled="true"</code> + <code>tabindex="-1"</code>；</li>
+        <li><code>btn-group</code> 拼按钮组（配 <code>role="group"</code>），<code>badge</code> 嵌按钮 / 标题，<code>rounded-pill</code> 做胶囊计数；</li>
+        <li><code>alert</code> 消息横幅必带 <code>role="alert"</code>；可关闭版 = <code>alert-dismissible</code> + <code>btn-close</code> + <code>data-bs-dismiss="alert"</code>。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼卡片——把今天学的按钮、徽章、提示框统统装进一张张 card 里。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

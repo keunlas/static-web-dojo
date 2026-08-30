@@ -44,7 +44,26 @@
 
 - 一个演示只讲清**一件事**；
 - 演示要小（10–30 行），能一眼看出因果；
-- 先给效果（预览），再给源码，正文在两者之间用一两句话点出关键类名/方法。
+- 先给效果（预览），再给源码，正文在两者之间用一两句话点出关键类名/方法；
+- 统计类 UI（计数、汇总）抽成单一函数（如 `updateStats()`），每次数据变动后统一调用——单一事实来源，避免各处数字不同步；
+- 带持久化（localStorage）的演示要用**独立 key**（如 `dojo-demo-*`），与成品页/其他演示错开，防止同一站点下串数据；
+- 响应式演示的标准写法：同一元素叠加互斥的显隐工具类（如 `d-none d-md-inline d-xl-none`），读者缩放窗口即可看到三档变化；
+- 演示中确需固定尺寸（对齐演示的行高、正圆等）时，允许**内联 `style`**；“不用自定义 CSS”
+  仅指不用自定义 class / 内联 `<style>` 块；
+- “链接式禁用按钮”类演示必须给 `<a>` 写 `href="#"`，否则无 href 的 a 本就不进 Tab 序，
+  `tabindex="-1"` 的教学点演示不出来；
+- 演示里“初始隐藏”的元素统一用内联 `style="display:none"`（不要用 `.d-none`），
+  配合 `slideToggle`/`fadeIn` 的行为最直观；
+- 无后端的 `load()` 演示套路：加载“本章自身的某段内容”（如 `.chapter-lead` 片段），
+  真实可运行、不新增数据文件；
+- 验证 `.show()` 类效果要用 `getComputedStyle(el).display !== 'none'` 断言——
+  jQuery 的 `.show()` 会把 `style.display` 置回默认值 `''`，直接读 style.display 会误判；
+- **Bootstrap 自带 CSS 过渡会干扰“读值运算”类演示**：`.progress-bar`（width .6s）、
+  `.form-control`（border-color .15s）都带过渡——凡用 `css()` 读值参与计算（如进度步进），
+  快速连点会读到过渡中间值导致错乱；这类演示给元素加内联 `transition: none`
+  （或改用计数器），并在正文说明原因；
+- 教学效果好的演示模式：**跨栏对比**（如“直接绑定 vs 事件委托”并排两栏，点同一按钮看两边行为差异），
+  对比类知识点优先采用。
 
 ## 陷阱清单（打样期真实教训）
 
@@ -53,8 +72,17 @@
 | text/plain 里写了 `</script>` | 页面碎裂、后续内容消失 | 写 `<\/script>` |
 | 预览脚本裸用 `$` 不包 ready | 随机 `$ is not defined` | `$(function(){})` |
 | tooltip/popover 只写 data 属性不 new | 悬浮无反应 | `DOJO.ready` 里 `new bootstrap.Tooltip(el)` |
+| toast 写 data-bs-toggle | 点了没反应 | toast 是纯 JS opt-in：`bootstrap.Toast.getOrCreateInstance(el).show()`；仅关闭按钮用 `data-bs-dismiss="toast"` |
 | 演示 id 与页面其他元素重复 | 事件绑错/失效 | 章节前缀 id |
 | 演示里引用 CDN | 违反离线铁律 | 用本站 vendor/演示内联样式 |
+| 动态项上“切换 + 删除按钮”同区 | 点 ✕ 冒泡误触切换 | 回调开头守卫：`if ($(e.target).closest('.btn-del').length) return;` |
+| 断言 collapse 立即生效 | 误判组件失效 | `.show` 在过渡动画（~350ms）结束后才加上，测试需等待 |
+| 演示/答案里用 h2/h3（如官方 `accordion-header`） | 污染右侧“本式目录” | 演示内部标题用 h4/h5；site.js 已排除 .demo/.practice/details.answer 内的标题（双保险） |
+| 下拉菜单用 `<a href="#">` | 点击后页面跳到顶部 | 用 `<button class="dropdown-item">`；分页等占位链接用假锚点 `#demo4-p1` 并在正文说明 |
+| 节选源码与预览不一致引发困惑 | 读者对不上 | 节选块在 data-title 里标“（节选）/（只列与例 N 不同的部分）”，正文说明对应关系 |
+
+**版本事实备忘（5.3.8）**：组合进度条推荐 `.progress-stacked` 包裹多条 `.progress`；
+collapse 多目标共享触发用共享 class（data API 走 `getMultipleElementsFromSelector`）。
 
 ## 自查
 

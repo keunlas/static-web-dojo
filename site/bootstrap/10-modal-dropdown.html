@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十式 · 模态框与下拉菜单 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="用 modal 弹出需要确认的对话框，用 dropdown 把常用操作收进下拉菜单。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-10">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖行走，有些话要当面说清——比如“这一页当真要删？”；有些招式要藏进袖中——比如一排备用操作。
+        本式修炼两件“藏与现”的兵器：模态框与下拉菜单。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>认识模态框 <code>modal</code> 的完整结构：外层外壳、中层对话框、内层内容三件套</li>
+          <li>会用 <code>data-bs-toggle="modal"</code> + <code>data-bs-target="#id"</code> 触发模态框，用 <code>data-bs-dismiss="modal"</code> 关闭</li>
+          <li>掌握 <code>modal-dialog-centered</code> 垂直居中与 <code>modal-dialog-scrollable</code> 框内滚动</li>
+          <li>会搭下拉菜单：菜单项、分割线、禁用项，以及 <code>dropend</code> 弹出方向</li>
+        </ul>
+      </div>
+
+      <h2>模态框：一层盖住页面的对话框</h2>
+      <p>
+        <strong>模态框（modal）</strong>是一层盖住整个页面的对话框：背景变暗，其余内容暂时不可操作，
+        逼着访客先处理眼前的事——确认删除、登录、填表单，都是它的经典场景。
+      </p>
+      <p>它由三层结构组成，缺一层都会散架：</p>
+      <ul>
+        <li><code>modal</code>——最外层外壳，负责盖住页面与变暗的遮罩；</li>
+        <li><code>modal-dialog</code>——中层对话框，决定宽度与位置；</li>
+        <li><code>modal-content</code>——内层内容，再分为 <code>modal-header</code>（标题区）、
+          <code>modal-body</code>（主体区）、<code>modal-footer</code>（按钮区）三部分。</li>
+      </ul>
+
+      <script type="text/plain" data-lang="html" data-title="模态框的完整结构">
+        <!-- 触发按钮：data-bs-toggle 声明“我是模态框触发器”，data-bs-target 点名目标 -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          打开模态框
+        </button>
+
+        <!-- 模态框本体：三层结构 + 内容三区 -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">标题</h5>
+                <!-- data-bs-dismiss="modal"：任何带此属性的元素点击后都会关闭所在模态框 -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+              </div>
+              <div class="modal-body">
+                这里是主体内容，放什么都可以。
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">确定</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </script>
+
+      <p>两个触发细节：</p>
+      <ul>
+        <li><strong>打开</strong>：按钮上写 <code>data-bs-toggle="modal"</code> 声明身份，<code>data-bs-target="#…"</code> 点名目标；</li>
+        <li><strong>关闭</strong>：元素上写 <code>data-bs-dismiss="modal"</code>，点击即关闭。此外点遮罩、按 Esc 也能关。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：data-bs-* 是 Bootstrap 的数据 API</div>
+        <p style="margin:0">
+          <code>data-bs-*</code> 属性由 Bootstrap 的“数据 API”自动接管——modal、dropdown、collapse、carousel
+          这些组件只写属性就能生效，<strong>一行 JavaScript 都不用写</strong>。
+          不过本回第十三式的 tooltip / popover 是两个例外，先留个悬念，届时见分晓。
+        </p>
+      </div>
+
+      <h2>例：确认删除弹窗</h2>
+      <p>
+        最典型的模态框场景——点“删除”先弹出确认。这里还加了两道保险：
+        <code>data-bs-backdrop="static"</code> 让点遮罩不关闭，<code>data-bs-keyboard="false"</code> 让按 Esc 也不关闭，
+        防止手滑造成误删。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 确认删除弹窗（点遮罩与 Esc 均无法关闭）</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#bs10-demo1">
+            删除《轻功入门》
+          </button>
+
+          <div class="modal fade" id="bs10-demo1" tabindex="-1" aria-labelledby="bs10-demo1-label" aria-hidden="true"
+               data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="bs10-demo1-label">确认删除</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                  此招一删，无法恢复。少侠当真舍得？
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">取消</button>
+                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">忍痛删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#bs10-demo1">
+              删除《轻功入门》
+            </button>
+
+            <div class="modal fade" id="bs10-demo1" tabindex="-1" aria-labelledby="bs10-demo1-label" aria-hidden="true"
+                 data-bs-backdrop="static" data-bs-keyboard="false">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="bs10-demo1-label">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                  </div>
+                  <div class="modal-body">
+                    此招一删，无法恢复。少侠当真舍得？
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">忍痛删除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>垂直居中与框内滚动</h2>
+      <p>
+        默认的 <code>modal-dialog</code> 贴在页面偏上的位置。给它加上 <code>modal-dialog-centered</code>，
+        对话框便垂直居中，短内容看起来更从容。
+      </p>
+      <p>
+        如果内容很长（长公告、长条款），再加一个 <code>modal-dialog-scrollable</code>：
+        滚动条出现在模态框<strong>内部</strong>，标题与按钮始终可见，而不是把整页顶得看不见头尾。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 垂直居中 + 框内滚动的长公告</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs10-demo2">
+            查看《藏经阁公告》
+          </button>
+
+          <div class="modal fade" id="bs10-demo2" tabindex="-1" aria-labelledby="bs10-demo2-label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="bs10-demo2-label">藏经阁公告</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                  <p>各位同门：</p>
+                  <p>近日江湖风雨渐起，藏经阁闭关七日，整理经卷、修补窗棂。闭关期间，新晋弟子可先在练功场打熬筋骨。</p>
+                  <p>其一，抄经房即日起增设夜课，戌时开讲《栅格心法》第三卷，欢迎各位自带蒲团。</p>
+                  <p>其二，兵器架新到一批轻剑，取用前请在簿册上留名，用毕擦净归位。</p>
+                  <p>其三，听闻后山竹林里有前辈遗留的笔记，若有缘寻得，切勿外传。</p>
+                  <p>闭关期满，藏经阁将以全新面貌重开山门。修行路上，日拱一卒，功不唐捐。</p>
+                  <p class="mb-0">—— 藏经阁执事 谨启</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">知道了</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（只列出与例 1 不同的部分）">
+            <!-- 两个修饰类都加在 modal-dialog 上 -->
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">…标题与关闭按钮…</div>
+                <div class="modal-body">
+                  …很多很多段正文，超出高度后出现框内滚动条…
+                </div>
+                <div class="modal-footer">…操作按钮…</div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>下拉菜单：把常用招式收进袖中</h2>
+      <p>
+        <strong>下拉菜单（dropdown）</strong>把一个按钮与一列操作打包：平时只露出按钮，点一下弹出菜单。
+        结构上是一个 <code>dropdown</code> 容器，里面放着：
+      </p>
+      <ul>
+        <li><code>dropdown-toggle</code>——触发按钮，带 <code>data-bs-toggle="dropdown"</code>；</li>
+        <li><code>dropdown-menu</code>——菜单本体，条目用 <code>dropdown-item</code>；</li>
+        <li><code>dropdown-divider</code>——分割线，把条目分组；</li>
+        <li>禁用条目：加 <code>disabled</code> 类并配 <code>disabled</code> 属性；</li>
+        <li>弹出方向：默认向下，<code>dropup</code> 向上、<code>dropend</code> 向右、<code>dropstart</code> 向左。</li>
+      </ul>
+      <p>
+        菜单弹出后的位置由 bundle 内置的 Popper 定位库自动计算——空间不够时还会自动翻转方向，不用你操心。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 带分割线与禁用项的下拉菜单</div>
+        <div class="demo-preview">
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="bs10-demo3" data-bs-toggle="dropdown" aria-expanded="false">
+              招式大全
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="bs10-demo3">
+              <li><button class="dropdown-item" type="button">轻功入门</button></li>
+              <li><button class="dropdown-item" type="button">剑法进阶</button></li>
+              <li><button class="dropdown-item" type="button">内功心法</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item disabled" type="button" disabled>武学禁书（尚未解封）</button></li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="bs10-demo3" data-bs-toggle="dropdown" aria-expanded="false">
+                招式大全
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="bs10-demo3">
+                <li><button class="dropdown-item" type="button">轻功入门</button></li>
+                <li><button class="dropdown-item" type="button">剑法进阶</button></li>
+                <li><button class="dropdown-item" type="button">内功心法</button></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item disabled" type="button" disabled>武学禁书（尚未解封）</button></li>
+              </ul>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        细心的你可能发现：例 3 的菜单条目用的是 <code>&lt;button&gt;</code> 而不是链接。
+        <code>dropdown-item</code> 两种都支持——条目若是跳转，就写在 <code>&lt;a href="…"&gt;</code> 上；
+        若是就地执行某个动作，写在 <code>&lt;button&gt;</code> 上更合适（演示里用它，是为了避免点击后页面跳走）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · dropend：让菜单向右弹出</div>
+        <div class="demo-preview">
+          <div class="btn-group dropend">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              向右出招
+            </button>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" type="button">横扫千军</button></li>
+              <li><button class="dropdown-item" type="button">一剑西来</button></li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- 方向类加在容器上：dropend 向右、dropup 向上、dropstart 向左 -->
+            <div class="btn-group dropend">
+              <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                向右出招
+              </button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" type="button">横扫千军</button></li>
+                <li><button class="dropdown-item" type="button">一剑西来</button></li>
+              </ul>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十式</div>
+        <ol>
+          <li>新建一个模态框：标题写“修炼心得”，<code>modal-body</code> 里放一个
+            <code>&lt;input class="form-control"&gt;</code> 输入框，页脚放“保存”与“取消”两个按钮。</li>
+          <li>把例 3 的下拉菜单改成<strong>向上</strong>弹出（提示：方向类加在容器上），再添加两个 <code>dropdown-item</code>。</li>
+          <li>思考题：关闭按钮只写 <code>data-bs-dismiss="modal"</code> 而不指定 id，为什么触发按钮却必须写
+            <code>data-bs-target="#…"</code>？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="带输入框的模态框">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#practiceModal">
+              写修炼心得
+            </button>
+
+            <div class="modal fade" id="practiceModal" tabindex="-1" aria-labelledby="practiceModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="practiceModalLabel">修炼心得</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                  </div>
+                  <div class="modal-body">
+                    <input type="text" class="form-control" placeholder="今天练了什么？">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+          <p>
+            <code>modal-body</code> 里放任何 HTML 都可以——表单、图片、列表，模态框照单全收。
+            <code>form-control</code> 是第八式学过的表单控件类，套上即得整洁的输入框样式。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <p>
+            把例 3 容器上的 <code>dropdown</code> 类改成 <code>dropup</code> 即可：
+          </p>
+          <script type="text/plain" data-lang="html" data-title="向上弹出的菜单（节选）">
+            <div class="dropup">
+              <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                招式大全
+              </button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" type="button">轻功入门</button></li>
+                <li><button class="dropdown-item" type="button">剑法进阶</button></li>
+                <li><button class="dropdown-item" type="button">暗器百解</button></li>
+                <li><button class="dropdown-item" type="button">奇门遁甲</button></li>
+              </ul>
+            </div>
+          </script>
+          <p>
+            方向类四兄弟：<code>dropdown</code>（向下）、<code>dropup</code>（向上）、
+            <code>dropend</code>（向右）、<code>dropstart</code>（向左）。真到了页面边缘空间不够时，
+            Popper 会自动翻转方向，方向类只是“首选方向”。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <strong>距离不同。</strong>关闭按钮自己就住在模态框<em>内部</em>：数据 API 顺着 DOM 树向上找，
+            总能找到最近的 <code>.modal</code>，所以只写 <code>data-bs-dismiss="modal"</code> 就够。
+            而触发按钮与模态框往往天各一方，没有任何父子关系可循，只能靠 <code>data-bs-target="#id"</code>
+            点名，双方才能对上号。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>模态框三层结构：<code>modal</code> → <code>modal-dialog</code> → <code>modal-content</code>（header / body / footer）；</li>
+        <li>触发用 <code>data-bs-toggle="modal"</code> + <code>data-bs-target="#id"</code>，关闭用 <code>data-bs-dismiss="modal"</code>；</li>
+        <li><code>modal-dialog-centered</code> 垂直居中，<code>modal-dialog-scrollable</code> 框内滚动；</li>
+        <li>下拉菜单靠 <code>data-bs-toggle="dropdown"</code> 自动生效，分割线、禁用项与方向类各司其职。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼折叠与手风琴——把长内容折起来，等读者伸手一推，再徐徐展开。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

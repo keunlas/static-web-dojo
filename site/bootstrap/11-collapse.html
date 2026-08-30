@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十一式 · 折叠与手风琴 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="用 collapse 把长内容折起展开，用 accordion 排出只开一扇门的 FAQ 手风琴。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-11">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        庭院深深，不必每间厢房都门户大开。详情、说明、长篇内容，尽可先折起来，
+        等读者伸手一推再徐徐展开。本式修炼“折叠”之术，以及它的进阶形态——手风琴。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 <code>button</code> 或 <code>a</code> 触发折叠：<code>data-bs-toggle="collapse"</code> + 指向目标</li>
+          <li>一个按钮同时开合多个目标（目标选择器共享）</li>
+          <li>掌握 <code>accordion</code> 手风琴的完整结构与“只开一扇门”的互斥逻辑</li>
+          <li>用 <code>accordion-flush</code> 让手风琴与父容器无缝贴合</li>
+        </ul>
+      </div>
+
+      <h2>折叠 collapse：把内容折起来</h2>
+      <p>
+        <strong>折叠（collapse）</strong>是一块“可开合的内容面板”：平时整块收起（<code>display:none</code>），
+        点一下触发器就展开。详情说明、设置面板、长文附录，都是它的用武之地。
+      </p>
+      <p>触发器有两种写法，效果相同：</p>
+      <ul>
+        <li><code>&lt;button&gt;</code>——写 <code>data-bs-toggle="collapse"</code> 声明身份，
+          <code>data-bs-target="#id"</code> 点名目标；</li>
+        <li><code>&lt;a&gt;</code>——同样写 <code>data-bs-toggle="collapse"</code>，但目标由 <code>href="#id"</code> 指定。</li>
+      </ul>
+      <p>
+        目标面板则是一个带 <code>collapse</code> 类的元素，通常外面套一张 <code>card</code>，让内容有底有边。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 点击展开/收起详情（按钮与链接两种触发器）</div>
+        <div class="demo-preview">
+          <p>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo1" aria-expanded="false" aria-controls="bs11-demo1">
+              按钮触发
+            </button>
+            <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#bs11-demo1" role="button" aria-expanded="false" aria-controls="bs11-demo1">
+              链接触发
+            </a>
+          </p>
+          <div class="collapse" id="bs11-demo1">
+            <div class="card card-body">
+              《基础剑法》心要：剑走轻灵，意在剑先。每日晨起挥剑三百，风雨无阻，三年可成。
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- 触发器一：button，用 data-bs-target 点名 -->
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#bs11-demo1" aria-expanded="false" aria-controls="bs11-demo1">
+              按钮触发
+            </button>
+
+            <!-- 触发器二：a，用 href 点名 -->
+            <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#bs11-demo1"
+               role="button" aria-expanded="false" aria-controls="bs11-demo1">
+              链接触发
+            </a>
+
+            <!-- 目标面板：collapse 类 + 对应 id -->
+            <div class="collapse" id="bs11-demo1">
+              <div class="card card-body">
+                《基础剑法》心要：剑走轻灵，意在剑先。
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        例 1 里按钮与链接指向<strong>同一个面板</strong>，谁点都开合同一个目标。
+        还有两个无障碍小属性值得顺手写上：<code>aria-expanded</code> 报告当前开合状态（数据 API 会自动同步它），
+        <code>aria-controls</code> 说明“我管的是谁”。
+      </p>
+
+      <h2>一键开合多个目标</h2>
+      <p>
+        妙处来了：<code>data-bs-target</code> 接受的其实是一个 <strong>CSS 选择器</strong>，不只限一个 id。
+        给多个面板共享同一个 class，一个按钮就能让它们同开同合——比如一页多个详情同时展开。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 一个按钮，同时开合两卷</div>
+        <div class="demo-preview">
+          <p>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=".bs11-demo2-panel" aria-expanded="false" aria-controls="bs11-demo2-a bs11-demo2-b">
+              同时开合两卷
+            </button>
+          </p>
+          <div class="collapse bs11-demo2-panel" id="bs11-demo2-a">
+            <div class="card card-body">
+              第一卷《轻功心要》：先练提纵，再学腾挪；心不慌，脚不飘。
+            </div>
+          </div>
+          <div class="collapse bs11-demo2-panel mt-2" id="bs11-demo2-b">
+            <div class="card card-body">
+              第二卷《内功吐纳》：气沉丹田，吐故纳新；每日静坐半个时辰。
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- data-bs-target 接受 CSS 选择器：.bs11-demo2-panel 命中两个面板 -->
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target=".bs11-demo2-panel" aria-expanded="false"
+                    aria-controls="bs11-demo2-a bs11-demo2-b">
+              同时开合两卷
+            </button>
+
+            <div class="collapse bs11-demo2-panel" id="bs11-demo2-a">
+              <div class="card card-body">
+                第一卷《轻功心要》：先练提纵，再学腾挪。
+              </div>
+            </div>
+
+            <div class="collapse bs11-demo2-panel mt-2" id="bs11-demo2-b">
+              <div class="card card-body">
+                第二卷《内功吐纳》：气沉丹田，吐故纳新。
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>手风琴 accordion：只开一扇门</h2>
+      <p>
+        <strong>手风琴（accordion）</strong>是折叠的进阶形态：一组面板<strong>互斥</strong>，
+        点开新的，旧的自动合上，永远只开一扇门。FAQ（常见问题）是它的经典场景——
+        问题排成一条，点开哪个看哪个，页面始终清爽。
+      </p>
+      <p>它的结构比普通折叠多一层包装，共五件：</p>
+
+      <script type="text/plain" data-lang="html" data-title="手风琴的完整结构">
+        <div class="accordion" id="accordionExample">
+          <div class="accordion-item">
+            <!-- 1. 标题头：accordion-header 里放 accordion-button 按钮 -->
+            <h4 class="accordion-header" id="headingOne">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                问题一
+              </button>
+            </h4>
+            <!-- 2. 折叠面板：accordion-collapse + collapse，data-bs-parent 指向手风琴容器 -->
+            <div id="collapseOne" class="accordion-collapse collapse show"
+                 data-bs-parent="#accordionExample" aria-labelledby="headingOne">
+              <div class="accordion-body">
+                答案一……
+              </div>
+            </div>
+          </div>
+          <!-- 每个 accordion-item 都是这样一组，其他项把 show 去掉、aria-expanded 写 false -->
+        </div>
+      </script>
+
+      <ul>
+        <li><code>accordion</code>——手风琴容器；</li>
+        <li><code>accordion-item</code>——每一项（一组问答）；</li>
+        <li><code>accordion-header</code> + <code>accordion-button</code>——标题头与开关按钮；</li>
+        <li><code>accordion-collapse</code> + <code>accordion-body</code>——可折叠的面板与正文。</li>
+      </ul>
+      <p>
+        “只开一扇门”的机关在 <code>data-bs-parent="#手风琴id"</code>：
+        每个面板都指向同一个手风琴容器，Bootstrap 据此把其他面板当作“同门”，开新必关旧。
+        默认展开的项，在 <code>accordion-collapse</code> 上加 <code>show</code> 类、
+        按钮上写 <code>aria-expanded="true"</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · FAQ 手风琴（3 项，第一项默认展开）</div>
+        <div class="demo-preview">
+          <div class="accordion" id="bs11-demo3">
+            <div class="accordion-item">
+              <h4 class="accordion-header" id="bs11-demo3-h1">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo3-c1" aria-expanded="true" aria-controls="bs11-demo3-c1">
+                  什么是「纯静态网页」？
+                </button>
+              </h4>
+              <div id="bs11-demo3-c1" class="accordion-collapse collapse show" data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h1">
+                <div class="accordion-body">
+                  不需要服务器端程序，浏览器拿到 HTML、CSS、JS 后直接渲染的页面。
+                  本站就是这样：零构建、零后端，拷进任何静态服务器即可运行。
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h4 class="accordion-header" id="bs11-demo3-h2">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo3-c2" aria-expanded="false" aria-controls="bs11-demo3-c2">
+                  为什么还要学 Bootstrap？
+                </button>
+              </h4>
+              <div id="bs11-demo3-c2" class="accordion-collapse collapse" data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h2">
+                <div class="accordion-body">
+                  因为栅格、组件、工具类全是现成的：别人踩过的兼容坑你不用再踩一遍，
+                  把精力留给页面本身。它也是无数存量项目的共同语言。
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h4 class="accordion-header" id="bs11-demo3-h3">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo3-c3" aria-expanded="false" aria-controls="bs11-demo3-c3">
+                  本站可以完全离线打开吗？
+                </button>
+              </h4>
+              <div id="bs11-demo3-c3" class="accordion-collapse collapse" data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h3">
+                <div class="accordion-body">
+                  可以。样式、脚本、图标全部本地化，双击 HTML 文件直接打开也能完整运行。
+                  这正是本教程坚持“纯静态、零外链”的底气。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选第一项）">
+            <div class="accordion" id="bs11-demo3">
+              <div class="accordion-item">
+                <h4 class="accordion-header" id="bs11-demo3-h1">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#bs11-demo3-c1" aria-expanded="true" aria-controls="bs11-demo3-c1">
+                    什么是「纯静态网页」？
+                  </button>
+                </h4>
+                <div id="bs11-demo3-c1" class="accordion-collapse collapse show"
+                     data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h1">
+                  <div class="accordion-body">
+                    不需要服务器端程序，浏览器拿到 HTML、CSS、JS 后直接渲染的页面。
+                  </div>
+                </div>
+              </div>
+              <!-- 其余两项结构相同：去掉 show，按钮加 collapsed、aria-expanded="false" -->
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>无缝变体 accordion-flush</h2>
+      <p>
+        默认的手风琴每项之间有明显分隔与圆角。若想让它与父容器（比如一张卡片）无缝贴合，
+        给容器再加一个 <code>accordion-flush</code> 类——去掉外框与圆角，只保留项间的细线。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · accordion-flush：与父容器无缝贴合</div>
+        <div class="demo-preview">
+          <div class="card">
+            <div class="accordion accordion-flush" id="bs11-demo4">
+              <div class="accordion-item">
+                <h4 class="accordion-header" id="bs11-demo4-h1">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo4-c1" aria-expanded="true" aria-controls="bs11-demo4-c1">
+                    本月功课
+                  </button>
+                </h4>
+                <div id="bs11-demo4-c1" class="accordion-collapse collapse show" data-bs-parent="#bs11-demo4" aria-labelledby="bs11-demo4-h1">
+                  <div class="accordion-body">
+                    栅格练到第三式，手写两个响应式布局；周末前提交。
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h4 class="accordion-header" id="bs11-demo4-h2">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bs11-demo4-c2" aria-expanded="false" aria-controls="bs11-demo4-c2">
+                    上月战绩
+                  </button>
+                </h4>
+                <div id="bs11-demo4-c2" class="accordion-collapse collapse" data-bs-parent="#bs11-demo4" aria-labelledby="bs11-demo4-h2">
+                  <div class="accordion-body">
+                    修完组件七式，写坏三个页面，收获十二个报错，全部亲手修好。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <!-- 只需在容器上多加一个 accordion-flush -->
+            <div class="card">
+              <div class="accordion accordion-flush" id="bs11-demo4">
+                <div class="accordion-item">
+                  <h4 class="accordion-header" id="bs11-demo4-h1">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#bs11-demo4-c1" aria-expanded="true" aria-controls="bs11-demo4-c1">
+                      本月功课
+                    </button>
+                  </h4>
+                  <div id="bs11-demo4-c1" class="accordion-collapse collapse show"
+                       data-bs-parent="#bs11-demo4" aria-labelledby="bs11-demo4-h1">
+                    <div class="accordion-body">
+                      栅格练到第三式，手写两个响应式布局；周末前提交。
+                    </div>
+                  </div>
+                </div>
+                <!-- 第二项结构相同，略 -->
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十一式</div>
+        <ol>
+          <li>让例 1 的面板<strong>默认展开</strong>：给 <code>collapse</code> 面板加上 <code>show</code> 类，
+            并把两个触发器上的 <code>aria-expanded</code> 改为 <code>"true"</code>。</li>
+          <li>把例 3 三个 <code>accordion-collapse</code> 上的 <code>data-bs-parent="#bs11-demo3"</code>
+            <strong>全部删掉</strong>，再依次点开两项，观察“只开一扇门”是否失效。</li>
+          <li>思考题：为什么手风琴必须靠 <code>data-bs-parent</code> 指向同一个容器，而不能自动按
+            “同一个父元素”互斥？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="默认展开的面板（节选）">
+            <div class="collapse show" id="bs11-demo1">
+              <div class="card card-body">
+                《基础剑法》心要：剑走轻灵，意在剑先。
+              </div>
+            </div>
+          </script>
+          <p>
+            <code>show</code> 是 collapse 的“初始展开”标记；<code>aria-expanded</code> 则要与真实状态一致，
+            否则屏幕阅读器会误报。第一次点击之后，数据 API 会自动帮你同步
+            <code>aria-expanded</code> 与按钮上的 <code>collapsed</code> 类。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <p>
+            删掉 <code>data-bs-parent</code> 后，依次点开两项，<strong>两项会同时展开</strong>——
+            “只开一扇门”就此失效。这正是手风琴与普通折叠的本质区别：
+            折叠面板本身互不相识，<code>data-bs-parent</code> 是它们之间的“师门名册”，
+            有了它才知道“开我时必须关谁”。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为<strong>“同一父元素”不等于“同一互斥组”</strong>。一个手风琴容器里可能嵌套着其他折叠面板
+            （比如某个答案里又有一个折叠详情），它们住在同一父元素下，却不想参与互斥；
+            反过来，DOM 结构也可能中途换包装。所以 Bootstrap 不猜关系，而是用
+            <code>data-bs-parent</code> 让你<strong>显式点名</strong>互斥范围——
+            谁指向同一个容器，谁就是一家人。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>折叠面板：触发器写 <code>data-bs-toggle="collapse"</code>，button 用 <code>data-bs-target</code>、<code>a</code> 用 <code>href</code> 点名；</li>
+        <li><code>data-bs-target</code> 接受 CSS 选择器，一个按钮可以同开同合多个面板；</li>
+        <li>手风琴五件套：<code>accordion</code> / <code>accordion-item</code> / <code>accordion-header</code> / <code>accordion-collapse</code> / <code>accordion-body</code>；</li>
+        <li>“只开一扇门”靠 <code>data-bs-parent</code> 圈定互斥范围；<code>accordion-flush</code> 让手风琴无缝贴边。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼轮播与杂项——carousel、进度条、分页与加载动画，几件零散的小兵器一并收下。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

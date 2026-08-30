@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四式 · 类与样式 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="addClass、removeClass、toggleClass 与 css()：用类名与样式给元素换装，让页面随交互改头换面。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-04">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        内容与属性是内功，样式是衣裳。上一式练的是怎么说，这一式练的是怎么穿——
+        加一件、脱一件、随时换，全在鼠标起落之间。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>addClass</code> / <code>removeClass</code> / <code>toggleClass</code> / <code>hasClass</code> 管理类名</li>
+          <li>会用 <code>css()</code> 读单个属性、写单个属性、用对象一次写多个</li>
+          <li>知道 <code>toggleClass</code> 的第二参数能“强制开或关”，<code>css()</code> 也支持回调写法</li>
+        </ul>
+      </div>
+
+      <h2>类名四兄弟</h2>
+      <p>
+        类名是样式的开关——Bootstrap 的样式与本站皮肤，全都挂在 <code>class</code> 上。
+        所以 jQuery 把“换装”做成了四个方法：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="类名四兄弟">
+        $('#jq04-heart').addClass('text-danger');    // 加一个类
+        $('#jq04-heart').removeClass('text-danger'); // 去掉一个类
+        $('#jq04-heart').toggleClass('text-danger'); // 有则去，无则加
+        $('#jq04-heart').hasClass('text-danger');    // 有没有？返回 true / false
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 点赞按钮：toggleClass 切换红心</div>
+        <div class="demo-preview">
+          <div id="jq04-demo1">
+            <button id="jq04-like" type="button" class="btn btn-outline-primary">
+              <i id="jq04-heart" class="bi bi-heart me-1"></i>喜欢
+            </button>
+            <script>
+              $(function () {
+                $('#jq04-like').on('click', function () {
+                  // 三个类同时切换：空心 ↔ 实心，顺带染上朱砂色
+                  $('#jq04-heart').toggleClass('bi-heart bi-heart-fill text-danger');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button id="jq04-like" type="button" class="btn btn-outline-primary">
+              <i id="jq04-heart" class="bi bi-heart me-1"></i>喜欢
+            </button>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq04-like').on('click', function () {
+              // 三个类同时切换：空心 ↔ 实心，顺带染上朱砂色
+              $('#jq04-heart').toggleClass('bi-heart bi-heart-fill text-danger');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意 <code>toggleClass</code> 的参数用空格隔开，可以一次切换多个类——空心、实心、朱砂色三个类同起同落。
+        心形图标来自站内自带的 Bootstrap Icons 图标库（第二回第十四式细讲）。
+      </p>
+
+      <h2>toggleClass 的第二个参数</h2>
+      <p>
+        <code>toggleClass(类名, 开关)</code> 还接受第二个布尔参数：<code>true</code> 表示“无论现在有没有，都给我加上”，
+        <code>false</code> 表示“无论现在有没有，都给我去掉”。当样式该由<strong>程序状态</strong>决定、
+        而不是由“点一下翻一下”决定时，用它正合适。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="第二参数：强制开或关">
+        var vip = true; // 这个值可能来自登录状态、勾选框……
+        $('#jq04-heart').toggleClass('text-danger', vip);  // 强制加上
+        $('#jq04-heart').toggleClass('text-danger', !vip); // 强制去掉
+      </script>
+
+      <div class="callout">
+        <div class="callout-title">心法：状态与动作分开</div>
+        <p style="margin:0">
+          交互用无参的 <code>toggleClass</code>（来回翻），程序状态用第二参数（对齐现实）。
+          练功第一题就是这道题。
+        </p>
+      </div>
+
+      <h2>css：直接写样式</h2>
+      <p>
+        类名管“成套样式”，<code>css()</code> 管“单个或临时的样式”。它有四种形态：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="css 的四种形态">
+        var w = $('#jq04-bar').css('width'); // 读一个（返回计算后的值，如 "60px"）
+        $('#jq04-bar').css('width', '50%');  // 写一个
+        $('#jq04-bar').css({                  // 写多个：对象写法，属性名用驼峰
+          width: '50%',
+          backgroundColor: '#b03a2e'
+        });
+        $('#jq04-bar').css('width', function (i, old) { // 回调写法
+          return '25%';
+        });
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 鼠标进出卡片高亮（mouseenter/mouseleave + addClass）</div>
+        <div class="demo-preview">
+          <div id="jq04-demo2">
+            <div id="jq04-card" class="card p-3" style="max-width: 340px;">
+              <p class="mb-0">心法：样式是衣裳，类名是衣钩。把鼠标移进卡片——影子浮起；移出去——归于平静。</p>
+            </div>
+            <script>
+              $(function () {
+                $('#jq04-card')
+                  .on('mouseenter', function () { $('#jq04-card').addClass('shadow'); })
+                  .on('mouseleave', function () { $('#jq04-card').removeClass('shadow'); });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="jq04-card" class="card p-3" style="max-width: 340px;">
+              <p class="mb-0">心法：样式是衣裳，类名是衣钩。把鼠标移进卡片——影子浮起；移出去——归于平静。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq04-card')
+              .on('mouseenter', function () { $('#jq04-card').addClass('shadow'); })
+              .on('mouseleave', function () { $('#jq04-card').removeClass('shadow'); });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        鼠标进入加 <code>shadow</code> 类、离开再摘掉——两个 <code>.on()</code> 连写，也是链式调用。
+        （<code>mouseenter</code> / <code>mouseleave</code> 是下一式的主角，这里先混个脸熟。）
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 进度条步进：点击加 25%（css 读 + 写）</div>
+        <div class="demo-preview">
+          <div id="jq04-demo3">
+            <div class="progress" style="width: 240px;">
+              <div id="jq04-bar" class="progress-bar" role="progressbar" style="width: 0%; transition: none;">0%</div>
+            </div>
+            <button id="jq04-step" type="button" class="btn btn-primary mt-3">前进一格（+25%）</button>
+            <script>
+              $(function () {
+                $('#jq04-step').on('click', function () {
+                  // css('width') 读到的是计算后的像素值（轨道定宽 240px，每步 60px 即 25%）
+                  var now = parseInt($('#jq04-bar').css('width'), 10) || 0;
+                  var next = Math.min(now + 60, 240);
+                  $('#jq04-bar').css('width', next + 'px').text(Math.round(next / 240 * 100) + '%');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="progress" style="width: 240px;">
+              <div id="jq04-bar" class="progress-bar" role="progressbar" style="width: 0%; transition: none;">0%</div>
+            </div>
+            <button id="jq04-step" type="button" class="btn btn-primary mt-3">前进一格（+25%）</button>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq04-step').on('click', function () {
+              // css('width') 读到的是计算后的像素值（轨道定宽 240px，每步 60px 即 25%）
+              var now = parseInt($('#jq04-bar').css('width'), 10) || 0;
+              var next = Math.min(now + 60, 240);
+              $('#jq04-bar').css('width', next + 'px').text(Math.round(next / 240 * 100) + '%');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这里先 <code>css('width')</code> 读、算完再 <code>css('width', …)</code> 写。留意两个小细节：
+        <code>css('width')</code> 读到的是浏览器<strong>计算后的像素值</strong>（不是我们写的百分比），
+        所以演示把轨道定成 240px 宽，每步加 60px 恰好是 25%；
+        另外 Bootstrap 的进度条自带宽度过渡动画，演示里先用 <code>transition: none</code> 把它关掉，
+        让每一步的读数干净利落——第六式会教它重新动起来。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四式</div>
+        <ol>
+          <li>给例 1 加一个“管理员”勾选框：勾上后，点按钮只会强制点亮红心（不能取消）；不勾时恢复自由切换。提示：toggleClass 的第二参数。</li>
+          <li>用 <code>css()</code> 的对象写法，把进度条一次设置成：宽 100%、朱砂底色、圆角 999px。</li>
+          <li>思考题：<code>addClass('text-danger')</code> 与 <code>css('color', 'red')</code> 都能让字变红，什么时候用哪个？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="状态对齐">
+            $('#jq04-like').on('click', function () {
+              if ($('#jq04-admin').prop('checked')) {
+                // 管理员强制点亮：第二参数 true，只加不删
+                $('#jq04-heart').toggleClass('bi-heart bi-heart-fill text-danger', true);
+              } else {
+                // 普通用户：自由切换
+                $('#jq04-heart').toggleClass('bi-heart bi-heart-fill text-danger');
+              }
+            });
+          </script>
+          <p>
+            勾选状态来自 <code>prop('checked')</code>（上一式刚练过），“状态对齐现实”正是第二参数的用武之地。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="对象写法">
+            $('#jq04-bar').css({
+              width: '100%',
+              backgroundColor: '#b03a2e',
+              borderRadius: '999px'
+            });
+          </script>
+          <p>
+            对象写法适合“一次性交代好几条”，注意 CSS 属性名连字符的换成驼峰（<code>background-color</code>
+            写成 <code>backgroundColor</code>）。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            类名把“红”的含义收进 CSS 定义——可复用、可被皮肤与主题统一管理，适合“有名分的状态”；
+            <code>css()</code> 直接把样式钉在元素上，适合“动态数值”（宽度百分比、算出来的颜色）或一次性临时效果。
+            江湖经验：<strong>能说清名字的状态用类，说不清名字的动态数值用 css()</strong>。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>类名四兄弟管“成套样式”，<code>toggleClass</code> 第二参数让样式对齐程序状态；</li>
+        <li><code>css()</code> 读一、写一、写多、回调，四种形态按需取用；</li>
+        <li>类名与内联样式各司其职：有名分的用类，动态数值用 <code>css()</code>。</li>
+      </ul>
+
+      <blockquote>下一式，修炼事件——on 与 off、事件委托，让每个新来的元素一出生就会响应。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

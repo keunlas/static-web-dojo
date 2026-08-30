@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第九式 · Ajax | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="页面不刷新也能取数据：$.get、$.getJSON 与 $.ajax 完整配置，附本地服务器打开说明。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-09">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖传说，有一种功夫可以让页面不翻页就取来消息——像驿站飞鸽传书，人不动，信已到。
+        这一式，我们修炼 Ajax：页面不刷新，数据照样来。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用大白话理解 Ajax：不刷新整页，悄悄向服务器取数据</li>
+          <li>会写 <code>$.get</code> / <code>$.post</code> 与 <code>$.getJSON</code>，认识 <code>done</code> / <code>fail</code> / <code>always</code></li>
+          <li>会写 <code>$.ajax</code> 完整配置，知道 <code>load()</code> 一句话塞内容</li>
+          <li>记住：本章需要本地服务器，以及为什么其他章节不用</li>
+        </ul>
+      </div>
+
+      <h2>Ajax 是什么</h2>
+      <p>
+        传统的页面交互是“整页翻书”：点一下，整个页面重新加载一次。Ajax 是“递小纸条”：
+        页面留在原地，JavaScript 悄悄向服务器要一份数据，拿到后只更新需要更新的那一小块。
+        搜索框的联想词、瀑布流的新内容、表单提交后的小红字，都是它的手笔。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">先说清楚：本章需要本地服务器</div>
+        <p style="margin:0">
+          浏览器的安全策略不允许 <code>file://</code> 页面读本地文件（否则任何网页都能偷看你的硬盘），
+          所以<strong>双击打开本章时，下面的演示会失败</strong>——页面上会弹出提示框，那是 <code>fail</code> 在报信。
+          请用本地服务器打开本章：在项目根目录执行
+          <code>python3 -m http.server 8899 --directory site</code>，
+          然后访问 <code>http://127.0.0.1:8899/jquery/09-ajax.html</code>。
+          <strong>只有本章需要这么做</strong>，其他章节双击即开，不受影响。
+        </p>
+      </div>
+
+      <h2>$.get 与 $.post</h2>
+      <p>
+        两个最常用的快捷招式，各自对应一种“递纸条”的方向：<code>$.get</code> 去“拿”数据
+        （数据跟在网址后面），<code>$.post</code> 去“交”数据（数据放在请求的身体里）。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="$.get 与 $.post 的基本形态">
+        // $.get：用 GET 方式取数据，适合“拿”
+        $.get('../data/notes.json', function (data) {
+          console.log('拿到了：', data);
+        });
+
+        // $.post：用 POST 方式提交数据，适合“交”
+        // 注意：它需要一个会“接招”的服务端（如 PHP、Node），本教程没有后端，这里只看形态
+        $.post('/api/notes', { title: '新笔记', content: '今日站桩三刻' }, function (res) {
+          console.log('服务端回话：', res);
+        });
+      </script>
+
+      <h2>$.getJSON 读 JSON</h2>
+      <p>
+        JSON 是一种规规矩矩的数据格式——像一份字段整齐的花名册。本站的修行笔记就存成 JSON：
+        <code>site/data/notes.json</code>，里面是 8 条笔记，每条都有 <code>id</code>、<code>title</code>、
+        <code>content</code>、<code>level</code> 四个字段。<code>$.getJSON(网址, 回调)</code>
+        一步到位：取来数据并自动解析成 JavaScript 对象。
+      </p>
+      <p>
+        它返回的请求对象还能继续链上三种结局处理：<code>.done()</code> 成功时执行、
+        <code>.fail()</code> 失败时执行、<code>.always()</code> 无论成败都执行。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 按钮加载 ../data/notes.json 渲染成列表</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-primary" id="jq09-load">加载修行笔记</button>
+          <div id="jq09-tip" class="alert alert-warning mt-3" style="display:none;" role="alert">
+            <p class="mb-0">
+              加载失败：浏览器不允许 <code>file://</code> 页面读本地文件。请用本地服务器打开本章——
+              在项目根目录执行 <code>python3 -m http.server 8899 --directory site</code>，
+              再访问 <code>http://127.0.0.1:8899/jquery/09-ajax.html</code>。
+            </p>
+          </div>
+          <ul id="jq09-notes" class="list-group mt-3" style="max-width:32rem;"></ul>
+          <p id="jq09-status" class="mt-3 mb-0 text-muted" style="display:none;">本次请求已结束（无论成败，always 都会到）。</p>
+          <script>
+            $(function () {
+              $('#jq09-load').on('click', function () {
+                $('#jq09-status').hide();
+                $.getJSON('../data/notes.json')
+                  .done(function (notes) {
+                    $('#jq09-tip').hide();
+                    $('#jq09-notes').empty();
+                    $.each(notes, function (index, note) {
+                      var $li = $('<li>').addClass('list-group-item');
+                      var $head = $('<strong>').text(note.title);
+                      var $badge = $('<span>').addClass('badge text-bg-secondary float-end').text(note.level);
+                      var $body = $('<p>').addClass('mb-0 mt-1 text-muted').text(note.content);
+                      $li.append($head, ' ', $badge, $body).appendTo('#jq09-notes');
+                    });
+                  })
+                  .fail(function () {
+                    $('#jq09-tip').show();
+                    $('#jq09-notes').empty();
+                  })
+                  .always(function () {
+                    $('#jq09-status').show();
+                  });
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq09-load').on('click', function () {
+              $.getJSON('../data/notes.json')
+                .done(function (notes) {
+                  // 成功：把每条笔记渲染成一个列表项
+                  $.each(notes, function (index, note) {
+                    var $li = $('<li>').addClass('list-group-item');
+                    var $head = $('<strong>').text(note.title);
+                    var $badge = $('<span>').addClass('badge text-bg-secondary float-end').text(note.level);
+                    var $body = $('<p>').addClass('mb-0 mt-1 text-muted').text(note.content);
+                    $li.append($head, ' ', $badge, $body).appendTo('#jq09-notes');
+                  });
+                })
+                .fail(function () {
+                  // 失败：多半是 file:// 双击打开——亮出提示框
+                  $('#jq09-tip').show();
+                })
+                .always(function () {
+                  // 无论成败都收尾：显示状态行
+                  $('#jq09-status').show();
+                });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        三种结局各就各位：<code>done</code> 渲染列表，<code>fail</code> 亮出“请用本地服务器打开本章”的提示框，
+        <code>always</code> 收尾。试试用 <code>file://</code> 双击打开本章再点按钮——你会亲眼看到 <code>fail</code> 的报信。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · “加载中”转圈，done 后替换成结果</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-primary" id="jq09-spin-load">加载（带转圈）</button>
+          <div id="jq09-spin-area" class="mt-3">
+            <p class="text-muted mb-0">还没开始加载。</p>
+          </div>
+          <script>
+            $(function () {
+              $('#jq09-spin-load').on('click', function () {
+                var $area = $('#jq09-spin-area');
+                $area.html(
+                  '<div class="d-flex align-items-center gap-2">' +
+                  '<span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>' +
+                  '<span>正在翻阅藏经阁……</span>' +
+                  '</div>'
+                );
+                $.getJSON('../data/notes.json')
+                  .done(function (notes) {
+                    // 本地请求快如闪电，稍停 700 毫秒好让你看清“加载中”（真实项目里不需要）
+                    setTimeout(function () {
+                      var titles = [];
+                      $.each(notes, function (index, note) { titles.push(note.title); });
+                      $area.html('<p class="mb-0"><strong>共 ' + notes.length + ' 条：</strong>' + titles.join('、') + '</p>');
+                    }, 700);
+                  })
+                  .fail(function () {
+                    $area.html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章（命令见例 1 提示框）。</div>');
+                  });
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq09-spin-load').on('click', function () {
+              var $area = $('#jq09-spin-area');
+              // 1. 先摆出“加载中”的转圈
+              $area.html(
+                '<div class="d-flex align-items-center gap-2">' +
+                '<span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>' +
+                '<span>正在翻阅藏经阁……</span>' +
+                '</div>'
+              );
+              $.getJSON('../data/notes.json')
+                .done(function (notes) {
+                  // 2. 成功后，用结果替换整个区域
+                  var titles = [];
+                  $.each(notes, function (index, note) { titles.push(note.title); });
+                  $area.html('<p class="mb-0"><strong>共 ' + notes.length + ' 条：</strong>' + titles.join('、') + '</p>');
+                })
+                .fail(function () {
+                  // 3. 失败则换上一张警告
+                  $area.html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章。</div>');
+                });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        经典三段式：请求发出前摆出转圈（Bootstrap 的 <code>spinner-border</code>），
+        <code>done</code> 里把整个区域替换成结果，<code>fail</code> 里换上警告。
+      </p>
+
+      <h2>$.ajax 完整配置</h2>
+      <p>
+        <code>$.get</code>、<code>$.post</code>、<code>$.getJSON</code> 都是 <code>$.ajax</code> 的快捷招式，
+        内部都调用它。要更细的控制（请求方式、超时、请求头……），直接写 <code>$.ajax</code>：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="$.ajax 完整配置">
+        $.ajax({
+          url: '../data/notes.json',   // 要请求的地址
+          method: 'GET',               // 请求方式：GET 或 POST（jQuery 4 推荐 method）
+          dataType: 'json',            // 期望返回 JSON，jQuery 自动帮你解析
+          success: function (data) {
+            // 成功回调，与 .done(function (data) { … }) 等价
+            console.log('成功，共', data.length, '条');
+          },
+          error: function (xhr, status, err) {
+            // 失败回调，与 .fail(function () { … }) 对应
+            console.log('失败：', status, err);
+          }
+        });
+      </script>
+
+      <p>
+        <code>done</code> / <code>fail</code> / <code>always</code> 与 <code>success</code> / <code>error</code>
+        是两种写法、同一件事，挑顺手的用；链式的 <code>done/fail/always</code> 更贴近 jQuery 的现代风格。
+      </p>
+
+      <h2>load() 一句话塞进元素</h2>
+      <p>
+        最后是最偷懒的一招：<code>$el.load(网址)</code> 把服务器返回的 HTML <strong>直接塞进元素</strong>。
+        网址后面加一个空格再加选择器，还能只取返回内容里的一段。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · load() 把片段直接塞进元素</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-primary" id="jq09-fragload">把章首语塞进下面</button>
+          <div id="jq09-frag" class="border rounded p-3 mt-3" style="min-height:3rem;">
+            <p class="text-muted mb-0">这里将出现本章自己的章首语（load 来的）。</p>
+          </div>
+          <script>
+            $(function () {
+              $('#jq09-fragload').on('click', function () {
+                // 加载本章自己的 .chapter-lead 一段（演示 load 的“选择器”写法）
+                $('#jq09-frag').load('09-ajax.html .chapter-lead', function (response, status) {
+                  if (status === 'error') {
+                    $('#jq09-frag').html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章（命令见例 1 提示框）。</div>');
+                  }
+                });
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            // load()：把服务器返回的 HTML 直接塞进元素
+            $('#jq09-frag').load('09-ajax.html .chapter-lead');
+
+            // 网址后加“空格 + 选择器”，只取返回内容里的一段；
+            // 再传一个回调，加载完成/失败时好善后：
+            $('#jq09-frag').load('09-ajax.html .chapter-lead', function (response, status) {
+              if (status === 'error') {
+                // 失败：多半是 file:// 双击打开
+              }
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        <code>load</code> 适合加载现成的 HTML 片段；拿 JSON 数据还是 <code>getJSON</code> 顺手。
+        它也受本地服务器的限制——所以例 3 加载的是本章自己的一段内容，失败时同样会亮出提示。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第九式</div>
+        <ol>
+          <li>给例 1 加一个状态行——无论成败，请求结束后都显示“本次请求已结束”（用 <code>always()</code>）。</li>
+          <li>把例 1 的 <code>$.getJSON</code> 改写成 <code>$.ajax({…})</code> 完整写法（<code>url</code> / <code>method</code> / <code>dataType</code> / <code>success</code> / <code>error</code> 齐全）。</li>
+          <li>思考题：为什么 <code>file://</code> 双击打开时 Ajax 读不了本地 JSON，而 <code>&lt;script src="…"&gt;</code> 引入脚本却可以？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="用 always 收尾">
+            var $status = $('#jq09-status');
+            $('#jq09-load').on('click', function () {
+              $status.hide();
+              $.getJSON('../data/notes.json')
+                .done(function (notes) {
+                  // 渲染笔记列表……
+                })
+                .fail(function () {
+                  $('#jq09-tip').show();
+                })
+                .always(function () {
+                  $status.text('本次请求已结束').show();
+                });
+            });
+          </script>
+          <p>
+            <code>always</code> 像“散场打扫”——不管成功还是失败都会执行，
+            适合恢复按钮状态、显示收尾提示这类活儿。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="$.ajax 完整写法">
+            $.ajax({
+              url: '../data/notes.json',
+              method: 'GET',
+              dataType: 'json',
+              success: function (notes) {
+                // 与 .done(function (notes) { … }) 等价
+                console.log('成功，共', notes.length, '条');
+              },
+              error: function (xhr, status, err) {
+                // 与 .fail(function () { … }) 对应
+                console.log('失败：', status, err);
+              }
+            });
+          </script>
+          <p>
+            两种写法效果相同：<code>success</code>/<code>error</code> 写在配置里，
+            <code>done</code>/<code>fail</code>/<code>always</code> 链在返回的请求对象上。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>&lt;script&gt;</code> 标签是浏览器网开一面的“历史通道”——跨域加载脚本自古放行；
+            而 Ajax 受<strong>同源策略</strong>约束：页面只能向“同一个源”要数据。
+            双击打开的 <code>file://</code> 页面没有像样的“源”，浏览器一律拦下它对本地文件的 Ajax 请求，
+            防止网页偷读你的硬盘。本地服务器把页面和数据放进同一个源（<code>http://127.0.0.1:8899</code>），
+            Ajax 就名正言顺了。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>Ajax 是不刷新整页、悄悄取数据的飞鸽传书；</li>
+        <li><code>$.get</code> / <code>$.post</code> / <code>$.getJSON</code> 是 <code>$.ajax</code> 的快捷招式，<code>done</code> / <code>fail</code> / <code>always</code> 处理三种结局；</li>
+        <li><code>load()</code> 把 HTML 片段直接塞进元素；</li>
+        <li>本章需要本地服务器：<code>python3 -m http.server 8899 --directory site</code>，其余章节不受影响。</li>
+      </ul>
+
+      <blockquote>下一式，我们把 jQuery 与 Bootstrap 合璧，综合修炼一个待办清单。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

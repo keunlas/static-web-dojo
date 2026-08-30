@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>待办清单 · 练功成品 | 纯静态网页的修行</title>
+<meta name="description" content="jQuery + Bootstrap 手写的待办清单：添加、切换完成、事件委托删除、统计与 localStorage 持久化，完全离线可用。">
+<link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='18'%20fill='%23b03a2e'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20text-anchor='middle'%20fill='%23faf6ec'%20font-family='serif'%3E%E4%BF%AE%3C/text%3E%3C/svg%3E">
+<style>
+  body {
+    background: #faf6ec;
+    color: #2b2a26;
+  }
+  .todo-card {
+    max-width: 560px;
+    background: #fffdf7;
+    border: 1px solid #e3dcc8;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(43, 42, 38, .08);
+  }
+  .todo-title {
+    font-family: 'Songti SC', 'Noto Serif CJK SC', SimSun, serif;
+    letter-spacing: .02em;
+  }
+  #todo-list li {
+    cursor: pointer;
+  }
+  #todo-list li:hover {
+    background: #f4edde;
+  }
+  #todo-list li.done .todo-text {
+    text-decoration: line-through;
+    color: #6f6a5e;
+  }
+</style>
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="todo-card p-4 mx-auto">
+    <h1 class="todo-title h3 mb-1">今日待办</h1>
+    <p class="text-muted small mb-4">第十式 · 综合修炼的练功成品。数据存在本机浏览器里，刷新不丢。</p>
+
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" id="todo-input" placeholder="想做什么？写下来，做完点掉它">
+      <button class="btn btn-primary" id="todo-add" type="button">添加</button>
+    </div>
+
+    <ul class="list-group" id="todo-list"></ul>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <p class="mb-0 text-muted small">共 <span id="todo-total">0</span> 件 · 已完成 <span id="todo-done">0</span> 件</p>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="todo-clear">清除已完成</button>
+    </div>
+
+    <p class="text-muted small mt-4 mb-0">
+      完全离线可用：jQuery 与 Bootstrap 均为本地文件，任务保存在 localStorage。
+    </p>
+  </div>
+</div>
+
+<script src="../../assets/vendor/jquery/jquery-4.0.0.min.js"></script>
+<script>
+  $(function () {
+    var KEY = 'dojo-todo-app';
+
+    // 创建一条任务并挂进列表
+    function addItem(text, done) {
+      var $li = $('<li>')
+        .addClass('list-group-item d-flex justify-content-between align-items-center')
+        .append($('<span>').addClass('todo-text').text(text))
+        .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }));
+      if (done) $li.addClass('done');
+      $('#todo-list').append($li);
+    }
+
+    // 统计：总数、已完成数、清空按钮状态
+    function updateStats() {
+      $('#todo-total').text($('#todo-list li').length);
+      $('#todo-done').text($('#todo-list li.done').length);
+      $('#todo-clear').prop('disabled', $('#todo-list li.done').length === 0);
+    }
+
+    // 存档：把列表压成 JSON 存进 localStorage
+    function save() {
+      var items = [];
+      $('#todo-list li').each(function () {
+        items.push({
+          text: $(this).find('.todo-text').text(),
+          done: $(this).hasClass('done')
+        });
+      });
+      localStorage.setItem(KEY, JSON.stringify(items));
+    }
+
+    // 读档：启动时还原上次的列表
+    function load() {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) {
+        // 首次打开：放两条示例，方便上手
+        addItem('读一遍《纯静态网页的修行》', false);
+        addItem('练完 jQuery 第十式', true);
+        save();
+        return;
+      }
+      JSON.parse(raw).forEach(function (item) {
+        addItem(item.text, item.done);
+      });
+    }
+
+    // 添加：取值、判空、入列
+    function add() {
+      var text = $('#todo-input').val().trim();
+      if (!text) {
+        $('#todo-input').addClass('is-invalid').trigger('focus');
+        return;
+      }
+      $('#todo-input').removeClass('is-invalid');
+      addItem(text, false);
+      $('#todo-input').val('').trigger('focus');
+      updateStats();
+      save();
+    }
+
+    $('#todo-add').on('click', add);
+    $('#todo-input').on('keydown', function (e) {
+      if (e.key === 'Enter') add();
+    });
+
+    // 点击任务：切换完成状态（事件委托，新加项同样有效）
+    $('#todo-list').on('click', 'li', function (e) {
+      if ($(e.target).closest('.btn-del').length) return; // 点的是 ✕，让路
+      $(this).toggleClass('done');
+      updateStats();
+      save();
+    });
+
+    // 点击 ✕：淡出后删除
+    $('#todo-list').on('click', '.btn-del', function () {
+      var $li = $(this).closest('li');
+      $li.fadeOut(120, function () {
+        $li.remove();
+        updateStats();
+        save();
+      });
+    });
+
+    // 清除已完成
+    $('#todo-clear').on('click', function () {
+      $('#todo-list li.done').remove();
+      updateStats();
+      save();
+    });
+
+    load();
+    updateStats();
+  });
+</script>
+</body>
+</html>

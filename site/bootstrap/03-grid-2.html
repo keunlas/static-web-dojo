@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三式 · 容器与栅格（下） | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="行内嵌套、offset 偏移、order 排序、行列对齐与 gutter 列间距。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-03">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        上一式学会了搭架子，这一式要让架子活起来：让列里再装行、让盒子偏一偏、挪一挪、贴紧或散开。
+        栅格的下半部，全是布局的巧劲。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>在列里再开 <code>row</code>，实现任意深度的嵌套</li>
+          <li>用 <code>offset-*</code> 偏移、<code>order-*</code> 排序调整位置</li>
+          <li>用 <code>align-items-*</code> 与 <code>justify-content-*</code> 对齐行列</li>
+          <li>用 <code>g-*</code>（gutter 列间距）控制列与列的呼吸距离</li>
+        </ul>
+      </div>
+
+      <h2>嵌套：列中再开一行</h2>
+      <p>
+        栅格可以“套娃”：<code>col</code> 里面还能再放 <code>row</code>，新的一行又是<strong>一套完整的 12 列</strong>，
+        与外面互不相干。左侧导航 + 右侧内容区里再分两栏，就是嵌套的典型场景。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 外层 4:8，右侧列里再开一行 6:6</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="bg-secondary-subtle border rounded p-3">外层列 · 侧栏（4 份）</div>
+            </div>
+            <div class="col-12 col-md-8">
+              <div class="row g-3">
+                <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 A<br>新的一套 12 列，占 6 份</div></div>
+                <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 B<br>与 A 平分外层列</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <div class="bg-secondary-subtle border rounded p-3">外层列 · 侧栏（4 份）</div>
+              </div>
+              <div class="col-12 col-md-8">
+                <div class="row g-3">
+                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 A</div></div>
+                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 B</div></div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        嵌套深度不限，但一般不超过两层——每多一层，心算“这行是 12 份里的哪一层”的难度就翻一倍，
+        可读性也掉一档。
+      </p>
+
+      <h2>偏移与排序：offset-* 与 order-*</h2>
+      <p>
+        <code>offset-*</code> 让列向右“空出”若干份：<code>offset-md-3</code> 意为 md 起左侧空出 3 份。
+        居中一个登录框的经典写法就是 <code>col-md-6 offset-md-3</code>——占 6 份、左右各空 3 份，正好居中；
+        <code>offset-0</code> 可以清除之前的偏移。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 用偏移“端”出一个居中的登录框</div>
+        <div class="demo-preview">
+          <div class="row">
+            <div class="col-12 col-md-6 offset-md-3">
+              <div class="border rounded p-4">
+                <div class="h5 mb-3">登录</div>
+                <div class="mb-3">
+                  <label class="form-label" for="bs03-email">邮箱</label>
+                  <input type="email" class="form-control" id="bs03-email" placeholder="you@example.com">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="bs03-pass">密码</label>
+                  <input type="password" class="form-control" id="bs03-pass" placeholder="••••••">
+                </div>
+                <button type="button" class="btn btn-primary">进入</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row">
+              <div class="col-12 col-md-6 offset-md-3">
+                <div class="border rounded p-4">
+                  <div class="h5 mb-3">登录</div>
+                  <div class="mb-3">
+                    <label class="form-label" for="email">邮箱</label>
+                    <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="pass">密码</label>
+                    <input type="password" class="form-control" id="pass" placeholder="••••••">
+                  </div>
+                  <button type="button" class="btn btn-primary">进入</button>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        表单控件是第八式的招式，这里先混个脸熟，我们只看偏移：手机上框占满，md 起收成半宽并居中。
+      </p>
+
+      <p>
+        <code>order-*</code> 只改<strong>视觉顺序</strong>，不改 HTML 里的先后。经典用法：手机上希望正文先出现
+        （阅读优先），桌面上希望侧栏在左。HTML 里正文写前面，桌面用 <code>order-md-2</code> 把它挪到右边。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · order 换序：HTML 里正文在前，桌面上侧栏在左</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-12 col-md-9 order-md-2">
+              <div class="bg-success-subtle border rounded p-3">正文 —— HTML 里排第一；桌面（md 起）被 <code>order-md-2</code> 挪到右侧</div>
+            </div>
+            <div class="col-12 col-md-3 order-md-1">
+              <div class="bg-warning-subtle border rounded p-3">侧栏 —— HTML 里排第二；桌面挪到左侧</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-12 col-md-9 order-md-2">
+                <div class="bg-success-subtle border rounded p-3">正文</div>
+              </div>
+              <div class="col-12 col-md-3 order-md-1">
+                <div class="bg-warning-subtle border rounded p-3">侧栏</div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        手机上按 HTML 顺序：正文先、侧栏后；桌面（md 起）按 order 数字从小到大排：侧栏在左、正文在右。
+        order 取值 1–5，另有 <code>order-first</code> / <code>order-last</code>。
+      </p>
+
+      <h2>对齐：垂直与水平</h2>
+      <p>
+        行里的列默认被拉伸到与最高的列一样高。在 <code>row</code> 上加 <code>align-items-*</code> 可以统一控制
+        全部列的垂直对齐：<code>start</code> 顶端、<code>center</code> 居中、<code>end</code> 底端；
+        <code>align-self-*</code> 则加在单个 <code>col</code> 上单独控制。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 垂直对齐三连：start / center / end（行高固定，看列怎么站）</div>
+        <div class="demo-preview">
+          <p class="mb-1"><strong>align-items-start</strong></p>
+          <div class="row align-items-start bg-secondary-subtle border rounded p-2 mb-3" style="height:6rem">
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+          </div>
+          <p class="mb-1"><strong>align-items-center</strong></p>
+          <div class="row align-items-center bg-secondary-subtle border rounded p-2 mb-3" style="height:6rem">
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+          </div>
+          <p class="mb-1"><strong>align-items-end</strong></p>
+          <div class="row align-items-end bg-secondary-subtle border rounded p-2" style="height:6rem">
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+            <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <div class="row align-items-center bg-secondary-subtle border rounded p-2" style="height:6rem">
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+            </div>
+            <!-- 另两行分别换成 align-items-start / align-items-end -->
+          </script>
+        </div>
+      </div>
+
+      <p>
+        水平对齐用 <code>justify-content-*</code>：当一行的列宽之和不足 12 份时，多出来的空间怎么分。
+        取值 <code>start</code> / <code>center</code> / <code>end</code> / <code>between</code> /
+        <code>around</code> / <code>evenly</code>，<code>center</code> 最常用。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · justify-content-center：两个 col-4 居中，剩 4 份空白分到两侧</div>
+        <div class="demo-preview">
+          <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>顺带一提：列宽之和恰好等于 12 份时没有多余空间，<code>justify-content-*</code> 自然看不出效果。</p>
+
+      <h2>列间距：gutter</h2>
+      <p>
+        列与列之间的间隔叫 <strong>gutter（列间距）</strong>。默认每列左右各带半份间距，相邻列之间正好
+        1.5rem。用 <code>g-*</code> 六档（0–5）统一控制：<code>g-*</code> 同时管水平与垂直，
+        <code>gx-*</code> 只管水平、<code>gy-*</code> 只管垂直，数字越大越松、<code>g-0</code> 完全贴死。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · 卡片三连：row-cols 每行固定 3 张，g-3 拉开间距</div>
+        <div class="demo-preview">
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            <div class="col">
+              <div class="border rounded p-3">
+                <div class="fw-bold mb-1">招式 · 一式</div>
+                <p class="mb-2">初入江湖：引入 Bootstrap，写出第一个页面。</p>
+                <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="border rounded p-3">
+                <div class="fw-bold mb-1">招式 · 二式</div>
+                <p class="mb-2">容器与栅格：十二列系统与五大断点。</p>
+                <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+              </div>
+            </div>
+            <div class="col">
+              <div class="border rounded p-3">
+                <div class="fw-bold mb-1">招式 · 三式</div>
+                <p class="mb-2">嵌套、偏移、对齐与列间距。</p>
+                <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 一式</div>
+                  <p class="mb-2">初入江湖：引入 Bootstrap，写出第一个页面。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
+              <!-- 第二、三张卡片结构相同，复制即可 -->
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        <code>row-cols-*</code> 是上一式“自动均分”的懒人升级：<code>row-cols-md-3</code> 意为 md 起
+        <strong>每行固定 3 列</strong>，多出来的列自动换行；手机上 <code>row-cols-1</code> 单列堆叠。
+        真正的 <code>card</code> 组件第六式再学，这里先用 <code>border</code> + <code>rounded</code> 模拟。
+      </p>
+
+      <h2>实战套路：9:3 内容区 + 侧边栏</h2>
+      <p>
+        上一式预告了 3:9，现在补上完整版：内容区 9 份 + 侧边栏 3 份，<code>g-3</code> 留呼吸，
+        手机上两列各自占满、侧栏落到内容下方。这是博客、文档站最常见的骨架。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 7 · 常见套路：内容 9 份 + 侧栏 3 份</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-12 col-md-9">
+              <div class="border rounded p-3">
+                <div class="h5">内容区</div>
+                <p class="mb-2">正文、列表、卡片都放这里。把窗口拖窄，侧边栏会落到下方。</p>
+                <button type="button" class="btn btn-primary btn-sm">继续阅读</button>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="bg-secondary-subtle border rounded p-3">
+                <div class="fw-bold mb-2">目录</div>
+                <div class="bg-light border rounded p-2 mb-2">一 · 嵌套</div>
+                <div class="bg-light border rounded p-2 mb-2">二 · 偏移与排序</div>
+                <div class="bg-light border rounded p-2 mb-2">三 · 对齐</div>
+                <div class="bg-light border rounded p-2 mb-0">四 · 列间距</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-12 col-md-9">
+                <div class="border rounded p-3">
+                  <div class="h5">内容区</div>
+                  <p class="mb-2">正文、列表、卡片都放这里。</p>
+                  <button type="button" class="btn btn-primary btn-sm">继续阅读</button>
+                </div>
+              </div>
+              <div class="col-12 col-md-3">
+                <div class="bg-secondary-subtle border rounded p-3">
+                  <div class="fw-bold mb-2">目录</div>
+                  <div class="bg-light border rounded p-2 mb-2">一 · 嵌套</div>
+                  <div class="bg-light border rounded p-2 mb-2">二 · 偏移与排序</div>
+                  <div class="bg-light border rounded p-2 mb-2">三 · 对齐</div>
+                  <div class="bg-light border rounded p-2 mb-0">四 · 列间距</div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        9 + 3 = 12，刚好一行。如果希望侧栏在<strong>手机上</strong>排到内容前面（比如放“返回上一式”入口），
+        把上一节的 <code>order-*</code> 加上即可。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三式</div>
+        <ol>
+          <li>把例 6 的卡片三连改成<strong>每行 2 张</strong>：改哪个类？写出完整代码。</li>
+          <li>动手做一个“居中标题横幅”：一行里一个 <code>col-md-8 offset-md-2</code> 的标题块，标题下配一行小字。</li>
+          <li>思考题：<code>order-*</code> 只改视觉顺序、不改 DOM 顺序。这对用键盘 Tab 键或屏幕阅读器的用户意味着什么？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>把 <code>row-cols-md-3</code> 改成 <code>row-cols-md-2</code>，其余不动：</p>
+          <script type="text/plain" data-lang="html" data-title="每行 2 张卡片">
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 一式</div>
+                  <p class="mb-2">初入江湖：引入 Bootstrap，写出第一个页面。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
+              <!-- 第二、三、四张卡片结构相同 -->
+            </div>
+          </script>
+          <p>md 起每行 2 张、自动换行；手机上仍单列堆叠。</p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="居中标题横幅">
+            <div class="row">
+              <div class="col-12 col-md-8 offset-md-2">
+                <div class="bg-primary-subtle border rounded p-4 text-center">
+                  <div class="h3">日拱一卒，功不唐捐</div>
+                  <p class="mb-0">每天写一点，时间会给出答案。</p>
+                </div>
+              </div>
+            </div>
+          </script>
+          <p>占 8 份、左右各空 2 份（offset 把左边空出来，右边是自然余量），横幅稳稳居中。</p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            DOM 顺序不变，意味着 Tab 键的焦点顺序、屏幕阅读器的朗读顺序仍是 HTML 里的先后（正文先、侧栏后），
+            与桌面上的视觉顺序（侧栏左、正文右）不一致。视觉上在左边的元素，键盘要绕到后面才到，读屏用户
+            “听”到的页面和“看”到的页面是两回事。所以 <code>order-*</code> 适合重排地位相当的区块
+            （如本例的正文与侧栏），不适合把表单提交按钮这类关键操作挪到奇怪的位置。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>嵌套：<code>col</code> 里再开 <code>row</code>，内层是独立的一套 12 列；</li>
+        <li>偏移 <code>offset-*</code> 空出左份数（居中经典：<code>col-md-6 offset-md-3</code>）；</li>
+        <li>排序 <code>order-*</code> 只改视觉顺序，不改 DOM 顺序；</li>
+        <li>垂直对齐 <code>align-items-*</code> / <code>align-self-*</code>，水平对齐 <code>justify-content-*</code>；</li>
+        <li>列间距 gutter：<code>g-0</code> 到 <code>g-5</code>，<code>gx-*</code> 水平、<code>gy-*</code> 垂直。</li>
+      </ul>
+
+      <blockquote>下一式，我们暂时放下栅格，修炼排版与工具类——标题、颜色、边框阴影与间距。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

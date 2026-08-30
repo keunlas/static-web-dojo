@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第八式 · 表单 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="表单控件、输入组、栅格布局与校验反馈。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-08">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        网页若只会说、不会听，就成了自说自话。表单，是网页与访客对话的窗口：
+        访客递上名号与口令，页面据此应答。这一式，我们修炼听人说话的功夫。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>form-label 与 form-control 的基本搭档</li>
+          <li>会用 select 与 checkbox/radio 写选择类控件</li>
+          <li>用 input-group 给输入框加前后缀</li>
+          <li>用 needs-validation 与 was-validated 做校验反馈</li>
+        </ul>
+      </div>
+
+      <h2>表单控件的基本搭档</h2>
+      <p>
+        Bootstrap 表单的头号搭档：<strong>标签</strong>用 <code>form-label</code>，
+        <strong>输入框</strong>用 <code>form-control</code>——宽度铺满、圆角、聚焦时亮一圈光晕。
+        <code>placeholder</code> 是框内的占位提示，但<strong>不能替代 label</strong>：
+        提示会随输入消失，读屏器也不读它。辅助说明文字放 <code>form-text</code> 里，
+        紧跟在控件下面，像一行小字批注。
+      </p>
+      <p>两个原生属性也常上场：</p>
+      <ul>
+        <li><code>disabled</code>——禁用：灰掉、不能聚焦、提交时整个字段被忽略；</li>
+        <li><code>readonly</code>——只读：外观不变、可以聚焦复制，提交时值照常送出。</li>
+      </ul>
+      <p>一句话区分：<code>disabled</code> 是“锁在门外”，<code>readonly</code> 是“只许看不许改”。</p>
+
+      <h2>输入组与登录表单</h2>
+      <p>
+        <code>input-group</code> 能把输入框和它的“前后缀”粘成一条：用
+        <code>input-group-text</code> 装图标或文字，放在控件之前是前缀，之后是后缀。
+        下面这个登录表单就用它挂了图标，并且演示了完整的<strong>校验反馈</strong>——先看效果，
+        再听分解。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 登录表单（输入组 + 校验，点“登入”试试）</div>
+        <div class="demo-preview">
+          <form class="needs-validation" novalidate id="bs08-demo1" style="max-width: 26rem">
+            <div class="mb-3">
+              <label for="bs08-demo1-user" class="form-label">用户名</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                <input type="text" class="form-control" id="bs08-demo1-user" placeholder="请赐名号" required>
+                <div class="invalid-feedback">名号不能为空。</div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="bs08-demo1-pass" class="form-label">口令</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" class="form-control" id="bs08-demo1-pass" placeholder="至少 6 位" required minlength="6">
+                <div class="invalid-feedback">口令至少 6 位。</div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">登入</button>
+            <div class="alert alert-primary mt-3 mb-0 d-none" id="bs08-demo1-ok" role="alert">名号核对无误，欢迎入内！</div>
+          </form>
+          <script>
+            DOJO.ready(function () {
+              var form = document.getElementById('bs08-demo1');
+              var ok = document.getElementById('bs08-demo1-ok');
+              form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (form.checkValidity()) {
+                  ok.classList.remove('d-none');
+                  form.classList.remove('was-validated');
+                } else {
+                  ok.classList.add('d-none');
+                  form.classList.add('was-validated');
+                }
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form class="needs-validation" novalidate id="bs08-demo1" style="max-width: 26rem">
+              <div class="mb-3">
+                <label for="bs08-demo1-user" class="form-label">用户名</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                  <input type="text" class="form-control" id="bs08-demo1-user" placeholder="请赐名号" required>
+                  <div class="invalid-feedback">名号不能为空。</div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="bs08-demo1-pass" class="form-label">口令</label>
+                <div class="input-group has-validation">
+                  <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" class="form-control" id="bs08-demo1-pass" placeholder="至少 6 位" required minlength="6">
+                  <div class="invalid-feedback">口令至少 6 位。</div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">登入</button>
+              <div class="alert alert-primary mt-3 mb-0 d-none" id="bs08-demo1-ok" role="alert">名号核对无误，欢迎入内！</div>
+              <!-- 交互脚本见下一个源码块 -->
+            </form>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            DOJO.ready(function () {
+              var form = document.getElementById('bs08-demo1');
+              var ok = document.getElementById('bs08-demo1-ok');
+              form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (form.checkValidity()) {
+                  ok.classList.remove('d-none');
+                  form.classList.remove('was-validated');
+                } else {
+                  ok.classList.add('d-none');
+                  form.classList.add('was-validated');
+                }
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>校验的戏法拆开来看，一共四步：</p>
+      <ol>
+        <li><strong>挂旗子</strong>：表单写 <code>needs-validation</code>，表示“此地需要校验”；</li>
+        <li><strong>定规则</strong>：字段写 <code>required</code>、<code>minlength</code> 等原生校验属性，下面配一条 <code>invalid-feedback</code> 写错误文案（通过的文案用 <code>valid-feedback</code>）；</li>
+        <li><strong>按开关</strong>：提交时由脚本阻止默认提交，并给表单加上 <code>was-validated</code>——这个类一出现，红框与错误文案才亮出来；</li>
+        <li><strong>留后门</strong>：<code>novalidate</code> 关掉浏览器自带的报错气泡，让报错样式统一交给 Bootstrap，全场一个画风。</li>
+      </ol>
+      <p>
+        背后的原理很朴素：Bootstrap 用 <code>:invalid</code>/<code>:valid</code> 伪类给控件上色，
+        <code>was-validated</code> 只是决定这些样式“何时可见”，而
+        <code>checkValidity()</code> 是浏览器原生的体检报告——它照常工作，不受
+        <code>novalidate</code> 影响。另外注意：<code>invalid-feedback</code> 放进
+        <code>input-group</code> 时，输入组要补一个 <code>has-validation</code>，反馈文字才知道站哪儿。
+      </p>
+
+      <h2>下拉、单选与复选</h2>
+      <p>
+        选择类控件各有专属类名：下拉框用 <code>form-select</code>（不是 <code>form-control</code>）；
+        单选与复选是 <code>form-check</code> 包着 <code>form-check-input</code> 和
+        <code>form-check-label</code>。同一组单选给相同的 <code>name</code>，浏览器自会互斥；
+        <code>form-switch</code> 则把复选变成拨杆开关。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 选择类控件一览</div>
+        <div class="demo-preview">
+          <div style="max-width: 26rem">
+            <div class="mb-3">
+              <label for="bs08-demo2-school" class="form-label">所属门派</label>
+              <select class="form-select" id="bs08-demo2-school">
+                <option selected>丐帮（暂居）</option>
+                <option>武当</option>
+                <option>少林</option>
+                <option>逍遥派</option>
+              </select>
+              <div class="form-text">下拉框用 form-select，不用 form-control。</div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="bs08-demo2-time" id="bs08-demo2-am" checked>
+                <label class="form-check-label" for="bs08-demo2-am">清晨练功</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="bs08-demo2-time" id="bs08-demo2-pm">
+                <label class="form-check-label" for="bs08-demo2-pm">夜里打坐</label>
+              </div>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="bs08-demo2-agree" checked>
+              <label class="form-check-label" for="bs08-demo2-agree">我已熟读门规</label>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="mb-3">
+              <label for="school" class="form-label">所属门派</label>
+              <select class="form-select" id="school">
+                <option selected>丐帮（暂居）</option>
+                <option>武当</option>
+                <option>少林</option>
+                <option>逍遥派</option>
+              </select>
+              <div class="form-text">下拉框用 form-select，不用 form-control。</div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="time" id="am" checked>
+                <label class="form-check-label" for="am">清晨练功</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="time" id="pm">
+                <label class="form-check-label" for="pm">夜里打坐</label>
+              </div>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="agree" checked>
+              <label class="form-check-label" for="agree">我已熟读门规</label>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        记一个心法：<code>form-check-input</code> 与 <code>form-check-label</code> 靠
+        <code>for</code>/<code>id</code> 配对——点文字也能选中，手指粗的访客会感谢你。
+      </p>
+
+      <h2>栅格化表单</h2>
+      <p>
+        第二式的栅格可以直接用在表单上：把 <code>form</code> 写成
+        <code>row</code> + <code>g-3</code>（竖向留白），字段用 <code>col-md-6</code> 等
+        列类分配宽度。手机上一列到底，中屏起两列并排——响应式是白捡的。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 栅格化报名表单</div>
+        <div class="demo-preview">
+          <form class="row g-3 needs-validation" novalidate id="bs08-demo3" style="max-width: 34rem">
+            <div class="col-md-6">
+              <label for="bs08-demo3-name" class="form-label">姓名</label>
+              <input type="text" class="form-control" id="bs08-demo3-name" placeholder="行走江湖的名号" required>
+              <div class="invalid-feedback">名号不能为空。</div>
+            </div>
+            <div class="col-md-6">
+              <label for="bs08-demo3-home" class="form-label">籍贯</label>
+              <input type="text" class="form-control" id="bs08-demo3-home" placeholder="何门何派，何方人士">
+            </div>
+            <div class="col-12">
+              <label for="bs08-demo3-email" class="form-label">联络飞鸽（邮箱）</label>
+              <input type="email" class="form-control" id="bs08-demo3-email" placeholder="name@example.com" required>
+              <div class="invalid-feedback">飞鸽地址格式不对。</div>
+            </div>
+            <div class="col-md-6">
+              <label for="bs08-demo3-pass" class="form-label">口令</label>
+              <input type="password" class="form-control" id="bs08-demo3-pass" required minlength="6">
+              <div class="invalid-feedback">口令至少 6 位。</div>
+            </div>
+            <div class="col-md-6">
+              <label for="bs08-demo3-pass2" class="form-label">再报一遍口令</label>
+              <input type="password" class="form-control" id="bs08-demo3-pass2" required minlength="6">
+              <div class="invalid-feedback">口令至少 6 位。</div>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="bs08-demo3-agree" required>
+                <label class="form-check-label" for="bs08-demo3-agree">同意门规条款</label>
+                <div class="invalid-feedback">需先同意门规。</div>
+              </div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">递上名帖</button>
+              <div class="alert alert-primary mt-3 mb-0 d-none" id="bs08-demo3-ok" role="alert">名帖已收下，静候佳音！</div>
+            </div>
+          </form>
+          <script>
+            DOJO.ready(function () {
+              var form = document.getElementById('bs08-demo3');
+              var ok = document.getElementById('bs08-demo3-ok');
+              form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (form.checkValidity()) {
+                  ok.classList.remove('d-none');
+                  form.classList.remove('was-validated');
+                } else {
+                  ok.classList.add('d-none');
+                  form.classList.add('was-validated');
+                }
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form class="row g-3 needs-validation" novalidate id="bs08-demo3" style="max-width: 34rem">
+              <div class="col-md-6">
+                <label for="bs08-demo3-name" class="form-label">姓名</label>
+                <input type="text" class="form-control" id="bs08-demo3-name" placeholder="行走江湖的名号" required>
+                <div class="invalid-feedback">名号不能为空。</div>
+              </div>
+              <div class="col-md-6">
+                <label for="bs08-demo3-home" class="form-label">籍贯</label>
+                <input type="text" class="form-control" id="bs08-demo3-home" placeholder="何门何派，何方人士">
+              </div>
+              <div class="col-12">
+                <label for="bs08-demo3-email" class="form-label">联络飞鸽（邮箱）</label>
+                <input type="email" class="form-control" id="bs08-demo3-email" placeholder="name@example.com" required>
+                <div class="invalid-feedback">飞鸽地址格式不对。</div>
+              </div>
+              <div class="col-md-6">
+                <label for="bs08-demo3-pass" class="form-label">口令</label>
+                <input type="password" class="form-control" id="bs08-demo3-pass" required minlength="6">
+                <div class="invalid-feedback">口令至少 6 位。</div>
+              </div>
+              <div class="col-md-6">
+                <label for="bs08-demo3-pass2" class="form-label">再报一遍口令</label>
+                <input type="password" class="form-control" id="bs08-demo3-pass2" required minlength="6">
+                <div class="invalid-feedback">口令至少 6 位。</div>
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="bs08-demo3-agree" required>
+                  <label class="form-check-label" for="bs08-demo3-agree">同意门规条款</label>
+                  <div class="invalid-feedback">需先同意门规。</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">递上名帖</button>
+                <div class="alert alert-primary mt-3 mb-0 d-none" id="bs08-demo3-ok" role="alert">名帖已收下，静候佳音！</div>
+                <!-- 交互脚本见下一个源码块 -->
+              </div>
+            </form>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            DOJO.ready(function () {
+              var form = document.getElementById('bs08-demo3');
+              var ok = document.getElementById('bs08-demo3-ok');
+              form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (form.checkValidity()) {
+                  ok.classList.remove('d-none');
+                  form.classList.remove('was-validated');
+                } else {
+                  ok.classList.add('d-none');
+                  form.classList.add('was-validated');
+                }
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意一个细节：整个表单用了同一套校验写法——<code>col-12</code> 里的复选框也带
+        <code>required</code>，浏览器对复选、单选、下拉的校验一视同仁。至于
+        <code>DOJO.ready</code>，那是本站加载器提供的“等全部资源就绪再动手”的队列
+        （第一式提过那个小加载器）；在你自己的页面里，把脚本放在
+        <code>&lt;/body&gt;</code> 之前即可。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第八式</div>
+        <ol>
+          <li>把例 1 里口令的 <code>minlength</code> 从 6 改成 8，并同步修改 <code>invalid-feedback</code> 的文案，再点“登入”试试。</li>
+          <li>新写一张“拜师申请”表单：输入组前缀挂“@”，栅格三列（姓名 / 籍贯 / 门派，各 <code>col-md-4</code>），底部一个“同意门规”的 <code>form-check</code>。</li>
+          <li>思考题：既然要用脚本阻止默认提交并手动加 <code>was-validated</code>，为什么还要给表单加 <code>novalidate</code>？两者不矛盾吗？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="修改口令规则">
+            <input type="password" class="form-control" id="bs08-demo1-pass" placeholder="至少 8 位" required minlength="8">
+            <div class="invalid-feedback">口令至少 8 位。</div>
+          </script>
+          <p>
+            <code>minlength</code> 是浏览器原生校验属性，<code>checkValidity()</code> 认它；
+            但浏览器不会自动读懂你的中文文案——文案要自己改，否则规则与提示会“各说各话”。
+            校验的精髓就在这：<strong>规则与反馈必须同步</strong>。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="拜师申请">
+            <form class="row g-3" style="max-width: 34rem">
+              <div class="col-md-4">
+                <label for="ap-name" class="form-label">姓名</label>
+                <input type="text" class="form-control" id="ap-name" placeholder="张三">
+              </div>
+              <div class="col-md-4">
+                <label for="ap-home" class="form-label">籍贯</label>
+                <input type="text" class="form-control" id="ap-home" placeholder="终南山下">
+              </div>
+              <div class="col-md-4">
+                <label for="ap-school" class="form-label">门派</label>
+                <input type="text" class="form-control" id="ap-school" placeholder="全真教">
+              </div>
+              <div class="col-12">
+                <label for="ap-mail" class="form-label">飞鸽地址</label>
+                <div class="input-group">
+                  <span class="input-group-text">@</span>
+                  <input type="email" class="form-control" id="ap-mail" placeholder="name@example.com">
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="ap-agree">
+                  <label class="form-check-label" for="ap-agree">同意门规，甘受约束</label>
+                </div>
+              </div>
+            </form>
+          </script>
+          <p>
+            栅格只管“分列”，<code>col-md-4</code> 三列刚好平分一行；前缀“@”是
+            <code>input-group-text</code>，与输入框无缝拼接。两类组件互不干扰，这就是 Bootstrap 组件化的好处。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            不矛盾，因为两者管的是<strong>不同的两件事</strong>。<code>novalidate</code> 只关掉浏览器
+            <em>自带</em>的报错气泡，而 <code>checkValidity()</code>、<code>:invalid</code> 这些
+            <em>校验机制本身</em>照常工作。若不加 <code>novalidate</code>，提交时浏览器会先弹出自己的气泡、
+            有的字段又有 Bootstrap 红框，两种画风同台，访客眼花缭乱。加了它，报错样式就统一由
+            Bootstrap 说了算——脚本仍然如实体检，只是把“怎么呈现”的决定权收了回来。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>form-label</code> + <code>form-control</code> 是标签与输入框的标准搭档，<code>form-text</code> 放辅助说明；</li>
+        <li><code>input-group</code>/<code>input-group-text</code> 拼接前后缀，<code>form-select</code> 与 <code>form-check</code> 各管各的选择控件；</li>
+        <li><code>row g-3</code> + <code>col-*</code> 直接栅格化表单，移动端自动堆叠；</li>
+        <li>校验四步：<code>needs-validation</code> 挂旗、<code>required</code> 定规则、脚本加 <code>was-validated</code>、<code>novalidate</code> 统一画风。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼导航组件——给访客把回廊修好。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

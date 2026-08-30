@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第七式 · 遍历 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="在元素家族里认亲：parent、children、siblings、closest 等遍历方法，each 逐个处理与 filter、eq 缩小范围。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-07">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        一柄轻剑能伤敌，靠的是认得清敌我。选中一个元素之后，还得会看它的出身、父母、兄弟——
+        这些“亲戚关系”，就是遍历。这一式，我们学会在元素家族里认亲。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 <code>parent</code> / <code>children</code> / <code>find</code> / <code>siblings</code> / <code>next</code> / <code>prev</code> / <code>closest</code> 在家族里认亲</li>
+          <li>理解 <code>closest</code> 与事件委托的黄金配合</li>
+          <li>会用 <code>each()</code> 逐个处理选中的元素</li>
+          <li>会用 <code>filter</code> / <code>first</code> / <code>last</code> / <code>eq</code> 缩小包围圈</li>
+        </ul>
+      </div>
+
+      <h2>元素的家族关系</h2>
+      <p>把页面看成一张家谱——每个标签都是某个标签的子嗣。按钮小友的一家，长这样：</p>
+
+      <pre class="mb-0" style="font-size:.9rem; line-height:1.6;">document
+└── html
+    ├── head
+    └── body
+        ├── header
+        └── main
+            ├── h2（标题）
+            ├── .card（第一张）── siblings：互为兄弟
+            │   └── button（点我）← 你在这里
+            ├── .card（第二张）── next() / prev()：同级的前后邻居
+            └── p（段落）</pre>
+
+      <p>围绕这张家谱，jQuery 准备了一组“认亲”方法：</p>
+
+      <table>
+        <thead>
+          <tr><th>方法</th><th>家族说法</th><th>找谁</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>parent()</code></td><td>找父亲</td><td>上一级父元素，只找一层</td></tr>
+          <tr><td><code>parents()</code></td><td>列祖列宗</td><td>所有祖先；可传选择器过滤，如 <code>parents('.page')</code></td></tr>
+          <tr><td><code>children()</code></td><td>亲儿子</td><td>直接子元素；可传选择器过滤</td></tr>
+          <tr><td><code>find()</code></td><td>满门子孙</td><td>所有后代；必须传选择器，如 <code>find('a')</code></td></tr>
+          <tr><td><code>siblings()</code></td><td>兄弟姐妹</td><td>同级全部；可传选择器过滤</td></tr>
+          <tr><td><code>next()</code> / <code>prev()</code></td><td>紧邻的弟与兄</td><td>后一个 / 前一个同级元素，各只找一个</td></tr>
+          <tr><td><code>closest()</code></td><td>一路向上寻亲</td><td>从自己开始向上，找最近的匹配；必须传选择器，可能命中自己</td></tr>
+        </tbody>
+      </table>
+
+      <h2>向上找：parent / parents / closest</h2>
+      <p>
+        <code>parent()</code> 只找上一级；<code>parents()</code> 把一路向上的祖先全部找来（可传选择器过滤）；
+        <code>closest(选择器)</code> 从<strong>自己</strong>开始向上，返回<strong>最近的一个</strong>匹配。
+        最后一个正是事件委托的黄金搭档——事件绑在父级上，处理时却要操作“所在的那张卡片”，一记 <code>closest</code> 就位。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · closest 高亮按钮所在的卡片</div>
+        <div class="demo-preview">
+          <div class="row g-3" id="jq07-deck">
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">内功卡</h5>
+                  <p class="card-text">吐纳打坐，贵在坚持。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm jq07-mark">标记这张卡</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">轻功卡</h5>
+                  <p class="card-text">每日一纵，身轻如燕。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm jq07-mark">标记这张卡</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">剑法卡</h5>
+                  <p class="card-text">剑走轻灵，意在剑先。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm jq07-mark">标记这张卡</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+            $(function () {
+              $('.jq07-mark').on('click', function () {
+                $(this).closest('.card').toggleClass('border-danger bg-danger-subtle');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('.jq07-mark').on('click', function () {
+              // 从按钮出发向上爬，找到最近的 .card，给它加/去高亮类
+              $(this).closest('.card').toggleClass('border-danger bg-danger-subtle');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        按钮在 <code>.card-body</code> 里，卡片在两层之上——不管隔几层，
+        <code>closest('.card')</code> 都能一步找到“最近的卡片”，三张卡各管各的。
+      </p>
+
+      <h2>向下找：children / find</h2>
+      <p>
+        往下走的两个方法分工明确：<code>children()</code> 只认<strong>亲儿子</strong>（直接子元素），
+        <code>find()</code> 认<strong>满门子孙</strong>（所有后代，必须传选择器）。拿例 1 的卡片阵试刀：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="children 与 find 的分工">
+        $('#jq07-deck').children();            // 直接子级：三个 .col 列
+        $('#jq07-deck').children('.card');     // 直接子级里的卡片：一张也没有（返回空）
+        $('#jq07-deck').find('.card');         // 所有后代里的卡片：三张，全找到
+      </script>
+
+      <p>
+        三张卡都住在 <code>.col</code> 列里面，所以对 <code>#jq07-deck</code> 来说它们不是“儿子”而是“孙子”——
+        <code>children</code> 扑空，<code>find</code> 全中。想找哪层，先想清楚辈分。
+      </p>
+
+      <h2>兄弟姐妹：siblings / next / prev</h2>
+      <p>
+        同级之间也有讲究：<code>siblings()</code> 把兄弟姐妹一网打尽（可传选择器过滤），
+        <code>next()</code> / <code>prev()</code> 只找紧挨着的后一个 / 前一个。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="同级走动">
+        $('.jq07-mark').siblings();   // 按钮的兄弟姐妹：同级的其他元素
+        $('h2').next();               // 每个 h2 后紧邻的同级元素
+        $('h2').prev();               // 每个 h2 前紧邻的同级元素
+      </script>
+
+      <h2>逐个点名：each()</h2>
+      <p>
+        jQuery 对选中集合的隐式遍历是“一声令下，全员行动”。可有些活儿必须<strong>逐个点名</strong>——
+        比如“隔一行染一色”，得知道每个元素排第几。这时请 <code>each()</code> 出场：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="each 的签名">
+        $('li').each(function (index, element) {
+          // index   是序号，从 0 开始数
+          // element 是当前这个原生 DOM 元素，也就是 this
+          // 要再用 jQuery 招式，把它包一下：$(this)
+        });
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · each 给表格隔行变色</div>
+        <div class="demo-preview">
+          <div>
+            <button type="button" class="btn btn-primary" id="jq07-stripe">隔行染色</button>
+            <button type="button" class="btn btn-outline-primary" id="jq07-stripe-clear">还原</button>
+          </div>
+          <div class="table-responsive mt-3">
+            <table id="jq07-tbl">
+              <thead>
+                <tr><th>招式</th><th>境界</th><th>口诀</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>选择器</td><td>入门</td><td>找到即命中</td></tr>
+                <tr><td>事件</td><td>入门</td><td>点谁谁回应</td></tr>
+                <tr><td>动画</td><td>进阶</td><td>动静皆有度</td></tr>
+                <tr><td>遍历</td><td>进阶</td><td>认亲不迷路</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <script>
+            $(function () {
+              $('#jq07-stripe').on('click', function () {
+                $('#jq07-tbl tbody tr').each(function (index) {
+                  if (index % 2 === 1) {
+                    $(this).addClass('table-secondary');
+                  }
+                });
+              });
+              $('#jq07-stripe-clear').on('click', function () {
+                $('#jq07-tbl tbody tr').removeClass('table-secondary');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq07-stripe').on('click', function () {
+              $('#jq07-tbl tbody tr').each(function (index) {
+                if (index % 2 === 1) {
+                  $(this).addClass('table-secondary'); // index 为奇数 = 第 2、4 行
+                }
+              });
+            });
+            $('#jq07-stripe-clear').on('click', function () {
+              $('#jq07-tbl tbody tr').removeClass('table-secondary');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        <code>index % 2 === 1</code> 挑出第 2、4 行（序号从 0 数，奇数序号正是视觉上的偶数行）。
+        顺带一提：老代码里常写的 <code>:even</code> / <code>:odd</code> 这类位置伪类，jQuery 4 已经移除——
+        逐个判断的 <code>each</code> 写法才是正道。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · each 统计列表项，拼成一句话</div>
+        <div class="demo-preview">
+          <ul id="jq07-movelist" class="list-group list-group-flush" style="max-width:24rem;">
+            <li class="list-group-item">选择器</li>
+            <li class="list-group-item">内容与属性</li>
+            <li class="list-group-item">类与样式</li>
+            <li class="list-group-item">事件</li>
+          </ul>
+          <button type="button" class="btn btn-primary mt-3" id="jq07-join">串成一句话</button>
+          <p id="jq07-joined" class="mt-3 mb-0 text-muted">点上面的按钮，看结果。</p>
+          <script>
+            $(function () {
+              $('#jq07-join').on('click', function () {
+                var names = [];
+                $('#jq07-movelist li').each(function (index) {
+                  names.push('第' + (index + 1) + '式·' + $(this).text());
+                });
+                $('#jq07-joined').text(names.join('，'));
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq07-join').on('click', function () {
+              var names = [];
+              $('#jq07-movelist li').each(function (index) {
+                // $(this).text() 取当前项文字，index + 1 变成从 1 数的编号
+                names.push('第' + (index + 1) + '式·' + $(this).text());
+              });
+              $('#jq07-joined').text(names.join('，'));
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这就是 <code>each</code> 的日常：一边走一边收集，走完再统一收尾。
+        记一笔——<code>each</code> 走完后会把原来的集合原样还回来，链式调用不受影响。
+      </p>
+
+      <h2>缩小包围圈：filter / first / last / eq</h2>
+      <p>
+        选中一堆元素后，还可以从中再挑：<code>first()</code> 取第一个、<code>last()</code> 取最后一个、
+        <code>eq(2)</code> 取序号为 2 的那一个（即第三个，从 0 数）、<code>filter()</code> 按选择器或函数筛选。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="缩小包围圈">
+        $('li').addClass('marked');                   // 隐式遍历：每个 li 都动手
+        $('li').first().addClass('marked');           // 只动第一个
+        $('li').last().addClass('marked');            // 只动最后一个
+        $('li').eq(2).addClass('marked');             // 只动第三个（序号从 0 数）
+        $('li').filter('.active').addClass('marked'); // 只动带 active 类的
+      </script>
+
+      <div class="callout">
+        <div class="callout-title">心法：回顾隐式遍历</div>
+        <p style="margin:0">
+          第一式就见过它：<code>$('p').css('color', 'red')</code> 会让<strong>所有</strong>段落变红。
+          隐式遍历是 jQuery 的默认性格——“对选中的每个元素都动手”；而本式的遍历方法负责“换个圈子再动手”。
+          jQuery 4 已移除 <code>:first</code> / <code>:last</code> 等位置伪类，找位置一律用方法版。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第七式</div>
+        <ol>
+          <li>修改例 1：要求同一时刻<strong>只有一张卡高亮</strong>——点击前先把所有卡片的高亮洗掉，再点亮自己。</li>
+          <li>给例 1 的按钮再加一招：标记卡片的同时，把所在卡片的标题也染成朱砂色（<code>text-danger</code>）。</li>
+          <li>思考题：<code>parents('.card')</code> 与 <code>closest('.card')</code> 有什么区别？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="先洗全局，再点自己">
+            $('.jq07-mark').on('click', function () {
+              $('#jq07-deck .card').removeClass('border-danger bg-danger-subtle');
+              $(this).closest('.card').addClass('border-danger bg-danger-subtle');
+            });
+          </script>
+          <p>
+            “先全局清洗、再局部点亮”是做“唯一选中”的常见套路；
+            <code>closest</code> 负责把按钮的点击翻译成“所在卡片”的操作。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="closest 与 find 上下配合">
+            $('.jq07-mark').on('click', function () {
+              $(this).closest('.card').toggleClass('border-danger bg-danger-subtle');
+              $(this).closest('.card').find('.card-title').toggleClass('text-danger');
+            });
+          </script>
+          <p>
+            <code>closest</code> 向上找到卡片、<code>find</code> 向下找到标题——
+            上上下下的配合，正是遍历方法的日常。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>parents()</code> 返回<strong>所有</strong>匹配的祖先（不含自己，可能有多个，由近及远排列）；
+            <code>closest()</code> 从<strong>自己</strong>开始向上，返回<strong>最近的一个</strong>匹配（结果零个或一个）。
+            例 1 里两者都能找到卡片；但如果按钮自己也带 <code>.card</code> 类，
+            <code>closest</code> 会返回按钮本身，而 <code>parents</code> 不会。找全部用 <code>parents</code>，找最近用 <code>closest</code>。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>元素是一棵树：<code>parent</code> / <code>parents</code> / <code>children</code> / <code>find</code> 上下认亲，<code>siblings</code> / <code>next</code> / <code>prev</code> 同级走动；</li>
+        <li><code>closest</code> 从自己向上找最近匹配，是事件委托的黄金搭档；</li>
+        <li><code>each(function (index, element))</code> 逐个点名，<code>index</code> 从 0 起，<code>element</code> 就是 <code>this</code>；</li>
+        <li><code>filter</code> / <code>first</code> / <code>last</code> / <code>eq</code> 缩小包围圈；隐式遍历是“对每个选中元素都动手”的默认行为。</li>
+      </ul>
+
+      <blockquote>下一式，我们搭积木——节点的增删改。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

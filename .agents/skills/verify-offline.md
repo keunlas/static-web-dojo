@@ -73,4 +73,10 @@ CDP 的 `Page.navigate` 直接给 `file:///绝对路径/site/<页面>` 再跑同
 | 随机 `$ is not defined` | 注入脚本乱序 → loader 必须链式加载（已修复）；新代码别破坏链 |
 | TOC 链接 32px 巨字 | 用了 Bootstrap `.h2/.h3` 类 → 必须用 `l2/l3` |
 | file:// 下资源 404 | 相对路径层级写错（深度 1 用 `../`，深度 2 用 `../../`） |
-| favicon 404 | 未走 loader 的页面自己补 `<link rel="icon">` 或干脆不引 |
+| favicon 404 | 未走 loader 的独立页自己补 `<link rel="icon">`（内嵌 SVG data URI） |
+| id 唯一性误报 | grep 会把 text/plain 源码块里的示例 id 也计入 → 先剔除 text/plain 内容再查 |
+| `.show()` 断言失败 | jQuery 把 style.display 置回默认值 → 用 getComputedStyle 断言 |
+| 表单校验色断言误判 | `.form-control` 边框色有 0.15s 过渡 → 改类后等 ≥250ms 再读计算样式 |
+| 过渡类断言普遍偏早 | headless Chromium 下过渡完成明显慢于标称时长 → 读计算样式前等 ≥1s，或断言页面自写的内联值 |
+| 亮色断言受系统暗色干扰 | headless 默认 prefers-color-scheme: dark，UA 默认控件色随系统变 → 站点皮肤已声明 `color-scheme: light`；断言优先测页面自己写的内联样式值 |
+| table-dark 断言误判 | 背景实际落在 `th` 单元格上 → 查 `th` 的 backgroundColor，别查 `thead` |

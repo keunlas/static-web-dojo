@@ -90,7 +90,8 @@
       desc: '离线文档、官方示例与图标大全，无需联网即可查阅。',
       chapters: [
         { num: '', href: 'archive/bootstrap-docs/index.html', title: 'Bootstrap 离线文档', desc: '' },
-        { num: '', href: 'archive/examples/index.html', title: '官方示例集', desc: '' }
+        { num: '', href: 'archive/examples/index.html', title: '官方示例集', desc: '' },
+        { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
       ]
     }
   ];
@@ -103,15 +104,19 @@
   SECTIONS.forEach(function (sec) {
     PAGES.push({ id: sec.id, href: sec.href, nav: sec.label + ' · ' + sec.title.split(' · ')[0], title: sec.pageTitle || '卷首语', chapter: false });
     sec.chapters.forEach(function (ch) {
+      // 纯外链条目（离线文档、示例集）只进侧边栏，不进翻页顺序
+      if (!ch.num && !ch.pageId) return;
       PAGES.push({
-        id: sec.id + '-' + ch.num,
+        id: ch.pageId || (sec.id + '-' + ch.num),
         href: ch.href,
-        nav: sec.label + ' · 第' + ch.num + '式',
+        nav: ch.pageId ? (sec.label + ' · ' + ch.title) : (sec.label + ' · 第' + ch.num + '式'),
         title: ch.title,
-        chapter: true
+        chapter: !ch.pageId
       });
     });
   });
+  // 练功场：独立工具页，排在藏经阁之后
+  PAGES.push({ id: 'playground', href: 'playground/index.html', nav: '练功场', title: '在线练功场', chapter: false });
 
   var BY_ID = {};
   PAGES.forEach(function (p) { BY_ID[p.id] = p; });
@@ -149,7 +154,7 @@
       if (sec.chapters.length) {
         html += '<ul class="side-chapters">';
         sec.chapters.forEach(function (ch) {
-          var pid = sec.id + '-' + ch.num;
+          var pid = ch.pageId || (sec.id + '-' + ch.num);
           var cls = pid === pageId ? ' class="active"' : '';
           html += '<li><a' + cls + ' data-page-id="' + pid + '" href="' + url(ch.href) + '">'
                 + (ch.num ? '<span class="chap-num">' + ch.num + '</span>' : '') + ch.title + '</a></li>';
@@ -166,6 +171,7 @@
   function injectHeader(page) {
     if (!page || page.id === 'home' || page.id === 'archive') return;
     var sec = findSectionOf(page.id);
+    if (!sec) return;
     var seal = page.chapter ? page.id.split('-').pop() : sec.seal;
     var stage = page.chapter ? sec.label + ' · ' + sec.title + ' · 第' + seal + '式'
                              : sec.label + ' · ' + sec.title;
@@ -203,7 +209,10 @@
 
   function injectToc() {
     var $main = $('#main');
-    var heads = $main.find('h2, h3');
+    // 只收录正文标题：演示区/练功区/参考答案里的 h2/h3 不进目录
+    var heads = $main.find('h2, h3').filter(function () {
+      return !$(this).closest('.demo, .practice, details.answer, .callout').length;
+    });
     if (heads.length < 2) return;
 
     var items = [];
@@ -279,6 +288,80 @@
     $('#site-footer').html(html);
   }
 
+  // ================= 全站搜索（索引由 tools/gen-search-index.py 生成） =================
+
+  function initSearch() {
+    var data = window.DOJO_SEARCH || [];
+    if (!data.length) return;
+
+    var $wrap = $('<div class="search-box">'
+      + '<input type="search" id="site-search" class="form-control form-control-sm" placeholder="搜索全站 · 按 / 聚焦" aria-label="全站搜索">'
+      + '<div class="search-results" id="search-results" hidden></div>'
+      + '</div>');
+    $('#sidebar').prepend($wrap);
+
+    var $input = $('#site-search');
+    var $res = $('#search-results');
+
+    function escHtml(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    function run() {
+      var q = $.trim($input.val()).toLowerCase();
+      if (q.length < 1) { $res.attr('hidden', true); return; }
+      var terms = q.split(/\s+/);
+      var hits = [];
+      data.forEach(function (d) {
+        var title = d.title.toLowerCase();
+        var text = d.text.toLowerCase();
+        var score = 0;
+        for (var i = 0; i < terms.length; i++) {
+          var t = terms[i];
+          if (title.indexOf(t) !== -1) score += 3;
+          else if (text.indexOf(t) !== -1) score += 1;
+          else { score = 0; break; }
+        }
+        if (score > 0) hits.push({ d: d, score: score });
+      });
+      hits.sort(function (a, b) { return b.score - a.score; });
+      hits = hits.slice(0, 12);
+
+      if (!hits.length) {
+        $res.html('<div class="search-empty">没有找到相关章节</div>');
+      } else {
+        var html = '';
+        hits.forEach(function (h) {
+          html += '<a class="search-item" href="' + url(h.d.url) + '">'
+                + '<span class="search-item-title">' + escHtml(h.d.title) + '</span>'
+                + '<span class="search-item-url">' + escHtml(h.d.url) + '</span></a>';
+        });
+        $res.html(html);
+      }
+      $res.attr('hidden', false);
+    }
+
+    var timer = null;
+    $input.on('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(run, 150);
+    });
+    $input.on('keydown', function (e) {
+      if (e.key === 'Escape') { $res.attr('hidden', true); $input.blur(); }
+    });
+    $(document).on('click', function (e) {
+      if (!$(e.target).closest('.search-box').length) $res.attr('hidden', true);
+    });
+    $(document).on('keydown', function (e) {
+      if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+        e.preventDefault();
+        $input.focus();
+      }
+    });
+  }
+
   // ================= 初始化 =================
 
   function init() {
@@ -288,6 +371,7 @@
     // 侧边栏（桌面 + 移动端 offcanvas 共用同一份渲染结果）
     var sidebarHtml = renderSidebar(pageId);
     $('#sidebar').html(sidebarHtml);
+    initSearch();
 
     var $oc = $('<div class="offcanvas offcanvas-start sidebar-offcanvas" tabindex="-1" id="sidebar-offcanvas">'
               +   '<div class="offcanvas-header"><span class="offcanvas-title brand-title">' + T.title + '</span>'

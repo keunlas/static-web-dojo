@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十四式 · 图标库 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="bootstrap-icons 的本地引入、基本用法、常用图标对照与现场演示。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-14">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖行走，行囊里总要备几件趁手的家伙：一个“家”的图标、一颗“心”、一只“放大镜”。
+        与其自己一刀一刀地刻，不如打开 Bootstrap Icons 这只百宝囊——两千多件矢量图标，随取随用。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 bootstrap-icons 是什么、为什么图标能跟随字体变色变大小</li>
+          <li>会本地引入图标库——CSS 与 <code>fonts</code> 文件夹必须一起复制</li>
+          <li>会用 <code>&lt;i class="bi bi-…"&gt;</code> 往按钮、导航里塞图标</li>
+        </ul>
+      </div>
+
+      <h2>bootstrap-icons 是什么</h2>
+      <p>
+        <strong>Bootstrap Icons</strong> 是 Bootstrap 官方出品的免费开源图标库（MIT 协议，商用无碍），
+        收录了 <strong>2000 多个</strong>矢量图标，本站随附的是 1.13.1 版。
+        首页、按钮、表单、文件类型、品牌 Logo……日常写网页用得上的图标，它几乎全包了。
+      </p>
+      <p>它的实现原理很妙：每个图标其实是一个<strong>字体字符</strong>。引入图标库之后，图标就跟着文字走——</p>
+      <ul>
+        <li>文字多大，图标就多大（<code>font-size</code> 说了算）；</li>
+        <li>文字什么颜色，图标就什么颜色（<code>color</code> 说了算）；</li>
+        <li>矢量图标任意缩放都不发虚，而且整套才几个 KB。</li>
+      </ul>
+      <p>
+        所以你不需要为图标准备什么“图片文件”，只要记住类名，图标就能随时长在文字中间。
+      </p>
+
+      <h2>本地引入</h2>
+      <p>和引入 Bootstrap 一样，图标库也是一个 CSS 文件，放在 <code>&lt;head&gt;</code> 里：</p>
+
+      <script type="text/plain" data-lang="html" data-title="引入图标库（教学路径）">
+        <head>
+          ...
+          <link rel="stylesheet" href="libs/bootstrap.min.css">
+          <link rel="stylesheet" href="libs/bootstrap-icons.min.css">
+        </head>
+      </script>
+
+      <p>注意一个新手最容易踩的坑：<strong><code>fonts</code> 文件夹必须和 CSS 一起复制</strong>。
+        打开 <code>bootstrap-icons.min.css</code>，开头就能看到一行
+        <code>src: url("fonts/bootstrap-icons.woff2")…</code>——图标字库就放在
+        <code>libs/fonts/</code> 里。只拷 CSS 不拷 fonts，图标会全部变成小方块。
+      </p>
+      <p>
+        本站的图标库放在 <code>../assets/vendor/bootstrap-icons/</code>（CSS 与 fonts 相邻存放），
+        并且已经由 loader 全站加载好了——所以本页的演示里你可以直接使用图标，不必再单独引入。
+      </p>
+
+      <h2>用法</h2>
+      <p>
+        用法一句话：给 <code>&lt;i&gt;</code> 元素加两个类——<code>bi</code> 定身份，
+        <code>bi-图标名</code> 定长相：
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="基本用法">
+        <i class="bi bi-heart-fill"></i>
+      </script>
+
+      <p>几个小规矩：</p>
+      <ul>
+        <li>绝大多数图标都有<strong>空心 / 实心</strong>两个版本，实心版在类名末尾加
+          <code>-fill</code>：<code>bi-heart</code> 是空心，<code>bi-heart-fill</code> 是实心；</li>
+        <li>图标默认<strong>贴着基线</strong>显示，要居中好看，可以给 <code>bi</code> 所在元素加
+          <code>d-inline-flex align-items-center</code>，或干脆用按钮、导航这类自带对齐的组件；</li>
+        <li>图标是装饰，不是文字内容：建议加上 <code>aria-hidden="true"</code>，让屏幕阅读器跳过它；
+          纯图标的按钮则要给看不见的文字（见例 1 里的 <code>visually-hidden</code>）。</li>
+      </ul>
+
+      <h2>常用图标对照表</h2>
+      <p>记不住名字没关系，先混个脸熟。日常写作最常用的图标都在这里：</p>
+      <table>
+        <thead>
+          <tr><th>图标</th><th>类名</th><th>常见用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><i class="bi bi-house" aria-hidden="true"></i></td><td><code>bi-house</code></td><td>首页</td></tr>
+          <tr><td><i class="bi bi-search" aria-hidden="true"></i></td><td><code>bi-search</code></td><td>搜索</td></tr>
+          <tr><td><i class="bi bi-heart" aria-hidden="true"></i> / <i class="bi bi-heart-fill" aria-hidden="true"></i></td><td><code>bi-heart</code> / <code>bi-heart-fill</code></td><td>喜欢、收藏</td></tr>
+          <tr><td><i class="bi bi-star" aria-hidden="true"></i> / <i class="bi bi-star-fill" aria-hidden="true"></i></td><td><code>bi-star</code> / <code>bi-star-fill</code></td><td>收藏、评分</td></tr>
+          <tr><td><i class="bi bi-person" aria-hidden="true"></i></td><td><code>bi-person</code></td><td>用户、个人中心</td></tr>
+          <tr><td><i class="bi bi-envelope" aria-hidden="true"></i></td><td><code>bi-envelope</code></td><td>邮件、联系</td></tr>
+          <tr><td><i class="bi bi-trash" aria-hidden="true"></i></td><td><code>bi-trash</code></td><td>删除</td></tr>
+          <tr><td><i class="bi bi-pencil" aria-hidden="true"></i></td><td><code>bi-pencil</code></td><td>编辑</td></tr>
+          <tr><td><i class="bi bi-gear" aria-hidden="true"></i></td><td><code>bi-gear</code></td><td>设置</td></tr>
+          <tr><td><i class="bi bi-github" aria-hidden="true"></i></td><td><code>bi-github</code></td><td>GitHub 链接</td></tr>
+          <tr><td><i class="bi bi-bell" aria-hidden="true"></i></td><td><code>bi-bell</code></td><td>通知</td></tr>
+          <tr><td><i class="bi bi-cart" aria-hidden="true"></i></td><td><code>bi-cart</code></td><td>购物车</td></tr>
+          <tr><td><i class="bi bi-book" aria-hidden="true"></i></td><td><code>bi-book</code></td><td>文档、教程</td></tr>
+          <tr><td><i class="bi bi-check-circle-fill" aria-hidden="true"></i></td><td><code>bi-check-circle-fill</code></td><td>成功、完成</td></tr>
+        </tbody>
+      </table>
+      <p>
+        想翻全套？去藏经阁的<a href="../archive/icons/index.html">图标大全</a>
+        （<code>archive/icons/index.html</code>），2000+ 图标按分类摊开，离线随时可查。
+      </p>
+
+      <h2>现场演示</h2>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 图标按钮与图标导航</div>
+        <div class="demo-preview" id="bs14-demo1">
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            <button type="button" class="btn btn-primary">
+              <i class="bi bi-search me-1" aria-hidden="true"></i>搜索
+            </button>
+            <button type="button" class="btn btn-outline-primary">
+              <i class="bi bi-heart me-1" aria-hidden="true"></i>收藏
+            </button>
+            <button type="button" class="btn btn-outline-danger">
+              <i class="bi bi-trash me-1" aria-hidden="true"></i>删除
+            </button>
+            <button type="button" class="btn btn-primary" title="编辑">
+              <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">编辑</span>
+            </button>
+          </div>
+          <ul class="nav nav-pills mb-0">
+            <li class="nav-item"><a class="nav-link active" href="#bs14-demo1"><i class="bi bi-house me-1" aria-hidden="true"></i>首页</a></li>
+            <li class="nav-item"><a class="nav-link" href="#bs14-demo1"><i class="bi bi-envelope me-1" aria-hidden="true"></i>消息</a></li>
+            <li class="nav-item"><a class="nav-link" href="#bs14-demo1"><i class="bi bi-gear me-1" aria-hidden="true"></i>设置</a></li>
+          </ul>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+              <button type="button" class="btn btn-primary">
+                <i class="bi bi-search me-1" aria-hidden="true"></i>搜索
+              </button>
+              <button type="button" class="btn btn-outline-primary">
+                <i class="bi bi-heart me-1" aria-hidden="true"></i>收藏
+              </button>
+              <button type="button" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-1" aria-hidden="true"></i>删除
+              </button>
+              <button type="button" class="btn btn-primary" title="编辑">
+                <i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden">编辑</span>
+              </button>
+            </div>
+            <ul class="nav nav-pills mb-0">
+              <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house me-1" aria-hidden="true"></i>首页</a></li>
+              <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-envelope me-1" aria-hidden="true"></i>消息</a></li>
+              <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1" aria-hidden="true"></i>设置</a></li>
+            </ul>
+          </script>
+        </div>
+      </div>
+
+      <p>三个细节值得记住：</p>
+      <ul>
+        <li><code>me-1</code> 给图标与后面的文字之间留一点间距，图标紧贴文字会显得挤；</li>
+        <li>纯图标的“编辑”按钮用 <code>visually-hidden</code> 藏了一段文字——眼睛看不到，
+          屏幕阅读器却读得到；</li>
+        <li>图标在按钮、导航里自动继承了它们的字号和颜色，不用另调样式。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 图标的大小与颜色跟随字体</div>
+        <div class="demo-preview" id="bs14-demo2">
+          <div class="d-flex align-items-end gap-4 mb-3">
+            <p class="fs-1 mb-0 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+            <p class="fs-3 mb-0 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+            <p class="fs-6 mb-0 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+          </div>
+          <div class="d-flex align-items-center gap-3 mb-0">
+            <span class="fs-2 text-warning"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
+            <span class="fs-2 text-success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i></span>
+            <span class="fs-2 text-primary"><i class="bi bi-github" aria-hidden="true"></i></span>
+            <span class="fs-2 text-secondary"><i class="bi bi-gear" aria-hidden="true"></i></span>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- 同一个图标，三档字号 -->
+            <p class="fs-1 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+            <p class="fs-3 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+            <p class="fs-6 text-danger"><i class="bi bi-heart-fill" aria-hidden="true"></i></p>
+
+            <!-- 不同图标，不同颜色 -->
+            <span class="fs-2 text-warning"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
+            <span class="fs-2 text-success"><i class="bi bi-check-circle-fill" aria-hidden="true"></i></span>
+            <span class="fs-2 text-primary"><i class="bi bi-github" aria-hidden="true"></i></span>
+            <span class="fs-2 text-secondary"><i class="bi bi-gear" aria-hidden="true"></i></span>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        例 2 里没有写一行自定义 CSS：<code>fs-1</code> 到 <code>fs-6</code> 是 Bootstrap 的字号工具类
+        （第四式讲过），<code>text-danger</code> 等是颜色工具类。它们控制的是“字体”，
+        而图标恰恰是字体，所以全都对图标生效。若想更自由，直接写内联样式
+        <code>style="font-size: 5rem; color: #b03a2e"</code> 也一样。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十四式</div>
+        <ol>
+          <li>把例 1 里“搜索”按钮的图标从 <code>bi-search</code> 换成 <code>bi-star-fill</code>，观察效果。</li>
+          <li>在例 2 里加一个大号、朱砂色的 <code>bi-pen</code> 图标（提示：字号用 <code>fs-1</code>，颜色用 <code>text-danger</code>）。</li>
+          <li>思考题：为什么只拷贝 <code>bootstrap-icons.min.css</code>、不拷 <code>fonts</code> 文件夹，图标会变成小方块？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            只需把按钮里的类名改掉：<code>&lt;i class="bi bi-star-fill me-1" aria-hidden="true"&gt;&lt;/i&gt;搜索</code>。
+            图标立刻从放大镜变成实心五角星，按钮其余部分纹丝不动——这就是“改类名换长相”的便利。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="大号朱砂色图标">
+            <span class="fs-1 text-danger"><i class="bi bi-pen" aria-hidden="true"></i></span>
+          </script>
+          <p>
+            <code>fs-1</code> 把它放大到 2.5rem，<code>text-danger</code> 上色。
+            你也可以试试换 <code>text-primary</code> 或 <code>text-success</code>，感受“颜色跟随字体”的心法。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            图标并不是图片，而是字体里的字符。<code>bootstrap-icons.min.css</code> 开头的
+            <code>@font-face</code> 声明，把“字符编码 → 图标形状”的对应关系指到了
+            <code>fonts/</code> 下的 <code>bootstrap-icons.woff2</code> 等字体文件上。
+            CSS 在而字体文件不在，浏览器就加载不到字形，只能画出一个个“缺字”的小方块。
+            所以拷贝图标库时，CSS 与 fonts 文件夹要成双入对。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>Bootstrap Icons 是官方出品的 2000+ 免费图标库，本站随附 1.13.1 版；</li>
+        <li>引入只需一个 CSS，但 <code>fonts</code> 文件夹必须一起复制；</li>
+        <li>用法是 <code>bi</code> + <code>bi-图标名</code>，大小看 <code>font-size</code>，颜色看 <code>color</code>；</li>
+        <li>装饰性图标加 <code>aria-hidden="true"</code>，纯图标按钮加 <code>visually-hidden</code> 文字。</li>
+      </ul>
+
+      <blockquote>下一式，我们把学过的招式融会贯通，修炼响应式心法——让页面在不同宽度的屏幕上各展其长。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

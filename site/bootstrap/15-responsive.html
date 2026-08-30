@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十五式 · 响应式心法 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="移动优先的思路、五大断点、显隐工具类与响应式组合套路。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-15">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        招式学到这里，已经不少。可真正的高手，懂得在不同的对手面前使出不同的招式——
+        手机窄如短刃，桌面宽如长剑。这一式不教新组件，只传心法：如何让同一套页面，处处合身。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>理解“移动优先”的思路：先写手机版，再用断点逐级增强</li>
+          <li>记住五大断点（sm / md / lg / xl / xxl）与类名前缀的对应</li>
+          <li>会用 <code>d-none</code>、<code>d-md-block</code> 等显隐工具类</li>
+          <li>掌握“栅格断点 + 工具类”的组合套路</li>
+        </ul>
+      </div>
+
+      <h2>移动优先的思路</h2>
+      <p>
+        所谓<strong>移动优先</strong>，不是“只做手机版”，而是<strong>先写手机版，再逐步增强</strong>。
+        具体到 Bootstrap 的规则只有两条：
+      </p>
+      <ul>
+        <li>不带断点前缀的类（如 <code>col-12</code>、<code>d-none</code>）是<strong>基础款</strong>，对所有宽度生效；</li>
+        <li>带断点前缀的类（如 <code>col-md-6</code>、<code>d-lg-none</code>）只在<strong>该断点及以上</strong>生效，
+          它会覆盖同名的基础款。</li>
+      </ul>
+      <p>
+        为什么是“从小往大增强”，而不是反过来？因为手机的布局最简单——几乎永远是单列；
+        从小屏出发，每到一个断点只做加法（多分一列、多显一段），逻辑清爽。
+        反过来“从大往小裁剪”要做减法，容易顾此失彼。而且 Bootstrap 的断点一律用
+        <code>min-width</code>（“从这个宽度起”），天生就是为增强式写法准备的。
+      </p>
+
+      <h2>五大断点</h2>
+      <p>Bootstrap 5.3.8 默认把屏幕宽度划成六档，其中后五档就是常说的“五大断点”：</p>
+      <table>
+        <thead>
+          <tr><th>断点</th><th>类名中缀</th><th>生效条件</th><th>典型设备</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>xs（默认档）</td><td>无前缀</td><td>所有宽度</td><td>手机竖屏</td></tr>
+          <tr><td>sm</td><td><code>-sm-</code></td><td>≥ 576px</td><td>手机横屏</td></tr>
+          <tr><td>md</td><td><code>-md-</code></td><td>≥ 768px</td><td>平板</td></tr>
+          <tr><td>lg</td><td><code>-lg-</code></td><td>≥ 992px</td><td>小笔记本</td></tr>
+          <tr><td>xl</td><td><code>-xl-</code></td><td>≥ 1200px</td><td>桌面显示器</td></tr>
+          <tr><td>xxl</td><td><code>-xxl-</code></td><td>≥ 1400px</td><td>大屏显示器</td></tr>
+        </tbody>
+      </table>
+      <p>
+        记住规律：中缀就是断点名，写进任何响应式类里——<code>col-md-6</code>（md 起占 6 列）、
+        <code>d-xl-none</code>（xl 起隐藏）、<code>p-lg-5</code>（lg 起内边距 5 档）。
+        官方文档还允许自定义断点，但初学先把默认的记熟。
+      </p>
+
+      <h2>显隐工具类</h2>
+      <p>响应式最常用的招式是“该出现时才出现”。核心只有两个类：</p>
+      <ul>
+        <li><code>d-none</code>——任何宽度都隐藏（<code>display: none</code>）；</li>
+        <li><code>d-断点-block</code>——到该断点起显示（<code>display: block</code>）。</li>
+      </ul>
+      <p>把两者组合起来，就是一对“开关”：</p>
+      <ul>
+        <li><code>d-none d-md-block</code>：md 以下隐藏、md 及以上显示——专给平板和桌面看；</li>
+        <li><code>d-md-none</code>：md 以下显示、md 及以上隐藏——专给手机看。</li>
+      </ul>
+      <p>
+        注意：显隐工具类控制的是<strong>视觉显示</strong>，内容仍在 HTML 源码里，
+        只是不占位置、不显示。除 <code>block</code> 外还有 <code>d-md-flex</code>、
+        <code>d-lg-inline</code> 等变体，原理相同，按需要的 display 值取用即可。
+      </p>
+
+      <h2>container 各断点宽度</h2>
+      <p>
+        第二式讲过，<code>container</code> 是“会自动收窄的内容容器”。它的宽度不是固定的，
+        而是跟着断点走——屏幕越宽，上限越高：
+      </p>
+      <table>
+        <thead>
+          <tr><th>屏幕宽度</th><th>container 最大宽度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>小于 576px</td><td>100%（不设上限）</td></tr>
+          <tr><td>≥ 576px（sm）</td><td>540px</td></tr>
+          <tr><td>≥ 768px（md）</td><td>720px</td></tr>
+          <tr><td>≥ 992px（lg）</td><td>960px</td></tr>
+          <tr><td>≥ 1200px（xl）</td><td>1140px</td></tr>
+          <tr><td>≥ 1400px（xxl）</td><td>1320px</td></tr>
+        </tbody>
+      </table>
+      <p>
+        也就是说，<code>container</code> 是“最大宽度”而非“固定宽度”：屏幕不够宽时按 100% 收缩，
+        足够宽时封顶，两侧留出呼吸空间。想永远铺满，用 <code>container-fluid</code>。
+      </p>
+
+      <h2>响应式组合套路</h2>
+      <p>心法落到实战，通常是三招连用：</p>
+      <ul>
+        <li><strong>栅格断点</strong>：<code>col-12 col-md-6 col-xl-3</code>——手机 1 列、平板 2 列、桌面 4 列；</li>
+        <li><strong>显隐切换</strong>：手机上给“汉堡菜单”按钮（<code>d-md-none</code>），
+          桌面上铺开完整导航（<code>d-none d-md-block</code>）；</li>
+        <li><strong>间距字号随行</strong>：<code>p-3 p-lg-5</code>——手机留白小一点，桌面大方一点。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：响应式四诫</div>
+        <ul style="margin:0">
+          <li><strong>先默认，再增强</strong>：基础款永远是手机版，断点只做加法；</li>
+          <li><strong>断点从低到高写</strong>：<code>col-12 col-md-6 col-xl-3</code>，顺序别乱，覆盖关系才清晰；</li>
+          <li><strong>每加一个断点先问自己</strong>：这个宽度下读者需要什么？不为断点而断点；</li>
+          <li><strong>调完必实测</strong>：拖动窗口缩放，亲眼看过才算数。</li>
+        </ul>
+      </div>
+
+      <h2>现场演示</h2>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 同一块内容，三档宽度三种排法（试试缩放浏览器窗口）</div>
+        <div class="demo-preview" id="bs15-demo1">
+          <p class="small text-center mb-2">拖动窗口缩放：卡片从 1 列变成 2 列，再变成 4 列。</p>
+          <div class="row g-2 text-center">
+            <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第一格</div></div>
+            <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第二格</div></div>
+            <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第三格</div></div>
+            <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第四格</div></div>
+          </div>
+          <p class="text-center mt-3 mb-0">
+            <span class="badge text-bg-secondary d-md-none">当前宽度 768px 以下 · 单列</span>
+            <span class="badge text-bg-secondary d-none d-md-inline d-xl-none">当前宽度 768–1199px · 两列</span>
+            <span class="badge text-bg-secondary d-none d-xl-inline">当前宽度 1200px 及以上 · 四列</span>
+          </p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-2 text-center">
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第一格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第二格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第三格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第四格</div></div>
+            </div>
+
+            <!-- 用显隐工具类标注“当前处于哪一档” -->
+            <span class="badge text-bg-secondary d-md-none">当前宽度 768px 以下 · 单列</span>
+            <span class="badge text-bg-secondary d-none d-md-inline d-xl-none">当前宽度 768–1199px · 两列</span>
+            <span class="badge text-bg-secondary d-none d-xl-inline">当前宽度 1200px 及以上 · 四列</span>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        每一格的类名都是同一个套路：<code>col-12</code> 打底（手机 1 列），
+        <code>col-md-6</code> 从平板起一分为二，<code>col-xl-3</code> 从桌面起一分为四。
+        下面的三枚徽章是“反向”用显隐类：<code>d-none d-md-inline d-xl-none</code> 的意思是
+        “默认隐藏、md 起以内联显示、xl 起再隐藏”，正好框出 768–1199px 这一档。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · d-none 与 d-md-block 的显隐切换</div>
+        <div class="demo-preview" id="bs15-demo2">
+          <div class="alert alert-warning d-md-none mb-0" role="alert">
+            <i class="bi bi-phone me-1" aria-hidden="true"></i>小屏专属：菜单收进了“汉堡”按钮，点开才见。
+          </div>
+          <div class="alert alert-info d-none d-md-block mb-0" role="alert">
+            <i class="bi bi-laptop me-1" aria-hidden="true"></i>md 及以上专属：完整导航直接铺开在页头。
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- 只在 768px 以下显示 -->
+            <div class="alert alert-warning d-md-none" role="alert">
+              <i class="bi bi-phone me-1" aria-hidden="true"></i>小屏专属：菜单收进了“汉堡”按钮，点开才见。
+            </div>
+
+            <!-- 只在 768px 及以上显示 -->
+            <div class="alert alert-info d-none d-md-block" role="alert">
+              <i class="bi bi-laptop me-1" aria-hidden="true"></i>md 及以上专属：完整导航直接铺开在页头。
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这两条提示框永远只有一条可见。下一式里，作品集页面的折叠导航栏用的正是这套开关：
+        <code>navbar-expand-lg</code> 会自动在 lg 起隐藏汉堡按钮、展开菜单本体——
+        navbar 组件把“显隐”心法内置好了，我们只需选一个断点。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十五式</div>
+        <ol>
+          <li>把例 2 里“md 及以上”的提示框改成“lg 及以上”才显示（提示：两处类名都要动）。</li>
+          <li>把例 1 的四个格子改成“手机 2 列、平板 2 列、桌面 4 列”（提示：基础款改成 <code>col-6</code>）。</li>
+          <li>思考题：为什么 Bootstrap 的断点用 <code>min-width</code>（“从这个宽度起”），而不是 <code>max-width</code>（“到这个宽度止”）？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="改成 lg 起显示">
+            <div class="alert alert-warning d-lg-none" role="alert">
+              小屏专属：992px 以下可见。
+            </div>
+            <div class="alert alert-info d-none d-lg-block" role="alert">
+              lg 及以上专属：992px 起可见。
+            </div>
+          </script>
+          <p>
+            规律：把一对开关里的断点中缀一起换掉（<code>-md-</code> → <code>-lg-</code>），
+            阈值就从 768px 挪到了 992px。两处不同步，就会出现“某段宽度两条同时显示或同时消失”的怪相。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="手机 2 列、桌面 4 列">
+            <div class="row g-2 text-center">
+              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第一格</div></div>
+              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第二格</div></div>
+              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第三格</div></div>
+              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第四格</div></div>
+            </div>
+          </script>
+          <p>
+            <code>col-6</code> 让手机上一行放两个格子；md 档继续用 <code>col-md-6</code> 保持两列，
+            到 <code>col-xl-3</code> 再展开成四列。体会一下“基础款改观感、断点款改档位”的分工。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 Bootstrap 奉行“移动优先、逐步增强”：基础样式（无前缀类）已经是完整的手机版，
+            断点只需要在更宽的屏幕上<strong>追加</strong>几条规则就行。用 <code>min-width</code>，
+            宽的规则天然写在后面、覆盖窄的规则，简单清晰。若用 <code>max-width</code>，
+            每加一档都要“反向裁剪”之前写好的桌面样式，规则互相打架，越写越乱——
+            增强式写法是心法，min-width 只是它的自然结果。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>移动优先 = 先写手机版，再用断点逐级增强，断点一律 min-width；</li>
+        <li>五大断点：sm ≥576 / md ≥768 / lg ≥992 / xl ≥1200 / xxl ≥1400；</li>
+        <li><code>d-none d-md-block</code> 表示“md 起显示”，<code>d-md-none</code> 表示“md 起隐藏”；</li>
+        <li>套路就三招：栅格断点分列、显隐类切内容、间距字号随行，最后缩放窗口实测。</li>
+      </ul>
+
+      <blockquote>下一式，Bootstrap 篇的收官之战：把十六式所学串成一套完整剑法——手写一个作品集主页。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

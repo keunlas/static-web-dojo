@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二式 · 选择器 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="与 CSS 一一对照的 jQuery 选择器：#id、.class、组合、属性与位置选择器，以及用 .length 判断命中数量。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-02">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        剑客出剑，先要看得见对手；写 jQuery，先要找到元素。
+        选择器就是轻剑的眼睛——它与 CSS 选择器几乎一一对应，CSS 练得越熟，这一式练得越快。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>认识基本选择器：<code>#id</code>、<code>.class</code>、<code>tag</code> 与 <code>*</code>，与 CSS 同源同形</li>
+          <li>会用组合选择器：<code>tag.class</code>、后代、子代与逗号并集</li>
+          <li>了解属性选择器与位置选择器，会用 <code>$(selector).length</code> 判断命中数量</li>
+        </ul>
+      </div>
+
+      <h2>选择器：轻剑的眼睛</h2>
+      <p>
+        <code>$()</code> 里传入一个选择器字符串，它就会返回一个 jQuery 对象——本质是一个“元素集合”。
+        哪怕一个元素都没命中，它也不会报错，只是返回一个空集合；反过来，命中多个元素时，
+        大多数方法会<strong>自动对集合里的每一个元素执行</strong>，这就是上一式说的“隐式遍历”。
+      </p>
+      <p>好消息是：这套选择器语法与 CSS 选择器几乎完全一致。你写 CSS 时怎么选元素，jQuery 里就怎么写。基础四式如下：</p>
+
+      <script type="text/plain" data-lang="js" data-title="基本选择器四式">
+        $('#title')  // 按 id：全页只应有一个，干脆利落
+        $('.note')   // 按 class：所有带 note 类的元素都入选
+        $('p')       // 按标签：所有段落
+        $('*')       // 通配：全页元素一个不落（很少用到）
+      </script>
+
+      <h2>基本选择器</h2>
+      <p>
+        四个基本选择器里，<code>#id</code> 最快、最准——id 约定全页唯一，选它就等于指名道姓；
+        <code>.class</code> 用于“一批同类”；<code>tag</code> 用于“一整类标签”。
+        想知道命中了多少，就问集合的 <code>.length</code>。先来数一数段落：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 统计段落数</div>
+        <div class="demo-preview">
+          <div id="jq02-demo1">
+            <p class="mb-1">床前明月光，</p>
+            <p class="mb-1">疑是地上霜。</p>
+            <p class="mb-0">举头望明月，低头思故乡。</p>
+            <button id="jq02-count-btn" type="button" class="btn btn-primary mt-3">数一数段落</button>
+            <p id="jq02-count-msg" class="mt-2 mb-0">点按钮，看看这一页共有几个段落。</p>
+            <script>
+              $(function () {
+                $('#jq02-count-btn').on('click', function () {
+                  var all = $('p').length;
+                  var here = $('#jq02-demo1 p').length;
+                  $('#jq02-count-msg').text('全页共 ' + all + ' 个段落，其中本演示区 ' + here + ' 个。');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="jq02-demo1">
+              <p class="mb-1">床前明月光，</p>
+              <p class="mb-1">疑是地上霜。</p>
+              <p class="mb-0">举头望明月，低头思故乡。</p>
+              <button id="jq02-count-btn" type="button" class="btn btn-primary mt-3">数一数段落</button>
+              <p id="jq02-count-msg" class="mt-2 mb-0">点按钮，看看这一页共有几个段落。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq02-count-btn').on('click', function () {
+              var all = $('p').length;               // 全页的段落数
+              var here = $('#jq02-demo1 p').length;  // 只看本演示区
+              $('#jq02-count-msg').text('全页共 ' + all + ' 个段落，其中本演示区 ' + here + ' 个。');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这里有两个小知识点：<code>.length</code> 返回集合里元素的个数，0 就是“一个也没找到”；
+        而 <code>$('#jq02-demo1 p')</code> 这种“圈定范围再选”的写法，正是接下来要讲的组合选择器。
+      </p>
+
+      <h2>组合选择器</h2>
+      <p>
+        单一选择器不够精细时，把它们组合起来：紧挨着写是“同时满足”，空格是“后代”，
+        <code>&gt;</code> 是“只认亲儿子”，逗号是“都算”。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="组合选择器">
+        $('p.lead')        // 且：是段落、且带 lead 类
+        $('.menu a')       // 后代：menu 里任意深度的链接
+        $('.menu > a')     // 子代：只认 menu 直属的一级链接
+        $('h2, h3')        // 并集：标题和副标题一网打尽
+      </script>
+
+      <p>
+        <code>.menu a</code> 与 <code>.menu &gt; a</code> 的差别值得咬文嚼字：
+        后代不问辈分，隔几层都算；子代只认“亲儿子”。下面的演示用并集一次选中两类：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 并集选择器批量高亮</div>
+        <div class="demo-preview">
+          <div id="jq02-demo2">
+            <p class="mb-0">
+              手握<span class="jian">轻剑</span>，身佩<span class="dao">宝刀</span>；
+              踏遍<span class="jian">青山</span>，归来仍是<span class="dao">少年</span>。
+            </p>
+            <button id="jq02-hl-btn" type="button" class="btn btn-primary mt-3">兵器亮相</button>
+            <script>
+              $(function () {
+                $('#jq02-hl-btn').on('click', function () {
+                  // 并集选择器一次选中两类，css() 会依次作用于每一个
+                  $('.jian, .dao').css('color', '#b03a2e').css('font-weight', 'bold');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="mb-0">
+              手握<span class="jian">轻剑</span>，身佩<span class="dao">宝刀</span>；
+              踏遍<span class="jian">青山</span>，归来仍是<span class="dao">少年</span>。
+            </p>
+            <button id="jq02-hl-btn" type="button" class="btn btn-primary mt-3">兵器亮相</button>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq02-hl-btn').on('click', function () {
+              // 并集选择器一次选中两类，css() 会依次作用于每一个
+              $('.jian, .dao').css('color', '#b03a2e').css('font-weight', 'bold');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意 <code>$('.jian, .dao')</code> 一口气命中了四个词，<code>.css()</code> 也就被自动执行了四次——
+        还是那句话：隐式遍历，集合里人人有份。两行 <code>.css()</code> 首尾相连，正是链式调用。
+      </p>
+
+      <h2>属性选择器</h2>
+      <p>
+        元素身上穿的“属性”也能当线索：<code>[attr]</code> 表示“有这属性就行”，
+        <code>[attr=val]</code> 要求值完全相等，<code>[attr^=val]</code> 要求值以 val 开头。
+        jQuery 还支持 <code>[attr$=val]</code>（结尾）与 <code>[attr*=val]</code>（包含）。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="属性选择器">
+        $('input[disabled]')     // 所有被禁用的输入框（有没有 disabled 属性）
+        $('input[type="text"]')  // type 恰好是 text 的输入框
+        $('a[href^="#"]')        // href 以 # 开头的链接（锚点）
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 只照亮文本框</div>
+        <div class="demo-preview">
+          <div id="jq02-demo3">
+            <div class="row g-2" style="max-width: 460px;">
+              <div class="col-auto">
+                <input type="text" class="form-control" placeholder="文本输入框">
+              </div>
+              <div class="col-auto">
+                <input type="number" class="form-control" placeholder="数字输入框">
+              </div>
+              <div class="col-auto">
+                <button id="jq02-attr-btn" type="button" class="btn btn-primary">照亮文本框</button>
+              </div>
+            </div>
+            <script>
+              $(function () {
+                $('#jq02-attr-btn').on('click', function () {
+                  $('#jq02-demo3 input[type="text"]')
+                    .css('border-color', '#b03a2e')
+                    .css('box-shadow', '0 0 0 0.25rem rgba(176, 58, 46, .25)');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="jq02-demo3">
+              <div class="row g-2" style="max-width: 460px;">
+                <div class="col-auto">
+                  <input type="text" class="form-control" placeholder="文本输入框">
+                </div>
+                <div class="col-auto">
+                  <input type="number" class="form-control" placeholder="数字输入框">
+                </div>
+                <div class="col-auto">
+                  <button id="jq02-attr-btn" type="button" class="btn btn-primary">照亮文本框</button>
+                </div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq02-attr-btn').on('click', function () {
+              $('#jq02-demo3 input[type="text"]')
+                .css('border-color', '#b03a2e')
+                .css('box-shadow', '0 0 0 0.25rem rgba(176, 58, 46, .25)');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        旁边的数字输入框纹丝不动——<code>[type="text"]</code> 只认文本框。
+        属性选择器在表单里特别好用：<code>input[required]</code>、<code>input[type="email"]</code> 都是家常便饭。
+      </p>
+
+      <h2>位置选择器与方法</h2>
+      <p>
+        <code>:first</code>、<code>:last</code>、<code>:even</code>、<code>:odd</code>
+        按“在集合里的位置”选人。注意 jQuery 从 0 起数，所以 <code>:even</code> 选中的是第 1、3、5……个。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="位置选择器">
+        $('li:first')  // 集合里的第 1 个
+        $('li:last')   // 最后 1 个
+        $('tr:even')   // 第 0、2、4……行（从 0 起数）
+        $('tr:odd')    // 第 1、3、5……行
+      </script>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：方法比伪类更趁手</div>
+        <p style="margin:0">
+          这几个位置伪类是 jQuery 的“私房扩展”，不属于标准 CSS。现代 jQuery 更推荐对应的<strong>过滤方法</strong>：
+          <code>$('li').first()</code>、<code>$('li').eq(2)</code>。理由有二——<strong>性能</strong>：
+          浏览器原生不认识 <code>:first</code> 这类伪类，jQuery 得自己多扫一遍；<strong>可读性</strong>：
+          <code>.first()</code> 一眼就懂，<code>:first</code> 还容易与 CSS 的 <code>:first-child</code> 混淆。
+          江湖规矩：<strong>伪类能用，但方法更体面</strong>。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 表格隔行变色（:even + css）</div>
+        <div class="demo-preview">
+          <div id="jq02-demo4">
+            <table style="max-width: 420px;">
+              <thead>
+                <tr><th>位次</th><th>弟子</th><th>兵器</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>阿青</td><td>青竹棒</td></tr>
+                <tr><td>2</td><td>阿明</td><td>峨眉刺</td></tr>
+                <tr><td>3</td><td>阿直</td><td>长剑</td></tr>
+                <tr><td>4</td><td>阿敏</td><td>快马</td></tr>
+              </tbody>
+            </table>
+            <button id="jq02-stripe-btn" type="button" class="btn btn-primary">隔行上色</button>
+            <script>
+              $(function () {
+                $('#jq02-stripe-btn').on('click', function () {
+                  // :even 按 0 起数，选中的是第 1、3 行
+                  $('#jq02-demo4 tbody tr:even').css('background-color', '#f4edde');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="jq02-demo4">
+              <table style="max-width: 420px;">
+                <thead>
+                  <tr><th>位次</th><th>弟子</th><th>兵器</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>阿青</td><td>青竹棒</td></tr>
+                  <tr><td>2</td><td>阿明</td><td>峨眉刺</td></tr>
+                  <tr><td>3</td><td>阿直</td><td>长剑</td></tr>
+                  <tr><td>4</td><td>阿敏</td><td>快马</td></tr>
+                </tbody>
+              </table>
+              <button id="jq02-stripe-btn" type="button" class="btn btn-primary">隔行上色</button>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq02-stripe-btn').on('click', function () {
+              // :even 按 0 起数，选中的是第 1、3 行
+              $('#jq02-demo4 tbody tr:even').css('background-color', '#f4edde');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        <code>:even</code> 从 0 起数，所以 1、3 行上了色。若改用方法，就是
+        <code>$('#jq02-demo4 tbody tr').eq(2).css('background-color', '#f4edde')</code>
+        这类“先广撒网、再精挑”的两步走——这正是第七式（遍历）的主线，此处先打个照面。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二式</div>
+        <ol>
+          <li>把例 4 的 <code>:even</code> 改成 <code>:odd</code>，再点一次“隔行上色”，看哪几行变了颜色。</li>
+          <li>写一个新页面：四个段落，<code>class="a"</code> 与 <code>class="b"</code> 交替出现；点按钮后 .a 变红、.b 变蓝、全部加粗。</li>
+          <li>思考题：为什么 jQuery 官方更推荐 <code>.first()</code> / <code>.eq()</code> 方法，而不是 <code>:first</code> / <code>:eq</code> 伪类？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            变色的是第 2、4 行（阿明、阿敏）——从 0 起数，<code>:odd</code> 对应第 1、3 个位置。
+            顺手换成方法写法，给“阿直”那一行单独上色：
+          </p>
+          <script type="text/plain" data-lang="js" data-title="方法写法">
+            $('#jq02-demo4 tbody tr').eq(2).css('background-color', '#f4edde');
+          </script>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="两类分开上色">
+            $('.a').css('color', 'red');
+            $('.b').css('color', 'blue');
+            $('.a, .b').css('font-weight', 'bold'); // 并集：一次选中两类
+          </script>
+          <p>
+            前两行是普通 class 选择器，第三行用<strong>逗号并集</strong>把两类一起加粗——
+            三行代码，两类元素，处处都是隐式遍历。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            一是<strong>性能</strong>：这些伪类不是标准 CSS，浏览器原生选择器不认，jQuery 必须自己实现筛选，
+            凭空多一道工序；二是<strong>可读性</strong>：<code>.first()</code> 语义直白，而 <code>:first</code>
+            容易与 <code>:first-child</code> 等标准伪类混淆。此外，方法形式与 jQuery“先选择、再过滤”的分工一致——
+            选择器负责广撒网，过滤方法负责精挑细选。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>jQuery 选择器与 CSS 同源，会 CSS 就掌握了它的大半；</li>
+        <li>基本、组合、属性、位置四大类选择器，按需取用；</li>
+        <li><code>$(selector).length</code> 判断命中数量，命中 0 个也不报错；</li>
+        <li>位置伪类是 jQuery 扩展，江湖上更推崇 <code>.first()</code>、<code>.eq()</code> 等方法。</li>
+      </ul>
+
+      <blockquote>下一式，修炼内容与属性——text、html、val 三兄弟轮番登场，attr 与 prop 的恩怨也一并了结。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

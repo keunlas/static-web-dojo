@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十式 · 综合修炼 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="用 jQuery + Bootstrap 从零手写待办清单：添加、切换完成、事件委托删除、统计与 localStorage 持久化。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-10">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        十式剑诀学到最后一式，规矩不是再学新招，而是把学过的招式连成一套。
+        本式就用 jQuery 配上 Bootstrap，从零手写一个待办清单——它小到一口气能读完，
+        却把本回大半的心法全用上了：选择器、事件、增删改、类切换，外加一位新朋友 localStorage。
+        写完你会发现：江湖上多数页面，翻来覆去不过这几招。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 Bootstrap 搭出待办清单的三块骨架：输入组、列表组、统计栏</li>
+          <li>复习取值、判空、创建节点、入列的完整增删改链路</li>
+          <li>用事件委托让“新加的任务”天然可切换、可删除（呼应第五式）</li>
+          <li>用 localStorage 存 JSON，刷新不丢，file:// 直接打开也照常</li>
+        </ul>
+      </div>
+
+      <h2>结构：先立骨架</h2>
+      <p>
+        写页面像盖房子，先立结构。一个待办清单就三块：<strong>输入区</strong>（写新任务）、
+        <strong>列表区</strong>（放任务）、<strong>统计栏</strong>（记账）。输入区用 Bootstrap 的
+        <code>input-group</code> 把输入框和按钮粘成一组（<a href="../bootstrap/08-forms.html">第二回第八式</a>）；
+        列表区用 <code>list-group</code>（<a href="../bootstrap/07-lists-tables.html">第二回第七式</a>）。
+        先看静态骨架——
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 待办清单的静态骨架</div>
+        <div class="demo-preview">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="想做什么？写下来">
+            <button class="btn btn-primary" type="button">添加</button>
+          </div>
+          <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>读一遍《纯静态网页的修行》</span>
+              <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center done text-decoration-line-through text-muted">
+              <span>练完 jQuery 第十式</span>
+              <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>写一个自己的小页面</span>
+              <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+            </li>
+          </ul>
+          <p class="mb-0 text-muted">共 3 件 · 已完成 1 件</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="想做什么？写下来">
+              <button class="btn btn-primary" type="button">添加</button>
+            </div>
+
+            <ul class="list-group mb-3">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>读一遍《纯静态网页的修行》</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center done text-decoration-line-through text-muted">
+                <span>练完 jQuery 第十式</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>写一个自己的小页面</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" aria-label="删除">✕</button>
+              </li>
+            </ul>
+
+            <p class="mb-0 text-muted">共 3 件 · 已完成 1 件</p>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        本例没有一行脚本。注意第二条任务身上的三件套：<code>done</code> +
+        <code>text-decoration-line-through</code> + <code>text-muted</code>——语义类负责记账，
+        工具类负责划线变灰。记住这张脸，接下来每一小节都是在它身上加戏。
+      </p>
+
+      <h2>添加：让任务进列表</h2>
+      <p>
+        骨架立好，上行为。点“添加”要做三件事：<strong>取值、判空、入列</strong>。取值用
+        <code>.val()</code>（<a href="03-content-attr.html">第三式</a>）；判空前先
+        <code>.trim()</code> 去掉首尾空白——注意，jQuery 4 已经删掉了 <code>$.trim</code>，
+        直接用 JavaScript 原生的字符串 <code>trim()</code>；入列用 <code>$('&lt;li&gt;')</code>
+        创建新节点、再 <code>.appendTo()</code> 挂进列表（<a href="08-manipulation.html">第八式</a>）。
+      </p>
+      <p>
+        两个细节：任务文字交给 <code>.text()</code> 而不是 <code>.html()</code>——用户输入当纯文本处理，
+        绝不解释成标签；再给输入框绑一个回车事件，体验翻倍。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 点击按钮或按回车，任务入列</div>
+        <div class="demo-preview">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="jq10-d2-input" placeholder="想做什么？写下来">
+            <button class="btn btn-primary" id="jq10-d2-add" type="button">添加</button>
+          </div>
+          <ul class="list-group" id="jq10-d2-list"></ul>
+          <p class="mt-2 mb-0 small text-muted">试试空着点“添加”——输入框会红一下脸。</p>
+          <script>
+            $(function () {
+              function add() {
+                var text = $('#jq10-d2-input').val().trim();
+                if (!text) {
+                  $('#jq10-d2-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d2-input').removeClass('is-invalid');
+                $('<li>').addClass('list-group-item').text(text).appendTo('#jq10-d2-list');
+                $('#jq10-d2-input').val('').trigger('focus');
+              }
+              $('#jq10-d2-add').on('click', add);
+              $('#jq10-d2-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" id="jq10-d2-input" placeholder="想做什么？写下来">
+              <button class="btn btn-primary" id="jq10-d2-add" type="button">添加</button>
+            </div>
+            <ul class="list-group" id="jq10-d2-list"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $(function () {
+              function add() {
+                var text = $('#jq10-d2-input').val().trim();   // 取值 + 去空白
+                if (!text) {                                    // 空值拦截
+                  $('#jq10-d2-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d2-input').removeClass('is-invalid');
+                $('<li>').addClass('list-group-item')          // 创建新节点
+                  .text(text)                                   // 文字走 .text()，防注入
+                  .appendTo('#jq10-d2-list');                   // 挂进列表
+                $('#jq10-d2-input').val('').trigger('focus');   // 清空输入框
+              }
+              $('#jq10-d2-add').on('click', add);
+              $('#jq10-d2-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();                   // 回车等于点按钮
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">心法：创建即配置</div>
+        <p style="margin:0">
+          jQuery 允许一行把节点造出来并配好：<code>$('&lt;li&gt;').addClass(…).append(…).appendTo(…)</code>。
+          链式调用从头到尾不落地，新节点出生时就已经穿戴整齐。
+        </p>
+      </div>
+
+      <h2>完成与删除：让任务活起来</h2>
+      <p>
+        任务加进来了，还得能“做完”和“作废”。点任务本体，用 <code>toggleClass()</code> 切换
+        <code>done</code> 类（<a href="04-class-style.html">第四式</a>），划线变灰交给两个
+        Bootstrap 工具类一起切换。点 ✕ 则删除所在任务——这里必须用<strong>事件委托</strong>
+        （<a href="05-events.html">第五式</a>）：把监听绑在永远存在的 <code>ul</code> 上，
+        选择器指向 <code>.btn-del</code>，于是每个新加的任务出生自带删除能力。
+      </p>
+      <p>
+        还有一个隐蔽的坑：点 ✕ 时，事件会一路冒泡到 <code>li</code>，把完成状态也顺手切了。
+        所以 <code>li</code> 的处理器先问一句——点的是删除按钮吗？是就让路。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 点任务切换完成，点 ✕ 删除</div>
+        <div class="demo-preview">
+          <ul class="list-group" id="jq10-d3-list">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>读一遍《纯静态网页的修行》</span>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-del" aria-label="删除">✕</button>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center done text-decoration-line-through text-muted">
+              <span>练完 jQuery 第十式</span>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-del" aria-label="删除">✕</button>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>写一个自己的小页面</span>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-del" aria-label="删除">✕</button>
+            </li>
+          </ul>
+          <p class="mt-2 mb-0 small text-muted">点任务本体试试，再点点 ✕。</p>
+          <script>
+            $(function () {
+              $('#jq10-d3-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return; // 点的是 ✕，不切换
+                $(this).toggleClass('done text-decoration-line-through text-muted');
+              });
+              $('#jq10-d3-list').on('click', '.btn-del', function () {
+                $(this).closest('li').remove();
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（每项多一个删除按钮）">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>读一遍《纯静态网页的修行》</span>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-del" aria-label="删除">✕</button>
+            </li>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            // 点击任务：切换完成状态（done 类 + 划线变灰）
+            $('#jq10-d3-list').on('click', 'li', function (e) {
+              if ($(e.target).closest('.btn-del').length) return; // 点的是 ✕，让路
+              $(this).toggleClass('done text-decoration-line-through text-muted');
+            });
+
+            // 点击 ✕：删除所在任务（事件委托，新加项同样有效）
+            $('#jq10-d3-list').on('click', '.btn-del', function () {
+              $(this).closest('li').remove();
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        想让删除更有仪式感？<a href="06-effects.html">第六式</a>的 <code>fadeOut()</code> 随时待命——
+        本式最后的成品里就用上了它。
+      </p>
+
+      <h2>统计与清空：给列表一本账</h2>
+      <p>
+        统计栏是列表的账本，任何一次改动后都要重新记账。把 <code>updateStats()</code> 抽成一个函数：
+        总数 <code>$('… li').length</code>、已完成 <code>$('… li.done').length</code>——选择器的
+        隐式遍历（<a href="02-selectors.html">第二式</a>）在这里自动数人头。添加、切换、删除之后各调它一次。
+        “清空已完成”不过是选中 <code>li.done</code> 全部 <code>remove()</code>。
+        没有已完成时顺手禁用按钮——布尔状态一律用 <code>.prop('disabled', …)</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 统计随动作实时更新，可一键清空已完成</div>
+        <div class="demo-preview">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="jq10-d4-input" placeholder="想做什么？写下来">
+            <button class="btn btn-primary" id="jq10-d4-add" type="button">添加</button>
+          </div>
+          <ul class="list-group mb-3" id="jq10-d4-list">
+            <li class="list-group-item d-flex justify-content-between align-items-center done text-decoration-line-through text-muted">
+              <span>先吃透第十式</span>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-del" aria-label="删除">✕</button>
+            </li>
+          </ul>
+          <div class="d-flex justify-content-between align-items-center">
+            <p class="mb-0 text-muted">共 <span id="jq10-d4-total">1</span> 件 · 已完成 <span id="jq10-d4-done">1</span> 件</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="jq10-d4-clear">清除已完成</button>
+          </div>
+          <script>
+            $(function () {
+              function updateStats() {
+                $('#jq10-d4-total').text($('#jq10-d4-list li').length);
+                $('#jq10-d4-done').text($('#jq10-d4-list li.done').length);
+                $('#jq10-d4-clear').prop('disabled', $('#jq10-d4-list li.done').length === 0);
+              }
+              function add() {
+                var text = $('#jq10-d4-input').val().trim();
+                if (!text) {
+                  $('#jq10-d4-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d4-input').removeClass('is-invalid');
+                $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
+                  .append($('<span>').text(text))
+                  .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }))
+                  .appendTo('#jq10-d4-list');
+                $('#jq10-d4-input').val('').trigger('focus');
+                updateStats();
+              }
+              $('#jq10-d4-add').on('click', add);
+              $('#jq10-d4-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();
+              });
+              $('#jq10-d4-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return;
+                $(this).toggleClass('done text-decoration-line-through text-muted');
+                updateStats();
+              });
+              $('#jq10-d4-list').on('click', '.btn-del', function () {
+                $(this).closest('li').remove();
+                updateStats();
+              });
+              $('#jq10-d4-clear').on('click', function () {
+                $('#jq10-d4-list li.done').remove();
+                updateStats();
+              });
+              updateStats();
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul class="list-group mb-3" id="jq10-d4-list">…</ul>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="mb-0 text-muted">共 <span id="jq10-d4-total">1</span> 件 · 已完成 <span id="jq10-d4-done">1</span> 件</p>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq10-d4-clear">清除已完成</button>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（新增部分）">
+            function updateStats() {
+              $('#jq10-d4-total').text($('#jq10-d4-list li').length);          // 总数
+              $('#jq10-d4-done').text($('#jq10-d4-list li.done').length);      // 已完成数
+              $('#jq10-d4-clear').prop('disabled',                            // 无可清空时禁用按钮
+                $('#jq10-d4-list li.done').length === 0);
+            }
+
+            $('#jq10-d4-clear').on('click', function () {
+              $('#jq10-d4-list li.done').remove();   // 选中已完成的，全部删掉
+              updateStats();
+            });
+
+            // 其余代码与例 3 相同，只需在添加、切换、删除后各补一句 updateStats();
+          </script>
+        </div>
+      </div>
+
+      <h2>持久化：刷新不丢</h2>
+      <p>
+        最后一块拼图是 <code>localStorage</code>：浏览器自带的键值仓库，只存字符串，容量约 5MB。
+        存的时候用 <code>JSON.stringify()</code> 把任务数组压成字符串，读的时候用
+        <code>JSON.parse()</code> 还原——这是 JavaScript 原生本领，与 jQuery 各司其职。
+        规矩很简单：<strong>任何一次数据变动后都调 <code>save()</code></strong>，
+        页面启动时调一次 <code>load()</code>。
+      </p>
+      <p>
+        它不依赖服务器：<code>file://</code> 直接双击打开同样可用——数据存在本机浏览器里，
+        离线照常。不同浏览器对本地文件的存储分区略有差异，但本页的存读不受影响。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 完整成品：加几条任务，刷新本页，它们还在</div>
+        <div class="demo-preview">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="jq10-d5-input" placeholder="想做什么？写下来">
+            <button class="btn btn-primary" id="jq10-d5-add" type="button">添加</button>
+          </div>
+          <ul class="list-group mb-3" id="jq10-d5-list"></ul>
+          <div class="d-flex justify-content-between align-items-center">
+            <p class="mb-0 text-muted">共 <span id="jq10-d5-total">0</span> 件 · 已完成 <span id="jq10-d5-done">0</span> 件</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="jq10-d5-clear">清除已完成</button>
+          </div>
+          <script>
+            $(function () {
+              var KEY = 'dojo-demo-todo';
+
+              function addItem(text, done) {
+                var $li = $('<li>')
+                  .addClass('list-group-item d-flex justify-content-between align-items-center')
+                  .append($('<span>').addClass('todo-text').text(text))
+                  .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }));
+                if (done) $li.addClass('done text-decoration-line-through text-muted');
+                $('#jq10-d5-list').append($li);
+              }
+
+              function updateStats() {
+                $('#jq10-d5-total').text($('#jq10-d5-list li').length);
+                $('#jq10-d5-done').text($('#jq10-d5-list li.done').length);
+                $('#jq10-d5-clear').prop('disabled', $('#jq10-d5-list li.done').length === 0);
+              }
+
+              function save() {
+                var items = [];
+                $('#jq10-d5-list li').each(function () {
+                  items.push({
+                    text: $(this).find('.todo-text').text(),
+                    done: $(this).hasClass('done')
+                  });
+                });
+                localStorage.setItem(KEY, JSON.stringify(items));
+              }
+
+              function load() {
+                var raw = localStorage.getItem(KEY);
+                if (!raw) {                        // 首次打开：放两条示例
+                  addItem('读一遍《纯静态网页的修行》', false);
+                  addItem('练完 jQuery 第十式', true);
+                  save();
+                  return;
+                }
+                JSON.parse(raw).forEach(function (item) {
+                  addItem(item.text, item.done);
+                });
+              }
+
+              function add() {
+                var text = $('#jq10-d5-input').val().trim();
+                if (!text) {
+                  $('#jq10-d5-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d5-input').removeClass('is-invalid');
+                addItem(text, false);
+                $('#jq10-d5-input').val('').trigger('focus');
+                updateStats();
+                save();
+              }
+
+              $('#jq10-d5-add').on('click', add);
+              $('#jq10-d5-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();
+              });
+              $('#jq10-d5-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return;
+                $(this).toggleClass('done text-decoration-line-through text-muted');
+                updateStats();
+                save();
+              });
+              $('#jq10-d5-list').on('click', '.btn-del', function () {
+                var $li = $(this).closest('li');
+                $li.fadeOut(120, function () {   // 第六式的小把戏：淡出后再摘牌
+                  $li.remove();
+                  updateStats();
+                  save();
+                });
+              });
+              $('#jq10-d5-clear').on('click', function () {
+                $('#jq10-d5-list li.done').remove();
+                updateStats();
+                save();
+              });
+
+              load();
+              updateStats();
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" id="jq10-d5-input" placeholder="想做什么？写下来">
+              <button class="btn btn-primary" id="jq10-d5-add" type="button">添加</button>
+            </div>
+            <ul class="list-group mb-3" id="jq10-d5-list"></ul>
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="mb-0 text-muted">共 <span id="jq10-d5-total">0</span> 件 · 已完成 <span id="jq10-d5-done">0</span> 件</p>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq10-d5-clear">清除已完成</button>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（完整版）">
+            var KEY = 'dojo-demo-todo';
+
+            function addItem(text, done) {
+              var $li = $('<li>')
+                .addClass('list-group-item d-flex justify-content-between align-items-center')
+                .append($('<span>').addClass('todo-text').text(text))
+                .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }));
+              if (done) $li.addClass('done text-decoration-line-through text-muted');
+              $('#jq10-d5-list').append($li);
+            }
+
+            function save() {
+              var items = [];
+              $('#jq10-d5-list li').each(function () {
+                items.push({
+                  text: $(this).find('.todo-text').text(),
+                  done: $(this).hasClass('done')
+                });
+              });
+              localStorage.setItem(KEY, JSON.stringify(items));
+            }
+
+            function load() {
+              var raw = localStorage.getItem(KEY);
+              if (!raw) {
+                addItem('读一遍《纯静态网页的修行》', false);
+                addItem('练完 jQuery 第十式', true);
+                save();
+                return;
+              }
+              JSON.parse(raw).forEach(function (item) {
+                addItem(item.text, item.done);
+              });
+            }
+
+            // 添加 / 切换 / 删除 / 清空之后：updateStats() 记新账，save() 存档
+            // 启动时：load() 恢复上次的列表，updateStats() 记第一笔账
+          </script>
+        </div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十式</div>
+        <ol>
+          <li>给例 5 加一个“全部完成”按钮：点击后所有未完成任务都变成完成状态，统计与存档同步更新。</li>
+          <li>给例 5 加两条规矩：任务文字限制 20 字；再添一个“按时间排序”按钮，按添加时间重排任务。</li>
+          <li>思考题：删除按钮为什么用事件委托？在每次创建任务时给按钮逐个绑定 <code>.on('click', …)</code>，行不行？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="全部完成">
+            $('#jq10-all').on('click', function () {
+              $('#jq10-d5-list li').addClass('done text-decoration-line-through text-muted');
+              updateStats();   // 账本刷新
+              save();          // 存档
+            });
+          </script>
+          <p>
+            按钮就放在“清除已完成”旁边（<code>btn btn-sm btn-outline-primary</code>）。
+            <code>addClass()</code> 会自动对选中的每个 <code>li</code> 都加类——隐式遍历的老朋友；
+            已经完成的项再加一次也无妨。别忘了 <code>updateStats()</code> 和 <code>save()</code>，
+            不然数字和存档都会漏账。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="二十字限制：HTML 侧">
+            <input type="text" class="form-control" id="jq10-d5-input" maxlength="20" placeholder="想做什么？写下来">
+          </script>
+          <script type="text/plain" data-lang="js" data-title="JS 侧兜底 + 按时间排序">
+            // JS 侧再兜底一层（防止绕过 HTML 限制）：截断到 20 字
+            var text = $('#jq10-d5-input').val().trim().slice(0, 20);
+
+            // 创建任务时记下“出生时间”（addItem 里加一行）
+            $li.data('t', Date.now());
+
+            // “按时间排序”按钮
+            $('#jq10-sort').on('click', function () {
+              var items = $('#jq10-d5-list').children('li').toArray(); // 转成原生数组
+              items.sort(function (a, b) {
+                return $(a).data('t') - $(b).data('t');                // 比较出生时间
+              });
+              $('#jq10-d5-list').append(items);                        // 按新顺序落位
+            });
+          </script>
+          <p>
+            <code>maxlength="20"</code> 一行挡住打字超长，但粘贴、程序赋值仍能绕过，所以 JS 侧用
+            <code>slice(0, 20)</code> 再兜底。排序的妙处是：<code>append()</code> 对<strong>已在页面里的节点</strong>
+            是“移动”而不是“复制”——把数组按新顺序 append 回去，任务就在原列表里排好了队。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            逐个绑定<strong>不是不行</strong>——创建时对每个按钮 <code>.on('click', …)</code>，按钮同样会生效。
+            但委托更稳，理由有三：其一，规则集中一处，以后增删任务不必记得同步补绑定，漏一个就失灵一个；
+            其二，本例的任务项 <code>li</code> 本身也是动态的，“点击切换”若直接绑在 <code>li</code> 上，
+            同样要逐个绑，而委托一次绑定就管住了现在与将来的所有项；其三，委托把“会发生什么”写在
+            <code>ul</code> 上，代码读起来像在列表门口立了块告示牌，行为和容器一起走。
+            最不推荐的是在创建时写 <code>onclick="…"</code> 属性——行为与结构耦合，还容易重复触发。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>结构先行：Bootstrap 管样子（<code>input-group</code> / <code>list-group</code>），jQuery 管行为；</li>
+        <li>增删改一条链：<code>val()</code> 取值 → <code>trim()</code> 判空 → <code>$('&lt;li&gt;')</code> 创建 → <code>append</code> 入列；</li>
+        <li>类即状态：<code>done</code> 类既管样式又管统计，一处改动、处处刷新；</li>
+        <li>事件委托让动态内容天然可交互，新任务出生即带删除能力；</li>
+        <li><code>localStorage</code> + <code>JSON</code> 让数据跨刷新存活，离线照常。</li>
+      </ul>
+
+      <blockquote>第三回的十式至此全部修完。剑已佩妥，出门便是江湖——下一个待办：写你自己的页面。</blockquote>
+
+      <p>
+        本章完整成品已单独成页，双击打开就能用：
+        <a href="../demo/todo/index.html" target="_blank" rel="noopener">待办清单 · 完整成品（新标签打开）</a>。
+        它带正式页面骨架、全部功能与持久化，把它存进你的练功目录吧。
+      </p>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

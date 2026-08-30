@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第九式 · 导航组件 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="nav、tabs、pills、navbar 与 breadcrumb 的写法。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-09">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        庭院深深，靠回廊引路；网页重重，靠导航指路。这一式，我们把给访客领路的家伙事
+        一次配齐：页签、胶囊、导航栏，还有那条标着“你来时的路”的面包屑。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>nav、nav-item 与 nav-link 的基础搭配</li>
+          <li>会写 tabs 与 pills 的页签切换（data-bs-toggle）</li>
+          <li>会搭响应式导航栏（含折叠汉堡按钮）</li>
+          <li>认识 sticky-top 与 breadcrumb</li>
+        </ul>
+      </div>
+
+      <h2>nav 与页签</h2>
+      <p>
+        导航的最小单位是 <code>nav</code>：<code>ul</code> 挂 <code>nav</code>，
+        每个 <code>li</code> 挂 <code>nav-item</code>，里面的 <code>a</code> 挂
+        <code>nav-link</code>——默认就横排成一串。加上 <code>nav-tabs</code>，
+        就变成熟悉的页签外观；再让每个链接写 <code>data-bs-toggle="tab"</code> 并指向
+        <code>tab-content</code> 里对应 <code>tab-pane</code> 的 id，点击即切换。
+        <strong>全程不用写一行 JavaScript</strong>——这是 Bootstrap 的 data API
+        在自动生效，第一式就见过它的把戏。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · tabs 页签切换（点击页签试试）</div>
+        <div class="demo-preview">
+          <ul class="nav nav-tabs" id="bs09-demo1-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="bs09-demo1-tab-gong" data-bs-toggle="tab" data-bs-target="#bs09-demo1-gong" type="button" role="tab" aria-controls="bs09-demo1-gong" aria-selected="true">功法</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bs09-demo1-tab-jian" data-bs-toggle="tab" data-bs-target="#bs09-demo1-jian" type="button" role="tab" aria-controls="bs09-demo1-jian" aria-selected="false">剑谱</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bs09-demo1-tab-xin" data-bs-toggle="tab" data-bs-target="#bs09-demo1-xin" type="button" role="tab" aria-controls="bs09-demo1-xin" aria-selected="false">心法</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="bs09-demo1-tabContent">
+            <div class="tab-pane fade show active" id="bs09-demo1-gong" role="tabpanel" aria-labelledby="bs09-demo1-tab-gong" tabindex="0">
+              <p class="mt-3 mb-0">外练筋骨皮：站桩、扎马、打熬气力。</p>
+            </div>
+            <div class="tab-pane fade" id="bs09-demo1-jian" role="tabpanel" aria-labelledby="bs09-demo1-tab-jian" tabindex="0">
+              <p class="mt-3 mb-0">剑走轻灵：刺、挑、抹、撩，一招一式不可含糊。</p>
+            </div>
+            <div class="tab-pane fade" id="bs09-demo1-xin" role="tabpanel" aria-labelledby="bs09-demo1-tab-xin" tabindex="0">
+              <p class="mt-3 mb-0">内修真气：心无旁骛，呼吸绵长，以意导气。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul class="nav nav-tabs" id="bs09-demo1-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bs09-demo1-tab-gong" data-bs-toggle="tab"
+                        data-bs-target="#bs09-demo1-gong" type="button" role="tab"
+                        aria-controls="bs09-demo1-gong" aria-selected="true">功法</button>
+              </li>
+              <!-- 第二、三个页签结构相同，省略 -->
+            </ul>
+            <div class="tab-content" id="bs09-demo1-tabContent">
+              <div class="tab-pane fade show active" id="bs09-demo1-gong" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-gong" tabindex="0">
+                <p class="mt-3 mb-0">外练筋骨皮：站桩、扎马、打熬气力。</p>
+              </div>
+              <!-- 其余 tab-pane 结构相同，省略 -->
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>把接线关系看明白，页签就不神秘了：</p>
+      <ul>
+        <li><code>data-bs-target</code> 里的 id，必须与某个 <code>tab-pane</code> 的 id 逐字对上；</li>
+        <li><code>active</code> 决定初始显示哪一页（不写则一页都不亮）；</li>
+        <li><code>fade</code> 让切换带渐隐，第一页还要多写 <code>show</code>；</li>
+        <li>那一串 <code>role</code>/<code>aria-*</code> 是给读屏器的路标，跟着写即可。</li>
+      </ul>
+
+      <h2>胶囊与铺满</h2>
+      <p>
+        把 <code>nav-tabs</code> 换成 <code>nav-pills</code>，页签就变成胶囊按钮，
+        切换写法也随之改为 <code>data-bs-toggle="pill"</code>（同一个 tab 组件，
+        两个开关都认）。想让导航铺满整行，还有两个修饰类：
+        <code>nav-fill</code> 按内容比例分摊宽度，<code>nav-justified</code> 则人人等宽。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · pills 胶囊 + nav-fill 铺满</div>
+        <div class="demo-preview">
+          <ul class="nav nav-pills nav-fill mb-3" id="bs09-demo2-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="bs09-demo2-tab-zao" data-bs-toggle="pill" data-bs-target="#bs09-demo2-zao" type="button" role="tab" aria-controls="bs09-demo2-zao" aria-selected="true">早课</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bs09-demo2-tab-wu" data-bs-toggle="pill" data-bs-target="#bs09-demo2-wu" type="button" role="tab" aria-controls="bs09-demo2-wu" aria-selected="false">午课</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bs09-demo2-tab-wan" data-bs-toggle="pill" data-bs-target="#bs09-demo2-wan" type="button" role="tab" aria-controls="bs09-demo2-wan" aria-selected="false">晚课</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="bs09-demo2-tabContent">
+            <div class="tab-pane fade show active" id="bs09-demo2-zao" role="tabpanel" aria-labelledby="bs09-demo2-tab-zao" tabindex="0">
+              <p class="mb-0">站桩半炷香，再练一路拳。</p>
+            </div>
+            <div class="tab-pane fade" id="bs09-demo2-wu" role="tabpanel" aria-labelledby="bs09-demo2-tab-wu" tabindex="0">
+              <p class="mb-0">后山采药，顺带练轻功。</p>
+            </div>
+            <div class="tab-pane fade" id="bs09-demo2-wan" role="tabpanel" aria-labelledby="bs09-demo2-tab-wan" tabindex="0">
+              <p class="mb-0">抄经一页，打坐收功。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul class="nav nav-pills nav-fill mb-3" id="bs09-demo2-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bs09-demo2-tab-zao" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo2-zao" type="button" role="tab"
+                        aria-controls="bs09-demo2-zao" aria-selected="true">早课</button>
+              </li>
+              <!-- 其余页签结构相同，省略 -->
+            </ul>
+            <div class="tab-content" id="bs09-demo2-tabContent">
+              <div class="tab-pane fade show active" id="bs09-demo2-zao" role="tabpanel"
+                   aria-labelledby="bs09-demo2-tab-zao" tabindex="0">
+                <p class="mb-0">站桩半炷香，再练一路拳。</p>
+              </div>
+              <!-- 其余 tab-pane 结构相同，省略 -->
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>导航栏的结构</h2>
+      <p>
+        页签管“一页之内”的切换，导航栏管“页面之间”的往来。一条完整导航栏有六件套：
+      </p>
+      <ul>
+        <li><code>navbar</code> 定身份，<code>navbar-expand-lg</code> 定折叠时机——lg 断点（≥992px）以上横排展开，以下收起；</li>
+        <li><code>navbar-toggler</code> 是汉堡按钮，<code>data-bs-toggle="collapse"</code> + <code>data-bs-target</code> 指向要折叠的那块；</li>
+        <li><code>collapse navbar-collapse</code> 就是收起来的那块——id 必须与 toggler 的 target 对上；</li>
+        <li><code>navbar-brand</code> 是门牌名号；菜单用 <code>navbar-nav</code> + <code>nav-item</code> + <code>nav-link</code>；</li>
+        <li><code>container-fluid</code> 把内容兜住、左右留边。</li>
+      </ul>
+      <p>
+        上面那条<strong>面包屑</strong>（breadcrumb）也一并送上：<code>ol</code> 挂
+        <code>breadcrumb</code>，每级 <code>li</code> 挂 <code>breadcrumb-item</code>，
+        最后一格写 <code>active</code> 并标 <code>aria-current="page"</code>。
+        现在把浏览器窗口<strong>缩窄</strong>，看汉堡按钮现身、菜单收起。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 响应式导航栏 + 面包屑（缩窄窗口试试）</div>
+        <div class="demo-preview">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+              <li class="breadcrumb-item"><a href="#">首页</a></li>
+              <li class="breadcrumb-item"><a href="#">武学</a></li>
+              <li class="breadcrumb-item active" aria-current="page">第九式</li>
+            </ol>
+          </nav>
+          <nav class="navbar navbar-expand-lg bg-body-tertiary rounded">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#"><i class="bi bi-compass me-1"></i>修武堂</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bs09-demo3-nav" aria-controls="bs09-demo3-nav" aria-expanded="false" aria-label="展开菜单">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="bs09-demo3-nav">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">首页</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">武学</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">藏经阁</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="#">首页</a></li>
+                <li class="breadcrumb-item"><a href="#">武学</a></li>
+                <li class="breadcrumb-item active" aria-current="page">第九式</li>
+              </ol>
+            </nav>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary rounded">
+              <div class="container-fluid">
+                <a class="navbar-brand" href="#"><i class="bi bi-compass me-1"></i>修武堂</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#bs09-demo3-nav" aria-controls="bs09-demo3-nav"
+                        aria-expanded="false" aria-label="展开菜单">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="bs09-demo3-nav">
+                  <ul class="navbar-nav">
+                    <li class="nav-item">
+                      <a class="nav-link active" aria-current="page" href="#">首页</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">武学</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">藏经阁</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        折叠的机关藏在三处：toggler 的 <code>data-bs-target="#bs09-demo3-nav"</code>、
+        collapse 容器的 <code>id="bs09-demo3-nav"</code>、以及两者共同的
+        <code>data-bs-toggle="collapse"</code> 开关。id 对不上，按钮就是哑的——
+        这类“接线错误”占导航栏翻车事故的九成。
+      </p>
+
+      <h2>配色与吸顶</h2>
+      <p>
+        默认导航栏是浅色；深底导航栏，在 <code>navbar</code> 上加
+        <code>data-bs-theme="dark"</code> 再配一个 <code>bg-dark</code>（或
+        <code>bg-primary</code>）即可，文字与汉堡图标会自动反白。注意：老教程里的
+        <code>navbar-dark</code> 写法在 5.3 已弃用，认准 <code>data-bs-theme</code>。
+      </p>
+      <p>
+        想让导航栏随页面滚动<strong>吸在顶上</strong>，加一个 <code>sticky-top</code>：
+        它只在滚动越过它时才钉住，不遮挡上方内容。它的兄弟 <code>fixed-top</code> 则从
+        一开始就钉在窗口顶部，需要给正文留出等高的 padding 才不挡字——日常用
+        <code>sticky-top</code> 更省心。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第九式</div>
+        <ol>
+          <li>把例 3 的导航栏改成深色版：加 <code>data-bs-theme="dark"</code>，并把 <code>bg-body-tertiary</code> 换成 <code>bg-dark</code>，观察文字与汉堡按钮的变化。</li>
+          <li>把例 1 的页签改成胶囊版：<code>nav-tabs</code> 换 <code>nav-pills</code>，所有 <code>data-bs-toggle="tab"</code> 换成 <code>data-bs-toggle="pill"</code>，再试切换。</li>
+          <li>思考题：导航栏的折叠按钮用的是 <code>collapse</code> 组件，页签用的是 <code>tab</code> 组件，为什么同一句 <code>data-bs-toggle</code> 要分两种写法？它们的分工有何不同？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="深色导航栏">
+            <nav class="navbar navbar-expand-lg bg-dark rounded" data-bs-theme="dark">
+              <!-- 其余内容与例 3 相同 -->
+            </nav>
+          </script>
+          <p>
+            <code>data-bs-theme="dark"</code> 把导航栏切换进暗色模式，链接、品牌字、
+            汉堡按钮的描边与三道杠都会自动换成浅色；<code>bg-dark</code> 补上深色底。
+            只换 <code>bg-dark</code> 不换 theme，文字会“墨字沉在墨夜里”，什么都看不清。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="页签换胶囊">
+            <ul class="nav nav-pills" id="bs09-demo1-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bs09-demo1-tab-gong" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo1-gong" type="button" role="tab"
+                        aria-controls="bs09-demo1-gong" aria-selected="true">功法</button>
+              </li>
+              <!-- 其余页签同样改法 -->
+            </ul>
+          </script>
+          <p>
+            <code>tab-pane</code> 那半边完全不用动——切换的“管线”不变，变的只是开关写法
+            与外观类名。这也是 Bootstrap 组件化的甜头：结构稳定，样式随意换。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>data-bs-toggle</code> 后面的值，是告诉 Bootstrap “去启动哪个组件”：
+            <code>collapse</code> 启动折叠组件，<code>tab</code> 启动页签组件。
+            两者的<strong>分工</strong>不同：collapse 只管<em>自己</em>——把一大块内容
+            收起或展开（导航栏菜单、第十一式的折叠面板都是它）；tab 则要<em>联动</em>——
+            点亮自己被点的页签，同时切走别处的内容面板。所以导航栏的汉堡按钮借 collapse，
+            页签借 tab，各找各的搭档。至于 <code>navbar-expand-lg</code> 里的 lg，
+            就是第二式讲过的断点：屏幕宽于 992px 时菜单常驻横排，窄于此才需要汉堡按钮。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>nav</code>/<code>nav-item</code>/<code>nav-link</code> 是导航的最小骨架，<code>nav-tabs</code>/<code>nav-pills</code> 换外观；</li>
+        <li>页签切换靠 <code>data-bs-toggle="tab"|"pill"</code> + <code>tab-content</code>/<code>tab-pane</code>，全程零 JS；</li>
+        <li>导航栏六件套：<code>navbar-expand-*</code> 定断点、toggler 按开关、collapse 藏菜单、brand 挂牌匾；</li>
+        <li>深色用 <code>data-bs-theme="dark"</code>，吸顶用 <code>sticky-top</code>，面包屑是 <code>breadcrumb</code> 三件套。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼浮层法术——模态框与下拉菜单。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

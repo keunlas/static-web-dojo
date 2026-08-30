@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨白 · 作品集 | 纯静态网页的修行</title>
+<meta name="description" content="墨白的作品集主页：纯静态、零外链，由 Bootstrap 5.3.8 手写而成。">
+<link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" href="../../assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='18'%20fill='%23b03a2e'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20text-anchor='middle'%20fill='%23faf6ec'%20font-family='serif'%3E%E4%BF%AE%3C/text%3E%3C/svg%3E">
+<style>
+  body { background: #faf6ec; }
+  .project-thumb {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #2b2a26;
+  }
+  .project-a { background: #f4edde; }
+  .project-b { background: #e9f0e4; }
+  .project-c { background: #e8edf5; }
+  .project-d { background: #f5e8e4; }
+  .project-e { background: #eef0e0; }
+  .project-f { background: #e9e4f0; }
+  .portrait {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #b03a2e;
+    border-radius: 50%;
+    background: #fffdf7;
+    color: #b03a2e;
+    font-family: Georgia, "Songti SC", "Noto Serif CJK SC", "SimSun", serif;
+    font-size: 2.2rem;
+    letter-spacing: .2em;
+  }
+  .seal { color: #b03a2e; letter-spacing: .3em; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+  <div class="container">
+    <a class="navbar-brand" href="#hero">
+      <i class="bi bi-feather me-1" aria-hidden="true"></i>墨白 · 静水流深
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navMenu" aria-controls="navMenu"
+            aria-expanded="false" aria-label="展开导航">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="#hero">首页</a></li>
+        <li class="nav-item"><a class="nav-link" href="#projects">项目</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">关于</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<header id="hero" class="py-5 text-center">
+  <div class="container py-4">
+    <p class="seal mb-2"><i class="bi bi-feather" aria-hidden="true"></i> 修行笔记</p>
+    <h1 class="display-4">墨白</h1>
+    <p class="lead">一个在代码与山水之间行走的前端修行者。</p>
+    <p class="mt-4 mb-0">
+      <a class="btn btn-primary me-2" href="#projects">
+        <i class="bi bi-eyeglasses me-1" aria-hidden="true"></i>看作品
+      </a>
+      <a class="btn btn-outline-primary" href="#about">
+        <i class="bi bi-person me-1" aria-hidden="true"></i>关于我
+      </a>
+    </p>
+  </div>
+</header>
+
+<main>
+  <section id="projects" class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-1">我的作品</h2>
+      <p class="text-center text-body-secondary mb-4">六件练手之作，皆为纯静态页面，零外链。</p>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-a rounded-top">
+              <i class="bi bi-stars" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">剑气纵横</h3>
+              <p class="card-text">一套 CSS 动画库，让页面元素像剑招一样行云流水。</p>
+              <p class="card-text"><small class="text-body-secondary">HTML · CSS</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-b rounded-top">
+              <i class="bi bi-book" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">藏经阁</h3>
+              <p class="card-text">离线文档阅读器，断网也能翻遍要用的每一页参考。</p>
+              <p class="card-text"><small class="text-body-secondary">HTML · Bootstrap</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-c rounded-top">
+              <i class="bi bi-vector-pen" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">心法卷轴</h3>
+              <p class="card-text">竖排手写体排版工具，把文章卷成一张古朴的卷轴。</p>
+              <p class="card-text"><small class="text-body-secondary">CSS · JavaScript</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-d rounded-top">
+              <i class="bi bi-cup-hot" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">云水茶寮</h3>
+              <p class="card-text">给朋友写的博客主题：茶香、留白与慢下来的阅读。</p>
+              <p class="card-text"><small class="text-body-secondary">HTML · CSS</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-e rounded-top">
+              <i class="bi bi-markdown" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">竹简编辑器</h3>
+              <p class="card-text">极简 Markdown 编辑器，左边写字，右边成竹。</p>
+              <p class="card-text"><small class="text-body-secondary">JavaScript</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="project-thumb project-f rounded-top">
+              <i class="bi bi-map" aria-hidden="true"></i>
+            </div>
+            <div class="card-body">
+              <h3 class="h5 card-title">江湖地图</h3>
+              <p class="card-text">用 SVG 手绘的修行路线图，每一站都是踩过的坑。</p>
+              <p class="card-text"><small class="text-body-secondary">JavaScript · SVG</small></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-md-4 text-center">
+          <div class="portrait">墨白</div>
+          <p class="mt-3 mb-0 text-body-secondary">山中小镇 · 一台旧笔记本</p>
+        </div>
+        <div class="col-md-8">
+          <h2>关于我</h2>
+          <p>白天写页面，夜里读源码。相信好的网页应该像宣纸上的字：结构清晰，留白得当，离线也能打开。</p>
+          <p>本站即是我的一次修行：只用 Bootstrap 与十几行点缀样式手写而成，没有框架，没有构建工具，也没有任何外网请求。</p>
+          <p class="mb-1"><i class="bi bi-envelope me-1" aria-hidden="true"></i>mubai@example.com</p>
+          <p class="mb-3"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>江湖某处</p>
+          <p class="mb-0">
+            <span class="badge text-bg-primary me-1">HTML</span>
+            <span class="badge text-bg-primary me-1">CSS</span>
+            <span class="badge text-bg-primary me-1">JavaScript</span>
+            <span class="badge text-bg-primary me-1">Bootstrap</span>
+            <span class="badge text-bg-primary">jQuery</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="border-top py-4 bg-white">
+  <div class="container text-center">
+    <p class="mb-2">
+      <a class="text-decoration-none mx-2" href="#hero" aria-label="回到顶部">
+        <i class="bi bi-arrow-up-circle" aria-hidden="true"></i>
+      </a>
+      <a class="text-decoration-none mx-2" href="#hero" aria-label="GitHub">
+        <i class="bi bi-github" aria-hidden="true"></i>
+      </a>
+      <a class="text-decoration-none mx-2" href="#hero" aria-label="邮箱">
+        <i class="bi bi-envelope" aria-hidden="true"></i>
+      </a>
+    </p>
+    <p class="small text-body-secondary mb-0">手写于纸上，渲染于浏览器 · 纯静态 · 零外链 · 由 Bootstrap 5.3.8 驱动</p>
+  </div>
+</footer>
+
+<script src="../../assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四式 · 排版与工具类 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="display 大标题、文本与颜色、边框阴影，以及间距工具类。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-04">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        架子搭好了，接下来给页面添血肉。这一式没有大组件，全是一招一式的小工具类——
+        但它们用得最勤，一招鲜，吃遍天。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li><code>display-1</code> 到 <code>display-6</code> 六档大标题与 <code>lead</code> 引导段</li>
+          <li>文本处理：<code>mark</code>、<code>small</code>、<code>list-unstyled</code>、<code>list-inline</code> 与对齐</li>
+          <li>8 色系：<code>text-*</code>、<code>bg-*</code> 与 <code>text-bg-*</code> 组合</li>
+          <li><code>border</code>、<code>rounded</code>、<code>shadow</code> 与间距工具类 <code>p-*</code> / <code>m-*</code></li>
+        </ul>
+      </div>
+
+      <h2>标题与引导段</h2>
+      <p>
+        Bootstrap 把字号排成体系。<code>display-1</code> 到 <code>display-6</code> 是六档“展示型大标题”，
+        字号从 5rem 一路递减到 2.5rem，字重更轻（300），适合首页横幅；正文内部的分层用普通
+        <code>h1</code>–<code>h6</code> 标签即可（本章页的各级小标题就是例子）。
+        <code>lead</code> 是“引导段”：比正文大一号，适合放在页首领衔。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 排版样板：六档大标题 + 引导段 + 高亮</div>
+        <div class="demo-preview">
+          <h1 class="display-1">第 1 档</h1>
+          <h1 class="display-2">第 2 档</h1>
+          <h1 class="display-3">第 3 档</h1>
+          <h1 class="display-4">第 4 档</h1>
+          <h1 class="display-5">第 5 档</h1>
+          <h1 class="display-6">第 6 档</h1>
+          <p class="lead">这是 lead 引导段：比正文大一号，适合放在页首领衔。</p>
+          <p class="mb-0">这是普通正文，供对照。那 <mark>被 mark 标记的文字</mark> 会自动铺上黄底。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <h1 class="display-1">第 1 档</h1>
+            <h1 class="display-2">第 2 档</h1>
+            <!-- display-3 到 display-6 同理，字号逐档变小 -->
+            <h1 class="display-6">第 6 档</h1>
+
+            <p class="lead">这是 lead 引导段：比正文大一号。</p>
+            <p>这是普通正文。那 <mark>被 mark 标记的文字</mark> 会自动铺上黄底。</p>
+          </script>
+        </div>
+      </div>
+
+      <h2>文本处理：标记、小字与列表</h2>
+      <p>
+        <code>mark</code> 是黄底高亮；<code>small</code> 是小一号的弱化文字，适合备注与版权行；
+        <code>list-unstyled</code> 去掉列表默认的项目符号和缩进；<code>list-inline</code> 把竖排列表变成横排
+        （每个 <code>li</code> 上配 <code>list-inline-item</code>）。对齐有 <code>text-start</code> /
+        <code>text-center</code> / <code>text-end</code> 三档。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 对齐与列表的处理</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3 mb-3">
+            <p class="text-start border-bottom pb-1 mb-1">text-start —— 左对齐（默认）</p>
+            <p class="text-center border-bottom pb-1 mb-1">text-center —— 居中</p>
+            <p class="text-end pb-0 mb-0">text-end —— 右对齐</p>
+          </div>
+          <div class="border rounded p-3">
+            <p class="mb-1"><strong>默认列表</strong>（带圆点、有缩进）</p>
+            <ul class="mb-3">
+              <li>日拱一卒</li>
+              <li>功不唐捐</li>
+            </ul>
+            <p class="mb-1"><strong>list-unstyled</strong>（去符号、去缩进）</p>
+            <ul class="list-unstyled mb-3">
+              <li>日拱一卒</li>
+              <li>功不唐捐</li>
+            </ul>
+            <p class="mb-1"><strong>list-inline</strong>（横排一行）</p>
+            <ul class="list-inline mb-0">
+              <li class="list-inline-item">首页</li>
+              <li class="list-inline-item">目录</li>
+              <li class="list-inline-item">关于</li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <p class="text-center border-bottom pb-1 mb-1">text-center —— 居中</p>
+            <p class="text-end">text-end —— 右对齐</p>
+
+            <ul class="list-unstyled">
+              <li>日拱一卒</li>
+              <li>功不唐捐</li>
+            </ul>
+
+            <ul class="list-inline">
+              <li class="list-inline-item">首页</li>
+              <li class="list-inline-item">目录</li>
+              <li class="list-inline-item">关于</li>
+            </ul>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        顺带一提：Bootstrap 5 把旧版的 <code>text-left/right</code>、<code>ml/mr</code> 换成了
+        <code>text-start/end</code>、<code>ms/me</code>——为的是支持从右向左的语言（练功第 3 题细说）。
+      </p>
+
+      <h2>颜色：text-* 与 bg-*</h2>
+      <p>
+        Bootstrap 有一套贯穿全站的 <strong>8 色系</strong>：<code>primary</code>（主色）、
+        <code>secondary</code>（次色）、<code>success</code>（成功绿）、<code>danger</code>（危险红）、
+        <code>warning</code>（警示黄）、<code>info</code>（信息青）、<code>light</code>（浅）、
+        <code>dark</code>（深）。文字色用 <code>text-*</code>，背景色用 <code>bg-*</code>，
+        还有 <code>text-bg-*</code> 一次同时搞定背景和对比文字色。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：本站把 primary 染成了朱砂</div>
+        <p style="margin:0">
+          本教程网站的皮肤把 <code>primary</code> 定义成了朱砂色，所以本页的 <code>text-primary</code>、
+          <code>bg-primary</code> 都是朱砂而不是原版蓝。这正是“主题定制”的活例子，原理留到第十五式。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 八色色板：文字色与背景色</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3 mb-3">
+            <p class="mb-2">文字色 <code>text-*</code>：<span class="text-primary">primary</span> · <span class="text-secondary">secondary</span> · <span class="text-success">success</span> · <span class="text-danger">danger</span> · <span class="text-warning">warning</span> · <span class="text-info">info</span> · <span class="text-dark">dark</span></p>
+            <p class="mb-0 bg-dark rounded p-2"><span class="text-light">text-light 是浅色字，要铺在深色底上才看得清</span></p>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 col-md-3"><div class="bg-primary text-white rounded p-2 text-center">bg-primary</div></div>
+            <div class="col-6 col-md-3"><div class="bg-secondary text-white rounded p-2 text-center">bg-secondary</div></div>
+            <div class="col-6 col-md-3"><div class="bg-success text-white rounded p-2 text-center">bg-success</div></div>
+            <div class="col-6 col-md-3"><div class="bg-danger text-white rounded p-2 text-center">bg-danger</div></div>
+            <div class="col-6 col-md-3"><div class="bg-warning rounded p-2 text-center">bg-warning</div></div>
+            <div class="col-6 col-md-3"><div class="bg-info text-white rounded p-2 text-center">bg-info</div></div>
+            <div class="col-6 col-md-3"><div class="bg-light border rounded p-2 text-center">bg-light</div></div>
+            <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center">bg-dark</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <p>
+              文字色：<span class="text-primary">primary</span> ·
+              <span class="text-danger">danger</span> · <span class="text-dark">dark</span>
+            </p>
+
+            <div class="bg-primary text-white rounded p-2 text-center">bg-primary</div>
+            <div class="bg-warning rounded p-2 text-center">bg-warning</div>
+            <!-- 其余六色同理：secondary / success / danger / info / light / dark -->
+          </script>
+        </div>
+      </div>
+
+      <p>
+        观察两个细节：深色背景上要补 <code>text-white</code>；<code>text-light</code>（近白色字）
+        在浅底上会“隐身”，只能铺深底。背景色 + 文字色一起定，用 <code>text-bg-*</code> 一条类最省心，
+        它还会自动配上合适对比度的文字色。
+      </p>
+
+      <h2>边框、圆角与阴影</h2>
+      <p>
+        <code>border</code> 加一圈细边框，<code>border-primary</code> 等可以给边框上色；
+        <code>rounded</code> 是小圆角，<code>rounded-3</code> 更大，<code>rounded-pill</code> 是胶囊形、
+        <code>rounded-circle</code> 是圆形；阴影三档：<code>shadow-sm</code> / <code>shadow</code> /
+        <code>shadow-lg</code>，由浅入深。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 边框、圆角与阴影三件套</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-6 col-md-4"><div class="border rounded p-3 text-center">border + rounded<br>细框小圆角</div></div>
+            <div class="col-6 col-md-4"><div class="border border-primary rounded-3 p-3 text-center">border-primary<br>+ rounded-3</div></div>
+            <div class="col-6 col-md-4"><div class="border rounded-pill p-2 text-center">rounded-pill<br>胶囊形</div></div>
+            <div class="col-6 col-md-4"><div class="bg-warning-subtle rounded-circle d-flex align-items-center justify-content-center text-center" style="width:4rem;height:4rem">圆形</div></div>
+            <div class="col-6 col-md-4"><div class="rounded shadow p-3 text-center">shadow<br>默认阴影</div></div>
+            <div class="col-6 col-md-4"><div class="rounded shadow-lg p-3 text-center">shadow-lg<br>大阴影</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+            <div class="border rounded p-3 text-center">border + rounded</div>
+            <div class="border border-primary rounded-3 p-3 text-center">border-primary + rounded-3</div>
+            <div class="border rounded-pill p-2 text-center">rounded-pill</div>
+            <div class="bg-warning-subtle rounded-circle d-flex align-items-center justify-content-center text-center" style="width:4rem;height:4rem">圆形</div>
+            <div class="rounded shadow p-3 text-center">shadow</div>
+            <div class="rounded shadow-lg p-3 text-center">shadow-lg</div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        （那个圆形块外层用了 <code>d-flex</code> 让它居中，这是第十五式的招式，先混个脸熟。）
+      </p>
+
+      <h2>间距工具类：p-* 与 m-*</h2>
+      <p>
+        留白靠两大家族：<code>p-*</code>（padding 内边距）与 <code>m-*</code>（margin 外边距）。
+        数字 0–5 共六档：0 是零、1 是 0.25rem、2 是 0.5rem、3 是 1rem、4 是 1.5rem、5 是 3rem；
+        <code>m-*</code> 另有 <code>auto</code>（自动分配剩余空间）。方向后缀：<code>t</code> 上、
+        <code>b</code> 下、<code>s</code> 左、<code>e</code> 右、<code>x</code> 左右、<code>y</code> 上下；
+        不带后缀就是四边一起。于是有了 <code>mt-3</code>（上外边距 1rem）、<code>pe-2</code>（右内边距 0.5rem）、
+        <code>mx-auto</code>（左右自动外边距，让定宽块水平居中）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 用工具类拼一张名片——没有写一行自定义 CSS</div>
+        <div class="demo-preview">
+          <div class="row">
+            <div class="col-12 col-sm-8 col-lg-6 mx-auto">
+              <div class="bg-dark text-white rounded-3 shadow-lg p-4">
+                <div class="h5 mb-1">夜雨听风</div>
+                <div class="text-warning mb-3">前端修行者</div>
+                <div class="border-top border-light pt-3">
+                  <p class="mb-1">「日拱一卒，功不唐捐。」</p>
+                  <p class="mb-0"><span class="text-warning">邮箱</span>　dojo@example.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row">
+              <div class="col-12 col-sm-8 col-lg-6 mx-auto">
+                <div class="bg-dark text-white rounded-3 shadow-lg p-4">
+                  <div class="h5 mb-1">夜雨听风</div>
+                  <div class="text-warning mb-3">前端修行者</div>
+                  <div class="border-top border-light pt-3">
+                    <p class="mb-1">「日拱一卒，功不唐捐。」</p>
+                    <p class="mb-0"><span class="text-warning">邮箱</span>　dojo@example.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这张名片没有一个自定义类、一行 <code>style</code>：深底 <code>bg-dark</code> + 白字
+        <code>text-white</code>，圆角 <code>rounded-3</code>，大阴影 <code>shadow-lg</code>，
+        内边距 <code>p-4</code>；姓名用 <code>h5</code> 类冒充标题，职位用 <code>text-warning</code> 点缀；
+        <code>border-top border-light</code> 画出浅色分隔线；宽度由栅格 <code>col-*</code> 限住，
+        <code>mx-auto</code> 负责居中。工具类组合拳，就是这么打的。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四式</div>
+        <ol>
+          <li>把例 5 的名片改成<strong>浅色版</strong>：白底细边框（<code>bg-light</code> + <code>border</code>）、深色字（<code>text-dark</code>）、主色点缀（<code>text-primary</code>）。</li>
+          <li>动手：用 <code>list-inline</code> 做一行页脚链接，三个链接之间留出间距。</li>
+          <li>思考题：为什么 Bootstrap 5 把 <code>text-left/right</code> 改成 <code>text-start/end</code>、把 <code>ml/mr</code> 改成 <code>ms/me</code>？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="浅色版名片">
+            <div class="row">
+              <div class="col-12 col-sm-8 col-lg-6 mx-auto">
+                <div class="bg-light border text-dark rounded-3 shadow p-4">
+                  <div class="h5 mb-1">夜雨听风</div>
+                  <div class="text-primary mb-3">前端修行者</div>
+                  <div class="border-top pt-3">
+                    <p class="mb-1">「日拱一卒，功不唐捐。」</p>
+                    <p class="mb-0"><span class="text-primary">邮箱</span>　dojo@example.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+          <p>
+            浅底上不必再写 <code>text-white</code>（默认正文色就是深色）；分隔线的 <code>border-light</code>
+            在浅底上太浅，去掉即可。本站的 <code>text-primary</code> 是朱砂色，与浅纸底很配。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="横排页脚链接">
+            <ul class="list-inline mb-0">
+              <li class="list-inline-item"><a href="#">首页</a></li>
+              <li class="list-inline-item"><a href="#">目录</a></li>
+              <li class="list-inline-item"><a href="#">关于</a></li>
+            </ul>
+          </script>
+          <p><code>list-inline-item</code> 自带右侧间距，三个链接自然分开；链接样式全站由皮肤接管。</p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>start/end</code> 是“逻辑方向”：在从左向右的语言（中文、英文）里 start 就是左，
+            在从右向左的语言（阿拉伯语、希伯来语）里 start 自动变成右。用逻辑方向写一遍类名，
+            两种文字方向都能正确呈现，无需为 RTL 语言另写一套样式——这是国际化网页的基本素养。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>大标题 <code>display-1</code> 到 <code>display-6</code>（5rem 递减到 2.5rem），引导段 <code>lead</code>；</li>
+        <li>文本处理：<code>mark</code> 高亮、<code>small</code> 弱化、<code>list-unstyled</code> 去符号、<code>list-inline</code> 横排；</li>
+        <li>8 色系 <code>text-*</code> / <code>bg-*</code> / <code>text-bg-*</code>，深底记得配 <code>text-white</code>；</li>
+        <li><code>border</code> / <code>rounded(-pill/-circle)</code> / <code>shadow(-sm/-lg)</code> 三件套；</li>
+        <li>间距 <code>p-*</code> / <code>m-*</code>：数字 0–5 六档 + <code>auto</code>，方向后缀 t / b / s / e / x / y。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼按钮三件套——btn 按钮、badge 徽章与 alert 提示框。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

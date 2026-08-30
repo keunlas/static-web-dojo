@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十六式 · 综合修炼 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="把导航、英雄区、卡片网格、两栏布局与页脚组装成一个完整的作品集主页。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-16">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        十六式走到最后，不再学新招式。今日的功课，是把前十五式串成一套完整的剑法——
+        导航、英雄区、卡片、栅格、图标，手写一个属于自己的作品集主页。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>复习 navbar、hero、card、栅格、图标与显隐类的组合用法</li>
+          <li>学会把多个组件组装成一个完整页面</li>
+          <li>拿到一个完整成品的源码，作为后续练功的参考</li>
+        </ul>
+      </div>
+
+      <h2>成品先看</h2>
+      <p>
+        本式的成品是一个修行主题的作品集单页：作者假名“墨白”，六个假项目，全部用图标与色块代替图片，
+        响应式折叠导航，零外链、离线可用，只用本地 Bootstrap 与十几行点缀样式。
+      </p>
+      <p>
+        建议先在新标签打开完整成品：<a href="../demo/portfolio/index.html" target="_blank" rel="noopener">demo/portfolio/index.html</a>。
+        缩放窗口、点点汉堡菜单，感受一遍，再回来看下面的逐节拆解。
+      </p>
+
+      <h2>动手拆解</h2>
+      <p>整个页面按“从上到下、一块一节”的思路组装，一共六步。</p>
+
+      <h3>第一步 · 页面骨架与资源引入</h3>
+      <p>
+        成品是<strong>独立整页示例</strong>，不走本站的 loader，直接引三个本地文件：
+        Bootstrap 样式、图标库样式、bundle 脚本。注意它是从 <code>demo/portfolio/</code> 出发，
+        所以路径要上探两层：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="页面骨架">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>墨白 · 作品集</title>
+          <link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
+          <link rel="stylesheet" href="../../assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+          <style>
+            /* 少量点缀：项目色块与头像 */
+            .project-thumb { height: 160px; display: flex; align-items: center;
+                             justify-content: center; font-size: 3rem; }
+            .project-a { background: #f4edde; }
+            /* …project-b 到 project-f 同理换色… */
+            .portrait { width: 140px; height: 140px; margin: 0 auto;
+                        display: flex; align-items: center; justify-content: center;
+                        border: 2px solid #b03a2e; border-radius: 50%;
+                        color: #b03a2e; font-size: 2.2rem; }
+          </style>
+        </head>
+        <body>
+          <!-- 导航、英雄区、项目、关于、页脚依次放在这里 -->
+          <script src="../../assets/vendor/bootstrap/bootstrap.bundle.min.js"><\/script>
+        </body>
+        </html>
+      </script>
+      <p>
+        整页只有一处“自定义”点缀样式（项目色块和圆形头像），其余全靠 Bootstrap 类名完成——
+        这正是本教程主张的写法：能用类名解决的，不写 CSS。
+      </p>
+
+      <h3>第二步 · navbar 导航</h3>
+      <p>
+        导航用第九式学的 <code>navbar</code>。关键在 <code>navbar-expand-lg</code>：
+        lg 以下收起为“汉堡”按钮，lg 及以上自动铺开——第十五式显隐心法的实战。
+        汉堡按钮与折叠区靠 <code>data-bs-target="#navMenu"</code> 对上暗号：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="navbar 导航">
+        <nav class="navbar navbar-expand-lg bg-white border-bottom">
+          <div class="container">
+            <a class="navbar-brand" href="#hero">
+              <i class="bi bi-feather me-1" aria-hidden="true"></i>墨白 · 静水流深
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navMenu" aria-controls="navMenu"
+                    aria-expanded="false" aria-label="展开导航">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+              <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="#hero">首页</a></li>
+                <li class="nav-item"><a class="nav-link" href="#projects">项目</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">关于</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </script>
+      <p>
+        单页作品集里，导航链接用 <code>#hero</code>、<code>#projects</code> 这样的锚点就够了；
+        <code>ms-auto</code> 把菜单推到导航条右侧。
+      </p>
+
+      <h3>第三步 · hero 英雄区</h3>
+      <p>
+        英雄区是页面的门面：<code>py-5</code> 撑出上下留白，<code>text-center</code> 居中，
+        <code>display-4</code> 报上大名，<code>lead</code> 作一句话自白，两个按钮一实一虚，
+        图标是第十四式教的用法：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="hero 英雄区">
+        <header id="hero" class="py-5 text-center">
+          <div class="container py-4">
+            <p class="mb-2"><i class="bi bi-feather" aria-hidden="true"></i> 修行笔记</p>
+            <h1 class="display-4">墨白</h1>
+            <p class="lead">一个在代码与山水之间行走的前端修行者。</p>
+            <p class="mt-4 mb-0">
+              <a class="btn btn-primary me-2" href="#projects">
+                <i class="bi bi-eyeglasses me-1" aria-hidden="true"></i>看作品
+              </a>
+              <a class="btn btn-outline-primary" href="#about">
+                <i class="bi bi-person me-1" aria-hidden="true"></i>关于我
+              </a>
+            </p>
+          </div>
+        </header>
+      </script>
+      <p>
+        这里 <code>id="hero"</code> 与导航里的 <code>href="#hero"</code> 遥相呼应——
+        页面里的每个 <code>id</code>，都是导航可以抵达的驿站。
+      </p>
+
+      <h3>第四步 · 项目卡片网格</h3>
+      <p>
+        六个假项目用第六式的 <code>card</code> 排成网格。妙处全在一行：
+        <code>row-cols-1 row-cols-md-2 row-cols-lg-3</code> 让网格自己完成
+        “手机 1 列 → 平板 2 列 → 桌面 3 列”的响应式切换，每张卡片不必各写 <code>col</code> 类：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="项目卡片网格">
+        <section id="projects" class="py-5">
+          <div class="container">
+            <h2 class="text-center mb-4">我的作品</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-a rounded-top">
+                    <i class="bi bi-stars" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">剑气纵横</h3>
+                    <p class="card-text">一套 CSS 动画库，让页面元素像剑招一样行云流水。</p>
+                    <p class="card-text"><small class="text-body-secondary">HTML · CSS</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 同样的卡片再复制 5 张，换图标、换色块、换文案即可 -->
+
+            </div>
+          </div>
+        </section>
+      </script>
+      <p>
+        两个细节：<code>g-4</code> 管卡片之间的间距；<code>h-100</code> 让同一行卡片等高，
+        不至于长短参差。色块是 <code>project-thumb</code> 加上一个换色类（<code>project-a</code>），
+        大图标居中——没有一张图片文件，页面照样有“作品封面”的样子。
+      </p>
+
+      <h3>第五步 · 关于我（两栏）</h3>
+      <p>
+        “关于我”用第二、三式的两栏栅格：<code>col-md-4</code> 放圆形头像色块，
+        <code>col-md-8</code> 放自我介绍与技能徽章，<code>align-items-center</code> 让两栏垂直居中：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="关于我（两栏）">
+        <section id="about" class="py-5">
+          <div class="container">
+            <div class="row align-items-center g-4">
+              <div class="col-md-4 text-center">
+                <div class="portrait">墨白</div>
+                <p class="mt-3 mb-0 text-body-secondary">山中小镇 · 一台旧笔记本</p>
+              </div>
+              <div class="col-md-8">
+                <h2>关于我</h2>
+                <p>白天写页面，夜里读源码。相信好的网页应该像宣纸上的字：
+                   结构清晰，留白得当，离线也能打开。</p>
+                <p>本站即是我的一次修行：只用 Bootstrap 与几行点缀样式手写而成，
+                   没有框架，没有构建工具，也没有任何外网请求。</p>
+                <p class="mb-1"><i class="bi bi-envelope me-1" aria-hidden="true"></i>mubai@example.com</p>
+                <p class="mb-3"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>江湖某处</p>
+                <p class="mb-0">
+                  <span class="badge text-bg-primary me-1">HTML</span>
+                  <span class="badge text-bg-primary me-1">CSS</span>
+                  <span class="badge text-bg-primary me-1">JavaScript</span>
+                  <span class="badge text-bg-primary">Bootstrap</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </script>
+      <p>
+        手机上看，两栏自动叠成上下两段（默认 <code>col-12</code>），无需任何额外处理——
+        移动优先的心法又一次替你把活干完了。
+      </p>
+
+      <h3>第六步 · 页脚</h3>
+      <p>
+        收尾最简单：一条上边框，居中几枚图标链接与一行小字：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="页脚">
+        <footer class="border-top py-4 mt-5 bg-white">
+          <div class="container text-center">
+            <p class="mb-2">
+              <a class="text-decoration-none mx-2" href="#hero" aria-label="回到顶部">
+                <i class="bi bi-arrow-up-circle" aria-hidden="true"></i>
+              </a>
+              <a class="text-decoration-none mx-2" href="#hero" aria-label="GitHub">
+                <i class="bi bi-github" aria-hidden="true"></i>
+              </a>
+              <a class="text-decoration-none mx-2" href="#hero" aria-label="邮箱">
+                <i class="bi bi-envelope" aria-hidden="true"></i>
+              </a>
+            </p>
+            <p class="small text-body-secondary mb-0">
+              手写于纸上，渲染于浏览器 · 纯静态 · 零外链
+            </p>
+          </div>
+        </footer>
+      </script>
+      <p>
+        图标链接的 <code>href</code> 在真实作品里应指向你的 GitHub 与邮箱；
+        本示例保持零外链，统一指回 <code>#hero</code> 占位。
+      </p>
+
+      <h2>组装心法</h2>
+      <div class="callout warn">
+        <div class="callout-title">心法：整页组装四要诀</div>
+        <ul style="margin:0">
+          <li><strong>先骨架，后填充</strong>：五个 <code>section</code> 依次排开，每块独立成型，再逐块打磨；</li>
+          <li><strong>响应式只在两处动刀</strong>：导航的 <code>navbar-expand-lg</code> 与项目网格的 <code>row-cols</code>，其余布局天然自适应；</li>
+          <li><strong>图标与色块代替图片</strong>：页面零外链、零图片依赖，离线照样完整；</li>
+          <li><strong>不写一行手写 JavaScript</strong>：折叠菜单靠 <code>data-bs-*</code> 属性自动生效，bundle 脚本只是按需加载。</li>
+        </ul>
+      </div>
+      <p>
+        至此，Bootstrap 篇的全部十六式到此收官。建议把<a href="../demo/portfolio/index.html" target="_blank" rel="noopener">成品页面</a>
+        的源码逐行读一遍——你会发现没有一行陌生的东西，全是这十六式里练过的招式。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十六式</div>
+        <ol>
+          <li>把 hero 里的“看作品”按钮改成 <code>btn-outline-primary</code>，并给“关于我”按钮加一个 <code>bi-person</code> 图标。</li>
+          <li>把项目网格改成“手机 1 列、桌面 3 列”，中间不再分两列（提示：只留两个 <code>row-cols</code>）。</li>
+          <li>思考题：为什么成品导航用 <code>navbar-expand-lg</code>，而不是 <code>navbar-expand-md</code> 或干脆不折叠？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="改按钮与图标">
+            <p class="mt-4 mb-0">
+              <a class="btn btn-outline-primary me-2" href="#projects">
+                <i class="bi bi-eyeglasses me-1" aria-hidden="true"></i>看作品
+              </a>
+              <a class="btn btn-outline-primary" href="#about">
+                <i class="bi bi-person me-1" aria-hidden="true"></i>关于我
+              </a>
+            </p>
+          </script>
+          <p>
+            虚实搭配讲究主次：两个按钮都描边之后，“看作品”不再突出。
+            更常见的做法是保留“看作品”为实心 <code>btn-primary</code>（主行动），
+            “关于我”用描边（次行动）——虚实相生，页面才有层次。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="手机 1 列、桌面 3 列">
+            <div class="row row-cols-1 row-cols-lg-3 g-4">
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <!-- 卡片内容不变 -->
+                </div>
+              </div>
+              <!-- 共 6 张 -->
+            </div>
+          </script>
+          <p>
+            去掉中间的 <code>row-cols-md-2</code> 即可：md 档继承基础款 1 列，
+            直到 lg 才展开成 3 列。想想这条规则——断点类只在“该断点及以上”生效，
+            没有写到的档位，自动沿用更小一档的样式。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            这是断点选择的权衡：本页只有三个菜单项，就算在平板（md）上铺开也不会挤，
+            但收进汉堡同样无碍；选 <code>lg</code> 是让“小屏感”延续得更久一些——
+            平板和手机都享受简洁的汉堡交互，桌面才铺开完整导航。
+            若菜单项很多（比如六个以上），平板就装不下了，那时应该改成
+            <code>navbar-expand-md</code> 提前铺开。可见断点没有标准答案，
+            判断标准只有一条：<strong>这个宽度下，内容放得下、用起来顺手吗？</strong>
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>整页组装 = 骨架 + 导航 + 英雄区 + 卡片网格 + 两栏介绍 + 页脚，逐块推进；</li>
+        <li>响应式只靠 <code>navbar-expand-lg</code> 与 <code>row-cols-*</code> 两处完成；</li>
+        <li>图标 + 色块代替图片，纯静态、零外链，离线可用；</li>
+        <li>完整源码在 <code>demo/portfolio/index.html</code>，可对照拆解、任意改造。</li>
+      </ul>
+
+      <blockquote>下一回，我们换一柄轻剑——jQuery 篇。十六式的功夫，将化作你手中的内劲。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

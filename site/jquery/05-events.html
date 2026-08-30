@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第五式 · 事件 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="on 与 off、事件对象、事件委托：让页面会听会应，让新元素一出生就会响应。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-05">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        页面不是死物：按钮等你去点，输入框等你来敲。这个“等”，就是事件。
+        前面每一式的演示都在用事件，这一式，我们把它说透。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>on('事件名', fn)</code> 绑定事件，认识常用事件名</li>
+          <li>明白回调里的 <code>this</code> 与 <code>$(this)</code>，会用 <code>e.preventDefault()</code> 与 <code>e.stopPropagation()</code></li>
+          <li>掌握事件委托，让“新添加的元素”一出生就能响应；会用 <code>off()</code> 解绑</li>
+        </ul>
+      </div>
+
+      <h2>on：事件的统一入口</h2>
+      <p>
+        jQuery 里绑定事件只有一个入口：<code>on('事件名', 处理函数)</code>。那些“快捷方法”——
+        <code>.click(fn)</code>、<code>.keyup(fn)</code>——都只是 <code>on</code> 的马甲，写哪个都行，
+        本教程统一用 <code>on</code>。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="on 的写法">
+        $('#jq05-name').on('keyup', function () { … });         // 绑定一个事件
+        $('#jq05-name').on('keyup keydown', function () { … }); // 一次绑定两个（空格隔开）
+        $('#jq05-name').click(function () { … });               // 快捷方法，等价于 on('click', …)
+      </script>
+
+      <p>常用事件先混个脸熟，用到时回来翻：</p>
+
+      <table>
+        <thead>
+          <tr><th>事件</th><th>触发时机</th><th>典型场景</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>click</code></td><td>单击</td><td>按钮、菜单</td></tr>
+          <tr><td><code>dblclick</code></td><td>双击</td><td>少见，快捷操作</td></tr>
+          <tr><td><code>mouseenter</code></td><td>鼠标移入元素（不冒泡）</td><td>悬停高亮</td></tr>
+          <tr><td><code>mouseleave</code></td><td>鼠标移出元素</td><td>悬停恢复</td></tr>
+          <tr><td><code>keydown</code></td><td>按下按键（长按会连续触发）</td><td>快捷键</td></tr>
+          <tr><td><code>keyup</code></td><td>松开按键</td><td>输入统计、即时回显</td></tr>
+          <tr><td><code>change</code></td><td>值改变（勾选框立即、输入框失焦时）</td><td>表单联动</td></tr>
+          <tr><td><code>submit</code></td><td>表单提交（回车或点提交按钮）</td><td>表单校验</td></tr>
+          <tr><td><code>focus</code></td><td>获得焦点</td><td>提示、清空默认值</td></tr>
+        </tbody>
+      </table>
+
+      <h2>回调里的 this</h2>
+      <p>
+        事件回调执行时，<code>this</code> 指向“触发事件的元素本身”（原生 DOM 元素）。
+        用 <code>$(this)</code> 把它包成 jQuery 对象，就能施展全部招式。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="this 与 $(this)">
+        $('#jq05-list li').on('click', function () {
+          $(this).toggleClass('active'); // this = 被点的那一个 li
+        });
+      </script>
+
+      <p>
+        妙处在于：绑定的时候你并不知道用户会点哪一个——<code>this</code> 永远指向“当事人”，
+        一个处理函数就能服务整个集合。下一个演示会反复用到它。
+      </p>
+
+      <h2>事件委托：让新元素一出生就会响应</h2>
+      <p>
+        直接绑定有一个隐藏的坑：<code>$('li').on('click', …)</code> 的监听器是“钉”在当时存在的那些
+        <code>li</code> 身上的。之后新加进来的 <code>li</code>，身上没有监听器，点了毫无反应。
+      </p>
+      <p>
+        解法是<strong>事件委托</strong>：把监听器钉在恒久存在的父容器上，再传一个子元素选择器。
+        事件从被点的元素一路<strong>冒泡</strong>到父容器，父容器按选择器过滤——是“我的辖区”才动手。
+        新元素天然在父容器的辖区里，所以一出生就会响应。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="直接绑定 vs 事件委托">
+        // 直接绑定：只对“当时存在”的 li 生效，后加的点不动
+        $('#jq05-list-a li').on('click', function () { $(this).toggleClass('active'); });
+
+        // 事件委托：监听器挂在父容器上，按选择器把关
+        $('#jq05-list-b').on('click', 'li', function () { $(this).toggleClass('active'); });
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 动态添加的条目，只有委托那边会响应</div>
+        <div class="demo-preview">
+          <div id="jq05-demo1">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>直接绑定</strong>：<code>$('#jq05-list-a li').on('click', …)</code></p>
+                <ul id="jq05-list-a" class="list-group">
+                  <li class="list-group-item">旧招式 · 第一式</li>
+                  <li class="list-group-item">旧招式 · 第二式</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1"><strong>事件委托</strong>：<code>$('#jq05-list-b').on('click', 'li', …)</code></p>
+                <ul id="jq05-list-b" class="list-group">
+                  <li class="list-group-item">旧招式 · 第一式</li>
+                  <li class="list-group-item">旧招式 · 第二式</li>
+                </ul>
+              </div>
+            </div>
+            <button id="jq05-add" type="button" class="btn btn-primary mt-3">两边各添一招，再点新条目试试</button>
+            <script>
+              $(function () {
+                // 直接绑定：只对当时存在的 li 生效
+                $('#jq05-list-a li').on('click', function () {
+                  $(this).toggleClass('active');
+                });
+                // 事件委托：新来的 li 也自动响应
+                $('#jq05-list-b').on('click', 'li', function () {
+                  $(this).toggleClass('active');
+                });
+                var n = 0;
+                $('#jq05-add').on('click', function () {
+                  n += 1;
+                  $('#jq05-list-a').append('<li class="list-group-item">新招式 · 第' + (n + 2) + '式</li>');
+                  $('#jq05-list-b').append('<li class="list-group-item">新招式 · 第' + (n + 2) + '式</li>');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>直接绑定</strong>：<code>$('#jq05-list-a li').on('click', …)</code></p>
+                <ul id="jq05-list-a" class="list-group">
+                  <li class="list-group-item">旧招式 · 第一式</li>
+                  <li class="list-group-item">旧招式 · 第二式</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1"><strong>事件委托</strong>：<code>$('#jq05-list-b').on('click', 'li', …)</code></p>
+                <ul id="jq05-list-b" class="list-group">
+                  <li class="list-group-item">旧招式 · 第一式</li>
+                  <li class="list-group-item">旧招式 · 第二式</li>
+                </ul>
+              </div>
+            </div>
+            <button id="jq05-add" type="button" class="btn btn-primary mt-3">两边各添一招，再点新条目试试</button>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            // 直接绑定：只对当时存在的 li 生效
+            $('#jq05-list-a li').on('click', function () {
+              $(this).toggleClass('active');
+            });
+            // 事件委托：新来的 li 也自动响应
+            $('#jq05-list-b').on('click', 'li', function () {
+              $(this).toggleClass('active');
+            });
+            var n = 0;
+            $('#jq05-add').on('click', function () {
+              n += 1;
+              $('#jq05-list-a').append('<li class="list-group-item">新招式 · 第' + (n + 2) + '式</li>');
+              $('#jq05-list-b').append('<li class="list-group-item">新招式 · 第' + (n + 2) + '式</li>');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        左边的新条目点了没反应，右边的一点就亮——这就是委托的威力。
+        江湖规矩：<strong>凡是会动态添加的元素，一律用事件委托</strong>。
+      </p>
+
+      <h2>事件对象：preventDefault</h2>
+      <p>
+        回调的第一个参数是<strong>事件对象</strong>（惯例叫 <code>e</code>），它携带着这次事件的详细信息，
+        也提供两个关键招式。<code>e.preventDefault()</code> 阻止浏览器的默认行为——表单不刷新、链接不跳转。
+        表单校验是它的头号用武之地：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 表单 submit 拦截 + 提示（preventDefault）</div>
+        <div class="demo-preview">
+          <div id="jq05-demo2">
+            <form id="jq05-form" class="row g-2" style="max-width: 420px;">
+              <div class="col-auto">
+                <input id="jq05-name" type="text" class="form-control" placeholder="你的江湖名号">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">报名</button>
+              </div>
+            </form>
+            <p id="jq05-tip" class="mt-2 mb-0">按下回车或点“报名”，页面不会刷新。</p>
+            <script>
+              $(function () {
+                $('#jq05-form').on('submit', function (e) {
+                  e.preventDefault(); // 拦住默认提交，页面不刷新
+                  var name = $('#jq05-name').val();
+                  $('#jq05-tip').text(name === '' ? '先报上名号再走。' : '欢迎入伙，' + name + '！');
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="jq05-form" class="row g-2" style="max-width: 420px;">
+              <div class="col-auto">
+                <input id="jq05-name" type="text" class="form-control" placeholder="你的江湖名号">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">报名</button>
+              </div>
+            </form>
+            <p id="jq05-tip" class="mt-2 mb-0">按下回车或点“报名”，页面不会刷新。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq05-form').on('submit', function (e) {
+              e.preventDefault(); // 拦住默认提交，页面不刷新
+              var name = $('#jq05-name').val();
+              $('#jq05-tip').text(name === '' ? '先报上名号再走。' : '欢迎入伙，' + name + '！');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        按下回车或点“报名”，页面纹丝不动，只有提示在变——默认提交被 <code>preventDefault()</code> 拦下了。
+        真实项目里会在这里先校验，一切妥当后再提交。
+      </p>
+
+      <h2>冒泡与 stopPropagation</h2>
+      <p>
+        事件默认<strong>冒泡</strong>：内层元素触发后，会一层层向上汇报，祖先的监听器都会听到。
+        多数时候这是好事（委托就靠它），但有时不想让外层听到，就用 <code>e.stopPropagation()</code> 在半路截住。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 冒泡演示：勾选后事件到内层为止</div>
+        <div class="demo-preview">
+          <div id="jq05-demo3">
+            <div id="jq05-outer" class="callout">
+              <div class="callout-title">外层（监听着 click）</div>
+              <button id="jq05-inner" type="button" class="btn btn-outline-primary">内层按钮（也监听着 click）</button>
+              <div class="form-check mt-2">
+                <input id="jq05-stop" type="checkbox" class="form-check-input">
+                <label class="form-check-label" for="jq05-stop">勾选后点按钮：阻止冒泡</label>
+              </div>
+              <p id="jq05-log" class="mt-2 mb-0">点按钮试试。</p>
+            </div>
+            <script>
+              $(function () {
+                $('#jq05-outer').on('click', function () {
+                  $('#jq05-log').append(' 外层也听到了。');
+                });
+                $('#jq05-inner').on('click', function (e) {
+                  $('#jq05-log').text('内层听到了。');
+                  if ($('#jq05-stop').prop('checked')) {
+                    e.stopPropagation(); // 到此为止，别往上冒了
+                  }
+                });
+                // 开关自己的点击也别惊动外层
+                $('#jq05-stop').on('click', function (e) {
+                  e.stopPropagation();
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="jq05-outer" class="callout">
+              <div class="callout-title">外层（监听着 click）</div>
+              <button id="jq05-inner" type="button" class="btn btn-outline-primary">内层按钮（也监听着 click）</button>
+              <div class="form-check mt-2">
+                <input id="jq05-stop" type="checkbox" class="form-check-input">
+                <label class="form-check-label" for="jq05-stop">勾选后点按钮：阻止冒泡</label>
+              </div>
+              <p id="jq05-log" class="mt-2 mb-0">点按钮试试。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq05-outer').on('click', function () {
+              $('#jq05-log').append(' 外层也听到了。');
+            });
+            $('#jq05-inner').on('click', function (e) {
+              $('#jq05-log').text('内层听到了。');
+              if ($('#jq05-stop').prop('checked')) {
+                e.stopPropagation(); // 到此为止，别往上冒了
+              }
+            });
+            // 开关自己的点击也别惊动外层
+            $('#jq05-stop').on('click', function (e) {
+              e.stopPropagation();
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        不勾选时点按钮：内层先说“内层听到了”，外层随后补充“外层也听到了”；
+        勾选后，事件走到内层为止。冒泡是委托的基石，也是“误伤”的来源——哪层要哪层不要，你说了算。
+      </p>
+
+      <h2>off：解绑</h2>
+      <p>有绑就要有解。<code>off()</code> 与 <code>on()</code> 的写法一一对应：</p>
+
+      <script type="text/plain" data-lang="js" data-title="off 三种解绑">
+        $('#jq05-name').off('keyup');         // 解掉该元素所有 keyup
+        $('#jq05-name').off();                // 解掉该元素全部事件
+        $('#jq05-list-b').off('click', 'li'); // 解掉委托（选择器要与绑定时一致）
+      </script>
+
+      <p>常见用法是“只许点一次”——处理函数里先 <code>off</code> 再干活。</p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第五式</div>
+        <ol>
+          <li>在例 1 右侧列表下方加一个“解绑”按钮：点击后用 <code>off</code> 解除委托，再点“两边各添一招”验证新条目不再响应。</li>
+          <li>给一个输入框同时绑定 <code>keyup</code> 与 <code>focus</code>：获得焦点时提示“可以输入了”，松开按键时显示“已输入 N 字”。</li>
+          <li>思考题：事件委托为什么能让“新添加的元素”自动响应？它和直接绑定在“监听器放在哪”上有什么区别？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="解绑委托">
+            $('#jq05-unbind').on('click', function () {
+              $('#jq05-list-b').off('click', 'li');
+            });
+          </script>
+          <p>
+            解绑委托必须带上与绑定时<strong>相同的选择器</strong>——绑定是 <code>on('click', 'li', …)</code>，
+            解绑就是 <code>off('click', 'li')</code>。之后旧条目与新条目都归于平静。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="双事件绑定">
+            $('#jq05-name').on('focus', function () {
+              $('#jq05-tip').text('可以输入了。');
+            });
+            $('#jq05-name').on('keyup', function () {
+              $('#jq05-tip').text('已输入 ' + $(this).val().length + ' 字。');
+            });
+          </script>
+          <p>
+            同一个元素可以绑定多个事件，互不干扰；<code>$(this)</code> 让处理函数不必知道输入框的名字。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            直接绑定把监听器逐个挂在 <code>li</code> 身上——新元素出生时没人给它挂监听器，自然没反应；
+            委托只挂<strong>一个</strong>监听器在恒存在的父容器上，靠事件冒泡接收所有后代的事件，
+            再用选择器过滤——新元素天然在父容器辖区里，所以自动响应。
+            代价是每个后代事件都要过一遍过滤，元素极多且事件极高频时不如直接绑定精准，但常规场景毫无感觉。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>on()</code> 是事件统一入口，快捷方法都是它的马甲；</li>
+        <li>回调里的 <code>this</code> 是当事人，<code>$(this)</code> 让它进入 jQuery 招式体系；</li>
+        <li><code>preventDefault()</code> 拦默认行为，<code>stopPropagation()</code> 截冒泡；</li>
+        <li>动态元素靠事件委托，<code>off()</code> 让绑定有始有终。</li>
+      </ul>
+
+      <blockquote>下一式，修炼显隐与动画——hide、fadeIn、slideUp 轮番登场，页面开始有了呼吸。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

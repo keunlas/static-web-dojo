@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>在线练功场 | 纯静态网页的修行</title>
+<meta name="description" content="HTML / CSS / JS 三栏编辑器 + 实时预览，完全离线可用，代码自动保存在本地。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="playground">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <div class="chapter-header">
+        <div class="seal">练</div>
+        <div>
+          <p class="chapter-stage">附页 · 在线练功场</p>
+          <h1>在线练功场</h1>
+        </div>
+      </div>
+
+      <p class="chapter-lead">
+        光看不练假把式。这里给你三块沙地——HTML、CSS、JavaScript——
+        左边写，右边立刻见分晓，代码自动保存在本机浏览器里。
+      </p>
+
+      <div class="pg-toolbar">
+        <button type="button" id="pg-run" class="btn btn-primary">运行</button>
+        <button type="button" id="pg-reset" class="btn btn-outline-primary">重置示例</button>
+        <select id="pg-preset" class="form-select form-select-sm" style="max-width:13rem" aria-label="选择示例">
+          <option value="1">示例一 · 你好江湖（jQuery）</option>
+          <option value="2">示例二 · Bootstrap 卡片</option>
+          <option value="3">示例三 · 空白画布</option>
+        </select>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="pg-auto" checked>
+          <label class="form-check-label" for="pg-auto">自动预览</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="pg-bs" checked>
+          <label class="form-check-label" for="pg-bs">引入 Bootstrap</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="pg-jq" checked>
+          <label class="form-check-label" for="pg-jq">引入 jQuery</label>
+        </div>
+      </div>
+
+      <div class="playground">
+        <div class="pg-editors">
+          <div class="pg-editor">
+            <div class="pg-editor-label"><span>HTML（body 部分）</span><span id="pg-html-size"></span></div>
+            <textarea id="pg-html" spellcheck="false" aria-label="HTML 代码"></textarea>
+          </div>
+          <div class="pg-editor">
+            <div class="pg-editor-label"><span>CSS</span><span id="pg-css-size"></span></div>
+            <textarea id="pg-css" spellcheck="false" aria-label="CSS 代码"></textarea>
+          </div>
+          <div class="pg-editor">
+            <div class="pg-editor-label"><span>JavaScript</span><span id="pg-js-size"></span></div>
+            <textarea id="pg-js" spellcheck="false" aria-label="JavaScript 代码"></textarea>
+          </div>
+        </div>
+        <div class="pg-preview">
+          <div class="pg-preview-label">预览</div>
+          <iframe id="pg-frame" title="预览"></iframe>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-title">说明</div>
+        <ul style="margin:0">
+          <li>勾选“引入 Bootstrap / jQuery”后，预览里就能直接用 <code>btn</code> 类名与 <code>$</code>；</li>
+          <li>JS 代码里如果写了 <code>&lt;/script&gt;</code> 字符串，预览可能提前截断——请写成 <code>&lt;\/script&gt;</code>；</li>
+          <li>代码保存在本机浏览器（localStorage），换浏览器/清缓存会丢失，重要作品记得复制走。</li>
+        </ul>
+      </div>
+
+      <script>
+        $(function () {
+          var KEY = 'dojo-playground-v1';
+
+          var PRESETS = {
+            1: {
+              html: '<h1 class="display-6">你好，江湖！</h1>\n<p>点击按钮，看文字变化。</p>\n<button id="btn" type="button" class="btn btn-primary">点我</button>\n<p id="msg" class="mt-3 mb-0">这里还没有动静……</p>',
+              css: 'body { padding: 1.5rem; }',
+              js: "$('#btn').on('click', function () {\n  $('#msg').text('你好，江湖！').css('color', '#b03a2e');\n});"
+            },
+            2: {
+              html: '<div class="container py-4">\n  <div class="row g-3">\n    <div class="col-md-4">\n      <div class="card h-100">\n        <div class="card-body">\n          <h5 class="card-title">第一张卡</h5>\n          <p class="card-text">栅格会自动排成三列，缩窄窗口试试。</p>\n        </div>\n      </div>\n    </div>\n    <div class="col-md-4">\n      <div class="card h-100">\n        <div class="card-body">\n          <h5 class="card-title">第二张卡</h5>\n          <p class="card-text">row-cols 或者 col-md-* 都可以。</p>\n        </div>\n      </div>\n    </div>\n    <div class="col-md-4">\n      <div class="card h-100">\n        <div class="card-body">\n          <h5 class="card-title">第三张卡</h5>\n          <p class="card-text">在手机宽度下，它们会变成一列。</p>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>',
+              css: '',
+              js: ''
+            },
+            3: {
+              html: '<h1>你好，江湖！</h1>\n<p>从这里开始你的创作。</p>',
+              css: 'body { padding: 1.5rem; }',
+              js: ''
+            }
+          };
+
+          var $frame = $('#pg-frame');
+          var timer = null;
+
+          function build() {
+            var html = $('#pg-html').val();
+            var css = $('#pg-css').val();
+            var js = $('#pg-js').val().replace(/<\/script/gi, '<\\/script');
+            var head = '<meta charset="utf-8">'
+                     + '<meta name="viewport" content="width=device-width, initial-scale=1">';
+            if ($('#pg-bs').prop('checked')) {
+              head += '<link rel="stylesheet" href="../assets/vendor/bootstrap/bootstrap.min.css">';
+            }
+            head += '<style>' + css + '</style>';
+            var tail = '';
+            if ($('#pg-jq').prop('checked')) {
+              tail += '<script src="../assets/vendor/jquery/jquery-4.0.0.min.js"><\/script>';
+            }
+            tail += '<script>' + js + '<\/script>';
+            return '<!doctype html><html><head>' + head + '</head><body>' + html + tail + '</body></html>';
+          }
+
+          function run() { $frame.attr('srcdoc', build()); }
+          function save() {
+            try {
+              localStorage.setItem(KEY, JSON.stringify({
+                html: $('#pg-html').val(),
+                css: $('#pg-css').val(),
+                js: $('#pg-js').val(),
+                preset: $('#pg-preset').val()
+              }));
+            } catch (e) { /* 隐私模式等场景下静默失败 */ }
+          }
+          function sizes() {
+            ['html', 'css', 'js'].forEach(function (k) {
+              $('#pg-' + k + '-size').text($('#pg-' + k).val().length + ' 字符');
+            });
+          }
+
+          function loadPreset(n, saveIt) {
+            var p = PRESETS[n] || PRESETS[1];
+            $('#pg-html').val(p.html);
+            $('#pg-css').val(p.css);
+            $('#pg-js').val(p.js);
+            $('#pg-preset').val(String(n));
+            if (saveIt) save();
+            sizes();
+            run();
+          }
+
+          // 恢复上次代码（或默认示例一）
+          var restored = false;
+          try {
+            var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (saved && PRESETS[saved.preset]) {
+              $('#pg-html').val(saved.html);
+              $('#pg-css').val(saved.css);
+              $('#pg-js').val(saved.js);
+              $('#pg-preset').val(String(saved.preset));
+              restored = true;
+            }
+          } catch (e) { restored = false; }
+          if (!restored) loadPreset(1, false);
+
+          $('#pg-run').on('click', run);
+          $('#pg-reset').on('click', function () { loadPreset($('#pg-preset').val(), true); });
+          $('#pg-preset').on('change', function () { loadPreset(this.value, true); });
+          $('.pg-editors textarea').on('input', function () {
+            save();
+            sizes();
+            if ($('#pg-auto').prop('checked')) {
+              clearTimeout(timer);
+              timer = setTimeout(run, 400);
+            }
+          });
+          $('#pg-bs, #pg-jq').on('change', run);
+          run();
+          sizes();
+        });
+      </script>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

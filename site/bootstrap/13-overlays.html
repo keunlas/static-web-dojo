@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十三式 · 提示与浮层 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="手动初始化 tooltip 与 popover，再用 toast 弹出右下角轻通知——本回第一次亲手 new 一个 Bootstrap 组件。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-13">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前几式的组件大多“写上属性即生效”。本式三位主角却有些脾气：悬浮提示、弹出说明、角落通知，
+        都要你亲手写一行 JavaScript 唤醒。这也是本回第一次由你 <code>new</code> 一个 Bootstrap 组件。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li><code>tooltip</code>：<code>data-bs-toggle="tooltip"</code> + <code>title</code> 属性，
+            必须手动 <code>new bootstrap.Tooltip(元素)</code> 初始化</li>
+          <li>理解为什么 tooltip / popover 要手动初始化（官方“按需开启”的设计）</li>
+          <li><code>popover</code>：<code>data-bs-content</code> 装正文，<code>new bootstrap.Popover(元素)</code> 初始化</li>
+          <li><code>toast</code>：<code>new bootstrap.Toast(元素).show()</code> 弹出右下角轻通知</li>
+        </ul>
+      </div>
+
+      <h2>为什么这几位要“手动唤醒”</h2>
+      <p>
+        Bootstrap 的数据 API 能自动初始化大多数组件——modal、dropdown、collapse、carousel 都是
+        “写属性即生效”。唯独 <strong>tooltip（悬浮提示）</strong>与 <strong>popover（弹出说明）</strong>
+        被官方刻意设计成“opt-in”（按需开启）：<strong>只写属性不写 JS，它们绝不会出现</strong>。
+      </p>
+      <p>官方这么做的理由很实在：</p>
+      <ul>
+        <li><strong>开销</strong>：每个 tooltip 都要绑定悬浮、聚焦等一串事件监听。页面上一旦有成百上千个
+          （比如表格里每格一个），自动全扫就是白白浪费性能；</li>
+        <li><strong>定位</strong>：它们的浮层要用 Popper 定位库计算位置，这也是一笔只在需要时才值得付的开销；</li>
+        <li><strong>非必需</strong>：tooltip / popover 只是锦上添花，就算忘了初始化，也不该影响页面主功能。
+          所以官方把“要不要开”的决定权交给你。</li>
+      </ul>
+      <p>于是它们的正确用法是“<strong>属性 + 一行初始化</strong>”，缺一不可：</p>
+
+      <script type="text/plain" data-lang="html" data-title="属性部分（以 tooltip 为例）">
+        <!-- 属性只负责“声明”，不会自动生效 -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="我是一句悬浮提示">
+          把鼠标悬停在我身上
+        </button>
+      </script>
+
+      <script type="text/plain" data-lang="js" data-title="初始化部分（必需）">
+        // 手动初始化：new 一个 bootstrap.Tooltip 实例，悬浮提示才真正醒来
+        var el = document.querySelector('[data-bs-toggle="tooltip"]');
+        new bootstrap.Tooltip(el);
+      </script>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：DOJO.ready——本站的“全资源就绪”队列</div>
+        <p style="margin:0">
+          在本站页面里写这行初始化，必须包在 <code>DOJO.ready(function(){ … })</code> 里：
+          页面上的 Bootstrap 脚本是异步加载的，<code>DOJO.ready</code> 会等样式、脚本全部就位、
+          页面就绪后才放行你的代码——保证执行时 <code>bootstrap</code> 全局对象一定存在。
+          正如 <code>$(function(){ … })</code> 等 jQuery，<code>DOJO.ready</code> 等 Bootstrap 全家桶。
+        </p>
+      </div>
+
+      <h2>悬浮提示 tooltip</h2>
+      <p>
+        <strong>tooltip</strong> 是鼠标悬停时冒出的一行小字，用来补充说明按钮、图标的含义。
+        属性三件套：<code>data-bs-toggle="tooltip"</code> 声明身份、<code>title</code> 提供内容、
+        <code>data-bs-placement</code> 指定方向——<code>top</code> / <code>right</code> /
+        <code>bottom</code> / <code>left</code>，默认 <code>top</code>。
+      </p>
+      <p>
+        页面上 tooltip 往往不止一个，所以初始化习惯写成循环：选中所有带
+        <code>data-bs-toggle="tooltip"</code> 的元素，逐个 <code>new</code> 一遍。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 四个方向的悬浮提示（属性 + DOJO.ready 手动初始化）</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap gap-2" id="bs13-demo1">
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="上方提示">
+              上方
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="右方提示">
+              右方
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="下方提示">
+              下方
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="left" title="左方提示">
+              左方
+            </button>
+          </div>
+          <script>
+            DOJO.ready(function () {
+              // 等待全站资源就绪后，把演示里的 tooltip 逐个唤醒
+              document.querySelectorAll('#bs13-demo1 [data-bs-toggle="tooltip"]').forEach(function (el) {
+                new bootstrap.Tooltip(el);
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap gap-2" id="bs13-demo1">
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="top" title="上方提示">上方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="right" title="右方提示">右方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="bottom" title="下方提示">下方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="left" title="左方提示">左方</button>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            DOJO.ready(function () {
+              // 等待全站资源就绪后，把演示里的 tooltip 逐个唤醒
+              document.querySelectorAll('#bs13-demo1 [data-bs-toggle="tooltip"]').forEach(function (el) {
+                new bootstrap.Tooltip(el);
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        演示脚本里故意把选择器范围收窄到 <code>#bs13-demo1</code> 容器内——只唤醒本演示的工具提示，
+        不误伤页面其他元素，这是好习惯。另外 Bootstrap 5.3 也支持用 <code>data-bs-title</code>
+        代替 <code>title</code> 属性，二者选一即可。
+      </p>
+
+      <h2>弹出说明 popover</h2>
+      <p>
+        <strong>popover</strong> 是 tooltip 的加强版：多一个标题栏，还能装正文，
+        点击触发（tooltip 是悬浮触发）。与 tooltip 相比只多一个 <code>data-bs-content</code>
+        属性装正文，标题仍由 <code>title</code> 提供。同样需要手动
+        <code>new bootstrap.Popover(元素)</code>。
+      </p>
+      <p>
+        默认点一下弹出、再点一下收起。给它加 <code>data-bs-trigger="focus"</code> 更顺手：
+        点按钮获得焦点即弹出，<strong>点页面别处自动收起</strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 点击弹出说明，点别处自动收起</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-outline-primary" id="bs13-demo2"
+                  data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                  title="弹出说明" data-bs-content="popover 比 tooltip 多一个 data-bs-content 装正文。点击别处即可收起。">
+            点我看说明
+          </button>
+          <script>
+            DOJO.ready(function () {
+              new bootstrap.Popover(document.getElementById('bs13-demo2'));
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="btn btn-outline-primary" id="bs13-demo2"
+                    data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right"
+                    title="弹出说明" data-bs-content="popover 比 tooltip 多一个 data-bs-content 装正文。点击别处即可收起。">
+              点我看说明
+            </button>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            DOJO.ready(function () {
+              new bootstrap.Popover(document.getElementById('bs13-demo2'));
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>角落通知 toast</h2>
+      <p>
+        <strong>toast（轻通知）</strong>是屏幕角落一闪而过的小卡片，用来告知“已保存”“新消息到了”，
+        不打断访客当前的操作。结构分两截：<code>toast-header</code> 放图标、标题、时间与关闭按钮，
+        <code>toast-body</code> 放正文。
+      </p>
+      <p>
+        它同样是 opt-in：在触发按钮的点击处理里执行 <code>new bootstrap.Toast(元素).show()</code>。
+        更稳妥的写法是 <code>bootstrap.Toast.getOrCreateInstance(元素).show()</code>——
+        同一个元素反复创建实例可能留下“僵尸监听”，<code>getOrCreateInstance</code>
+        保证有则复用、无则新建。toast 默认约 5 秒后自动消失，可用 <code>data-bs-delay</code> 调整。
+        真实页面里，整个容器常用 <code>position-fixed</code> 固定在视口右下角。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 右下角 toast 轻通知（按钮触发）</div>
+        <div class="demo-preview">
+          <button type="button" class="btn btn-primary" id="bs13-demo3-btn">收到一封传书</button>
+
+          <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast" id="bs13-demo3-toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+              <div class="toast-header">
+                <i class="bi bi-bell me-2"></i>
+                <strong class="me-auto">飞鸽传书</strong>
+                <small>刚刚</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="关闭"></button>
+              </div>
+              <div class="toast-body">
+                山门已开，速来练功。
+              </div>
+            </div>
+          </div>
+          <script>
+            DOJO.ready(function () {
+              var btn = document.getElementById('bs13-demo3-btn');
+              var toastEl = document.getElementById('bs13-demo3-toast');
+              btn.addEventListener('click', function () {
+                bootstrap.Toast.getOrCreateInstance(toastEl).show();
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="btn btn-primary" id="bs13-demo3-btn">收到一封传书</button>
+
+            <!-- toast 容器：固定在视口右下角 -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+              <div class="toast" id="bs13-demo3-toast" role="alert" aria-live="assertive"
+                   aria-atomic="true" data-bs-delay="4000">
+                <div class="toast-header">
+                  <i class="bi bi-bell me-2"></i>
+                  <strong class="me-auto">飞鸽传书</strong>
+                  <small>刚刚</small>
+                  <!-- 关闭按钮：data-bs-dismiss="toast" -->
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="关闭"></button>
+                </div>
+                <div class="toast-body">
+                  山门已开，速来练功。
+                </div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            DOJO.ready(function () {
+              var btn = document.getElementById('bs13-demo3-btn');
+              var toastEl = document.getElementById('bs13-demo3-toast');
+              btn.addEventListener('click', function () {
+                // getOrCreateInstance：有实例则复用，无实例则新建，再 show
+                bootstrap.Toast.getOrCreateInstance(toastEl).show();
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        演示里 toast 没有一开始就显示，是因为它从不带 <code>show</code> 类的“沉睡”状态起步——
+        点一下按钮，它才从右下角冒出来，4 秒后自动告退。点它的 <code>&times;</code> 可以随时送客。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十三式</div>
+        <ol>
+          <li>给例 1 再加一个 <code>data-bs-placement="left"</code> 的 tooltip 按钮，并在
+            <code>DOJO.ready</code> 里为它初始化（提示：选择器命中了它吗？）。</li>
+          <li>把例 2 的 popover 触发方式改成 <code>data-bs-trigger="hover"</code>，观察鼠标移入移出的效果；
+            再想想：这对手机用户友好吗？</li>
+          <li>思考题：为什么 Bootstrap 不给 tooltip / popover 做自动初始化，而 modal / dropdown 却可以
+            写属性即生效？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构（新增一个按钮）">
+            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                    data-bs-placement="left" title="左方提示">左方</button>
+          </script>
+          <p>
+            例 1 的初始化脚本用的是 <code>#bs13-demo1</code> 容器内全局选择器，只要新按钮放在
+            <code>#bs13-demo1</code> 容器里，<strong>循环会自动把它也唤醒</strong>，一行 JS 都不用改。
+            这正是用“容器内全局选择器 + 循环”而不是“逐个 getElementById”的好处。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="hover 触发的 popover（节选）">
+            <button type="button" class="btn btn-outline-primary" id="bs13-demo2"
+                    data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right"
+                    title="弹出说明" data-bs-content="鼠标移入即出，移出即收。">
+              点我看说明
+            </button>
+          </script>
+          <p>
+            改成 <code>hover</code> 后，鼠标移入按钮即弹出、移出即收起。但对手机用户不友好——
+            触屏没有“悬浮”这回事，点一下往往触发一次 hover 后内容又收起，容易造成困惑。
+            所以 hover 触发通常只作为桌面端的锦上添花，移动端要有对应的点击方案。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            两点原因：<strong>性能与取舍</strong>。tooltip / popover 每个实例都要绑定悬浮、聚焦等一串监听，
+            还要动用 Popper 定位库计算浮层位置；页面里它们常常成群出现（表格里每格一个），
+            自动全扫是一笔不小的开销。而 modal、dropdown 这类组件一页最多几个，自动初始化几乎零负担。
+            同时 tooltip / popover 只是辅助说明，缺了不致命——于是官方把“开不开、开多少”的选择权
+            交给你：需要时 <code>new</code> 一下，按需付费。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>tooltip 与 popover 是 opt-in 组件：只写 <code>data-bs-*</code> 属性不会生效，
+          必须手动 <code>new bootstrap.Tooltip(el)</code> / <code>new bootstrap.Popover(el)</code>；</li>
+        <li>本站演示里初始化一律包在 <code>DOJO.ready(function(){ … })</code> 里，保证 <code>bootstrap</code> 全局已就位；</li>
+        <li>tooltip 用 <code>title</code> + <code>data-bs-placement</code> 定方向，popover 多一个 <code>data-bs-content</code>，<code>data-bs-trigger</code> 定触发方式；</li>
+        <li>toast 用 <code>bootstrap.Toast.getOrCreateInstance(el).show()</code> 唤醒，默认约 5 秒自动消失。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼图标库——引入 bootstrap-icons，给页面添上眉目。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

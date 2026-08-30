@@ -87,6 +87,7 @@
     A + '/vendor/jquery/jquery-4.0.0.min.js',
     A + '/vendor/bootstrap/bootstrap.bundle.min.js',
     A + '/js/highlight.js',
+    A + '/js/search-index.js',
     A + '/js/site.js'
   ];
 

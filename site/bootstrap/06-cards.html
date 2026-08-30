@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第六式 · 卡片 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="card 的结构与组合玩法：图文卡片、页眉页脚、卡片网格与卡组。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-06">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖中人递帖子，讲究体面：抬头、正文、落款，一样不能少。
+        网页上递“帖子”，也有个现成的组件，名叫卡片——<code>card</code>。
+        名帖、告示、相册、价目，皆可入卡。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 card 系列类搭出一张完整卡片</li>
+          <li>会放图、加页眉页脚，组合出不同款式</li>
+          <li>用 row-cols 排出整齐的卡片网格</li>
+          <li>用 card-group 让卡片等高等宽连成一排</li>
+        </ul>
+      </div>
+
+      <h2>卡片的基本骨架</h2>
+      <p>
+        卡片是一块“圆角白底、带细边框”的独立小版面，适合装一组互相关联的内容。
+        它的骨架由几个类名分工：<code>card</code> 是外框，<code>card-body</code> 是正文区，
+        里面再放 <code>card-title</code>（标题）、<code>card-text</code>（正文）、
+        <code>card-link</code>（成排的链接）。打个比方：<code>card</code> 是拜帖的封套，
+        <code>card-body</code> 是内页。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一张完整的拜师帖</div>
+        <div class="demo-preview">
+          <div class="card" style="max-width: 24rem">
+            <div class="card-body">
+              <h5 class="card-title">拜师帖</h5>
+              <h6 class="card-subtitle mb-2 text-body-secondary">门下弟子递上</h6>
+              <p class="card-text">今有江湖后学一名，愿入贵派门下，习武修身，日拱一卒。</p>
+              <a href="#" class="card-link">收下此徒</a>
+              <a href="#" class="card-link">再考虑考虑</a>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="card" style="max-width: 24rem">
+              <div class="card-body">
+                <h5 class="card-title">拜师帖</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">门下弟子递上</h6>
+                <p class="card-text">今有江湖后学一名，愿入贵派门下，习武修身，日拱一卒。</p>
+                <a href="#" class="card-link">收下此徒</a>
+                <a href="#" class="card-link">再考虑考虑</a>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>细看这套类名：</p>
+      <ul>
+        <li><code>card</code> 定身份，带来圆角、边框与白底；</li>
+        <li><code>card-body</code> 给内容一圈舒适的内边距；</li>
+        <li><code>card-title</code> 是标题，<code>card-subtitle</code> 是配在下面那行淡墨小字；</li>
+        <li><code>card-text</code> 是正文；<code>card-link</code> 让多个链接并排且有间距。</li>
+      </ul>
+      <p>
+        注意标题用了 <code>h5</code>：页面的 h1–h4 通常留给更重要的结构，组件里的标题
+        从 h5 起步，层次才不会打架。卡片里每个部分都可选——最简的卡片可以只有
+        <code>card-body</code> 一句话。
+      </p>
+
+      <h2>图片与相册网格</h2>
+      <p>
+        想在卡片顶部放一张图？把 <code>card-img-top</code> 加在 <code>&lt;img&gt;</code> 上，
+        放在 <code>card-body</code> 之前即可；它会让图片铺满卡片宽度、并贴合顶部圆角。
+        对应的底部款式是 <code>card-img-bottom</code>。
+      </p>
+      <p>
+        真正的相册页不会一张一张排，而是用栅格铺成网格：<code>row row-cols-1 row-cols-md-3</code>
+        的意思是——手机上一列，中屏起三列。这正是第二式的十二列系统换了种说法。
+        本站铁律不引外网图片，下面的演示用纯色块加图标代替图片，你把它们换成
+        <code>img.card-img-top</code> 就是真的相册了。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 相册卡片三连（响应式网格）</div>
+        <div class="demo-preview">
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            <div class="col">
+              <div class="card h-100">
+                <div class="d-flex align-items-center justify-content-center" style="height:110px;background:#0d6efd">
+                  <i class="bi bi-sunrise fs-1 text-white"></i>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">朝课</h5>
+                  <p class="card-text mb-0">辰时 · 山门前集合</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card h-100">
+                <div class="d-flex align-items-center justify-content-center" style="height:110px;background:#198754">
+                  <i class="bi bi-tree fs-1 text-white"></i>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">采药</h5>
+                  <p class="card-text mb-0">午后 · 后山寻百草</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card h-100">
+                <div class="d-flex align-items-center justify-content-center" style="height:110px;background:#6f42c1">
+                  <i class="bi bi-moon-stars fs-1 text-white"></i>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">夜修</h5>
+                  <p class="card-text mb-0">戌时 · 静室打坐</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">
+                <div class="card h-100">
+                  <!-- 占位图：换成 <img src="…" class="card-img-top" alt="…"> 即可 -->
+                  <div class="d-flex align-items-center justify-content-center" style="height:110px;background:#0d6efd">
+                    <i class="bi bi-sunrise fs-1 text-white"></i>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">朝课</h5>
+                    <p class="card-text mb-0">辰时 · 山门前集合</p>
+                  </div>
+                </div>
+              </div>
+              <!-- 第二、三张卡结构相同，省略 -->
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>两个细节值得记住：</p>
+      <ul>
+        <li><code>g-3</code> 是列间距（gutter）三档，让卡片之间透气；</li>
+        <li><code>h-100</code> 让卡片在行内撑满等高——行高由最高的卡片决定，其余自动跟上。</li>
+      </ul>
+
+      <h2>页眉、页脚与卡组</h2>
+      <p>
+        公告、通知这类卡片，常用 <code>card-header</code> 与 <code>card-footer</code>
+        把标题和落款单独隔出来：页眉在卡片顶部、页脚在底部，都自带一条淡墨分隔线。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 带页眉页脚的公告卡</div>
+        <div class="demo-preview">
+          <div class="card text-center" style="max-width: 26rem">
+            <div class="card-header">山门告示</div>
+            <div class="card-body">
+              <h5 class="card-title">明日起，藏经阁延时开放</h5>
+              <p class="card-text mb-0">辰时至亥时，凭腰牌入内，抄经请自备笔墨。</p>
+            </div>
+            <div class="card-footer text-body-secondary">发布于三月初三</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="card text-center" style="max-width: 26rem">
+              <div class="card-header">山门告示</div>
+              <div class="card-body">
+                <h5 class="card-title">明日起，藏经阁延时开放</h5>
+                <p class="card-text mb-0">辰时至亥时，凭腰牌入内，抄经请自备笔墨。</p>
+              </div>
+              <div class="card-footer text-body-secondary">发布于三月初三</div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        若要一组“同规格”的卡片无缝并排，就用 <code>card-group</code> 把它们包起来：
+        卡片们等宽等高、边框合并，中间不留缝。它适合排课表、价目这类整齐划一的内容。
+        与例 2 的 <code>row-cols</code> 网格相比，卡组没有列间距，卡片是“贴”在一起的。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 卡组：两张等宽等高的日程卡</div>
+        <div class="demo-preview">
+          <div class="card-group">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">早课</h5>
+                <p class="card-text mb-0">辰时起，先站桩半炷香，再练一路拳。</p>
+              </div>
+              <div class="card-footer"><small class="text-body-secondary">每日辰时</small></div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">晚课</h5>
+                <p class="card-text mb-0">戌时回房，抄经一页，打坐收功。</p>
+              </div>
+              <div class="card-footer"><small class="text-body-secondary">每日戌时</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="card-group">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">早课</h5>
+                  <p class="card-text mb-0">辰时起，先站桩半炷香，再练一路拳。</p>
+                </div>
+                <div class="card-footer"><small class="text-body-secondary">每日辰时</small></div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">晚课</h5>
+                  <p class="card-text mb-0">戌时回房，抄经一页，打坐收功。</p>
+                </div>
+                <div class="card-footer"><small class="text-body-secondary">每日戌时</small></div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第六式</div>
+        <ol>
+          <li>把例 2 的 <code>row-cols-md-3</code> 改成 <code>row-cols-md-2</code>，观察卡片何时换行；再改成 <code>row-cols-sm-2 row-cols-lg-4</code>，体会“不同断点不同列数”。</li>
+          <li>新写一张“拜师帖”卡片：<code>card-header</code> 写「拜师帖」，<code>card-body</code> 里放标题、正文和两个 <code>card-link</code>，<code>card-footer</code> 写落款日期。</li>
+          <li>思考题：<code>card-group</code> 和 <code>row-cols</code> 网格都能并排卡片，它们有什么不同？什么时候该用哪个？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            <code>row-cols-md-2</code> 让中屏起每行两张，第三张会换到下一行；
+            <code>row-cols-sm-2 row-cols-lg-4</code> 则是小屏起两列、大屏起四列。
+            注意断点顺序：从小写到大，后面的断点在更宽的屏幕上生效。这就是“移动优先”的栅格写法，
+            第二、三式的心法在这里再次应验。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="拜师帖">
+            <div class="card" style="max-width: 24rem">
+              <div class="card-header">拜师帖</div>
+              <div class="card-body">
+                <h5 class="card-title">弟子张三，恳请收录</h5>
+                <p class="card-text">家学渊源，勤勉肯学，愿随师父晨钟暮鼓，日日不辍。</p>
+                <a href="#" class="card-link">收下此徒</a>
+                <a href="#" class="card-link">婉言谢绝</a>
+              </div>
+              <div class="card-footer text-body-secondary">庚子年 · 三月初三</div>
+            </div>
+          </script>
+          <p>
+            <code>card-header</code> 与 <code>card-footer</code> 一上一下夹住 <code>card-body</code>，
+            顺序就是书写顺序，无需额外样式。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            区别有三：<strong>间距</strong>——卡组没有列间距，卡片边框互相合并、贴成一整块；
+            网格有 <code>g-*</code> 沟槽，卡片各自独立。<strong>宽度</strong>——卡组按内容等分或挤压，
+            网格按列数精确控制。<strong>灵活度</strong>——网格能指定断点列数、能嵌套、能对齐，
+            玩法远多于卡组。所以：一组规格完全一致、想要“无缝拼接”的小卡（课表、价目）用卡组；
+            相册、文章列表这类需要间距与响应式列数的，用网格。多数时候，网格是默认答案。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>card</code> 定身份，<code>card-body</code>/<code>card-title</code>/<code>card-text</code>/<code>card-link</code> 各司其职；</li>
+        <li><code>card-img-top</code> 贴顶放图，<code>card-header</code>/<code>card-footer</code> 分出头尾；</li>
+        <li><code>row-cols-*</code> 排网格、<code>card-group</code> 排卡组，一松一紧，按需取用。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼列表组与表格——榜单与账册的排法。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

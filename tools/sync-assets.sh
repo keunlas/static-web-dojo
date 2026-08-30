@@ -34,6 +34,8 @@ sync_archive() {
   cp -r "$BS_DOCS"    "$SITE/archive/bootstrap-docs"
   cp -r "$BS_EXAMPLES" "$SITE/archive/examples"
   generate_examples_index
+  echo "==> 再生成图标大全页"
+  python3 "$ROOT/tools/gen-icons-page.py"
   echo "==> 藏经阁同步完成"
 }
 

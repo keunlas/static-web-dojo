@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二式 · 容器与栅格（上） | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="container 与 container-fluid、row 与 col、十二列系统与五大断点。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-02">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        上一式只算亮了个相。从这一式起，我们修炼 Bootstrap 的看家本领——栅格系统。
+        江湖上人人都说布局难，其实拆开看，不过是一个容器、几行几列，把十二个格子分来分去罢了。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>分清 <code>container</code> 与 <code>container-fluid</code> 两种容器</li>
+          <li>会用 <code>row</code> 与 <code>col</code> 搭出十二列栅格</li>
+          <li>理解断点前缀 sm / md / lg / xl / xxl 与“移动优先”的写法</li>
+          <li>能写出手机堆叠、桌面并排的响应式布局</li>
+        </ul>
+      </div>
+
+      <h2>容器：container 与 container-fluid</h2>
+      <p>
+        栅格系统的第一层是<strong>容器</strong>。<code>container</code> 是“定宽居中”：内容居中，
+        两侧留出呼吸空间，宽度随屏幕档位有上限；<code>container-fluid</code> 是“通栏”：
+        永远撑满父元素的宽度，不留白。
+      </p>
+      <table>
+        <thead>
+          <tr><th>屏幕档位</th><th>container 的最大宽度</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>手机（&lt;576px）</td><td>100%（通栏）</td></tr>
+          <tr><td>sm（≥576px）</td><td>540px</td></tr>
+          <tr><td>md（≥768px）</td><td>720px</td></tr>
+          <tr><td>lg（≥992px）</td><td>960px</td></tr>
+          <tr><td>xl（≥1200px）</td><td>1140px</td></tr>
+          <tr><td>xxl（≥1400px）</td><td>1320px</td></tr>
+        </tbody>
+      </table>
+      <p>也就是说：屏幕上 <code>container</code> 会随宽度“跳档”变宽，直到 1320px 封顶。</p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 两种容器对比（把浏览器窗口拉宽看差异）</div>
+        <div class="demo-preview">
+          <div class="container bg-info-subtle border rounded py-2 text-center mb-3">
+            container —— 定宽居中，两侧留白
+          </div>
+          <div class="container-fluid bg-warning-subtle border rounded py-2 text-center">
+            container-fluid —— 通栏，撑满整个宽度
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="container bg-info-subtle border rounded py-2 text-center">
+              container —— 定宽居中，两侧留白
+            </div>
+            <div class="container-fluid bg-warning-subtle border rounded py-2 text-center">
+              container-fluid —— 通栏，撑满整个宽度
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>用哪个？正文页几乎都用 <code>container</code>；需要背景色横贯全屏的导航条、页脚，
+        通常外层 <code>container-fluid</code>、内层再套一个 <code>container</code> 让内容居中。</p>
+
+      <h2>行与列：row 与 col</h2>
+      <p>
+        容器里先放<strong>行</strong> <code>row</code>，行里放<strong>列</strong> <code>col</code>。
+        Bootstrap 把每一行想象成 <strong>12 等份</strong>，<code>col</code> 后面的数字就是“占几份”：
+        <code>col-4</code> 占 4 份（三分之一宽），<code>col-6</code> 占一半，<code>col-12</code> 占满。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：栅格三句话</div>
+        <ul style="margin:0">
+          <li>列必须放在行里，行最好放在容器里；</li>
+          <li>一行里所有数字之和不要超过 12，超过了会换行；</li>
+          <li>数字写的是<strong>占比</strong>不是像素，所以栅格永远跟得上屏幕宽度。</li>
+        </ul>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 一行 12 个 col-1，正好把一行填满</div>
+        <div class="demo-preview">
+          <div class="row g-1">
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">1</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">2</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">3</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">4</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">5</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">6</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">7</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">8</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">9</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">10</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">11</div></div>
+            <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">12</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-1">
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">1</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">2</div></div>
+              <!-- ……中间的 3 到 11 同理，每个都是 col-1 …… -->
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">12</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        在手机上，这 12 格会挤成一团——因为“占 1 份”是相对宽度，屏幕窄了每份就窄。
+        别急，本式结尾的断点就是解药。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 数字的含义：占 4 份得三分之一，占 6 份得一半</div>
+        <div class="demo-preview">
+          <div class="row g-2">
+            <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+            <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+            <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+          </div>
+          <div class="row g-2 mt-2">
+            <div class="col-6"><div class="bg-info-subtle border rounded text-center py-2">col-6</div></div>
+            <div class="col-6"><div class="bg-info-subtle border rounded text-center py-2">col-6</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-2">
+              <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+              <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+              <div class="col-4"><div class="bg-success-subtle border rounded text-center py-2">col-4</div></div>
+            </div>
+            <div class="row g-2 mt-2">
+              <div class="col-6"><div class="bg-info-subtle border rounded text-center py-2">col-6</div></div>
+              <div class="col-6"><div class="bg-info-subtle border rounded text-center py-2">col-6</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>自动均分：不带数字的 col</h2>
+      <p>
+        每个列都写数字，有时很啰嗦。想让一行里的列<strong>平均分</strong>，直接写不带数字的
+        <code>col</code> 即可：3 个 <code>col</code> 自动各占 4 份，4 个各占 3 份，加一个自动换一行。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 三个不带数字的 col，自动三等分</div>
+        <div class="demo-preview">
+          <div class="row g-2">
+            <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+            <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+            <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-2">
+              <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+              <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+              <div class="col"><div class="bg-warning-subtle border rounded text-center py-2">col</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>效果和例 3 的三等分完全一样，代码却更省。想要“每行固定几列”的懒人写法
+        <code>row-cols-*</code>，下一式会讲到。</p>
+
+      <h2>断点：让布局跟屏幕走</h2>
+      <p>
+        光有十二列还不能“响应式”。<strong>断点</strong>是 Bootstrap 预设的 5 档屏幕宽度门槛，
+        前缀写在 <code>col</code> 和数字之间——<code>col-md-6</code> 意为“从 md 起占 6 列”。
+      </p>
+      <table>
+        <thead>
+          <tr><th>前缀</th><th>生效门槛</th><th>典型设备</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>无前缀</td><td>&lt;576px</td><td>手机竖屏</td></tr>
+          <tr><td><code>sm</code></td><td>≥576px</td><td>手机横屏、小平板</td></tr>
+          <tr><td><code>md</code></td><td>≥768px</td><td>平板</td></tr>
+          <tr><td><code>lg</code></td><td>≥992px</td><td>笔记本</td></tr>
+          <tr><td><code>xl</code></td><td>≥1200px</td><td>桌面显示器</td></tr>
+          <tr><td><code>xxl</code></td><td>≥1400px</td><td>宽屏大屏</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：移动优先</div>
+        <p style="margin:0">
+          无前缀的规则对<strong>所有屏幕</strong>生效，带前缀的只在对应档位起叠加覆盖。
+          所以写法永远是“先手机、再往上加”：<code>col-12 col-md-6</code> 意为手机占满 12 列堆叠，
+          md 起覆盖成占 6 列并排。顺序别反着来——先写大屏再写小屏，等于让自己多打一场补丁仗。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 三栏布局：手机上堆叠，桌面并排（把窗口拖窄拖宽试试）</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第一栏<br>手机占 12 列（堆叠），md 起占 4 列（并排）</div></div>
+            <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第二栏<br>与左右两栏同宽</div></div>
+            <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第三栏<br>4 + 4 + 4 = 12，正好一行</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第一栏</div></div>
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第二栏</div></div>
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第三栏</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        把浏览器窗口拖过 768px 那条线，三栏就在“堆叠 / 并排”之间切换——这就是响应式最常用的一个动作。
+        注意看类名：手机样式 <code>col-12</code> 在前，桌面样式 <code>col-md-4</code> 在后，桌面覆盖手机。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · 3:9 侧边栏布局预告：侧栏 3 份 + 内容 9 份</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-12 col-md-3"><div class="bg-secondary-subtle border rounded p-3">侧边栏（3 份）<br>手机堆叠在上方</div></div>
+            <div class="col-12 col-md-9"><div class="bg-secondary-subtle border rounded p-3">内容区（9 份）<br>3 + 9 = 12，正好一行</div></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-12 col-md-3"><div class="bg-secondary-subtle border rounded p-3">侧边栏</div></div>
+              <div class="col-12 col-md-9"><div class="bg-secondary-subtle border rounded p-3">内容区</div></div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这是网页最常见的骨架之一。下一式会把它做成完整套路——内容区 + 侧边栏的 9:3 布局，
+        外加嵌套、偏移与对齐，让侧栏想站哪边就站哪边。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二式</div>
+        <ol>
+          <li>把例 5 的三栏改成<strong>四栏</strong>：每个列该换成什么类？写出完整代码。</li>
+          <li>动手做一个“左 8 右 4”的两栏布局：左边放一段介绍文字，右边放一张图片占位块。</li>
+          <li>思考题：<code>col-md-6</code> 里只有一个断点规则，为什么在手机上它会自动占满整行，而不是挤成半行？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>12 份平分给 4 栏，每栏 3 份，所以把 <code>col-md-4</code> 全换成 <code>col-md-3</code>：</p>
+          <script type="text/plain" data-lang="html" data-title="四栏布局">
+            <div class="row g-3">
+              <div class="col-12 col-md-3"><div class="bg-primary-subtle border rounded p-3">第一栏</div></div>
+              <div class="col-12 col-md-3"><div class="bg-primary-subtle border rounded p-3">第二栏</div></div>
+              <div class="col-12 col-md-3"><div class="bg-primary-subtle border rounded p-3">第三栏</div></div>
+              <div class="col-12 col-md-3"><div class="bg-primary-subtle border rounded p-3">第四栏</div></div>
+            </div>
+          </script>
+          <p>手机上依然堆叠（<code>col-12</code> 不变），桌面变四栏。3 + 3 + 3 + 3 = 12，正好一行。</p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="左 8 右 4 布局">
+            <div class="row g-3">
+              <div class="col-12 col-md-8">
+                <div class="bg-success-subtle border rounded p-3">
+                  这里放介绍文字：修行如逆水行舟，不进则退。
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="bg-info-subtle border rounded p-3 text-center">
+                  这里放图片占位块
+                </div>
+              </div>
+            </div>
+          </script>
+          <p>8 + 4 = 12。手机上文字先出现、图片后出现，桌面并排——顺序完全由 HTML 里写的前后决定。</p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            Bootstrap 给 <code>row</code> 的所有直接子元素设了一条兜底规则：<strong>没有生效的列宽时，默认占满 100% 宽</strong>。
+            <code>col-md-6</code> 的“占 6 列”只在 ≥768px 时生效；手机上这条规则不存在，兜底规则接管，
+            于是每列占满整行、自动堆叠。这正是“移动优先”的底气：小屏永远有得体默认值，大屏样式只是往上加。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>容器：<code>container</code> 定宽居中（最大 540 / 720 / 960 / 1140 / 1320px），<code>container-fluid</code> 通栏；</li>
+        <li>行 <code>row</code> + 列 <code>col-N</code>：一行 12 等份，数字是占比不是像素；</li>
+        <li><code>col</code> 不带数字 = 自动均分；</li>
+        <li>断点前缀 sm / md / lg / xl / xxl，移动优先：先写手机，再往上加。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼栅格的下半部——嵌套、偏移、排序、对齐与列间距。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

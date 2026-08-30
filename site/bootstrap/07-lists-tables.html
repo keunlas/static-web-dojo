@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第七式 · 列表组与表格 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="list-group 列表组与 table 表格的样式与响应式滚动。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-07">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        武林有榜，账房有册。网页上，榜单用列表组 <code>list-group</code>，账册用表格
+        <code>table</code>——一个是竖排的名次，一个是横竖交错的格子，各有各的江湖。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 list-group 排出榜单、菜单与目录</li>
+          <li>掌握 active、disabled 与链接版列表</li>
+          <li>给表格套上条纹、悬停等样式</li>
+          <li>用 table-responsive 让宽表格在小屏幕上也能看</li>
+        </ul>
+      </div>
+
+      <h2>列表组基础</h2>
+      <p>
+        列表组就是把一连串 <code>&lt;li&gt;</code> 装进一个圆角边框里，让它们上下相连、
+        只留一道淡墨线作分隔。<code>ul</code> 上写 <code>list-group</code>，
+        每个 <code>&lt;li&gt;</code> 上写 <code>list-group-item</code>。
+        排行榜上少不了名次徽章（第五式的 <code>badge</code>），用
+        <code>d-flex justify-content-between</code> 就能把文字与徽章各顶一边。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 论剑排行榜（带徽章）</div>
+        <div class="demo-preview">
+          <ul class="list-group" style="max-width: 24rem">
+            <li class="list-group-item active d-flex justify-content-between align-items-center" aria-current="true">
+              第一名 · 扫地僧
+              <span class="badge text-bg-light rounded-pill">一炷香</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              第二名 · 王重阳
+              <span class="badge text-bg-primary rounded-pill">三炷香</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              第三名 · 黄药师
+              <span class="badge text-bg-primary rounded-pill">五炷香</span>
+            </li>
+            <li class="list-group-item disabled">周伯通（闭关中，恕不奉陪）</li>
+          </ul>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul class="list-group" style="max-width: 24rem">
+              <li class="list-group-item active d-flex justify-content-between align-items-center" aria-current="true">
+                第一名 · 扫地僧
+                <span class="badge text-bg-light rounded-pill">一炷香</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                第二名 · 王重阳
+                <span class="badge text-bg-primary rounded-pill">三炷香</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                第三名 · 黄药师
+                <span class="badge text-bg-primary rounded-pill">五炷香</span>
+              </li>
+              <li class="list-group-item disabled">周伯通（闭关中，恕不奉陪）</li>
+            </ul>
+          </script>
+        </div>
+      </div>
+
+      <p>三个状态类值得记住：</p>
+      <ul>
+        <li><code>active</code>——高亮当前项（这里顺手加了 <code>aria-current="true"</code> 告诉读屏器“就是它”）；</li>
+        <li><code>disabled</code>——灰掉、不可点，闭关名额专属；</li>
+        <li><code>list-group-flush</code>——去掉外框与圆角，专门用来嵌进第六式的卡片里。</li>
+      </ul>
+
+      <h2>链接版列表</h2>
+      <p>
+        列表组最常见的身份是<strong>目录</strong>：把 <code>&lt;li&gt;</code> 换成
+        <code>&lt;a&gt;</code>，类名里加一个 <code>list-group-item-action</code>，
+        鼠标悬停就有底色反馈，整个条目都可点击。禁用链接项时，还要补
+        <code>aria-disabled="true"</code>，因为链接不吃 <code>disabled</code> 属性。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 修习目录（链接版）</div>
+        <div class="demo-preview">
+          <div class="list-group" style="max-width: 24rem">
+            <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">第二回 · Bootstrap 篇</h6>
+                <small>修习中</small>
+              </div>
+              <p class="mb-1">十六式，从栅格到综合修炼。</p>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">第三回 · jQuery 篇</h6>
+                <small class="text-body-secondary">待修习</small>
+              </div>
+              <p class="mb-1">十式，轻剑快马。</p>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">第四回 · 藏经阁（尚未开放）</a>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="list-group" style="max-width: 24rem">
+              <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">第二回 · Bootstrap 篇</h6>
+                  <small>修习中</small>
+                </div>
+                <p class="mb-1">十六式，从栅格到综合修炼。</p>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">第三回 · jQuery 篇</h6>
+                  <small class="text-body-secondary">待修习</small>
+                </div>
+                <p class="mb-1">十式，轻剑快马。</p>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">第四回 · 藏经阁（尚未开放）</a>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>表格样式</h2>
+      <p>
+        裸的 <code>&lt;table&gt;</code> 没有边框、挤成一团；加上 <code>table</code> 类，
+        立刻有了横线分隔与呼吸感。再往上叠修饰类，就像给账册换装帧：
+      </p>
+      <ul>
+        <li><code>table-striped</code>——斑马纹，隔行变色，看长表不串行；</li>
+        <li><code>table-hover</code>——悬停那一行变色，眼神跟着鼠标走；</li>
+        <li><code>table-bordered</code>——给所有格子画上边框；<code>table-sm</code>——紧凑小号；</li>
+        <li><code>table-dark</code>——整套暗色，也可以只加在 <code>&lt;thead&gt;</code> 上给表头配色
+          （<code>table-light</code> 同理）。</li>
+      </ul>
+      <p>
+        表格天生容易“宽过屏幕”，解法不是把字缩小，而是给它一个
+        <code>table-responsive</code> 外衣：窄屏时横向滚动，内容一行不折、一字不丢。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 条纹 + 悬停的响应式表格（把窗口缩窄试试）</div>
+        <div class="demo-preview">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>招式</th>
+                  <th>分卷</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>十二列栅格</td>
+                  <td>第二回</td>
+                  <td>布局基本功</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>卡片</td>
+                  <td>第二回</td>
+                  <td>第六式</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>表单</td>
+                  <td>第二回</td>
+                  <td>第八式</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>轻剑 jQuery</td>
+                  <td>第三回</td>
+                  <td>选择器</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>招式</th>
+                    <th>分卷</th>
+                    <th>备注</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>十二列栅格</td>
+                    <td>第二回</td>
+                    <td>布局基本功</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>卡片</td>
+                    <td>第二回</td>
+                    <td>第六式</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td>表单</td>
+                    <td>第二回</td>
+                    <td>第八式</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td>轻剑 jQuery</td>
+                    <td>第三回</td>
+                    <td>选择器</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        若只想在小屏以下才允许滚动，还有 <code>table-responsive-md</code>、
+        <code>table-responsive-lg</code> 等带断点的版本：桌面端照常平铺，窄屏才开滚动。
+      </p>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第七式</div>
+        <ol>
+          <li>给例 3 的表格再加上 <code>table-bordered</code> 与 <code>table-sm</code>，对比观感变化。</li>
+          <li>做一个“藏经阁目录”列表组：链接版、<code>list-group-flush</code>，每项右侧挂一个徽章显示篇数。</li>
+          <li>思考题：宽表格为什么要套 <code>table-responsive</code> 横向滚动，而不是把字号调小硬塞进屏幕？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            类名叠成 <code>table table-striped table-hover table-bordered table-sm</code>：
+            <code>table-bordered</code> 给每个单元格都画上边框，账册感更重；
+            <code>table-sm</code> 把单元格内边距减半，行更矮、一屏能多装几行。
+            修饰类都是“加法”，叠得越多，观感越重——日常用两三个就够。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="藏经阁目录">
+            <div class="list-group list-group-flush" style="max-width: 24rem">
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Bootstrap 离线文档
+                <span class="badge text-bg-primary rounded-pill">5.3.8</span>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                jQuery 心法
+                <span class="badge text-bg-primary rounded-pill">4.0.0</span>
+              </a>
+              <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                图标大全
+                <span class="badge text-bg-primary rounded-pill">千余枚</span>
+              </a>
+            </div>
+          </script>
+          <p>
+            <code>list-group-flush</code> 去掉了外框，正好嵌进第六式的 <code>card</code> 里；
+            <code>list-group-item-action</code> 与 <code>d-flex justify-content-between</code>
+            叠加，链接与徽章各占一边，与例 1 的思路一脉相承。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            字号调小，是让读者“迁就”数据；横向滚动，是让数据“适应”设备。手机屏幕本来就小，
+            再把字压到 10px，触屏点不中、眼睛也受罪。而表格的语义在于<strong>行列对齐</strong>——
+            横向滚动虽然要多滑一下，但每一列都保持原样、每一行都还是一条完整记录，
+            对照查找才不会错位。这也是响应式设计的心法：先保内容可读，再谈塞进屏幕。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>list-group</code> + <code>list-group-item</code> 排出竖排榜单，<code>active</code>/<code>disabled</code> 标状态；</li>
+        <li>链接版加 <code>list-group-item-action</code>，徽章用 <code>d-flex</code> 顶到右边；</li>
+        <li><code>table</code> 定骨架，<code>striped</code>/<code>hover</code>/<code>bordered</code>/<code>sm</code> 换装帧；</li>
+        <li>宽表套 <code>table-responsive</code>，窄屏滚动、大字不折。</li>
+      </ul>
+
+      <blockquote>下一式，我们修炼表单——网页与访客对话的窗口。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

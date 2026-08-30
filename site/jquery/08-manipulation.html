@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第八式 · 节点的增删改 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="本式修炼节点的增删改：用 $('<li>') 创建元素，append/prepend/after/before 四处安放，remove/empty 删除与 clone 复制。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-08">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        写网页如搭积木：光会摆弄现成的还不够，得学会自己造积木、插积木、拆积木。
+        这一式，我们修炼节点的增删改——让页面像活水一样流动。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 <code>$('&lt;li&gt;')</code> 凭空造出元素，并用 <code>text</code> / <code>attr</code> 妆点它</li>
+          <li>掌握 <code>append</code> / <code>prepend</code> / <code>after</code> / <code>before</code> 四个安放方位</li>
+          <li>分清 <code>remove()</code> 与 <code>empty()</code>，知道 <code>detach()</code> 留了一手</li>
+          <li>用 <code>clone(true)</code> 连事件一起复制</li>
+        </ul>
+      </div>
+
+      <h2>凭空造一个节点</h2>
+      <p>
+        写页面时，很多节点是“后来才出生”的：新一条待办、新一张卡片。造节点的方法很轻巧——
+        把尖括号写进 <code>$()</code> 里。注意与找元素的选择器区别：<code>$('li')</code> 是“找现成的 li”，
+        <code>$('&lt;li&gt;')</code> 是“新造一个 li”。
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="创建元素并安放">
+        // 1. 造：新造一个 <li>（尖括号是“新建”的暗号）
+        var $li = $('<li>');
+
+        // 2. 妆点：文字、类、自定义属性
+        $li.text('晨练站桩半小时');
+        $li.addClass('list-group-item');
+        $li.attr('data-time', '06:00');
+
+        // 3. 安放：放进 #todo 的末尾
+        $('#todo').append($li);
+
+        // 反向写法：主语宾语互换，效果完全一样
+        $li.appendTo('#todo');
+      </script>
+
+      <p>
+        第 2 步里全是熟面孔：<code>text()</code>、<code>addClass()</code>、<code>attr()</code> 都能链式连写。
+        <code>appendTo</code> 是 <code>append</code> 的反向写法——一个说“容器装元素”，一个说“元素进容器”，挑顺手的用。
+      </p>
+
+      <h2>放进去：append / prepend / after / before</h2>
+      <p>
+        安放方位一共四个，分清“子级”与“同级”就不乱：
+        <code>append()</code> / <code>prepend()</code> 以<strong>父元素</strong>为主语，插进子级的末尾 / 开头；
+        <code>after()</code> / <code>before()</code> 以<strong>元素自身</strong>为主语，插到同级的后面 / 前面。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · append / prepend / after / before 四个方位</div>
+        <div class="demo-preview">
+          <div id="jq08-pos" class="border rounded p-3" style="max-width:24rem;">
+            <p class="mb-0">我是本体：append / prepend 的徽章进框内，after / before 的徽章在框外。</p>
+          </div>
+          <div class="mt-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="jq08-append">append 末尾</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="jq08-prepend">prepend 开头</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="jq08-after">after 后面</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="jq08-before">before 前面</button>
+          </div>
+          <script>
+            $(function () {
+              var n = 0;
+              function tag(label) {
+                n += 1;
+                return $('<span>')
+                  .addClass('badge text-bg-secondary me-1 mb-1')
+                  .text(label + '·' + n);
+              }
+              $('#jq08-append').on('click', function () { $('#jq08-pos').append(tag('append')); });
+              $('#jq08-prepend').on('click', function () { $('#jq08-pos').prepend(tag('prepend')); });
+              $('#jq08-after').on('click', function () { $('#jq08-pos').after(tag('after')); });
+              $('#jq08-before').on('click', function () { $('#jq08-pos').before(tag('before')); });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var n = 0;
+            function tag(label) {
+              n += 1;
+              return $('<span>')
+                .addClass('badge text-bg-secondary me-1 mb-1')
+                .text(label + '·' + n);
+            }
+            $('#jq08-append').on('click', function () { $('#jq08-pos').append(tag('append')); });
+            $('#jq08-prepend').on('click', function () { $('#jq08-pos').prepend(tag('prepend')); });
+            $('#jq08-after').on('click', function () { $('#jq08-pos').after(tag('after')); });
+            $('#jq08-before').on('click', function () { $('#jq08-pos').before(tag('before')); });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        每个徽章都是现场 <code>$('&lt;span&gt;')</code> 造出来的，再按四个方位安放。
+        框内框外的差别，就是“子级”与“同级”的差别。
+      </p>
+
+      <h2>拿掉：remove / empty / detach</h2>
+      <p>有增就有删，三种删法各管一摊：</p>
+
+      <table>
+        <thead>
+          <tr><th>方法</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$el.remove()</code></td><td>删掉元素自身与全部子孙，<strong>连同绑定的事件与数据</strong>一起清除</td></tr>
+          <tr><td><code>$el.empty()</code></td><td>只清空<strong>里面的内容</strong>，元素自身这个“壳”还在</td></tr>
+          <tr><td><code>$el.detach()</code></td><td>同 <code>remove</code>，但<strong>保留事件与数据</strong>——日后还能原样插回来</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        日常口诀：“清空列表用 <code>empty</code>，连根拔起用 <code>remove</code>，
+        暂时离场还想回来用 <code>detach</code>。”
+      </p>
+
+      <h2>合起来练：列表的增与删</h2>
+      <p>
+        把“造、放、删”串成一个小工具：输入任务、点击添加，列表末尾多一项；点“删除”按钮，那一项离场。
+        删除按钮是<strong>后来才出生</strong>的，所以用上一式学过的事件委托——把事件绑在列表身上。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 添加与删除列表项（事件委托）</div>
+        <div class="demo-preview">
+          <div class="input-group" style="max-width:24rem;">
+            <input id="jq08-input" type="text" class="form-control" placeholder="输入一条修行任务，如：晨练站桩">
+            <button id="jq08-add" type="button" class="btn btn-primary">添加</button>
+          </div>
+          <ul id="jq08-list" class="list-group mt-3" style="max-width:24rem;">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              每日一页 HTML
+              <button type="button" class="btn btn-sm btn-outline-danger jq08-del">删除</button>
+            </li>
+          </ul>
+          <script>
+            $(function () {
+              // 添加：造一个 li，放进 ul 末尾
+              $('#jq08-add').on('click', function () {
+                var text = $('#jq08-input').val().trim();
+                if (!text) { return; }
+                $('<li>')
+                  .addClass('list-group-item d-flex justify-content-between align-items-center')
+                  .text(text)
+                  .append($('<button>').addClass('btn btn-sm btn-outline-danger jq08-del').text('删除'))
+                  .appendTo('#jq08-list');
+                $('#jq08-input').val('');
+              });
+
+              // 删除：事件委托——新来的删除按钮也能响应
+              $('#jq08-list').on('click', '.jq08-del', function () {
+                $(this).closest('li').remove();
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="input-group" style="max-width:24rem;">
+              <input id="jq08-input" type="text" class="form-control" placeholder="输入一条修行任务，如：晨练站桩">
+              <button id="jq08-add" type="button" class="btn btn-primary">添加</button>
+            </div>
+            <ul id="jq08-list" class="list-group mt-3" style="max-width:24rem;">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                每日一页 HTML
+                <button type="button" class="btn btn-sm btn-outline-danger jq08-del">删除</button>
+              </li>
+            </ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            // 添加：造一个 li，放进 ul 末尾
+            $('#jq08-add').on('click', function () {
+              var text = $('#jq08-input').val().trim();
+              if (!text) { return; }
+              $('<li>')
+                .addClass('list-group-item d-flex justify-content-between align-items-center')
+                .text(text)
+                .append($('<button>').addClass('btn btn-sm btn-outline-danger jq08-del').text('删除'))
+                .appendTo('#jq08-list');
+              $('#jq08-input').val('');
+            });
+
+            // 删除：事件委托——新来的删除按钮也能响应
+            $('#jq08-list').on('click', '.jq08-del', function () {
+              $(this).closest('li').remove();
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        拆解两个关键：<code>$(this).closest('li')</code> 从删除按钮向上找到它所在的那一项再 <code>remove()</code>；
+        事件绑在 <code>#jq08-list</code> 上、用选择器 <code>'.jq08-del'</code> 过滤——
+        于是以后每一条新加的任务都自带删除功能，不用再绑一遍。
+      </p>
+
+      <h2>复制：clone() 与 clone(true)</h2>
+      <p>
+        <code>clone()</code> 把元素连结构一起复印一份；但它<strong>不复印事件</strong>——
+        事件是登记在“原来那个元素”身上的。想让复制品也有灵魂，用 <code>clone(true)</code>，
+        连事件与数据一起带走。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · clone() 与 clone(true) 的差别</div>
+        <div class="demo-preview">
+          <div>
+            <button type="button" class="btn btn-primary" id="jq08-clone">clone() 复制</button>
+            <button type="button" class="btn btn-primary" id="jq08-clonetrue">clone(true) 复制</button>
+          </div>
+          <p class="text-muted small mt-2 mb-0">复制后点击各卡片：只有原版和 clone(true) 复制品会“已阅”变红。</p>
+          <div id="jq08-deck" class="d-flex flex-wrap gap-3 mt-3">
+            <div class="card jq08-card" style="max-width:16rem;">
+              <div class="card-body">
+                <h5 class="card-title mb-1">修行卡</h5>
+                <p class="card-text mb-0">点我：已阅。</p>
+              </div>
+            </div>
+          </div>
+          <script>
+            $(function () {
+              // 事件直接绑在卡片上：clone(true) 会把它一起复制
+              $('#jq08-deck .jq08-card').on('click', function () {
+                $(this).toggleClass('border-danger bg-danger-subtle');
+              });
+              $('#jq08-clone').on('click', function () {
+                $('#jq08-deck .jq08-card').first().clone().appendTo('#jq08-deck');
+              });
+              $('#jq08-clonetrue').on('click', function () {
+                $('#jq08-deck .jq08-card').first().clone(true).appendTo('#jq08-deck');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            // 事件直接绑在卡片上：clone(true) 会把它一起复制
+            $('#jq08-deck .jq08-card').on('click', function () {
+              $(this).toggleClass('border-danger bg-danger-subtle');
+            });
+            $('#jq08-clone').on('click', function () {
+              $('#jq08-deck .jq08-card').first().clone().appendTo('#jq08-deck');
+            });
+            $('#jq08-clonetrue').on('click', function () {
+              $('#jq08-deck .jq08-card').first().clone(true).appendTo('#jq08-deck');
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">心法：委托与 clone(true) 各管一路</div>
+        <p style="margin:0">
+          例 2 的删除按钮用的是<strong>事件委托</strong>（事件在父级 <code>ul</code> 身上），
+          新元素天生可响应，无需 <code>clone(true)</code>；例 3 的事件<strong>直接绑在卡片自己身上</strong>，
+          复制时就必须 <code>clone(true)</code> 才能带走。两条路都通，知道自己在哪条路上就行。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第八式</div>
+        <ol>
+          <li>给例 2 加两个按钮——“清空 <code>empty()</code>”和“连根拔起 <code>remove()</code>”，点完再看列表还在不在。</li>
+          <li>把例 2 的 <code>appendTo</code> 换成 <code>prependTo</code>，让新任务插到列表<strong>顶部</strong>；并说明为什么放用户输入要用 <code>text()</code> 而不是 <code>html()</code>。</li>
+          <li>思考题：为什么 <code>clone()</code> 复制出来的卡片点不动，<code>clone(true)</code> 复制出来的就行？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="empty 与 remove">
+            $('#jq08-empty').on('click', function () {
+              $('#jq08-list').empty();   // 只清内容：ul 这个壳还在
+            });
+            $('#jq08-remove').on('click', function () {
+              $('#jq08-list').remove();  // 连壳带内容一起删
+            });
+          </script>
+          <p>
+            <code>empty</code> 之后列表壳子还在，还能继续添加；<code>remove</code> 之后 <code>ul</code> 整个消失，
+            再点“添加”就没地方放了。所以“清空列表”要用 <code>empty()</code>。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="prependTo 插到顶部">
+            $('<li>')
+              .addClass('list-group-item d-flex justify-content-between align-items-center')
+              .text(text)                                  // 输入当纯文字
+              .append($('<button>').addClass('btn btn-sm btn-outline-danger jq08-del').text('删除'))
+              .prependTo('#jq08-list');                    // 插到列表顶部
+          </script>
+          <p>
+            <code>prependTo</code> 与 <code>prepend</code> 对应，插到开头。安全上：<code>text()</code> 把输入当纯文字；
+            <code>html()</code> 会把输入当 HTML 解析——用户输入 <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>
+            之类的内容就会被执行，这叫 XSS 攻击。放用户输入，永远用 <code>text()</code>。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            事件是登记在“原来那个元素”身上的：<code>clone()</code> 只复印了 HTML 结构，
+            没复印 jQuery 记在元素上的事件与数据，所以复制品点不动；<code>clone(true)</code> 才连事件一起带走。
+            反观例 2 的删除按钮用的是事件委托（事件在父级身上），新元素天然可响应——委托场景下不需要 <code>clone(true)</code>。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>$('&lt;li&gt;')</code> 凭空造节点，<code>text</code> / <code>attr</code> / <code>addClass</code> 妆点它；</li>
+        <li><code>append</code> / <code>prepend</code> 插进子级末尾 / 开头，<code>after</code> / <code>before</code> 插到同级后 / 前，<code>appendTo</code> 等是反向写法；</li>
+        <li><code>remove()</code> 连事件一起删，<code>empty()</code> 只清内容，<code>detach()</code> 删而留事件；</li>
+        <li><code>clone(true)</code> 连事件一起复制，复制品也有灵魂。</li>
+      </ul>
+
+      <blockquote>下一式，页面不刷新也能取数据——Ajax。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>
