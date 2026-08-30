@@ -45,6 +45,7 @@
 | `positional-pseudos-fact-conflict.md` | 两代理对“位置伪类是否移除”说法冲突，以源码为准定论的教训 |
 | `has-toc-main-margin-auto-overflow.md` | has-toc 网格下正文残留 `margin: 0 auto` 被 fit-content 定宽，长代码行撑破 46rem 列压住右侧目录 |
 | `raw-codeblock-double-escape.md` | text/plain 源码块里写 HTML 实体（script raw text 不解码），代码块双重转义显示 `&lt;` |
+| `favicon-black.md` | favicon SVG 字符串手写 `%23` 后又过 encodeURIComponent，二次编码成非法颜色，图标漆黑一片 |
 
 ## 使用约定
 

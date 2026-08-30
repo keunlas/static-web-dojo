@@ -48,12 +48,16 @@
   window.SITE_ROOT = root;
   var A = root + '/assets';
 
-  // —— 站点图标（朱砂印章，内嵌 SVG，无网络请求）——
+  // —— 站点图标（朱砂印章「静」字，内嵌 SVG，无网络请求）——
+  // 注意：这里必须写真实的“#”，由 encodeURIComponent 统一编码成“%23”。
+  // 若直接写“%23”会被二次编码为“%2523”，解码后 SVG 里就是非法颜色值，
+  // fill 回退为默认黑色——浏览器标签页图标会漆黑一片（真实 bug，见 bug-fix/favicon-black.md）。
+  // 印章用字为“静”（用户拍板，取“纯静态”之静）。
   var favicon =
     "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-    "<rect width='100' height='100' rx='18' fill='%23b03a2e'/>" +
-    "<rect x='6' y='6' width='88' height='88' rx='13' fill='none' stroke='%23faf6ec' stroke-width='2' opacity='.55'/>" +
-    "<text x='50' y='70' font-size='56' text-anchor='middle' fill='%23faf6ec' font-family='serif'>修</text>" +
+    "<rect width='100' height='100' rx='18' fill='#b03a2e'/>" +
+    "<rect x='6' y='6' width='88' height='88' rx='13' fill='none' stroke='#faf6ec' stroke-width='2' opacity='.55'/>" +
+    "<text x='50' y='70' font-size='56' text-anchor='middle' fill='#faf6ec' font-family='serif'>静</text>" +
     "</svg>";
   var icon = document.createElement('link');
   icon.rel = 'icon';

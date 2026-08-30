@@ -426,7 +426,7 @@
     var $top = $('<header class="topbar">'
               + '<button type="button" class="hamburger" data-bs-toggle="offcanvas" data-bs-target="#sidebar-offcanvas" aria-label="打开目录"><i class="bi bi-list"></i></button>'
               + '<a class="topbar-brand" href="' + url('index.html') + '">'
-              +   '<span class="seal">行</span>'
+              +   '<span class="seal">静</span>'
               +   '<span class="brand-title">' + T.title + '</span>'
               + '</a>'
               + '<div class="topbar-search"></div>'

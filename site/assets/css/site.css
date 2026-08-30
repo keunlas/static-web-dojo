@@ -5,7 +5,10 @@
    ============================================================ */
 
 :root {
-  color-scheme: light;       /* 亮色皮肤：UA 控件（输入框/滚动条等）始终按亮色渲染 */
+  color-scheme: light;       /* 亮色皮肤：UA 控件（输入框/滚动条等）按亮色渲染 */
+                             /* 注意：暗色要在 html[data-bs-theme="dark"] 里显式改回 dark，
+                                否则同特异性下这里会盖掉 Bootstrap 的暗色 color-scheme，
+                                Chromium 的滚动条/原生控件在暗色下仍是白的（真实 bug）。 */
 
   /* 纸墨配色 */
   --paper: #faf6ec;          /* 宣纸米白（页面底色） */
@@ -18,6 +21,11 @@
   --cinnabar-deep: #8f2f24;  /* 深朱砂 */
   --line: #e3dcc8;           /* 淡墨线（边框） */
   --line-strong: #d4cab0;
+
+  /* 滚动条（Firefox 经 scrollbar-color，Chromium 121+ 同；老 Blink 走 ::-webkit-scrollbar） */
+  --sb-thumb: #d4cab0;
+  --sb-thumb-hover: #c4b693;
+  --sb-track: transparent;
 
   /* 墨夜（代码块） */
   --night: #20242e;
@@ -65,6 +73,10 @@
    只重定义 CSS 变量，所有颜色的使用处都通过变量取色，无需逐处改写。 */
 
 html[data-bs-theme="dark"] {
+  /* 暗色模式：UA 控件（滚动条/输入框等）必须显式切回 dark，
+     否则会被 :root 的 color-scheme: light 覆盖，Chromium 滚动条刺眼发白 */
+  color-scheme: dark;
+
   /* 暗夜宣纸：纸墨配色的暗色版 */
   --paper: #17181d;          /* 夜墨（页面底色） */
   --paper-2: #1e2026;        /* 旧纸暗版（侧边栏、区块底） */
@@ -76,6 +88,11 @@ html[data-bs-theme="dark"] {
   --cinnabar-deep: #e9a396;  /* 朱砂淡版（文字强调，深底上需更亮） */
   --line: #35363f;           /* 墨线暗版（边框） */
   --line-strong: #43464f;
+
+  /* 滚动条（暗版：低调深灰，融入夜墨底） */
+  --sb-thumb: #4b4f5c;
+  --sb-thumb-hover: #5c6272;
+  --sb-track: transparent;
 
   /* 墨夜代码块：比页面底色再暗一档，保持“墨夜”的存在感 */
   --night: #101218;
@@ -207,6 +224,25 @@ p code, li code, td code, .callout code {
   font-family: var(--mono);
   font-size: .86em;
 }
+
+/* ============ 滚动条（跟随明暗主题，Firefox / Chromium 统一） ============
+   现代引擎走标准属性 scrollbar-color/width（Firefox 与 Chromium 121+ 都支持，
+   且一旦设置，Chromium 会关闭 ::-webkit-scrollbar 样式）；
+   老版本 Chromium/WebKit 由 ::-webkit-scrollbar 兜底（同样读主题变量）。 */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--sb-track); }
+::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--sb-thumb-hover); }
 
 /* ============ 印章 ============ */
 

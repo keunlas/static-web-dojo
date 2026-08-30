@@ -107,6 +107,12 @@ site/                        # 部署根目录（唯一需要上传的部分）
   `data-bs-theme="dark"` 让组件（nav/accordion/form/modal…）自动适配，本站只需覆盖
   `--bs-body-*`/`--bs-primary*` 等少数全局变量，并给写死色值的处所（印章字色、透明度底色、
   warn 警示色、`.btn-primary` 白字用深一档朱砂 `#c14f43` 等）补暗版覆盖。
+  注意：`color-scheme` 必须主题随动——`:root` 里是 light，`html[data-bs-theme="dark"]`
+  里要显式改回 dark，否则同特异性下 site.css 后加载会盖掉 Bootstrap 的暗色 color-scheme，
+  Chromium 滚动条/原生控件在暗色下仍是白的（真实 bug，已在暗版块注明）。
+- **滚动条**：`scrollbar-width/color`（Firefox 与 Chromium 121+；颜色走 `--sb-thumb` 等
+  主题变量，明暗自动切换）+ `::-webkit-scrollbar` 兜底老 Blink；全站（页面/侧边栏/代码块/
+  搜索下拉/练功场编辑器）都inherit，无需逐处设置。
 - 字体全部系统栈：正文无衬线（含 PingFang SC / Microsoft YaHei）、标题宋体系（Songti SC / SimSun）、代码等宽栈。
 - 布局：页面级吸顶顶栏（`--topbar-h`，搜索/品牌/主题切换都在这里）+ 侧边栏 fixed 280px
   顶到顶栏之下（<992px 收进 offcanvas，顶栏保留 hamburger）；正文 max-width 46rem；
@@ -150,6 +156,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | site.js 用 `$.trim` 致全站搜索静默失效 | `bug-fix/site-js-used-removed-jquery-trim.md` |
 | has-toc 网格下正文 `margin:0 auto` 致 fit-content 撑破列宽、压住右侧 TOC | `bug-fix/has-toc-main-margin-auto-overflow.md` |
 | text/plain 源码块写 HTML 实体致代码块双重转义 | `bug-fix/raw-codeblock-double-escape.md` |
+| favicon SVG 手写 `%23` 再 encodeURIComponent 二次编码，标签页图标漆黑一片 | `bug-fix/favicon-black.md` |
 | 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。
