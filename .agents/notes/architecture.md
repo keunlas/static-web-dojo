@@ -62,7 +62,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
   - `home`、`basics`、`bootstrap`、`jquery`、`archive`（卷首/分卷页）
   - `bootstrap-01`…`bootstrap-16`、`jquery-01`…`jquery-10`（章节页，与 slug 一致）
   - `archive-icons`（藏经阁·图标大全，登记时用章节条目的 `pageId` 字段指定）
-  - `playground`（练功场，独立 PAGES 条目，无对应 SECTIONS 回）
+  - `playground`（练功场，SECTIONS 里的「附页」回：进侧边栏 + 翻页顺序；
+    页面页头手写，故 injectHeader 跳过它——曾漏登记 SECTIONS 导致侧边栏无入口，已修）
 - 章节条目支持 `pageId` 字段：藏经阁这类无编号条目（离线文档/示例集/图标大全）用它指定
   data-page；无 `num` 且无 `pageId` 的条目只进侧边栏、不进翻页顺序。
 - site.js 在 `$(init)`里完成七件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆）、

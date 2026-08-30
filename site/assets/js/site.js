@@ -94,6 +94,19 @@
         { num: '', href: 'archive/examples/index.html', title: '官方示例集', desc: '' },
         { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
       ]
+    },
+    {
+      // 附页：练功场。登记进 SECTIONS 后，侧边栏、翻页顺序都自动生成；
+      // 但页面页头是手写的（playground/index.html 自带 chapter-header），
+      // 因此 injectHeader 需要跳过它（见 injectHeader 内注释）。
+      id: 'playground',
+      label: '附页',
+      title: '练功场',
+      pageTitle: '在线练功场',
+      href: 'playground/index.html',
+      seal: '练',
+      desc: 'HTML / CSS / JS 三栏在线编辑，代码自动保存在本机浏览器。',
+      chapters: []
     }
   ];
 
@@ -116,8 +129,8 @@
       });
     });
   });
-  // 练功场：独立工具页，排在藏经阁之后
-  PAGES.push({ id: 'playground', href: 'playground/index.html', nav: '练功场', title: '在线练功场', chapter: false });
+  // 注：练功场不再是手动 push —— 已登记为 SECTIONS 里的「附页」回，
+  // 上面 forEach 循环会自动把它送进 PAGES（排在藏经阁之后）。
 
   var BY_ID = {};
   PAGES.forEach(function (p) { BY_ID[p.id] = p; });
@@ -165,7 +178,9 @@
   // ================= 渲染：章节页头 =================
 
   function injectHeader(page) {
-    if (!page || page.id === 'home' || page.id === 'archive') return;
+    // home / archive / playground 的页头是页面手写的（home 用 hero、
+    // 藏经阁卷首与练功场自带 chapter-header），不重复注入
+    if (!page || page.id === 'home' || page.id === 'archive' || page.id === 'playground') return;
     var sec = findSectionOf(page.id);
     if (!sec) return;
     var seal = page.chapter ? page.id.split('-').pop() : sec.seal;
