@@ -46,9 +46,9 @@ python3 -m http.server 8899 --directory site
 
 - 项目约定：**动态注入的脚本一律链式加载**（见 `../architecture.md` §2）；
 - 任何新增“依赖加载顺序”的机制，必须在 http:// 与 file:// 下各连测多次；
-- `../skills/verify-offline.md` 的失败对照表第一行即为本坑。
+- `../skills/verify-offline/SKILL.md` 的失败对照表第一行即为本坑。
 
 ## 相关
 
 - 文件：`site/assets/js/loader.js`、`site/assets/js/site.js`
-- 关联：`../skills/build-demo.md`（演示脚本包裹规则）、`../architecture.md` §2
+- 关联：`../skills/build-demo/SKILL.md`（演示脚本包裹规则）、`../architecture.md` §2

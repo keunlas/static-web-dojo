@@ -52,4 +52,4 @@ grep -nE '"(bind|unbind|live|die|delegate|undelegate)":' reference/jquery/jquery
 ## 相关
 
 - 文件：`reference/jquery/jquery-4.0.0.js`（1874–1929 行）、`.agents/notes/conventions.md` §6
-- 关联：`../skills/doc-sync.md`（核心原则 2）、`../architecture.md` §8
+- 关联：`../skills/doc-sync/SKILL.md`（核心原则 2）、`../architecture.md` §8

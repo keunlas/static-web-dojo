@@ -28,7 +28,7 @@
    **实事求是**——写文档前先读真实文件核实，禁止凭记忆或臆测编造。
    - 每完成一批工作，**立即**更新 `notes/progress.md` 的当前状态；
    - 产生新的约定、工具、踩坑或设计变更时，**当场**沉淀进对应 notes / skills；
-   - 每轮工作收尾按 `skills/doc-sync.md` 过一遍文档维护清单。
+   - 每轮工作收尾按 `skills/doc-sync/SKILL.md` 过一遍文档维护清单。
    - 并行多代理时，共享文档由协调者统一更新，避免并发写坏文件。
 7. **用户指令优先于文档（项目开发纪律）**：当人类用户的直接指令与本仓库已有文档
    （包括本文件、`.agents/` 下所有文档、`README.md`）冲突时，**一律以用户指令为准**执行；
@@ -51,22 +51,22 @@
 
 | 文件 | 内容 | 何时用 |
 | --- | --- | --- |
-| `write-chapter.md` | 从大纲到合格章节的完整流程 + 验收清单 | 编写任何教程章节 |
-| `build-demo.md` | 演示区块（预览+源码）的构造方法与常见陷阱 | 章节内做现场演示 |
-| `register-chapter.md` | 在 site.js 登记新章节 / 新页面的方法 | 新增页面时 |
-| `verify-offline.md` | 双模式（http:// 与 file://）验证、离线纯净检查、链接检查 | 改完任何页面后 |
-| `sync-assets.md` | vendor / 藏经阁资源的同步与再生成 | 处理本地资源时 |
-| `doc-sync.md` | `.agents/` 文档与 AGENTS.md 的同步维护纪律与流程 | **每轮工作收尾时** |
+| `write-chapter/SKILL.md` | 从大纲到合格章节的完整流程 + 验收清单 | 编写任何教程章节 |
+| `build-demo/SKILL.md` | 演示区块（预览+源码）的构造方法与常见陷阱 | 章节内做现场演示 |
+| `register-chapter/SKILL.md` | 在 site.js 登记新章节 / 新页面的方法 | 新增页面时 |
+| `verify-offline/SKILL.md` | 双模式（http:// 与 file://）验证、离线纯净检查、链接检查 | 改完任何页面后 |
+| `sync-assets/SKILL.md` | vendor / 藏经阁资源的同步与再生成 | 处理本地资源时 |
+| `doc-sync/SKILL.md` | `.agents/` 文档与 AGENTS.md 的同步维护纪律与流程 | **每轮工作收尾时** |
 
 ## 常见任务速查
 
 | 任务 | 做法 |
 | --- | --- |
-| 新写一章教程 | 读 `notes/conventions.md` + `skills/write-chapter.md` → 写文件 → 登记章节 → 按 `skills/verify-offline.md` 自查 |
-| 章节里加演示 | 读 `skills/build-demo.md` |
-| 调整全站导航/目录 | 只改 `site/assets/js/site.js` 的 `SECTIONS`，读 `skills/register-chapter.md` |
+| 新写一章教程 | 读 `notes/conventions.md` + `skills/write-chapter/SKILL.md` → 写文件 → 登记章节 → 按 `skills/verify-offline/SKILL.md` 自查 |
+| 章节里加演示 | 读 `skills/build-demo/SKILL.md` |
+| 调整全站导航/目录 | 只改 `site/assets/js/site.js` 的 `SECTIONS`，读 `skills/register-chapter/SKILL.md` |
 | 本地预览 | `python3 -m http.server 8899 --directory site`（Ajax 章也用它） |
-| 同步本地资源 | `bash tools/sync-assets.sh`（读 `skills/sync-assets.md`） |
+| 同步本地资源 | `bash tools/sync-assets.sh`（读 `skills/sync-assets/SKILL.md`） |
 
 ## 不要做的事
 

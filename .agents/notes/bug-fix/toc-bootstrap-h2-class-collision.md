@@ -39,11 +39,11 @@ python3 -m http.server 8899 --directory site
 
 - 约定：**站点自定义类名禁止裸用 Bootstrap 已有类名**（如 `h2`/`h3`/`card`/`btn`），
   层级标记类一律用项目自有前缀（`l2/l3`）；
-- `../skills/verify-offline.md` 的布局测试要求：TOC 存在时断言 `.toc a` 的
+- `../skills/verify-offline/SKILL.md` 的布局测试要求：TOC 存在时断言 `.toc a` 的
   `fontSize ≈ 13.6px`（不是 32px）；
 - CDP 布局测量（`/tmp/cdp-layout.js` 风格）已作为常规检查手段。
 
 ## 相关
 
 - 文件：`site/assets/js/site.js`（injectToc）、`site/assets/css/site.css`
-- 关联：`../skills/build-demo.md`（演示内避免 h2/h3）、`../architecture.md` §3
+- 关联：`../skills/build-demo/SKILL.md`（演示内避免 h2/h3）、`../architecture.md` §3

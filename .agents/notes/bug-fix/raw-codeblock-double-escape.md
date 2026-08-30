@@ -74,4 +74,4 @@ node /tmp/xxx.js http://127.0.0.1:8899/archive/icons/index.html
 ## 相关
 
 - 文件：`tools/gen-icons-page.py`、`site/archive/icons/index.html`（生成物）
-- 关联：`../../skills/build-demo.md`（源码块约定）、`../architecture.md` §4（代码高亮管线）
+- 关联：`../../skills/build-demo/SKILL.md`（源码块约定）、`../architecture.md` §4（代码高亮管线）

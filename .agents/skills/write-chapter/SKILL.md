@@ -1,3 +1,8 @@
+---
+name: write-chapter
+description: 从章节大纲产出一章合格教程页（site/bootstrap 与 site/jquery），含完整流程、验收清单与常见错误。适用于编写任何教程章节。
+---
+
 # 技能：write-chapter（编写一章教程）
 
 > 用途：从章节大纲产出一章合格教程页。适用于 `site/bootstrap/` 与 `site/jquery/` 下的章节。
@@ -21,14 +26,14 @@
 2. **写骨架**：复制 `tools/page-template.html`，替换 `__TITLE__`、`__DESC__`、
    `__ROOT__`（章节页一律 `../`）、`__PAGE_ID__`。
 3. **写正文**：按五段式（章首语 → 本式要点 callout → 讲解与演示 → 练功 3 题 →
-   本式小结 + blockquote 预告）。演示构造见 `skills/build-demo.md`。
+   本式小结 + blockquote 预告）。演示构造见 `skills/build-demo/SKILL.md`。
 4. **写练功**：2 道动手题 + 1 道思考题；每个 `details.answer` 给代码 + 白话解释；
    思考题给“为什么”层面的解释。
-5. **登记**：确认 slug 已在 site.js（新页面才需要登记，见 `skills/register-chapter.md`）。
-6. **自查**：跑 conventions.md 第 7 节的检查命令；浏览器双模式验证（`skills/verify-offline.md`）。
+5. **登记**：确认 slug 已在 site.js（新页面才需要登记，见 `skills/register-chapter/SKILL.md`）。
+6. **自查**：跑 conventions.md 第 7 节的检查命令；浏览器双模式验证（`skills/verify-offline/SKILL.md`）。
 7. **更新** `.agents/notes/progress.md` 中对应章节状态为 ✅。
    **注意**：并行多代理场景下，共享文档（含 progress.md）一律由协调者（父代理）统一更新，
-   子代理只在自己的交付报告里说明，不要直接改（见 `skills/doc-sync.md`）；独立单人工作时可自行更新。
+   子代理只在自己的交付报告里说明，不要直接改（见 `skills/doc-sync/SKILL.md`）；独立单人工作时可自行更新。
 
 ## 验收清单（全部满足才算完成）
 

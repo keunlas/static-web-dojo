@@ -1,3 +1,8 @@
+---
+name: sync-assets
+description: 从 reference/ 原料库复制 vendor 库文件与藏经阁到 site/，并再生成本站生成物（示例集索引等）。适用于处理本地资源时。
+---
+
 # 技能：sync-assets（同步与再生成本地资源）
 
 > 用途：从 `reference/` 原料库复制 vendor 库文件与藏经阁到 `site/`，
@@ -32,7 +37,7 @@ python3 tools/gen-search-index.py    # 再生成全站搜索索引（新增页�
    `site/assets/vendor/` 或 `site/archive/` 后再引用。
 4. `site/archive/bootstrap-docs/`、`site/archive/examples/` 已 gitignore，属生成物，
    不要手改其中内容（第三方镜像）。
-5. 同步后建议跑 `skills/verify-offline.md` 的静态检查确认资源齐全。
+5. 同步后建议跑 `skills/verify-offline/SKILL.md` 的静态检查确认资源齐全。
 
 ## 版本基线（当前）
 

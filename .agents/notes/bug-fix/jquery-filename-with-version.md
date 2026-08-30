@@ -35,10 +35,10 @@ ls reference/jquery/        # 查看真实文件名
 
 - 约定：**同步脚本里写死带版本号的文件名，换版本时三处同步**（sync 脚本、
   loader.js 链、教程内“引入方式”示例文本）；
-- `../skills/sync-assets.md` 记录了当前版本基线与“文件名带版本号”注意项；
+- `../skills/sync-assets/SKILL.md` 记录了当前版本基线与“文件名带版本号”注意项；
 - 同步后立即 `ls site/assets/vendor/*` 核对产物。
 
 ## 相关
 
 - 文件：`tools/sync-assets.sh`、`site/assets/js/loader.js`
-- 关联：`../skills/sync-assets.md`
+- 关联：`../skills/sync-assets/SKILL.md`

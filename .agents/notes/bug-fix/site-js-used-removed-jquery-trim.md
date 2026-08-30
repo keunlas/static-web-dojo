@@ -50,11 +50,11 @@ var q = ($input.val() || '').trim().toLowerCase();
    （loader/site/highlight）是否用了 jQuery 4 已移除 API
    （`$.trim`、`$.proxy`、`.bind/.unbind/.live/.die/.delegate/.undelegate`），
    违者判失败；
-2. **验证升级**：`../skills/verify-offline.md` 明确要求“改完任何功能都要做
+2. **验证升级**：`../skills/verify-offline/SKILL.md` 明确要求“改完任何功能都要做
    交互级验证”——搜索必须真的敲词并断言结果数量，不能只查标记；
 3. 教训沉淀：站点公共 JS 与教程章节遵守同一套红线（conventions.md §6）。
 
 ## 相关
 
 - 文件：`site/assets/js/site.js`（initSearch）、`tools/check-offline.sh`（2b 项）
-- 关联：`../conventions.md` §6、`../skills/verify-offline.md`、`../architecture.md` §3.5
+- 关联：`../conventions.md` §6、`../skills/verify-offline/SKILL.md`、`../architecture.md` §3.5

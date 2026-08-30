@@ -143,5 +143,5 @@ grep -c '<script' <你写的文件> && grep -c '</script>' <你写的文件>
 # 3) UTF-8 合法
 python3 -c "open('<你写的文件>','rb').read().decode('utf-8')"
 # 4) data-page 与文件名和 site.js 登记一致（人工核对）
-# 5) 浏览器验证见 skills/verify-offline.md
+# 5) 浏览器验证见 skills/verify-offline/SKILL.md
 ```

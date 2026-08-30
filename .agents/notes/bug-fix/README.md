@@ -50,5 +50,5 @@
 ## 使用约定
 
 - 修完一个新 bug 后，**立即**在本目录按模板新增一个文件，并更新上面的索引表；
-- 同时检查是否需要在对应 notes / skills 里补一行预防措施（见 `skills/doc-sync.md`）；
+- 同时检查是否需要在对应 notes / skills 里补一行预防措施（见 `skills/doc-sync/SKILL.md`）；
 - `notes/architecture.md` 只保留坑的一句话索引，详细内容以本目录为准。

@@ -1,3 +1,8 @@
+---
+name: register-chapter
+description: 在 site/assets/js/site.js 的 SECTIONS 中登记新章节或新页面，让侧边栏、分卷列表、翻页顺序自动更新。适用于新增页面时。
+---
+
 # 技能：register-chapter（登记章节 / 新页面）
 
 > 用途：在 `site/assets/js/site.js` 的 `SECTIONS` 中登记新章节或新页面，
