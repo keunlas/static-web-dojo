@@ -36,6 +36,9 @@ site/                        # 部署根目录（唯一需要上传的部分）
 - `tools/` 一览：`sync-assets.sh`（同步 vendor/藏经阁）、`gen-icons-page.py`（图标大全）、
   `gen-search-index.py`（搜索索引）、`gen-sitemap.py`（站点地图）、`check-offline.sh`
   （离线纯净扫描）、`check-links.py`（内部链接检查）、`page-template.html`（作者模板）。
+- 仓库根目录 `deploy.sh`：**一键部署准备**——按部署顺序执行 sync-assets →
+  gen-icons-page → gen-search-index → gen-sitemap（参数原样透传，如 `--base`）→
+  check-offline → check-links，任一步失败即停止；它不是构建系统，`site/` 仍零构建。
 - 页面深度 → loader 引入前缀：根目录页面 `assets/js/loader.js`；一层子目录 `../assets/js/loader.js`；两层 `../../assets/js/loader.js`。
 
 ## 2. 加载机制（loader.js）

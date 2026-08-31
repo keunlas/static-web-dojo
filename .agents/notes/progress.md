@@ -3,7 +3,28 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：新增 sitemap.xml 与 404 迷路页）
+## 当前状态（全站完成 ✅ · 最后更新：新增一键部署脚本 deploy.sh）
+
+### 🆕 最新一轮（根目录一键部署脚本 deploy.sh · 用户需求）
+
+用户反馈：部署时要依次执行多个脚本，希望在根目录提供一个脚本一次性执行完。
+本轮交付：
+
+- **根目录 `deploy.sh`**：按部署顺序串起全部 6 步——`tools/sync-assets.sh`
+  （vendor + 藏经阁）→ `gen-icons-page.py`（图标大全）→ `gen-search-index.py`
+  （搜索索引）→ `gen-sitemap.py`（站点地图，**参数原样透传**：`bash deploy.sh --base https://你的域名/`）
+  → `check-offline.sh`（离线纯净自检）→ `check-links.py`（内部链接自检）；
+  `set -euo pipefail`，任一步失败即停止并显示该工具自己的报错；脚本先 `cd` 到仓库根，
+  从任意目录运行都正确。
+- 定位说明（写入脚本头注释与 README）：deploy.sh 只是把现有工具按顺序串起来，
+  **不是构建系统**——`site/` 仍零构建、纯静态，不违背项目哲学。
+- 文档同步：README（新增「一键部署准备」小节、部署检查清单合并为一条、sitemap
+  说明指向 deploy.sh）、AGENTS.md 任务速查新增一行、architecture.md tools 一览补
+  deploy.sh。
+- **验证**：`bash deploy.sh` 端到端跑通（6/6 全绿、退出码 0，产物重生成后
+  git diff 为空即生成器幂等）；`bash deploy.sh --base https://deploy-check.invalid/`
+  确认参数透传生效（sitemap 基址随之变化），随后已还原为占位域名；
+  从仓库外目录运行同样正常（脚本自 cd）。
 
 ### 🆕 最新一轮（新增 sitemap.xml 与 404 迷路页 · 用户需求）
 
@@ -198,7 +219,8 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
   见 `bug-fix/404-deep-path-relative-links.md`）
 - 整页示例：`demo/portfolio`、`demo/todo`（独立页、含内嵌 favicon）；`data/notes.json`
 - 工具：check-offline.sh、check-links.py、gen-icons-page.py、gen-search-index.py、
-  **gen-sitemap.py（sitemap.xml 生成器）**、verify-cdp.js、page-template.html
+  **gen-sitemap.py（sitemap.xml 生成器）**、**根目录 deploy.sh（一键部署准备）**、
+  verify-cdp.js、page-template.html
 - AI 代理文档体系：AGENTS.md + notes（architecture / conventions / style-guide /
   progress / **bug-fix 坑档案一坑一文件 × 9**）+ 7 篇 skills（含 doc-sync 纪律与
   “用户指令优先”铁律）
@@ -313,6 +335,7 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 - `site/archive/icons/index.html`、`site/playground/index.html` 建好后，侧边栏“藏经阁”与
   PAGES 顺序需更新；速查页已登记（archive-reference，进侧边栏 + 翻页链）；
 - `site/sitemap.xml` 是生成物：增删章节后跑 `python3 tools/gen-sitemap.py --base https://你的域名/`；
+  部署前一次性准备全部产物用根目录 `bash deploy.sh --base https://你的域名/`（含自检）；
   `site/404.html` 是特殊页（未入 SECTIONS、loader 逐级上探），改它前先读
   `bug-fix/404-deep-path-relative-links.md`；
 - 全部章节完成后记得把本文件的状态标记为“全站完成”，并跑一遍 verify-offline 终验。

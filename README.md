@@ -73,9 +73,20 @@ python3 -m http.server 8000 --directory site
 > jQuery 第九式《Ajax》需要读取本地 JSON 文件，受浏览器安全策略限制，
 > 双击打开（file://）时该章演示不可用，请用方式二或部署后访问。
 
-### 同步本地资源
+### 一键部署准备
 
-`reference/` 是原始资源库，部署前（或更换版本后）把所需文件复制进 `site/`：
+部署前（或更换资源版本后），在**仓库根目录**执行一次即可：同步 vendor 与藏经阁、
+生成图标大全 / 搜索索引 / 站点地图，并自动跑完离线纯净性与内部链接两项自检，
+全部通过后 `site/` 即为最新产物，可直接上传：
+
+```bash
+bash deploy.sh --base https://你的域名/   # 不传 --base 则站点地图使用占位域名
+```
+
+> `deploy.sh` 只是把下面各工具按部署顺序串起来（任何一步失败即停止并报错），
+> 不是构建系统：`site/` 本身仍然零构建、纯静态，部署的始终是 `site/` 目录。
+
+需要单独执行某个工具时：
 
 ```bash
 bash tools/sync-assets.sh          # 同步 vendor 库文件 + 藏经阁（离线文档/示例集）
@@ -85,6 +96,8 @@ python3 tools/gen-sitemap.py --base https://你的域名/  # 生成站点地图�
 ```
 
 ### 质量检查
+
+（`deploy.sh` 已自动执行以下两项，这里列出来供单独复跑。）
 
 ```bash
 bash tools/check-offline.sh   # 离线纯净性（无外网资源依赖）
@@ -98,7 +111,8 @@ python3 tools/check-links.py  # 内部链接有效性
 - 站点自带 `404.html`（迷路页）：nginx 需要一条 `error_page`；GitHub Pages / Netlify /
   Vercel 等静态托管会自动使用根目录的 `404.html`，无需配置。
 - 站点自带 `sitemap.xml`：**部署前请用真实域名重新生成**
-  （`python3 tools/gen-sitemap.py --base https://你的域名/`），否则其中是占位域名。
+  （`bash deploy.sh --base https://你的域名/`，或单独跑
+  `python3 tools/gen-sitemap.py --base https://你的域名/`），否则其中是占位域名。
 
 nginx 最小配置示例：
 
@@ -120,11 +134,7 @@ server {
 
 部署检查清单：
 
-- [ ] 已运行 `tools/sync-assets.sh`（vendor 与藏经阁就位）
-- [ ] 已运行 `gen-icons-page.py` 与 `gen-search-index.py`
-- [ ] 已用真实域名运行 `gen-sitemap.py --base https://你的域名/`
-- [ ] `bash tools/check-offline.sh` 通过
-- [ ] `python3 tools/check-links.py` 通过
+- [ ] 已运行 `bash deploy.sh --base https://你的域名/`（产物与两项自检全部通过）
 - [ ] 浏览器访问首页、章节页、练功场、图标大全、离线文档均正常
 - [ ] 访问一个不存在的地址，确认出现本站 404 迷路页
 
