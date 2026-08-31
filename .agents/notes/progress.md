@@ -3,7 +3,33 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：演示源码“去节选”整改 + 新增工具类速查）
+## 当前状态（全站完成 ✅ · 最后更新：组合进度条示例修复）
+
+### 🐛 最新修复（组合进度条 progress-stacked 文字挤叠 · 用户反馈）
+
+用户反馈 12 式“例 3 · 组合进度条”看起来不对。CDP 复现：宽度写在了 `.progress-bar`
+上（`style="width:50%"`），而 `.progress-stacked` 是横向 flex，每个 `.progress` 没设宽度、
+按内容收缩到 51px，文字互相压叠。根因：**Bootstrap 5.3 的 progress-stacked 要求宽度写在
+每条 `.progress` 容器上**（`.progress-stacked>.progress>.progress-bar{width:100%}` 会自动
+撑满），写在内层 bar 上则各段按内容宽挤在一起。修复：宽度移到 `.progress`，bar 不再写
+宽度；正文补一句心法（“宽度写在各条 .progress 上”）并在源码块注释注明；数值维持
+50/30/15。CDP 复测：三段 50%/30%/15% 无缝相接、零重叠（gap=0）、http 与 file:// 双模式
+零报错。与上轮 carousel-caption 修复（12 式例 1）为同页两处独立问题，
+坑档案见 `bug-fix/carousel-progress-stacked-width.md`。
+
+
+### 🐛 最新修复（轮播章节例 1 文字重叠 · 用户反馈）
+
+用户反馈 12 式例 1 三页轮播“文字出现重叠”。CDP 复现：桌面宽度下标题 h5 与
+carousel-caption 说明重叠 24px（cap top=1192 / h5 bottom=1232；窄屏 caption 被
+`d-none d-md-block` 隐藏所以正常）。根因：`.carousel-caption` 是**绝对定位**钉在
+容器底部，而原内容块只是 `py-5` 约 200px 高，底部空间不够放说明，位置恰好压住标题。
+修复：每页内容改固定 `height:320px` 弹性容器（图标+标题垂直居中），caption 作为
+`carousel-item` 直接子元素只放说明文字；标题 h5 保留在色块内（任何宽度可见）；
+练功答案 1 同步新结构；正文补一句心法（“caption 是绝对定位说明区，内容块要留足高度”）。
+CDP 复测：h5 与 caption 重叠 0、图标与 caption 间距约 18px，桌面/700px 窄屏均正常、
+零报错。坑档案：`bug-fix/carousel-caption-overlap.md`。
+
 
 ### 🆕 最新一轮（用户两点意见：源码块不得节选、取值要逐一介绍）(用户指令优先)
 

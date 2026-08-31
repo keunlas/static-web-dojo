@@ -167,6 +167,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | has-toc 网格下正文 `margin:0 auto` 致 fit-content 撑破列宽、压住右侧 TOC | `bug-fix/has-toc-main-margin-auto-overflow.md` |
 | text/plain 源码块写 HTML 实体致代码块双重转义 | `bug-fix/raw-codeblock-double-escape.md` |
 | favicon SVG 手写 `%23` 再 encodeURIComponent 二次编码，标签页图标漆黑一片 | `bug-fix/favicon-black.md` |
+| carousel-caption 绝对定位钉底，内容块太矮时与标题文字重叠 | `bug-fix/carousel-caption-overlap.md` |
+| progress-stacked 宽度误写在 .progress-bar 上，各段按内容宽挤成一团 | `bug-fix/carousel-progress-stacked-width.md` |
 | 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。

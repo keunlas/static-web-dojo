@@ -66,30 +66,30 @@
             </div>
             <div class="carousel-inner">
               <div class="carousel-item active">
-                <div class="bg-primary text-white text-center py-5">
-                  <i class="bi bi-moon-stars display-4"></i>
+                <div class="bg-primary text-white d-flex flex-column align-items-center justify-content-center" style="height:320px">
+                  <i class="bi bi-moon-stars display-4" aria-hidden="true"></i>
                   <h5 class="mt-3 mb-0">静夜思 · 打坐</h5>
-                  <div class="carousel-caption d-none d-md-block">
-                    <p class="mb-0">戌时静坐，气沉丹田</p>
-                  </div>
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                  <p class="mb-0">戌时静坐，气沉丹田</p>
                 </div>
               </div>
               <div class="carousel-item">
-                <div class="bg-success text-white text-center py-5">
-                  <i class="bi bi-sunrise display-4"></i>
+                <div class="bg-success text-white d-flex flex-column align-items-center justify-content-center" style="height:320px">
+                  <i class="bi bi-sunrise display-4" aria-hidden="true"></i>
                   <h5 class="mt-3 mb-0">破晓 · 晨练</h5>
-                  <div class="carousel-caption d-none d-md-block">
-                    <p class="mb-0">闻鸡起舞，挥剑三百</p>
-                  </div>
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                  <p class="mb-0">闻鸡起舞，挥剑三百</p>
                 </div>
               </div>
               <div class="carousel-item">
-                <div class="text-center py-5" style="background-color:#6f4e37">
-                  <i class="bi bi-stars display-4 text-white"></i>
-                  <h5 class="mt-3 mb-0 text-white">藏经阁 · 抄经</h5>
-                  <div class="carousel-caption d-none d-md-block">
-                    <p class="mb-0">午后抄经，字字入心</p>
-                  </div>
+                <div class="text-white d-flex flex-column align-items-center justify-content-center text-center" style="height:320px;background-color:#6f4e37">
+                  <i class="bi bi-stars display-4" aria-hidden="true"></i>
+                  <h5 class="mt-3 mb-0">藏经阁 · 抄经</h5>
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                  <p class="mb-0">午后抄经，字字入心</p>
                 </div>
               </div>
             </div>
@@ -115,30 +115,31 @@
               <!-- 内层轨道：每页一个 carousel-item，第一页加 active -->
               <div class="carousel-inner">
                 <div class="carousel-item active">
-                  <div class="bg-primary text-white text-center py-5">
-                    <i class="bi bi-moon-stars display-4"></i>
+                  <div class="bg-primary text-white d-flex flex-column align-items-center justify-content-center" style="height:320px">
+                    <i class="bi bi-moon-stars display-4" aria-hidden="true"></i>
                     <h5 class="mt-3 mb-0">静夜思 · 打坐</h5>
-                    <div class="carousel-caption d-none d-md-block">
-                      <p class="mb-0">戌时静坐，气沉丹田</p>
-                    </div>
+                  </div>
+                  <!-- carousel-caption：叠在内容底部的说明区（绝对定位，内容块要留足高度） -->
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">戌时静坐，气沉丹田</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <div class="bg-success text-white text-center py-5">
-                    <i class="bi bi-sunrise display-4"></i>
+                  <div class="bg-success text-white d-flex flex-column align-items-center justify-content-center" style="height:320px">
+                    <i class="bi bi-sunrise display-4" aria-hidden="true"></i>
                     <h5 class="mt-3 mb-0">破晓 · 晨练</h5>
-                    <div class="carousel-caption d-none d-md-block">
-                      <p class="mb-0">闻鸡起舞，挥剑三百</p>
-                    </div>
+                  </div>
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">闻鸡起舞，挥剑三百</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <div class="text-center py-5" style="background-color:#6f4e37">
-                    <i class="bi bi-stars display-4 text-white"></i>
-                    <h5 class="mt-3 mb-0 text-white">藏经阁 · 抄经</h5>
-                    <div class="carousel-caption d-none d-md-block">
-                      <p class="mb-0">午后抄经，字字入心</p>
-                    </div>
+                  <div class="text-white d-flex flex-column align-items-center justify-content-center text-center" style="height:320px;background-color:#6f4e37">
+                    <i class="bi bi-stars display-4" aria-hidden="true"></i>
+                    <h5 class="mt-3 mb-0">藏经阁 · 抄经</h5>
+                  </div>
+                  <div class="carousel-caption d-none d-md-block">
+                    <p class="mb-0">午后抄经，字字入心</p>
                   </div>
                 </div>
               </div>
@@ -159,6 +160,8 @@
       <p>
         例 1 里每个 <code>carousel-item</code> 都指向同一个 <code>#bs12-demo1</code>——
         这是轮播的“中枢点名”：指示器、控制按钮、翻页动作全靠它对上号。
+        注意 <code>carousel-caption</code> 是<strong>绝对定位</strong>的说明区，叠在页面内容底部，
+        所以每页的内容块要留足高度（这里固定 320px），标题与说明才不会互相压住。
         图标 <code>bi bi-*</code> 是 Bootstrap Icons 的写法，下一式之后我们专门修炼。
       </p>
 
@@ -190,38 +193,42 @@
       <p>
         一条轨道也可以装<strong>多段</strong>进度——用 <code>progress-stacked</code> 把多根
         <code>progress-bar</code> 包起来，配不同的 <code>bg-*</code> 颜色，各段宽度加起来不超过 100% 即可。
+        注意一个细节：<code>progress-stacked</code> 是<strong>横向弹性布局</strong>，
+        宽度要写在各条 <code>.progress</code> 上（<code>style="width: 50%"</code>），
+        每条内部的 <code>.progress-bar</code> 会自动撑满自己的 <code>.progress</code>——
+        若把宽度写在 <code>progress-bar</code> 上，各段会按内容宽挤在一起，文字互相压叠。
       </p>
 
       <div class="demo">
         <div class="demo-caption">例 3 · 组合进度条：三门功课各占一段</div>
         <div class="demo-preview">
           <div class="progress-stacked">
-            <div class="progress" role="progressbar" aria-label="外功" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-              <div class="progress-bar bg-primary" style="width: 50%">外功 50%</div>
+            <div class="progress" role="progressbar" aria-label="外功" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+              <div class="progress-bar bg-primary">外功 50%</div>
             </div>
-            <div class="progress" role="progressbar" aria-label="内功" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
-              <div class="progress-bar bg-success" style="width: 30%">内功 30%</div>
+            <div class="progress" role="progressbar" aria-label="内功" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%">
+              <div class="progress-bar bg-success">内功 30%</div>
             </div>
-            <div class="progress" role="progressbar" aria-label="轻功" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">
-              <div class="progress-bar bg-warning" style="width: 15%">轻功 15%</div>
+            <div class="progress" role="progressbar" aria-label="轻功" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 15%">
+              <div class="progress-bar bg-warning">轻功 15%</div>
             </div>
           </div>
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <!-- progress-stacked 把多条进度条拼成一根 -->
+            <!-- progress-stacked 把多条进度条横向拼成一根；宽度加在每条 .progress 上 -->
             <div class="progress-stacked">
               <div class="progress" role="progressbar" aria-label="外功"
-                   aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar bg-primary" style="width: 50%">外功 50%</div>
+                   aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                <div class="progress-bar bg-primary">外功 50%</div>
               </div>
               <div class="progress" role="progressbar" aria-label="内功"
-                   aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar bg-success" style="width: 30%">内功 30%</div>
+                   aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%">
+                <div class="progress-bar bg-success">内功 30%</div>
               </div>
               <div class="progress" role="progressbar" aria-label="轻功"
-                   aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar bg-warning" style="width: 15%">轻功 15%</div>
+                   aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 15%">
+                <div class="progress-bar bg-warning">轻功 15%</div>
               </div>
             </div>
           </script>
@@ -357,20 +364,21 @@
 
             <!-- 内层轨道里加第四页，注意不要写 active -->
             <div class="carousel-item">
-              <div class="bg-danger text-white text-center py-5">
-                <i class="bi bi-fire display-4"></i>
+              <div class="bg-danger text-white d-flex flex-column align-items-center justify-content-center" style="height:320px">
+                <i class="bi bi-fire display-4" aria-hidden="true"></i>
                 <h5 class="mt-3 mb-0">灶房 · 晚课</h5>
-                <div class="carousel-caption d-none d-md-block">
-                  <p class="mb-0">自己动手，丰衣足食</p>
-                </div>
+              </div>
+              <div class="carousel-caption d-none d-md-block">
+                <p class="mb-0">自己动手，丰衣足食</p>
               </div>
             </div>
           </script>
           <p>
             页号从 0 数起：第四页是 <code>data-bs-slide-to="3"</code>。新页<strong>不要加</strong>
             <code>active</code>——一个轮播里只能有一个当前页，加了会打乱开播顺序。
-            把上面两段分别插进例 1 的 <code>carousel-indicators</code> 与
-            <code>carousel-inner</code>，就是完整的四页轮播。
+            结构和例 1 保持一致：内容块固定 320px 高、图标与标题居中，说明文字放
+            <code>carousel-caption</code>。把上面两段分别插进例 1 的
+            <code>carousel-indicators</code> 与 <code>carousel-inner</code>，就是完整的四页轮播。
           </p>
         </details>
 

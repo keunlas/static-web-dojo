@@ -46,6 +46,8 @@
 | `has-toc-main-margin-auto-overflow.md` | has-toc 网格下正文残留 `margin: 0 auto` 被 fit-content 定宽，长代码行撑破 46rem 列压住右侧目录 |
 | `raw-codeblock-double-escape.md` | text/plain 源码块里写 HTML 实体（script raw text 不解码），代码块双重转义显示 `&lt;` |
 | `favicon-black.md` | favicon SVG 字符串手写 `%23` 后又过 encodeURIComponent，二次编码成非法颜色，图标漆黑一片 |
+| `carousel-caption-overlap.md` | carousel-caption 绝对定位钉在底部，内容块太矮时与标题文字重叠 |
+| `carousel-progress-stacked-width.md` | progress-stacked 的宽度写在 .progress-bar 上，各段按内容宽挤成一团 |
 
 ## 使用约定
 
