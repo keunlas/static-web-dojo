@@ -21,6 +21,9 @@ EXCLUDE_DIRS = {
     os.path.join(SITE, "assets"),
 }
 
+# 错误页不进入搜索索引（搜到“页面不存在”对读者没有价值）。
+EXCLUDE_FILES = {"404.html"}
+
 class Extract(html.parser.HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -63,7 +66,7 @@ entries = []
 for dirpath, dirnames, filenames in os.walk(SITE):
     dirnames[:] = [d for d in dirnames if os.path.join(dirpath, d) not in EXCLUDE_DIRS]
     for fn in filenames:
-        if not fn.endswith(".html"):
+        if not fn.endswith(".html") or fn in EXCLUDE_FILES:
             continue
         path = os.path.join(dirpath, fn)
         rel = os.path.relpath(path, SITE).replace(os.sep, "/")

@@ -3,7 +3,38 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：组合进度条示例修复）
+## 当前状态（全站完成 ✅ · 最后更新：新增 sitemap.xml 与 404 迷路页）
+
+### 🆕 最新一轮（新增 sitemap.xml 与 404 迷路页 · 用户需求）
+
+用户要求：① 一个 sitemap.xml 文件；② 一个 404 页面。本轮交付：
+
+- **`tools/gen-sitemap.py` + `site/sitemap.xml`**：生成器从 site.js 的 `SECTIONS`
+  （单一数据源）提取全部页面 href，前置首页 `index.html`，追加 `demo/portfolio`、
+  `demo/todo` 两个整页示例，共 **38 个 URL**；`index.html` 收敛为目录 URL；
+  基址由 `--base` 传入（sitemap 协议要求绝对 URL），未传则用占位域名并提示，
+  部署前需换成真实域名重新生成。XML 良构性已用 ElementTree 校验。
+- **`site/404.html`**：纸墨风迷路页（印章「迷」+ hero「此页不在山中」+ 四回地图卡 +
+  迷路须知），`data-page="404"` 未入 SECTIONS——site.js 不注入章节页头（页面自带 hero）、
+  翻页只显示“回到首页”，均为预期行为。
+  **深路径陷阱**：GitHub Pages 等托管把 404.html “原地”返回给缺失路径，写死的相对
+  `assets/js/loader.js` 会按原地址解析而 404——改为 `<head>` 内联**逐级上探**（0..10 级
+  `onerror` 链）加载 loader；手写链接全部带 `data-root`，SITE_ROOT 就绪后改写为
+  根地址 + 路径。坑档案：`bug-fix/404-deep-path-relative-links.md`。
+- **搜索索引排除 404 页**：`tools/gen-search-index.py` 加 `EXCLUDE_FILES={"404.html"}`，
+  重新生成索引（顺带把 12 式旧正文索引更新到最新，diff 即此修复）。
+- **文档同步**：architecture.md（目录树/§2.1 404 加载机制/§3.6 sitemap/踩坑索引/
+  决策表）、bug-fix 新档案 + 索引、README（部署 error_page 与托管说明、sitemap 重生成、
+  检查清单）、AGENTS.md（任务速查加 sitemap 行）。
+- **验证**：`node --check` ✔；`check-offline.sh` ✔（无外网资源依赖）；`check-links.py` ✔
+  **37 页**（含新 404 页）全部内部链接有效；CDP 四场景 PASS——`http://…/404.html`、
+  模拟“原地渲染”深路径 `/bootstrap/no-such-page.html` 与
+  `/archive/bootstrap-docs/docs/5.3/components/…`（侧边栏 30 条、顶栏/页脚就位、
+  6 条手写链接全部改写指向站点根、零 JS 报错）、`file://` 双击打开；
+  明暗两主题数值断言（朱砂 #b03a2e / 暗版 #c14f43、无横向溢出、4 张 realm 卡等宽）。
+  sitemap.xml 经 8899 端口 http 服务返回 200 text/xml。
+- 已知代价（预期噪声）：原地渲染场景下上探探测产生“路径深度”条 resource-404
+  控制台日志，根目录部署与 file:// 下为 0 条；详见坑档案。
 
 ### 🐛 最新修复（组合进度条 progress-stacked 文字挤叠 · 用户反馈）
 
@@ -163,12 +194,13 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
   highlight.js、search-index.js（生成）、site.css（纸墨风皮肤）
 - 页面：首页、基础篇（MDN 引路）、四个分卷首页、**Bootstrap 16 式**、
   **jQuery 10 式**（全部 ✅ 已写已验）、藏经阁（卷首/离线文档/示例集/图标大全 2078 个）、
-  练功场（三栏编辑 + srcdoc 预览 + localStorage）
+  练功场（三栏编辑 + srcdoc 预览 + localStorage）、**404 迷路页**（深路径免疫，
+  见 `bug-fix/404-deep-path-relative-links.md`）
 - 整页示例：`demo/portfolio`、`demo/todo`（独立页、含内嵌 favicon）；`data/notes.json`
 - 工具：check-offline.sh、check-links.py、gen-icons-page.py、gen-search-index.py、
-  verify-cdp.js、page-template.html
+  **gen-sitemap.py（sitemap.xml 生成器）**、verify-cdp.js、page-template.html
 - AI 代理文档体系：AGENTS.md + notes（architecture / conventions / style-guide /
-  progress / **bug-fix 坑档案一坑一文件 × 8**）+ 7 篇 skills（含 doc-sync 纪律与
+  progress / **bug-fix 坑档案一坑一文件 × 9**）+ 7 篇 skills（含 doc-sync 纪律与
   “用户指令优先”铁律）
 - README：教程定位 + 网站构建/部署/检查说明（nginx 示例）
 
@@ -280,4 +312,7 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 - 新增“图标大全/练功场/搜索/工具类速查”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
 - `site/archive/icons/index.html`、`site/playground/index.html` 建好后，侧边栏“藏经阁”与
   PAGES 顺序需更新；速查页已登记（archive-reference，进侧边栏 + 翻页链）；
+- `site/sitemap.xml` 是生成物：增删章节后跑 `python3 tools/gen-sitemap.py --base https://你的域名/`；
+  `site/404.html` 是特殊页（未入 SECTIONS、loader 逐级上探），改它前先读
+  `bug-fix/404-deep-path-relative-links.md`；
 - 全部章节完成后记得把本文件的状态标记为“全站完成”，并跑一遍 verify-offline 终验。

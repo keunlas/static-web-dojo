@@ -81,6 +81,7 @@ python3 -m http.server 8000 --directory site
 bash tools/sync-assets.sh          # 同步 vendor 库文件 + 藏经阁（离线文档/示例集）
 python3 tools/gen-icons-page.py    # 生成藏经阁图标大全页
 python3 tools/gen-search-index.py  # 生成全站搜索索引
+python3 tools/gen-sitemap.py --base https://你的域名/  # 生成站点地图（不传 --base 则用占位域名）
 ```
 
 ### 质量检查
@@ -93,6 +94,11 @@ python3 tools/check-links.py  # 内部链接有效性
 ### 部署
 
 `site/` 是部署根目录，上传到任意静态服务器即可（相对路径设计，支持根目录或子目录部署）。
+
+- 站点自带 `404.html`（迷路页）：nginx 需要一条 `error_page`；GitHub Pages / Netlify /
+  Vercel 等静态托管会自动使用根目录的 `404.html`，无需配置。
+- 站点自带 `sitemap.xml`：**部署前请用真实域名重新生成**
+  （`python3 tools/gen-sitemap.py --base https://你的域名/`），否则其中是占位域名。
 
 nginx 最小配置示例：
 
@@ -107,6 +113,8 @@ server {
     location / {
         try_files $uri $uri/ =404;
     }
+
+    error_page 404 /404.html;
 }
 ```
 
@@ -114,9 +122,11 @@ server {
 
 - [ ] 已运行 `tools/sync-assets.sh`（vendor 与藏经阁就位）
 - [ ] 已运行 `gen-icons-page.py` 与 `gen-search-index.py`
+- [ ] 已用真实域名运行 `gen-sitemap.py --base https://你的域名/`
 - [ ] `bash tools/check-offline.sh` 通过
 - [ ] `python3 tools/check-links.py` 通过
 - [ ] 浏览器访问首页、章节页、练功场、图标大全、离线文档均正常
+- [ ] 访问一个不存在的地址，确认出现本站 404 迷路页
 
 ### 维护文档
 

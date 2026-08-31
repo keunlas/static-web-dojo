@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 本文件由 tools/gen-sitemap.py 生成，勿手改。
+     部署前请用真实域名替换下方占位域名并重新生成，用法见该脚本顶部注释。 -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.com/</loc></url>
+  <url><loc>https://example.com/basics/</loc></url>
+  <url><loc>https://example.com/bootstrap/</loc></url>
+  <url><loc>https://example.com/bootstrap/01-intro.html</loc></url>
+  <url><loc>https://example.com/bootstrap/02-grid-1.html</loc></url>
+  <url><loc>https://example.com/bootstrap/03-grid-2.html</loc></url>
+  <url><loc>https://example.com/bootstrap/04-typography.html</loc></url>
+  <url><loc>https://example.com/bootstrap/05-buttons.html</loc></url>
+  <url><loc>https://example.com/bootstrap/06-cards.html</loc></url>
+  <url><loc>https://example.com/bootstrap/07-lists-tables.html</loc></url>
+  <url><loc>https://example.com/bootstrap/08-forms.html</loc></url>
+  <url><loc>https://example.com/bootstrap/09-navs.html</loc></url>
+  <url><loc>https://example.com/bootstrap/10-modal-dropdown.html</loc></url>
+  <url><loc>https://example.com/bootstrap/11-collapse.html</loc></url>
+  <url><loc>https://example.com/bootstrap/12-carousel.html</loc></url>
+  <url><loc>https://example.com/bootstrap/13-overlays.html</loc></url>
+  <url><loc>https://example.com/bootstrap/14-icons.html</loc></url>
+  <url><loc>https://example.com/bootstrap/15-responsive.html</loc></url>
+  <url><loc>https://example.com/bootstrap/16-project.html</loc></url>
+  <url><loc>https://example.com/jquery/</loc></url>
+  <url><loc>https://example.com/jquery/01-intro.html</loc></url>
+  <url><loc>https://example.com/jquery/02-selectors.html</loc></url>
+  <url><loc>https://example.com/jquery/03-content-attr.html</loc></url>
+  <url><loc>https://example.com/jquery/04-class-style.html</loc></url>
+  <url><loc>https://example.com/jquery/05-events.html</loc></url>
+  <url><loc>https://example.com/jquery/06-effects.html</loc></url>
+  <url><loc>https://example.com/jquery/07-traversing.html</loc></url>
+  <url><loc>https://example.com/jquery/08-manipulation.html</loc></url>
+  <url><loc>https://example.com/jquery/09-ajax.html</loc></url>
+  <url><loc>https://example.com/jquery/10-todo.html</loc></url>
+  <url><loc>https://example.com/archive/</loc></url>
+  <url><loc>https://example.com/archive/bootstrap-docs/</loc></url>
+  <url><loc>https://example.com/archive/examples/</loc></url>
+  <url><loc>https://example.com/archive/icons/</loc></url>
+  <url><loc>https://example.com/archive/reference/</loc></url>
+  <url><loc>https://example.com/playground/</loc></url>
+  <url><loc>https://example.com/demo/portfolio/</loc></url>
+  <url><loc>https://example.com/demo/todo/</loc></url>
+</urlset>

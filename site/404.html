@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>此页不在山中 · 404 | 纯静态网页的修行</title>
+<meta name="description" content="你访问的页面不存在或已被移动。用顶栏的全站搜索，或从下方地图回到修行正途。">
+<script>
+// —— 404 页的“原地渲染”陷阱（坑档案：bug-fix/404-deep-path-relative-links.md）——
+// 很多静态托管（GitHub Pages / Netlify 等）把 404.html 的内容**原地**返回给缺失路径
+// （地址栏仍是 /bootstrap/某个地址，状态码 404）。此时写死相对路径的 script 标签
+// （src="assets/js/loader.js"）会按“原地址”解析，加载器自己先 404，整页只剩一张裸 HTML。
+// 因此这里不写死相对路径，而是从当前目录起逐层上探（0..10 级），
+// 直到命中真实的 assets/js/loader.js——它从自身位置反推 SITE_ROOT（file:// 与 http 通用，
+// 子目录部署同样成立），之后注入的样式、侧边栏、页脚等一律走 SITE_ROOT，天然免疫深路径。
+(function () {
+  var MAX_DEPTH = 10;
+  function tryLoad(d) {
+    if (d > MAX_DEPTH) return;
+    var s = document.createElement('script');
+    s.src = new Array(d + 1).join('../') + 'assets/js/loader.js';
+    s.onerror = function () { s.remove(); tryLoad(d + 1); };
+    document.head.appendChild(s);
+  }
+  tryLoad(0);
+})();
+</script>
+</head>
+<body data-page="404">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <section class="hero">
+        <div class="seal">迷</div>
+        <h1>此页不在山中</h1>
+        <p class="tagline">你走的这条小路，山中没有记载——也许路标改了，也许链接旧了，也许只是地址打错了一个字。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" data-root="index.html" href="index.html">回到修行地图</a>
+          <a class="btn btn-outline-primary btn-lg" data-root="basics/index.html" href="basics/index.html">从头开始修行</a>
+        </div>
+      </section>
+
+      <div class="home-body">
+
+        <div class="callout">
+          <div class="callout-title">迷路须知</div>
+          <p style="margin:0">页面不存在有 404 种可能，最常见的是地址写错。顶栏的<strong>全站搜索</strong>能帮你找到想修的那一式；若这个地址来自站内链接，那便是山里的路标出了错。</p>
+        </div>
+
+        <h2>该往哪走</h2>
+        <div class="realm-grid">
+          <a class="realm-card" data-root="basics/index.html" href="basics/index.html">
+            <span class="seal seal-small">一</span>
+            <span>
+              <span class="realm-title">第一回 · 基础篇 · MDN 引路</span>
+              <p>HTML、CSS、JavaScript 的基础知识，从 MDN 引路开始。</p>
+            </span>
+          </a>
+          <a class="realm-card" data-root="bootstrap/index.html" href="bootstrap/index.html">
+            <span class="seal seal-small">二</span>
+            <span>
+              <span class="realm-title">第二回 · Bootstrap 篇</span>
+              <p>十六式，从容器栅格到交互组件，最后手写一个完整的作品集主页。</p>
+            </span>
+          </a>
+          <a class="realm-card" data-root="jquery/index.html" href="jquery/index.html">
+            <span class="seal seal-small">三</span>
+            <span>
+              <span class="realm-title">第三回 · jQuery 篇</span>
+              <p>十式，一柄轻剑，从选择器到 Ajax，最后写一个待办清单。</p>
+            </span>
+          </a>
+          <a class="realm-card" data-root="archive/index.html" href="archive/index.html">
+            <span class="seal seal-small">四</span>
+            <span>
+              <span class="realm-title">第四回 · 藏经阁</span>
+              <p>Bootstrap 离线文档、官方示例集与图标大全，随时查阅。</p>
+            </span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+<script>
+// —— 手写链接的深路径改写（与 <head> 里的 loader 上探配套）——
+// 本页手写链接一律带 data-root（相对站点根），这里改写成“站点根 + 路径”。
+// SITE_ROOT 由 loader.js 上探成功后算出（http(s)、file:// 通用）；上探是异步的，
+// 所以先试一次、未就绪则轮询等待（最多约 5 秒），就绪即改写。
+// 站内其余链接由 site.js 注入，本来就走 SITE_ROOT，无需处理。
+(function () {
+  var links = document.querySelectorAll('a[data-root]');
+  function rewrite() {
+    if (!window.SITE_ROOT) return false;
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i];
+      a.href = window.SITE_ROOT + '/' + a.getAttribute('data-root');
+    }
+    return true;
+  }
+  if (!rewrite()) {
+    var tries = 0;
+    var t = setInterval(function () {
+      if (rewrite() || ++tries > 100) clearInterval(t);
+    }, 50);
+  }
+})();
+</script>
+</body>
+</html>

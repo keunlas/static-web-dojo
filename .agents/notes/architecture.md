@@ -7,6 +7,8 @@
 ```
 site/                        # 部署根目录（唯一需要上传的部分）
 ├── index.html               # 首页 · 修行地图（data-page="home"）
+├── 404.html                 # 迷路页（data-page="404"，未入 SECTIONS；见 §2 末段）
+├── sitemap.xml              # 站点地图（tools/gen-sitemap.py 从 SECTIONS 生成）
 ├── basics/index.html        # 第一回 · 基础篇（MDN 引路）
 ├── bootstrap/               # 第二回 · Bootstrap 篇（16 式）
 ├── jquery/                  # 第三回 · jQuery 篇（10 式）
@@ -32,8 +34,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ```
 
 - `tools/` 一览：`sync-assets.sh`（同步 vendor/藏经阁）、`gen-icons-page.py`（图标大全）、
-  `gen-search-index.py`（搜索索引）、`check-offline.sh`（离线纯净扫描）、
-  `check-links.py`（内部链接检查）、`page-template.html`（作者模板）。
+  `gen-search-index.py`（搜索索引）、`gen-sitemap.py`（站点地图）、`check-offline.sh`
+  （离线纯净扫描）、`check-links.py`（内部链接检查）、`page-template.html`（作者模板）。
 - 页面深度 → loader 引入前缀：根目录页面 `assets/js/loader.js`；一层子目录 `../assets/js/loader.js`；两层 `../../assets/js/loader.js`。
 
 ## 2. 加载机制（loader.js）
@@ -55,6 +57,22 @@ site/                        # 部署根目录（唯一需要上传的部分）
 6. **DOJO.ready 队列**：演示若需要 `bootstrap` 全局（如 `new bootstrap.Tooltip(...)`），
    用 `DOJO.ready(fn)` 包裹；site.js 初始化完成后统一 `DOJO._flush()`。
 
+### 2.1 404 页的特殊加载方式（404.html）
+
+- 很多静态托管（GitHub Pages / Netlify / Apache ErrorDocument 等）把 404.html 的内容
+  **原地**返回给缺失路径（地址栏仍是原地址）。此时写死相对路径的
+  `<script src="assets/js/loader.js">` 会按原地址解析，加载器自己先 404，整页只剩裸 HTML。
+- 因此 `site/404.html` **不写 loader 那一行**，改用 `<head>` 内联脚本**逐级上探**
+  （当前目录 → `../` → `../../`… 最多 10 级，`onerror` 链式尝试）直到命中真实的
+  `assets/js/loader.js`；loader 从自身位置反推 SITE_ROOT，后续注入天然免疫深路径。
+  根目录部署与 file:// 双击时第 0 级即命中，零额外请求。
+- 页内手写链接一律带 `data-root`（相对站点根），页尾内联脚本在 SITE_ROOT 就绪后
+  （先试一次再 50ms 轮询，最多约 5 秒）改写为 `SITE_ROOT + '/' + data-root`。
+  站内其余链接由 site.js 注入、本来就走 SITE_ROOT，无需处理。
+- 已知代价：原地渲染场景下必然产生“路径深度”条 resource-404 控制台日志（试错探测的
+  固有成本），根目录与 file:// 下为 0 条；坑档案见
+  `bug-fix/404-deep-path-relative-links.md`。
+
 ## 3. 导航机制（site.js）
 
 - `SECTIONS`：全站目录的**单一数据源**（四回 + 每回章节列表，含 num/title/href/desc）。
@@ -67,6 +85,9 @@ site/                        # 部署根目录（唯一需要上传的部分）
     `home`/`archive`/`playground` 三个 id 被 injectHeader 跳过）
   - `playground`（练功场，SECTIONS 里的「附页」回：进侧边栏 + 翻页顺序；
     页面页头手写，故 injectHeader 跳过它——曾漏登记 SECTIONS 导致侧边栏无入口，已修）
+  - `404`（迷路页，**未登记进 SECTIONS**：不进侧边栏与翻页顺序，`BY_ID` 查无 →
+    injectHeader 不注入章节页头（页面自带 hero）、翻页只显示“回到首页”——均为预期行为；
+    搜索索引同样排除它）
 - 章节条目支持 `pageId` 字段：藏经阁这类无编号条目（离线文档/示例集/图标大全）用它指定
   data-page；无 `num` 且无 `pageId` 的条目只进侧边栏、不进翻页顺序。
 - site.js 在 `$(init)`里完成七件事：渲染侧边栏（桌面 fixed + 移动端 offcanvas 克隆）、
@@ -87,11 +108,24 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ## 3.5 全站搜索（离线可用）
 
 - 索引：`site/assets/js/search-index.js` 由 `tools/gen-search-index.py` 扫描本站手写页面生成
-  （排除第三方镜像），输出 `window.DOJO_SEARCH = [{url,title,text},…]`。
+  （排除第三方镜像与 `404.html` 错误页），输出 `window.DOJO_SEARCH = [{url,title,text},…]`。
   它是 **JS 文件而非 JSON**，所以 file:// 双击打开也能搜索（不经过 fetch）。
 - UI：site.js 的 `initSearch()` 在侧边栏顶部注入搜索框；输入即过滤（标题命中 3 分、正文 1 分），
   结果以下拉列表显示；快捷键 `/` 聚焦、`Esc` 关闭。
 - **新增/修改页面后必须重跑 `python3 tools/gen-search-index.py`**，否则搜不到。
+
+## 3.6 站点地图（sitemap.xml）
+
+- `site/sitemap.xml` 由 `tools/gen-sitemap.py` 生成：从 site.js 的 `SECTIONS`
+  （单一数据源）按序提取全部 href，前置首页 `index.html`，追加 `EXTRA_PAGES`
+  （SECTIONS 之外的 `demo/portfolio`、`demo/todo` 整页示例）；错误页不收录。
+- **改目录只改 SECTIONS**：新增/删除章节后重跑生成器即可，sitemap 绝不手改。
+- sitemap 协议要求 `<loc>` 为绝对 URL，而本站可部署到任意域名/子目录：
+  基址由 `--base` 指定，未指定时输出占位域名 `https://example.com/` 并提示，
+  部署前务必 `python3 tools/gen-sitemap.py --base https://你的域名/` 重新生成。
+- `index.html` 收敛为目录 URL（`basics/index.html` → `basics/`）；
+  生成器会校验每个 href 对应文件存在（藏经阁镜像缺失时仅警告——它由 sync-assets.sh
+  在部署前生成）。
 
 ## 4. 代码高亮（highlight.js）
 
@@ -152,6 +186,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 演示用 `$(function(){})` + DOJO.ready | 演示代码即教学代码，且异步加载下不报错 |
 | 习题答案用原生 `<details>` | 零 JS 依赖，任何环境可展开 |
 | 藏经阁打包离线文档（20MB） | 用户拍板：站内离线查阅优先于体积 |
+| sitemap 由生成器从 SECTIONS 派生、基址用 --base 传入 | 保住“单一数据源”铁律；域名/子目录部署不定，占位基址 + 部署前重生成 |
 
 ## 8. 踩坑索引
 
@@ -170,5 +205,6 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | carousel-caption 绝对定位钉底，内容块太矮时与标题文字重叠 | `bug-fix/carousel-caption-overlap.md` |
 | progress-stacked 宽度误写在 .progress-bar 上，各段按内容宽挤成一团 | `bug-fix/carousel-progress-stacked-width.md` |
 | 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
+| 404 页被“原地”渲染在深路径时相对引用全失效（含 loader 自身） | `bug-fix/404-deep-path-relative-links.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。
