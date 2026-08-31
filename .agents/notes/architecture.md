@@ -8,7 +8,7 @@
 site/                        # 部署根目录（唯一需要上传的部分）
 ├── index.html               # 首页 · 修行地图（data-page="home"）
 ├── 404.html                 # 迷路页（data-page="404"，未入 SECTIONS；见 §2 末段）
-├── sitemap.xml              # 站点地图（tools/gen-sitemap.py 从 SECTIONS 生成）
+├── sitemap.xml              # 站点地图（部署时由 tools/gen-sitemap.py 生成，不入库）
 ├── basics/index.html        # 第一回 · 基础篇（MDN 引路）
 ├── bootstrap/               # 第二回 · Bootstrap 篇（16 式）
 ├── jquery/                  # 第三回 · jQuery 篇（10 式）
@@ -122,6 +122,9 @@ site/                        # 部署根目录（唯一需要上传的部分）
 - `site/sitemap.xml` 由 `tools/gen-sitemap.py` 生成：从 site.js 的 `SECTIONS`
   （单一数据源）按序提取全部 href，前置首页 `index.html`，追加 `EXTRA_PAGES`
   （SECTIONS 之外的 `demo/portfolio`、`demo/todo` 整页示例）；错误页不收录。
+- **不入库**（.gitignore 已忽略）：它是部署时生成物，内含部署域名（基址），
+  必须在部署前用真实域名现生成——`deploy.sh` 的第 4 步会自动做这件事；
+  仓库里只有生成器 `tools/gen-sitemap.py`。
 - **改目录只改 SECTIONS**：新增/删除章节后重跑生成器即可，sitemap 绝不手改。
 - sitemap 协议要求 `<loc>` 为绝对 URL，而本站可部署到任意域名/子目录：
   基址由 `--base` 指定，未指定时输出占位域名 `https://example.com/` 并提示，

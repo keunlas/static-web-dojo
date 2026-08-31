@@ -66,7 +66,7 @@
 | 章节里加演示 | 读 `skills/build-demo/SKILL.md` |
 | 调整全站导航/目录 | 只改 `site/assets/js/site.js` 的 `SECTIONS`，读 `skills/register-chapter/SKILL.md` |
 | 部署前一键准备全部产物 | `bash deploy.sh --base https://你的域名/`（依次：sync-assets → gen-icons-page → gen-search-index → gen-sitemap → check-offline → check-links） |
-| 增删章节后重新生成站点地图 | `python3 tools/gen-sitemap.py --base https://你的域名/`（部署前换成真实域名） |
+| 增删章节后重新生成站点地图 | `python3 tools/gen-sitemap.py --base https://你的域名/`（**sitemap.xml 不入库**，部署时生成，部署前换成真实域名） |
 | 改 404 迷路页 | 先读 `bug-fix/404-deep-path-relative-links.md`（loader 逐级上探机制，勿改回写死相对路径） |
 | 本地预览 | `python3 -m http.server 8899 --directory site`（Ajax 章也用它） |
 | 同步本地资源 | `bash tools/sync-assets.sh`（读 `skills/sync-assets/SKILL.md`） |

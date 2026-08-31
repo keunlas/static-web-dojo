@@ -85,6 +85,8 @@ bash deploy.sh --base https://你的域名/   # 不传 --base 则站点地图使
 
 > `deploy.sh` 只是把下面各工具按部署顺序串起来（任何一步失败即停止并报错），
 > 不是构建系统：`site/` 本身仍然零构建、纯静态，部署的始终是 `site/` 目录。
+> 其中 `sitemap.xml` 是**部署时生成物，不入库**（已被 .gitignore 忽略）——
+> 它内含部署域名，必须在部署前用真实域名现生成。
 
 需要单独执行某个工具时：
 
@@ -110,9 +112,10 @@ python3 tools/check-links.py  # 内部链接有效性
 
 - 站点自带 `404.html`（迷路页）：nginx 需要一条 `error_page`；GitHub Pages / Netlify /
   Vercel 等静态托管会自动使用根目录的 `404.html`，无需配置。
-- 站点自带 `sitemap.xml`：**部署前请用真实域名重新生成**
-  （`bash deploy.sh --base https://你的域名/`，或单独跑
-  `python3 tools/gen-sitemap.py --base https://你的域名/`），否则其中是占位域名。
+- 站点地图 `sitemap.xml` **不入库**（.gitignore 已忽略）：它是部署时生成物，
+  由 `bash deploy.sh --base https://你的域名/` 或
+  `python3 tools/gen-sitemap.py --base https://你的域名/` 生成；
+  不指定 `--base` 时其中是占位域名，请勿直接部署。
 
 nginx 最小配置示例：
 

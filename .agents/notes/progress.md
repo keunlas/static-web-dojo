@@ -3,7 +3,21 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：新增一键部署脚本 deploy.sh）
+## 当前状态（全站完成 ✅ · 最后更新：sitemap.xml 改为不入库）
+
+### 🆕 最新一轮（sitemap.xml 从 git 移除、改为部署时生成 · 用户反馈）
+
+用户指出 sitemap.xml 被提交进了 git（上一轮改动入库时一并带上，提交者为用户本人，
+代理未执行过 git add/commit）。处理：
+
+- **`git rm --cached site/sitemap.xml`**（磁盘文件保留），并在 `.gitignore` 追加
+  `site/sitemap.xml`：它是部署时生成物，内含部署域名（基址），必须部署前现生成；
+- 仓库里只保留生成器 `tools/gen-sitemap.py`，`deploy.sh` 第 4 步照常生成它；
+- 文档同步：README（一键部署准备与部署小节注明“sitemap.xml 不入库”）、
+  architecture.md（§1 目录树 / §3.6 生成机制）、AGENTS.md 任务速查、本文件。
+- 约定沉淀：**生成物入库的红线**——内含“部署环境相关值”（域名等）的产物一律
+  .gitignore（与 archive 镜像同理）；站点通用、可离线直接用（file:// 即用）的
+  生成物（search-index.js、icons 页）维持入库。
 
 ### 🆕 最新一轮（根目录一键部署脚本 deploy.sh · 用户需求）
 
@@ -334,7 +348,8 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 - 新增“图标大全/练功场/搜索/工具类速查”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
 - `site/archive/icons/index.html`、`site/playground/index.html` 建好后，侧边栏“藏经阁”与
   PAGES 顺序需更新；速查页已登记（archive-reference，进侧边栏 + 翻页链）；
-- `site/sitemap.xml` 是生成物：增删章节后跑 `python3 tools/gen-sitemap.py --base https://你的域名/`；
+- `site/sitemap.xml` 是部署时生成物且**不入库**（.gitignore）：增删章节后跑
+  `python3 tools/gen-sitemap.py --base https://你的域名/`；
   部署前一次性准备全部产物用根目录 `bash deploy.sh --base https://你的域名/`（含自检）；
   `site/404.html` 是特殊页（未入 SECTIONS、loader 逐级上探），改它前先读
   `bug-fix/404-deep-path-relative-links.md`；
