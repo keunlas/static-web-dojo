@@ -146,17 +146,20 @@
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="small text-center mb-2">拖动窗口缩放：卡片从 1 列变成 2 列，再变成 4 列。</p>
             <div class="row g-2 text-center">
-              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第一格</div></div>
-              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第二格</div></div>
-              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第三格</div></div>
-              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded">第四格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第一格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第二格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第三格</div></div>
+              <div class="col-12 col-md-6 col-xl-3"><div class="p-3 border rounded bg-white">第四格</div></div>
             </div>
 
             <!-- 用显隐工具类标注“当前处于哪一档” -->
-            <span class="badge text-bg-secondary d-md-none">当前宽度 768px 以下 · 单列</span>
-            <span class="badge text-bg-secondary d-none d-md-inline d-xl-none">当前宽度 768–1199px · 两列</span>
-            <span class="badge text-bg-secondary d-none d-xl-inline">当前宽度 1200px 及以上 · 四列</span>
+            <p class="text-center mt-3 mb-0">
+              <span class="badge text-bg-secondary d-md-none">当前宽度 768px 以下 · 单列</span>
+              <span class="badge text-bg-secondary d-none d-md-inline d-xl-none">当前宽度 768–1199px · 两列</span>
+              <span class="badge text-bg-secondary d-none d-xl-inline">当前宽度 1200px 及以上 · 四列</span>
+            </p>
           </script>
         </div>
       </div>
@@ -181,12 +184,12 @@
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <!-- 只在 768px 以下显示 -->
-            <div class="alert alert-warning d-md-none" role="alert">
+            <div class="alert alert-warning d-md-none mb-0" role="alert">
               <i class="bi bi-phone me-1" aria-hidden="true"></i>小屏专属：菜单收进了“汉堡”按钮，点开才见。
             </div>
 
             <!-- 只在 768px 及以上显示 -->
-            <div class="alert alert-info d-none d-md-block" role="alert">
+            <div class="alert alert-info d-none d-md-block mb-0" role="alert">
               <i class="bi bi-laptop me-1" aria-hidden="true"></i>md 及以上专属：完整导航直接铺开在页头。
             </div>
           </script>

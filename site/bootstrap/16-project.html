@@ -61,7 +61,11 @@
             .project-thumb { height: 160px; display: flex; align-items: center;
                              justify-content: center; font-size: 3rem; }
             .project-a { background: #f4edde; }
-            /* …project-b 到 project-f 同理换色… */
+            .project-b { background: #e9f0e4; }
+            .project-c { background: #e8edf5; }
+            .project-d { background: #f5e8e4; }
+            .project-e { background: #eef0e0; }
+            .project-f { background: #e9e4f0; }
             .portrait { width: 140px; height: 140px; margin: 0 auto;
                         display: flex; align-items: center; justify-content: center;
                         border: 2px solid #b03a2e; border-radius: 50%;
@@ -164,7 +168,70 @@
                 </div>
               </div>
 
-              <!-- 同样的卡片再复制 5 张，换图标、换色块、换文案即可 -->
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-b rounded-top">
+                    <i class="bi bi-book" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">藏经阁</h3>
+                    <p class="card-text">离线文档阅读器，断网也能翻遍要用的每一页参考。</p>
+                    <p class="card-text"><small class="text-body-secondary">HTML · Bootstrap</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-c rounded-top">
+                    <i class="bi bi-vector-pen" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">心法卷轴</h3>
+                    <p class="card-text">竖排手写体排版工具，把文章卷成一张古朴的卷轴。</p>
+                    <p class="card-text"><small class="text-body-secondary">CSS · JavaScript</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-d rounded-top">
+                    <i class="bi bi-cup-hot" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">云水茶寮</h3>
+                    <p class="card-text">给朋友写的博客主题：茶香、留白与慢下来的阅读。</p>
+                    <p class="card-text"><small class="text-body-secondary">HTML · CSS</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-e rounded-top">
+                    <i class="bi bi-markdown" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">竹简编辑器</h3>
+                    <p class="card-text">极简 Markdown 编辑器，左边写字，右边成竹。</p>
+                    <p class="card-text"><small class="text-body-secondary">JavaScript</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="project-thumb project-f rounded-top">
+                    <i class="bi bi-map" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-body">
+                    <h3 class="h5 card-title">江湖地图</h3>
+                    <p class="card-text">用 SVG 手绘的修行路线图，每一站都是踩过的坑。</p>
+                    <p class="card-text"><small class="text-body-secondary">JavaScript · SVG</small></p>
+                  </div>
+                </div>
+              </div>
 
             </div>
           </div>
@@ -286,20 +353,17 @@
 
         <details class="answer">
           <summary>参考答案 2</summary>
-          <script type="text/plain" data-lang="html" data-title="手机 1 列、桌面 3 列">
+          <p>
+            只把网格那行的类名 <code>row-cols-1 row-cols-md-2 row-cols-lg-3 g-4</code>
+            改成 <code>row-cols-1 row-cols-lg-3 g-4</code>——去掉中间的
+            <code>row-cols-md-2</code>，六张卡片一字不动（完整代码见上文第四步，把该行替换即可）：
+          </p>
+          <script type="text/plain" data-lang="html" data-title="改动的这一行">
             <div class="row row-cols-1 row-cols-lg-3 g-4">
-              <div class="col">
-                <div class="card h-100 border-0 shadow-sm">
-                  <!-- 卡片内容不变 -->
-                </div>
-              </div>
-              <!-- 共 6 张 -->
-            </div>
           </script>
           <p>
-            去掉中间的 <code>row-cols-md-2</code> 即可：md 档继承基础款 1 列，
-            直到 lg 才展开成 3 列。想想这条规则——断点类只在“该断点及以上”生效，
-            没有写到的档位，自动沿用更小一档的样式。
+            md 档于是继承基础款 1 列，直到 lg 才展开成 3 列。想想这条规则——
+            断点类只在“该断点及以上”生效，没有写到的档位，自动沿用更小一档的样式。
           </p>
         </details>
 

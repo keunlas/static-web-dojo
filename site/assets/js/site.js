@@ -92,7 +92,8 @@
       chapters: [
         { num: '', href: 'archive/bootstrap-docs/index.html', title: 'Bootstrap 离线文档', desc: '' },
         { num: '', href: 'archive/examples/index.html', title: '官方示例集', desc: '' },
-        { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
+        { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' },
+        { num: '', pageId: 'archive-reference', href: 'archive/reference/index.html', title: '工具类速查', desc: '' }
       ]
     },
     {

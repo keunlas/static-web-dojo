@@ -75,13 +75,27 @@
           </div>
         </div>
         <div class="demo-source">
-          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
-            <button type="button" class="btn btn-primary">primary</button>
-            <button type="button" class="btn btn-danger">danger</button>
-            <!-- 其余六色同理：secondary / success / warning / info / light / dark -->
-
-            <button type="button" class="btn btn-outline-primary">outline-primary</button>
-            <button type="button" class="btn btn-outline-danger">outline-danger</button>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-primary">primary</button>
+              <button type="button" class="btn btn-secondary">secondary</button>
+              <button type="button" class="btn btn-success">success</button>
+              <button type="button" class="btn btn-danger">danger</button>
+              <button type="button" class="btn btn-warning">warning</button>
+              <button type="button" class="btn btn-info">info</button>
+              <button type="button" class="btn btn-light">light</button>
+              <button type="button" class="btn btn-dark">dark</button>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-outline-primary">outline-primary</button>
+              <button type="button" class="btn btn-outline-secondary">outline-secondary</button>
+              <button type="button" class="btn btn-outline-success">outline-success</button>
+              <button type="button" class="btn btn-outline-danger">outline-danger</button>
+              <button type="button" class="btn btn-outline-warning">outline-warning</button>
+              <button type="button" class="btn btn-outline-info">outline-info</button>
+              <button type="button" class="btn btn-outline-light">outline-light</button>
+              <button type="button" class="btn btn-outline-dark">outline-dark</button>
+            </div>
           </script>
         </div>
       </div>
@@ -125,13 +139,16 @@
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <button type="button" class="btn btn-primary btn-lg">大按钮 btn-lg</button>
-            <button type="button" class="btn btn-primary">默认按钮</button>
-            <button type="button" class="btn btn-primary btn-sm">小按钮 btn-sm</button>
-
-            <button type="button" class="btn btn-primary" disabled>禁用按钮</button>
-            <button type="button" class="btn btn-primary active" aria-pressed="true">选中按钮</button>
-            <a href="#" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true">链接式禁用</a>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+              <button type="button" class="btn btn-primary btn-lg">大按钮 btn-lg</button>
+              <button type="button" class="btn btn-primary">默认按钮</button>
+              <button type="button" class="btn btn-primary btn-sm">小按钮 btn-sm</button>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-primary" disabled>禁用按钮</button>
+              <button type="button" class="btn btn-primary active" aria-pressed="true">选中按钮</button>
+              <a href="#" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true">链接式禁用</a>
+            </div>
           </script>
         </div>
       </div>
@@ -166,15 +183,17 @@
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <div class="btn-group" role="group" aria-label="视图切换">
-              <button type="button" class="btn btn-outline-primary">日</button>
-              <button type="button" class="btn btn-outline-primary active" aria-pressed="true">周</button>
-              <button type="button" class="btn btn-outline-primary">月</button>
-            </div>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="btn-group" role="group" aria-label="视图切换">
+                <button type="button" class="btn btn-outline-primary">日</button>
+                <button type="button" class="btn btn-outline-primary active" aria-pressed="true">周</button>
+                <button type="button" class="btn btn-outline-primary">月</button>
+              </div>
 
-            <div class="btn-group" role="group" aria-label="工具栏">
-              <button type="button" class="btn btn-primary">收件箱 <span class="badge text-bg-light">9</span></button>
-              <button type="button" class="btn btn-primary">草稿 <span class="badge text-bg-warning">3</span></button>
+              <div class="btn-group" role="group" aria-label="工具栏">
+                <button type="button" class="btn btn-primary">收件箱 <span class="badge text-bg-light">9</span></button>
+                <button type="button" class="btn btn-primary">草稿 <span class="badge text-bg-warning">3</span></button>
+              </div>
             </div>
           </script>
         </div>
@@ -215,13 +234,21 @@
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <p class="h5">修行进度 <span class="badge text-bg-secondary">第 5 式</span></p>
-
-            <span class="badge text-bg-primary">primary</span>
-            <span class="badge text-bg-danger">danger</span>
-            <!-- 其余六色同理 -->
-
-            <span class="badge rounded-pill text-bg-danger">99+</span>
-            <span class="badge rounded-pill text-bg-success">已完成</span>
+            <p class="mb-3">
+              <span class="badge text-bg-primary">primary</span>
+              <span class="badge text-bg-secondary">secondary</span>
+              <span class="badge text-bg-success">success</span>
+              <span class="badge text-bg-danger">danger</span>
+              <span class="badge text-bg-warning">warning</span>
+              <span class="badge text-bg-info">info</span>
+              <span class="badge text-bg-light">light</span>
+              <span class="badge text-bg-dark">dark</span>
+            </p>
+            <p class="mb-0">
+              胶囊徽章：
+              <span class="badge rounded-pill text-bg-danger">99+</span>
+              <span class="badge rounded-pill text-bg-success">已完成</span>
+            </p>
           </script>
         </div>
       </div>
@@ -265,7 +292,12 @@
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
             </div>
 
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              心法提示：这一式需要动手敲，光看不练等于没学。
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+            </div>
+
+            <div class="alert alert-danger mb-0" role="alert">
               这条没有关闭按钮，会一直挂在页面上。
             </div>
           </script>

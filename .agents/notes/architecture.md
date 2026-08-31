@@ -13,6 +13,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ├── archive/                 # 第四回 · 藏经阁（离线文档/示例集/图标大全）
 │   ├── index.html           # 藏经阁卷首（手写，入库）
 │   ├── icons/index.html     # 图标大全（tools/gen-icons-page.py 生成）
+│   ├── reference/index.html # 工具类速查（手写，入库，data-page="archive-reference"）
 │   ├── bootstrap-docs/      # Bootstrap 离线文档镜像（脚本生成，gitignore）
 │   └── examples/            # 官方示例集（脚本生成，gitignore）
 ├── demo/                    # 整页示例（综合修炼章配套，独立打开）
@@ -62,6 +63,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
   - `home`、`basics`、`bootstrap`、`jquery`、`archive`（卷首/分卷页）
   - `bootstrap-01`…`bootstrap-16`、`jquery-01`…`jquery-10`（章节页，与 slug 一致）
   - `archive-icons`（藏经阁·图标大全，登记时用章节条目的 `pageId` 字段指定）
+  - `archive-reference`（藏经阁·工具类速查，同上；页头由 site.js 正常注入——只有
+    `home`/`archive`/`playground` 三个 id 被 injectHeader 跳过）
   - `playground`（练功场，SECTIONS 里的「附页」回：进侧边栏 + 翻页顺序；
     页面页头手写，故 injectHeader 跳过它——曾漏登记 SECTIONS 导致侧边栏无入口，已修）
 - 章节条目支持 `pageId` 字段：藏经阁这类无编号条目（离线文档/示例集/图标大全）用它指定

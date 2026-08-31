@@ -3,7 +3,32 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：练功场缺侧边栏入口修复）
+## 当前状态（全站完成 ✅ · 最后更新：演示源码“去节选”整改 + 新增工具类速查）
+
+### 🆕 最新一轮（用户两点意见：源码块不得节选、取值要逐一介绍）(用户指令优先)
+
+用户反馈：①部分示例的源码块是“节选”（“同理/结构相同/省略/复制即可/（节选）”），
+②像 `justify-content-*` 只列了 start/center/end/between/around/evenly 却不逐一解释用途，
+并要求添加专门查阅章节。本轮整改：
+
+- **demo 源码块全部与预览逐字一致**：03 例4/例5、04 例1–4、05 例1/4（及例2/3外层 flex 行）、
+  02 例1/2/5/6、06 例2、07 例3、08 例2（id 统一）、09 例1/2/3（含练功答案1/2）、
+  10 例2（长公告补全）、11 例1/3/4（含结构示例、答案1）、12 例1、15 例1/2、16（CSS 六色 +
+  六张卡）、13/10 的（节选）标题移除。**jQuery 篇**：07 例1/2/3、08 例1/3、09 例1/2/3、
+  10 例2/4 补上被省掉的“页面结构”块与外层 wrapper div，10 例5 JS 全量。
+- **justify-content 六值逐一讲**：03-grid-2 新增取值表格（start/center/end/between/around/evenly
+  各一句）+ 例5 改为“六值合影”演示（六个标签行 + 六行 row），预览与源码一致。
+- **新增「工具类速查」页** `site/archive/reference/index.html`（data-page="archive-reference"）：
+  11 个小节 12 张表，覆盖 justify-content/align-*/间距/文本/颜色/边框圆角阴影/显示/弹性/尺寸/
+  位置/可见性交互，全部取值一句话说明并注“带断点类从该断点起生效”；类名已在
+  vendor bootstrap.min.css 逐个 grep 验证。site.js SECTIONS 藏经阁登记 + 卷首 realm-grid
+  加“查”字卡；03 与 04 各加一条交叉链接。
+- **文档同步**：conventions.md 补“源码块必须与预览逐字一致”红线（用户明确要求）、
+  style-guide.md 术语补充，architecture.md 目录/`data-page` 说明更新。
+- **验证**：check-offline ✔、check-links ✔ 36 页（索引重生成）、node --check ✔、
+  CDP http:// 与 file:// 抽查全部零 JS 报错；速查页 TOC 11 项、翻页链
+  （图标大全→工具类速查→练功场）正确；HTML 标签全平衡。
+
 
 ### 🐛 最新修复（练功场等页面无法从目录导航过去 · 用户反馈）
 
@@ -226,7 +251,7 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 
 ## 注意事项
 
-- 新增“图标大全/练功场/搜索”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
+- 新增“图标大全/练功场/搜索/工具类速查”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
 - `site/archive/icons/index.html`、`site/playground/index.html` 建好后，侧边栏“藏经阁”与
-  PAGES 顺序需更新；
+  PAGES 顺序需更新；速查页已登记（archive-reference，进侧边栏 + 翻页链）；
 - 全部章节完成后记得把本文件的状态标记为“全站完成”，并跑一遍 verify-offline 终验。

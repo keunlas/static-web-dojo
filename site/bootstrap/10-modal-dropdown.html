@@ -186,15 +186,32 @@
           </div>
         </div>
         <div class="demo-source">
-          <script type="text/plain" data-lang="html" data-title="页面结构（只列出与例 1 不同的部分）">
-            <!-- 两个修饰类都加在 modal-dialog 上 -->
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">…标题与关闭按钮…</div>
-                <div class="modal-body">
-                  …很多很多段正文，超出高度后出现框内滚动条…
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs10-demo2">
+              查看《藏经阁公告》
+            </button>
+
+            <div class="modal fade" id="bs10-demo2" tabindex="-1" aria-labelledby="bs10-demo2-label" aria-hidden="true">
+              <!-- 两个修饰类都加在 modal-dialog 上 -->
+              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="bs10-demo2-label">藏经阁公告</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>各位同门：</p>
+                    <p>近日江湖风雨渐起，藏经阁闭关七日，整理经卷、修补窗棂。闭关期间，新晋弟子可先在练功场打熬筋骨。</p>
+                    <p>其一，抄经房即日起增设夜课，戌时开讲《栅格心法》第三卷，欢迎各位自带蒲团。</p>
+                    <p>其二，兵器架新到一批轻剑，取用前请在簿册上留名，用毕擦净归位。</p>
+                    <p>其三，听闻后山竹林里有前辈遗留的笔记，若有缘寻得，切勿外传。</p>
+                    <p>闭关期满，藏经阁将以全新面貌重开山门。修行路上，日拱一卒，功不唐捐。</p>
+                    <p class="mb-0">—— 藏经阁执事 谨启</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">知道了</button>
+                  </div>
                 </div>
-                <div class="modal-footer">…操作按钮…</div>
               </div>
             </div>
           </script>
@@ -332,7 +349,7 @@
           <p>
             把例 3 容器上的 <code>dropdown</code> 类改成 <code>dropup</code> 即可：
           </p>
-          <script type="text/plain" data-lang="html" data-title="向上弹出的菜单（节选）">
+          <script type="text/plain" data-lang="html" data-title="向上弹出的菜单">
             <div class="dropup">
               <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 招式大全

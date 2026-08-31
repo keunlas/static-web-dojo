@@ -58,8 +58,8 @@
               </div>
               <div class="col-12 col-md-8">
                 <div class="row g-3">
-                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 A</div></div>
-                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 B</div></div>
+                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 A<br>新的一套 12 列，占 6 份</div></div>
+                  <div class="col-12 col-sm-6"><div class="bg-primary-subtle border rounded p-3">内层列 B<br>与 A 平分外层列</div></div>
                 </div>
               </div>
             </div>
@@ -106,12 +106,12 @@
                 <div class="border rounded p-4">
                   <div class="h5 mb-3">登录</div>
                   <div class="mb-3">
-                    <label class="form-label" for="email">邮箱</label>
-                    <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                    <label class="form-label" for="bs03-email">邮箱</label>
+                    <input type="email" class="form-control" id="bs03-email" placeholder="you@example.com">
                   </div>
                   <div class="mb-3">
-                    <label class="form-label" for="pass">密码</label>
-                    <input type="password" class="form-control" id="pass" placeholder="••••••">
+                    <label class="form-label" for="bs03-pass">密码</label>
+                    <input type="password" class="form-control" id="bs03-pass" placeholder="••••••">
                   </div>
                   <button type="button" class="btn btn-primary">进入</button>
                 </div>
@@ -146,10 +146,10 @@
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <div class="row g-3">
               <div class="col-12 col-md-9 order-md-2">
-                <div class="bg-success-subtle border rounded p-3">正文</div>
+                <div class="bg-success-subtle border rounded p-3">正文 —— HTML 里排第一；桌面（md 起）被 <code>order-md-2</code> 挪到右侧</div>
               </div>
               <div class="col-12 col-md-3 order-md-1">
-                <div class="bg-warning-subtle border rounded p-3">侧栏</div>
+                <div class="bg-warning-subtle border rounded p-3">侧栏 —— HTML 里排第二；桌面挪到左侧</div>
               </div>
             </div>
           </script>
@@ -191,34 +191,117 @@
           </div>
         </div>
         <div class="demo-source">
-          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
-            <div class="row align-items-center bg-secondary-subtle border rounded p-2" style="height:6rem">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="mb-1"><strong>align-items-start</strong></p>
+            <div class="row align-items-start bg-secondary-subtle border rounded p-2 mb-3" style="height:6rem">
               <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
               <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
               <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
             </div>
-            <!-- 另两行分别换成 align-items-start / align-items-end -->
+
+            <p class="mb-1"><strong>align-items-center</strong></p>
+            <div class="row align-items-center bg-secondary-subtle border rounded p-2 mb-3" style="height:6rem">
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+            </div>
+
+            <p class="mb-1"><strong>align-items-end</strong></p>
+            <div class="row align-items-end bg-secondary-subtle border rounded p-2" style="height:6rem">
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-1">矮</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-3">高</div></div>
+              <div class="col-4"><div class="bg-primary text-white text-center rounded py-2">中</div></div>
+            </div>
           </script>
         </div>
       </div>
 
       <p>
         水平对齐用 <code>justify-content-*</code>：当一行的列宽之和不足 12 份时，多出来的空间怎么分。
-        取值 <code>start</code> / <code>center</code> / <code>end</code> / <code>between</code> /
-        <code>around</code> / <code>evenly</code>，<code>center</code> 最常用。
+        取值有六个，含义如下：
       </p>
+      <table>
+        <thead>
+          <tr><th>取值</th><th>多余空间怎么分</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>start</code></td><td>全部留在右侧，列从行首排起——这是默认行为；</td></tr>
+          <tr><td><code>center</code></td><td>左右均分，列整体居中，最常用；</td></tr>
+          <tr><td><code>end</code></td><td>全部留在左侧，列挤到行尾；</td></tr>
+          <tr><td><code>between</code></td><td>两端贴边，中间的自由空间均匀分给列与列之间——"一张邮票贴两端"；</td></tr>
+          <tr><td><code>around</code></td><td>每个列的左右两侧各分到一半自由空间，列与列之间的缝隙是边缘间隙的两倍；</td></tr>
+          <tr><td><code>evenly</code></td><td>列与列、列与边缘的缝隙全部相等，左右完全对称。</td></tr>
+        </tbody>
+      </table>
 
       <div class="demo">
-        <div class="demo-caption">例 5 · justify-content-center：两个 col-4 居中，剩 4 份空白分到两侧</div>
+        <div class="demo-caption">例 5 · 六个取值合影：两个 col-4 只占 8 份，剩 4 份全部看 justify-content 怎么分</div>
         <div class="demo-preview">
-          <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-3">
+          <p class="mb-1"><strong>justify-content-start</strong>（默认）</p>
+          <div class="row justify-content-start g-2 bg-secondary-subtle border rounded p-2 mb-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+          <p class="mb-1"><strong>justify-content-center</strong></p>
+          <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-2 mb-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+          <p class="mb-1"><strong>justify-content-end</strong></p>
+          <div class="row justify-content-end g-2 bg-secondary-subtle border rounded p-2 mb-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+          <p class="mb-1"><strong>justify-content-between</strong></p>
+          <div class="row justify-content-between g-2 bg-secondary-subtle border rounded p-2 mb-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+          <p class="mb-1"><strong>justify-content-around</strong></p>
+          <div class="row justify-content-around g-2 bg-secondary-subtle border rounded p-2 mb-3">
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+          </div>
+          <p class="mb-1"><strong>justify-content-evenly</strong></p>
+          <div class="row justify-content-evenly g-2 bg-secondary-subtle border rounded p-2">
             <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
             <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
           </div>
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-3">
+            <p class="mb-1"><strong>justify-content-start</strong>（默认）</p>
+            <div class="row justify-content-start g-2 bg-secondary-subtle border rounded p-2 mb-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+
+            <p class="mb-1"><strong>justify-content-center</strong></p>
+            <div class="row justify-content-center g-2 bg-secondary-subtle border rounded p-2 mb-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+
+            <p class="mb-1"><strong>justify-content-end</strong></p>
+            <div class="row justify-content-end g-2 bg-secondary-subtle border rounded p-2 mb-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+
+            <p class="mb-1"><strong>justify-content-between</strong></p>
+            <div class="row justify-content-between g-2 bg-secondary-subtle border rounded p-2 mb-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+
+            <p class="mb-1"><strong>justify-content-around</strong></p>
+            <div class="row justify-content-around g-2 bg-secondary-subtle border rounded p-2 mb-3">
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+              <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
+            </div>
+
+            <p class="mb-1"><strong>justify-content-evenly</strong></p>
+            <div class="row justify-content-evenly g-2 bg-secondary-subtle border rounded p-2">
               <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
               <div class="col-4"><div class="bg-info text-white text-center rounded py-1">col-4</div></div>
             </div>
@@ -226,7 +309,10 @@
         </div>
       </div>
 
-      <p>顺带一提：列宽之和恰好等于 12 份时没有多余空间，<code>justify-content-*</code> 自然看不出效果。</p>
+      <p>
+        顺带一提：列宽之和恰好等于 12 份时没有多余空间，<code>justify-content-*</code> 自然看不出效果。
+        记不住六个值的细微差别？去<a href="../archive/reference/index.html#justify-content">藏经阁的速查</a>一翻便知。
+      </p>
 
       <h2>列间距：gutter</h2>
       <p>
@@ -272,7 +358,20 @@
                   <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
                 </div>
               </div>
-              <!-- 第二、三张卡片结构相同，复制即可 -->
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 二式</div>
+                  <p class="mb-2">容器与栅格：十二列系统与五大断点。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 三式</div>
+                  <p class="mb-2">嵌套、偏移、对齐与列间距。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
             </div>
           </script>
         </div>
@@ -361,7 +460,20 @@
                   <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
                 </div>
               </div>
-              <!-- 第二、三、四张卡片结构相同 -->
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 二式</div>
+                  <p class="mb-2">容器与栅格：十二列系统与五大断点。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
+              <div class="col">
+                <div class="border rounded p-3">
+                  <div class="fw-bold mb-1">招式 · 三式</div>
+                  <p class="mb-2">嵌套、偏移、对齐与列间距。</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm">查看</button>
+                </div>
+              </div>
             </div>
           </script>
           <p>md 起每行 2 张、自动换行；手机上仍单列堆叠。</p>

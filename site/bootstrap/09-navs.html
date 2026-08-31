@@ -74,14 +74,30 @@
                         data-bs-target="#bs09-demo1-gong" type="button" role="tab"
                         aria-controls="bs09-demo1-gong" aria-selected="true">功法</button>
               </li>
-              <!-- 第二、三个页签结构相同，省略 -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo1-tab-jian" data-bs-toggle="tab"
+                        data-bs-target="#bs09-demo1-jian" type="button" role="tab"
+                        aria-controls="bs09-demo1-jian" aria-selected="false">剑谱</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo1-tab-xin" data-bs-toggle="tab"
+                        data-bs-target="#bs09-demo1-xin" type="button" role="tab"
+                        aria-controls="bs09-demo1-xin" aria-selected="false">心法</button>
+              </li>
             </ul>
             <div class="tab-content" id="bs09-demo1-tabContent">
               <div class="tab-pane fade show active" id="bs09-demo1-gong" role="tabpanel"
                    aria-labelledby="bs09-demo1-tab-gong" tabindex="0">
                 <p class="mt-3 mb-0">外练筋骨皮：站桩、扎马、打熬气力。</p>
               </div>
-              <!-- 其余 tab-pane 结构相同，省略 -->
+              <div class="tab-pane fade" id="bs09-demo1-jian" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-jian" tabindex="0">
+                <p class="mt-3 mb-0">剑走轻灵：刺、挑、抹、撩，一招一式不可含糊。</p>
+              </div>
+              <div class="tab-pane fade" id="bs09-demo1-xin" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-xin" tabindex="0">
+                <p class="mt-3 mb-0">内修真气：心无旁骛，呼吸绵长，以意导气。</p>
+              </div>
             </div>
           </script>
         </div>
@@ -137,14 +153,30 @@
                         data-bs-target="#bs09-demo2-zao" type="button" role="tab"
                         aria-controls="bs09-demo2-zao" aria-selected="true">早课</button>
               </li>
-              <!-- 其余页签结构相同，省略 -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo2-tab-wu" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo2-wu" type="button" role="tab"
+                        aria-controls="bs09-demo2-wu" aria-selected="false">午课</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo2-tab-wan" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo2-wan" type="button" role="tab"
+                        aria-controls="bs09-demo2-wan" aria-selected="false">晚课</button>
+              </li>
             </ul>
             <div class="tab-content" id="bs09-demo2-tabContent">
               <div class="tab-pane fade show active" id="bs09-demo2-zao" role="tabpanel"
                    aria-labelledby="bs09-demo2-tab-zao" tabindex="0">
                 <p class="mb-0">站桩半炷香，再练一路拳。</p>
               </div>
-              <!-- 其余 tab-pane 结构相同，省略 -->
+              <div class="tab-pane fade" id="bs09-demo2-wu" role="tabpanel"
+                   aria-labelledby="bs09-demo2-tab-wu" tabindex="0">
+                <p class="mb-0">后山采药，顺带练轻功。</p>
+              </div>
+              <div class="tab-pane fade" id="bs09-demo2-wan" role="tabpanel"
+                   aria-labelledby="bs09-demo2-tab-wan" tabindex="0">
+                <p class="mb-0">抄经一页，打坐收功。</p>
+              </div>
             </div>
           </script>
         </div>
@@ -269,13 +301,34 @@
           <summary>参考答案 1</summary>
           <script type="text/plain" data-lang="html" data-title="深色导航栏">
             <nav class="navbar navbar-expand-lg bg-dark rounded" data-bs-theme="dark">
-              <!-- 其余内容与例 3 相同 -->
+              <div class="container-fluid">
+                <a class="navbar-brand" href="#"><i class="bi bi-compass me-1"></i>修武堂</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#bs09-demo3-nav" aria-controls="bs09-demo3-nav"
+                        aria-expanded="false" aria-label="展开菜单">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="bs09-demo3-nav">
+                  <ul class="navbar-nav">
+                    <li class="nav-item">
+                      <a class="nav-link active" aria-current="page" href="#">首页</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">武学</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">藏经阁</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </nav>
           </script>
           <p>
             <code>data-bs-theme="dark"</code> 把导航栏切换进暗色模式，链接、品牌字、
             汉堡按钮的描边与三道杠都会自动换成浅色；<code>bg-dark</code> 补上深色底。
             只换 <code>bg-dark</code> 不换 theme，文字会“墨字沉在墨夜里”，什么都看不清。
+            改动只发生在 <code>navbar</code> 这一个标签上，面包屑部分无需动。
           </p>
         </details>
 
@@ -288,8 +341,31 @@
                         data-bs-target="#bs09-demo1-gong" type="button" role="tab"
                         aria-controls="bs09-demo1-gong" aria-selected="true">功法</button>
               </li>
-              <!-- 其余页签同样改法 -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo1-tab-jian" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo1-jian" type="button" role="tab"
+                        aria-controls="bs09-demo1-jian" aria-selected="false">剑谱</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bs09-demo1-tab-xin" data-bs-toggle="pill"
+                        data-bs-target="#bs09-demo1-xin" type="button" role="tab"
+                        aria-controls="bs09-demo1-xin" aria-selected="false">心法</button>
+              </li>
             </ul>
+            <div class="tab-content" id="bs09-demo1-tabContent">
+              <div class="tab-pane fade show active" id="bs09-demo1-gong" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-gong" tabindex="0">
+                <p class="mt-3 mb-0">外练筋骨皮：站桩、扎马、打熬气力。</p>
+              </div>
+              <div class="tab-pane fade" id="bs09-demo1-jian" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-jian" tabindex="0">
+                <p class="mt-3 mb-0">剑走轻灵：刺、挑、抹、撩，一招一式不可含糊。</p>
+              </div>
+              <div class="tab-pane fade" id="bs09-demo1-xin" role="tabpanel"
+                   aria-labelledby="bs09-demo1-tab-xin" tabindex="0">
+                <p class="mt-3 mb-0">内修真气：心无旁骛，呼吸绵长，以意导气。</p>
+              </div>
+            </div>
           </script>
           <p>
             <code>tab-pane</code> 那半边完全不用动——切换的“管线”不变，变的只是开关写法

@@ -62,7 +62,7 @@
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <div class="container bg-info-subtle border rounded py-2 text-center">
+            <div class="container bg-info-subtle border rounded py-2 text-center mb-3">
               container —— 定宽居中，两侧留白
             </div>
             <div class="container-fluid bg-warning-subtle border rounded py-2 text-center">
@@ -114,7 +114,15 @@
             <div class="row g-1">
               <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">1</div></div>
               <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">2</div></div>
-              <!-- ……中间的 3 到 11 同理，每个都是 col-1 …… -->
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">3</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">4</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">5</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">6</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">7</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">8</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">9</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">10</div></div>
+              <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">11</div></div>
               <div class="col-1"><div class="bg-primary-subtle border rounded text-center py-1">12</div></div>
             </div>
           </script>
@@ -223,9 +231,9 @@
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <div class="row g-3">
-              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第一栏</div></div>
-              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第二栏</div></div>
-              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第三栏</div></div>
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第一栏<br>手机占 12 列（堆叠），md 起占 4 列（并排）</div></div>
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第二栏<br>与左右两栏同宽</div></div>
+              <div class="col-12 col-md-4"><div class="bg-primary-subtle border rounded p-3">第三栏<br>4 + 4 + 4 = 12，正好一行</div></div>
             </div>
           </script>
         </div>
@@ -247,8 +255,8 @@
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <div class="row g-3">
-              <div class="col-12 col-md-3"><div class="bg-secondary-subtle border rounded p-3">侧边栏</div></div>
-              <div class="col-12 col-md-9"><div class="bg-secondary-subtle border rounded p-3">内容区</div></div>
+              <div class="col-12 col-md-3"><div class="bg-secondary-subtle border rounded p-3">侧边栏（3 份）<br>手机堆叠在上方</div></div>
+              <div class="col-12 col-md-9"><div class="bg-secondary-subtle border rounded p-3">内容区（9 份）<br>3 + 9 = 12，正好一行</div></div>
             </div>
           </script>
         </div>

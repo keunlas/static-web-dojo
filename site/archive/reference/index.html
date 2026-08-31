@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工具类速查 | 藏经阁 · 纯静态网页的修行</title>
+<meta name="description" content="Bootstrap 5.3 工具类速查：间距、文本、颜色、边框圆角阴影、显示、尺寸、位置与弹性布局，一页看清所有取值。">
+<script src="../../assets/js/loader.js"></script>
+</head>
+<body data-page="archive-reference">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        类名繁多，不必都记在脑子里——记在心里，查在指间。这一页是本站教程里出现过（以及相关）
+        的工具类速查：每个取值一句话说明，翻到即用。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">使用说明</div>
+        <ul style="margin:0">
+          <li><code>*</code> 表示占位符：间距类写数字 0–5，颜色类写 8 色名，断点类写 sm / md / lg / xl / xxl；</li>
+          <li>带断点的类（如 <code>mt-md-3</code>、<code>d-lg-none</code>）除专门标注外，一律遵循
+            <strong>“该断点及以上生效”</strong>；</li>
+          <li>完整组件（卡片、导航、模态框等）请查<a href="../bootstrap-docs/index.html">离线文档</a>；
+            本页只收“一招一式”的工具类。</li>
+        </ul>
+      </div>
+
+      <h2 id="justify-content">水平对齐：justify-content-*</h2>
+      <p>作用于弹性容器（<code>row</code>、<code>d-flex</code> 等），决定“多余空间怎么分”。</p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>justify-content-start</code></td><td>列挤在行首（默认行为）</td></tr>
+          <tr><td><code>justify-content-center</code></td><td>列整体居中，最常用</td></tr>
+          <tr><td><code>justify-content-end</code></td><td>列挤到行尾</td></tr>
+          <tr><td><code>justify-content-between</code></td><td>两端贴边，列与列之间均分</td></tr>
+          <tr><td><code>justify-content-around</code></td><td>每个列左右各分半份，列间缝是边缘缝的两倍</td></tr>
+          <tr><td><code>justify-content-evenly</code></td><td>列与列、列与边缘的缝全部相等</td></tr>
+        </tbody>
+      </table>
+      <p>带断点：<code>justify-content-md-center</code> 等，从该断点起生效。</p>
+
+      <h2>垂直对齐：align-items-* / align-self-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>align-items-start</code></td><td>子项顶端对齐</td></tr>
+          <tr><td><code>align-items-center</code></td><td>子项垂直居中</td></tr>
+          <tr><td><code>align-items-end</code></td><td>子项底端对齐</td></tr>
+          <tr><td><code>align-items-stretch</code></td><td>拉伸撑满（默认行为）</td></tr>
+          <tr><td><code>align-items-baseline</code></td><td>按文字基线对齐</td></tr>
+          <tr><td><code>align-self-*</code></td><td>同上五个取值，但只作用于<strong>单个</strong>子项</td></tr>
+          <tr><td><code>align-content-*</code></td><td>弹性容器<strong>换行后</strong>行与行之间的分布，取值同 justify-content</td></tr>
+        </tbody>
+      </table>
+
+      <h2>间距：m-* / p-*</h2>
+      <p><code>m</code> 是外边距 margin、<code>p</code> 是内边距 padding，数字档位如下：</p>
+      <table>
+        <thead>
+          <tr><th>数字</th><th>实际值</th><th>感觉</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>贴死</td></tr>
+          <tr><td>1</td><td>0.25rem（4px）</td><td>微呼吸</td></tr>
+          <tr><td>2</td><td>0.5rem（8px）</td><td>小间隔</td></tr>
+          <tr><td>3</td><td>1rem（16px）</td><td>标准间距</td></tr>
+          <tr><td>4</td><td>1.5rem（24px）</td><td>宽松</td></tr>
+          <tr><td>5</td><td>3rem（48px）</td><td>大开大合</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr><th>方向后缀</th><th>作用</th><th>例子</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>t</code> 上 / <code>b</code> 下 / <code>s</code> 左 / <code>e</code> 右</td><td>单边</td><td><code>mt-3</code> 上边距 1rem</td></tr>
+          <tr><td><code>x</code> 左右 / <code>y</code> 上下</td><td>成对</td><td><code>px-2</code> 左右内边距 0.5rem</td></tr>
+          <tr><td>不带后缀</td><td>四边</td><td><code>p-4</code> 四边 1.5rem</td></tr>
+          <tr><td><code>auto</code></td><td>自动分配剩余空间</td><td><code>mx-auto</code> 水平居中、<code>ms-auto</code> 推到右侧</td></tr>
+        </tbody>
+      </table>
+      <p>带断点：<code>mt-md-3</code>、<code>p-lg-5</code> 等，从该断点起生效。</p>
+
+      <h2>文本：text-* / fs-* / fw-* / fst-* / lh-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>text-start</code> / <code>text-center</code> / <code>text-end</code></td><td>左对齐 / 居中 / 右对齐</td></tr>
+          <tr><td><code>fs-1</code> – <code>fs-6</code></td><td>字号 6 档（2.5rem 递减到 1rem）</td></tr>
+          <tr><td><code>fw-bold</code> / <code>fw-bolder</code> / <code>fw-semibold</code> / <code>fw-medium</code> / <code>fw-normal</code> / <code>fw-light</code> / <code>fw-lighter</code></td><td>字重 7 档</td></tr>
+          <tr><td><code>fst-italic</code> / <code>fst-normal</code></td><td>斜体 / 常规</td></tr>
+          <tr><td><code>lh-1</code> / <code>lh-sm</code> / <code>lh-base</code> / <code>lh-lg</code></td><td>行高 4 档：最紧到最松</td></tr>
+          <tr><td><code>text-decoration-underline</code> / <code>-line-through</code> / <code>-none</code></td><td>下划线 / 删除线 / 去装饰</td></tr>
+          <tr><td><code>text-lowercase</code> / <code>text-uppercase</code> / <code>text-capitalize</code></td><td>小写 / 大写 / 首字母大写</td></tr>
+          <tr><td><code>text-wrap</code> / <code>text-nowrap</code></td><td>自动换行（默认）/ 禁止换行</td></tr>
+          <tr><td><code>text-break</code> / <code>text-truncate</code></td><td>任意处可断行 / 单行溢出变省略号</td></tr>
+          <tr><td><code>text-body</code> / <code>text-body-secondary</code> / <code>text-body-tertiary</code></td><td>正文色 / 二級弱化 / 三级弱化</td></tr>
+        </tbody>
+      </table>
+
+      <h2>颜色：text-* / bg-* / text-bg-*</h2>
+      <p>8 色语义贯穿全站：<strong>primary 主、secondary 次、success 成、danger 危、warning 警、info 讯、light 浅、dark 深</strong>。</p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>text-primary</code> 等</td><td>文字色（本站主色已被染成朱砂）</td></tr>
+          <tr><td><code>bg-primary</code> 等</td><td>背景色</td></tr>
+          <tr><td><code>text-bg-primary</code> 等</td><td>背景 + 自动配好对比文字色</td></tr>
+          <tr><td><code>primary-subtle</code> 等</td><td>柔和版（如 <code>bg-primary-subtle</code>），做浅底醒目不易翻车</td></tr>
+          <tr><td><code>text-primary-emphasis</code> 等</td><td>强调版文字色</td></tr>
+        </tbody>
+      </table>
+
+      <h2>边框、圆角与阴影</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>border</code> / <code>border-0</code></td><td>加一圈细边 / 去掉边框</td></tr>
+          <tr><td><code>border-top</code> / <code>-bottom</code> / <code>-start</code> / <code>-end</code></td><td>只保留单边</td></tr>
+          <tr><td><code>border-primary</code> 等</td><td>边框颜色</td></tr>
+          <tr><td><code>border-1</code> – <code>border-5</code></td><td>边框粗细 5 档</td></tr>
+          <tr><td><code>rounded</code> / <code>rounded-0</code> – <code>rounded-5</code></td><td>小圆角 / 0 到更圆，数字越大越圆</td></tr>
+          <tr><td><code>rounded-circle</code> / <code>rounded-pill</code></td><td>正圆 / 胶囊形</td></tr>
+          <tr><td><code>shadow-sm</code> / <code>shadow</code> / <code>shadow-lg</code> / <code>shadow-none</code></td><td>阴影三档，由浅入深 / 去阴影</td></tr>
+        </tbody>
+      </table>
+
+      <h2>显示：d-*</h2>
+      <p>值有多少种，类就有多少种；每种都能加断点前缀（如 <code>d-md-none</code>）。</p>
+      <table>
+        <thead>
+          <tr><th>值</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>d-none</code></td><td>隐藏（最常用的“开关”起点）</td></tr>
+          <tr><td><code>d-inline</code> / <code>d-inline-block</code></td><td>行内 / 行内块</td></tr>
+          <tr><td><code>d-block</code></td><td>块级、独占一行</td></tr>
+          <tr><td><code>d-flex</code> / <code>d-inline-flex</code></td><td>弹性布局（配合下文 flex-*）</td></tr>
+          <tr><td><code>d-grid</code></td><td>网格布局</td></tr>
+          <tr><td><code>d-table</code> / <code>d-table-row</code> / <code>d-table-cell</code></td><td>用 CSS 扮演表格结构</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法：显隐开关</div>
+        <p style="margin:0">
+          <code>d-none d-md-block</code> = 默认隐藏、md 起显示；<code>d-md-none</code> = 默认显示、md 起隐藏。
+          注意显隐类只管<strong>视觉</strong>，内容仍在 HTML 里，读屏软件照样能读到。
+        </p>
+      </div>
+
+      <h2>弹性布局：flex-* 与 gap-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>flex-row</code> / <code>flex-row-reverse</code></td><td>横向排（默认）/ 横向反排</td></tr>
+          <tr><td><code>flex-column</code> / <code>flex-column-reverse</code></td><td>纵向排 / 纵向反排</td></tr>
+          <tr><td><code>flex-wrap</code> / <code>flex-nowrap</code> / <code>flex-wrap-reverse</code></td><td>允许换行（默认）/ 禁止换行 / 反向换行</td></tr>
+          <tr><td><code>flex-fill</code></td><td>等分剩余空间（想平均分就用它）</td></tr>
+          <tr><td><code>flex-grow-0/1</code></td><td>按比例抢占剩余空间（0 不抢）</td></tr>
+          <tr><td><code>flex-shrink-0/1</code></td><td>空间不足时是否可压缩（0 不缩）</td></tr>
+          <tr><td><code>order-0</code> – <code>order-5</code>，另有 <code>order-first</code> / <code>order-last</code></td><td>视觉排序，数字小在前</td></tr>
+          <tr><td><code>gap-0</code> – <code>gap-5</code>（可加断点如 <code>gap-lg-3</code>）</td><td>子项之间的横纵向间距</td></tr>
+        </tbody>
+      </table>
+
+      <h2>尺寸：w-* / h-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>w-25</code> / <code>w-50</code> / <code>w-75</code> / <code>w-100</code> / <code>w-auto</code></td><td>宽度 25% / 50% / 75% / 100% / 按内容</td></tr>
+          <tr><td><code>h-25</code> / <code>h-50</code> / <code>h-75</code> / <code>h-100</code> / <code>h-auto</code></td><td>高度同款五档</td></tr>
+          <tr><td><code>mw-100</code> / <code>mh-100</code></td><td>最大宽 / 最大高 100%</td></tr>
+          <tr><td><code>vw-100</code> / <code>vh-100</code></td><td>视口宽 / 高的 100%</td></tr>
+        </tbody>
+      </table>
+
+      <h2>位置与层级：position-* / top-* / start-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>position-static</code> / <code>-relative</code> / <code>-absolute</code> / <code>-fixed</code> / <code>-sticky</code></td><td>默认 / 相对 / 绝对 / 固定 / 吸顶</td></tr>
+          <tr><td><code>top-0/50/100</code>、<code>bottom-0/50/100</code>、<code>start-0/50/100</code>、<code>end-0/50/100</code></td><td>相对定位容器四边的偏移距离</td></tr>
+          <tr><td><code>translate-middle</code> / <code>-x</code> / <code>-y</code></td><td>自身平移 50%（配合 top-50 等实现精确居中）</td></tr>
+        </tbody>
+      </table>
+
+      <h2>可见性、透明度与交互</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>visible</code> / <code>invisible</code></td><td>可见 / 隐藏但仍占位（区别于 d-none）</td></tr>
+          <tr><td><code>opacity-0</code> – <code>opacity-100</code></td><td>透明度 5 档（0 / 25 / 50 / 75 / 100）</td></tr>
+          <tr><td><code>overflow-auto</code> / <code>overflow-hidden</code></td><td>溢出滚动 / 溢出裁剪（另有 <code>overflow-scroll</code> / <code>overflow-visible</code>）</td></tr>
+          <tr><td><code>user-select-all</code> / <code>-auto</code> / <code>-none</code></td><td>整段一键选 / 正常 / 禁选</td></tr>
+          <tr><td><code>pe-auto</code> / <code>pe-none</code></td><td>指针事件放行 / 穿透（禁点常用）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="practice">
+        <div class="practice-title">一句话记忆</div>
+        <p style="margin:0">
+          栅格管布局、间距管呼吸、文本管脸面、颜色管情绪；
+          方向后缀 t/b/s/e/x/y 记一次，断点前缀 sm/md/lg/xl/xxl 记一次，
+          剩下的组合拳，怕忘就来翻这一页。
+        </p>
+      </div>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

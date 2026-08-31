@@ -64,16 +64,16 @@
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
             <!-- 触发器一：button，用 data-bs-target 点名 -->
-            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#bs11-demo1" aria-expanded="false" aria-controls="bs11-demo1">
-              按钮触发
-            </button>
-
-            <!-- 触发器二：a，用 href 点名 -->
-            <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#bs11-demo1"
-               role="button" aria-expanded="false" aria-controls="bs11-demo1">
-              链接触发
-            </a>
+            <p>
+              <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#bs11-demo1" aria-expanded="false" aria-controls="bs11-demo1">
+                按钮触发
+              </button>
+              <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#bs11-demo1"
+                 role="button" aria-expanded="false" aria-controls="bs11-demo1">
+                链接触发
+              </a>
+            </p>
 
             <!-- 目标面板：collapse 类 + 对应 id -->
             <div class="collapse" id="bs11-demo1">
@@ -162,11 +162,24 @@
             <div id="collapseOne" class="accordion-collapse collapse show"
                  data-bs-parent="#accordionExample" aria-labelledby="headingOne">
               <div class="accordion-body">
-                答案一……
+                答案一：这是默认展开的那一项。
               </div>
             </div>
           </div>
-          <!-- 每个 accordion-item 都是这样一组，其他项把 show 去掉、aria-expanded 写 false -->
+          <div class="accordion-item">
+            <h4 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                问题二
+              </button>
+            </h4>
+            <div id="collapseTwo" class="accordion-collapse collapse"
+                 data-bs-parent="#accordionExample" aria-labelledby="headingTwo">
+              <div class="accordion-body">
+                答案二：这一项默认收起——去掉 show、按钮写 collapsed、aria-expanded 写 false。
+              </div>
+            </div>
+          </div>
         </div>
       </script>
 
@@ -229,7 +242,7 @@
           </div>
         </div>
         <div class="demo-source">
-          <script type="text/plain" data-lang="html" data-title="页面结构（节选第一项）">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
             <div class="accordion" id="bs11-demo3">
               <div class="accordion-item">
                 <h4 class="accordion-header" id="bs11-demo3-h1">
@@ -242,10 +255,40 @@
                      data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h1">
                   <div class="accordion-body">
                     不需要服务器端程序，浏览器拿到 HTML、CSS、JS 后直接渲染的页面。
+                    本站就是这样：零构建、零后端，拷进任何静态服务器即可运行。
                   </div>
                 </div>
               </div>
-              <!-- 其余两项结构相同：去掉 show，按钮加 collapsed、aria-expanded="false" -->
+              <div class="accordion-item">
+                <h4 class="accordion-header" id="bs11-demo3-h2">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#bs11-demo3-c2" aria-expanded="false" aria-controls="bs11-demo3-c2">
+                    为什么还要学 Bootstrap？
+                  </button>
+                </h4>
+                <div id="bs11-demo3-c2" class="accordion-collapse collapse"
+                     data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h2">
+                  <div class="accordion-body">
+                    因为栅格、组件、工具类全是现成的：别人踩过的兼容坑你不用再踩一遍，
+                    把精力留给页面本身。它也是无数存量项目的共同语言。
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h4 class="accordion-header" id="bs11-demo3-h3">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#bs11-demo3-c3" aria-expanded="false" aria-controls="bs11-demo3-c3">
+                    本站可以完全离线打开吗？
+                  </button>
+                </h4>
+                <div id="bs11-demo3-c3" class="accordion-collapse collapse"
+                     data-bs-parent="#bs11-demo3" aria-labelledby="bs11-demo3-h3">
+                  <div class="accordion-body">
+                    可以。样式、脚本、图标全部本地化，双击 HTML 文件直接打开也能完整运行。
+                    这正是本教程坚持“纯静态、零外链”的底气。
+                  </div>
+                </div>
+              </div>
             </div>
           </script>
         </div>
@@ -290,7 +333,7 @@
           </div>
         </div>
         <div class="demo-source">
-          <script type="text/plain" data-lang="html" data-title="页面结构（节选）">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
             <!-- 只需在容器上多加一个 accordion-flush -->
             <div class="card">
               <div class="accordion accordion-flush" id="bs11-demo4">
@@ -308,7 +351,20 @@
                     </div>
                   </div>
                 </div>
-                <!-- 第二项结构相同，略 -->
+                <div class="accordion-item">
+                  <h4 class="accordion-header" id="bs11-demo4-h2">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#bs11-demo4-c2" aria-expanded="false" aria-controls="bs11-demo4-c2">
+                      上月战绩
+                    </button>
+                  </h4>
+                  <div id="bs11-demo4-c2" class="accordion-collapse collapse"
+                       data-bs-parent="#bs11-demo4" aria-labelledby="bs11-demo4-h2">
+                    <div class="accordion-body">
+                      修完组件七式，写坏三个页面，收获十二个报错，全部亲手修好。
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </script>
@@ -328,7 +384,16 @@
 
         <details class="answer">
           <summary>参考答案 1</summary>
-          <script type="text/plain" data-lang="html" data-title="默认展开的面板（节选）">
+          <script type="text/plain" data-lang="html" data-title="默认展开的面板">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#bs11-demo1" aria-expanded="true" aria-controls="bs11-demo1">
+              按钮触发
+            </button>
+            <a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#bs11-demo1"
+               role="button" aria-expanded="true" aria-controls="bs11-demo1">
+              链接触发
+            </a>
+
             <div class="collapse show" id="bs11-demo1">
               <div class="card card-body">
                 《基础剑法》心要：剑走轻灵，意在剑先。

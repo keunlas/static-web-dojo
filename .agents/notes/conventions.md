@@ -68,11 +68,15 @@
 规则：
 - 源码块用 `<script type="text/plain" data-lang="html|css|js" data-title="…">`，内容不转义；
 - ⚠️ 源码内出现 `</script>` 必须写成 `<\/script>`（HTML 解析器限制，高亮器会自动还原）；
+- **源码块必须与预览逐字一致（用户明确要求）**：不要把重复结构写成“同理/结构相同/省略/复制即可”
+  或“（节选）”，也不要把外层容器、标签行（`<p class="mb-1"><strong>…</strong></p>` 这类说明行）、
+  `mb-*` 等修饰类省掉——源码里的代码粘贴出去应能 100% 还原预览。结构块（非 .demo 的教学示例）同理。
+  写完用它自查：`python3 - <<'EOF'` 对比预览与源码的标签多重集（见 progress.md 2025 轮次的脚本）。
 - 预览内交互脚本：jQuery 必须包 `$(function(){…})`（loader 排队桩保证 jQuery 就绪后放行）；
   需要 `bootstrap` 全局（tooltip/popover 手动初始化）必须包 `DOJO.ready(function(){…})`；
   纯原生 JS 的交互脚本同样可以用 `DOJO.ready` 排队（等价于“全部资源就绪后再动手”）；
 - Bootstrap 组件（dropdown/collapse/modal/tabs/toast）用 `data-bs-*` 属性自动生效，无需 JS；
-- 预览内 id 全页唯一，用章节前缀（如 `#bs08-demo1`、`#jq03-demo2`）；
+- 预览内 id 全页唯一，用章节前缀（如 `#bs08-demo1`、`#jq03-demo2`）；源码块里的 id 必须与预览一致；
 - 演示效果要在**本站皮肤下**也好看（纸墨风，见 style-guide）。
 
 ## 4. 常用样式类清单（site.css 已提供，直接用）
