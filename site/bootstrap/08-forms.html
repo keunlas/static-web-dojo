@@ -26,6 +26,7 @@
           <li>会用 select 与 checkbox/radio 写选择类控件</li>
           <li>用 input-group 给输入框加前后缀</li>
           <li>用 needs-validation 与 was-validated 做校验反馈</li>
+          <li>认识 form-floating、控件尺寸、form-control-color、form-range 与 is-valid / is-invalid</li>
         </ul>
       </div>
 
@@ -361,6 +362,155 @@
         <code>&lt;/body&gt;</code> 之前即可。
       </p>
 
+      <h2>表单补遗：浮动标签、尺寸、颜色与即时校验</h2>
+      <p>
+        表单控件还有几样好用的“配件”，一并补齐：
+      </p>
+      <table>
+        <thead>
+          <tr><th>成员</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>form-floating</code></td><td>浮动标签：label 平时“住”在输入框里，聚焦或已有内容时浮到框顶——省一行高度</td></tr>
+          <tr><td><code>form-control-sm</code> / <code>-lg</code></td><td>输入框的小号 / 大号变体（下拉框用 <code>form-select-sm</code>）</td></tr>
+          <tr><td><code>form-control-plaintext</code></td><td>只读的“纯文本”样式：像正文一样显示，去掉输入框的外观</td></tr>
+          <tr><td><code>form-control-color</code></td><td>把取色器修成标准尺寸的小方框（配 <code>&lt;input type="color"&gt;</code>）</td></tr>
+          <tr><td><code>form-range</code></td><td>滑块控件（配 <code>&lt;input type="range"&gt;</code>）</td></tr>
+          <tr><td><code>is-valid</code> / <code>is-invalid</code></td><td>手动给单个控件判“合格 / 不合格”，配合 <code>valid-feedback</code> / <code>invalid-feedback</code> 显示反馈</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="callout-title">浮动标签的结构要点</div>
+        <p style="margin:0">
+          <code>form-floating</code> 里，<strong>input 必须写在 label 前面</strong>，并且 input 上要有
+          <code>placeholder</code>（哪怕是空字符串）——浮动的动画靠它触发。顺序写反，标签就不浮了。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 配件合影：浮动标签、尺寸、取色器、滑块与即时校验</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="row g-3 mb-2">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="bs08-demo4-party" placeholder="门派">
+                  <label for="bs08-demo4-party">门派（点进来，标签会浮上去）</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <input type="color" class="form-control form-control-color" id="bs08-demo4-color" value="#b03a2e" title="挑一个颜色">
+                  <label for="bs08-demo4-color">门旗颜色</label>
+                </div>
+              </div>
+            </div>
+            <div class="row g-3 align-items-center mb-2">
+              <div class="col-md-6">
+                <input type="text" class="form-control form-control-sm" id="bs08-demo4-small" placeholder="小号输入框（form-control-sm）">
+              </div>
+              <div class="col-md-6">
+                <label for="bs08-demo4-range" class="form-label mb-1">今日修炼时长：<output id="bs08-demo4-range-out">6</output> 刻</label>
+                <input type="range" class="form-range" id="bs08-demo4-range" min="0" max="10" value="6">
+              </div>
+            </div>
+            <div class="mb-2">
+              <label for="bs08-demo4-check" class="form-label">即时校验状态（按钮手动判定）</label>
+              <input type="text" class="form-control" id="bs08-demo4-check" value="待查验">
+              <div class="valid-feedback">名帖无误。</div>
+              <div class="invalid-feedback">名帖有误，请核对。</div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-success" id="bs08-demo4-pass">判为合格</button>
+              <button type="button" class="btn btn-sm btn-danger" id="bs08-demo4-fail">判为不合格</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="bs08-demo4-clear">清除状态</button>
+            </div>
+          </div>
+          <script>
+            DOJO.ready(function () {
+              var range = document.getElementById('bs08-demo4-range');
+              var out = document.getElementById('bs08-demo4-range-out');
+              range.addEventListener('input', function () {
+                out.textContent = range.value;
+              });
+
+              var check = document.getElementById('bs08-demo4-check');
+              document.getElementById('bs08-demo4-pass').addEventListener('click', function () {
+                check.classList.remove('is-invalid');
+                check.classList.add('is-valid');
+              });
+              document.getElementById('bs08-demo4-fail').addEventListener('click', function () {
+                check.classList.remove('is-valid');
+                check.classList.add('is-invalid');
+              });
+              document.getElementById('bs08-demo4-clear').addEventListener('click', function () {
+                check.classList.remove('is-valid', 'is-invalid');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="row g-3 mb-2">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="bs08-demo4-party" placeholder="门派">
+                    <label for="bs08-demo4-party">门派（点进来，标签会浮上去）</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <input type="color" class="form-control form-control-color" id="bs08-demo4-color" value="#b03a2e" title="挑一个颜色">
+                    <label for="bs08-demo4-color">门旗颜色</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-3 align-items-center mb-2">
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" id="bs08-demo4-small" placeholder="小号输入框（form-control-sm）">
+                </div>
+                <div class="col-md-6">
+                  <label for="bs08-demo4-range" class="form-label mb-1">今日修炼时长：<output id="bs08-demo4-range-out">6</output> 刻</label>
+                  <input type="range" class="form-range" id="bs08-demo4-range" min="0" max="10" value="6">
+                </div>
+              </div>
+              <div class="mb-2">
+                <label for="bs08-demo4-check" class="form-label">即时校验状态（按钮手动判定）</label>
+                <input type="text" class="form-control" id="bs08-demo4-check" value="待查验">
+                <div class="valid-feedback">名帖无误。</div>
+                <div class="invalid-feedback">名帖有误，请核对。</div>
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-success" id="bs08-demo4-pass">判为合格</button>
+                <button type="button" class="btn btn-sm btn-danger" id="bs08-demo4-fail">判为不合格</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="bs08-demo4-clear">清除状态</button>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var range = document.getElementById('bs08-demo4-range');
+            var out = document.getElementById('bs08-demo4-range-out');
+            range.addEventListener('input', function () {
+              out.textContent = range.value;
+            });
+
+            var check = document.getElementById('bs08-demo4-check');
+            document.getElementById('bs08-demo4-pass').addEventListener('click', function () {
+              check.classList.remove('is-invalid');
+              check.classList.add('is-valid');
+            });
+            document.getElementById('bs08-demo4-fail').addEventListener('click', function () {
+              check.classList.remove('is-valid');
+              check.classList.add('is-invalid');
+            });
+            document.getElementById('bs08-demo4-clear').addEventListener('click', function () {
+              check.classList.remove('is-valid', 'is-invalid');
+            });
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第八式</div>
         <ol>
@@ -436,7 +586,8 @@
         <li><code>form-label</code> + <code>form-control</code> 是标签与输入框的标准搭档，<code>form-text</code> 放辅助说明；</li>
         <li><code>input-group</code>/<code>input-group-text</code> 拼接前后缀，<code>form-select</code> 与 <code>form-check</code> 各管各的选择控件；</li>
         <li><code>row g-3</code> + <code>col-*</code> 直接栅格化表单，移动端自动堆叠；</li>
-        <li>校验四步：<code>needs-validation</code> 挂旗、<code>required</code> 定规则、脚本加 <code>was-validated</code>、<code>novalidate</code> 统一画风。</li>
+        <li>校验四步：<code>needs-validation</code> 挂旗、<code>required</code> 定规则、脚本加 <code>was-validated</code>、<code>novalidate</code> 统一画风；</li>
+        <li>配件速览：<code>form-floating</code>（input 在前、带 placeholder）、<code>form-control-sm/lg</code>、<code>form-control-color</code>、<code>form-range</code>；<code>is-valid</code> / <code>is-invalid</code> 可单独判定某个控件。</li>
       </ul>
 
       <blockquote>下一式，我们修炼导航组件——给访客把回廊修好。</blockquote>

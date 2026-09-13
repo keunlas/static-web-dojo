@@ -26,6 +26,7 @@
           <li>掌握 active、disabled 与链接版列表</li>
           <li>给表格套上条纹、悬停等样式</li>
           <li>用 table-responsive 让宽表格在小屏幕上也能看</li>
+          <li>认识表格与列表组的一批变体类（颜色行、caption-top、numbered、horizontal 等）</li>
         </ul>
       </div>
 
@@ -102,14 +103,14 @@
                 <h6 class="mb-1">第二回 · Bootstrap 篇</h6>
                 <small>修习中</small>
               </div>
-              <p class="mb-1">十六式，从栅格到综合修炼。</p>
+              <p class="mb-1">十八式，从栅格到综合修炼。</p>
             </a>
             <a href="#" class="list-group-item list-group-item-action">
               <div class="d-flex w-100 justify-content-between">
                 <h6 class="mb-1">第三回 · jQuery 篇</h6>
                 <small class="text-body-secondary">待修习</small>
               </div>
-              <p class="mb-1">十式，轻剑快马。</p>
+              <p class="mb-1">十四式，轻剑快马。</p>
             </a>
             <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">第四回 · 藏经阁（尚未开放）</a>
           </div>
@@ -122,14 +123,14 @@
                   <h6 class="mb-1">第二回 · Bootstrap 篇</h6>
                   <small>修习中</small>
                 </div>
-                <p class="mb-1">十六式，从栅格到综合修炼。</p>
+                <p class="mb-1">十八式，从栅格到综合修炼。</p>
               </a>
               <a href="#" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                   <h6 class="mb-1">第三回 · jQuery 篇</h6>
                   <small class="text-body-secondary">待修习</small>
                 </div>
-                <p class="mb-1">十式，轻剑快马。</p>
+                <p class="mb-1">十四式，轻剑快马。</p>
               </a>
               <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">第四回 · 藏经阁（尚未开放）</a>
             </div>
@@ -245,6 +246,118 @@
         <code>table-responsive-lg</code> 等带断点的版本：桌面端照常平铺，窄屏才开滚动。
       </p>
 
+      <h2>表格与列表的变体速览</h2>
+      <p>
+        除了条纹、悬停与响应式，表格和列表组还有一批“变体类”，用不着背，认个脸熟，
+        要用时回来对号入座：
+      </p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>table-sm</code></td><td>更紧凑的行高，适合数据密集的表格</td></tr>
+          <tr><td><code>table-bordered</code> / <code>table-borderless</code></td><td>四边都加框 / 全表去掉框线</td></tr>
+          <tr><td><code>table-group-divider</code></td><td>加在 <code>tbody</code> 上，在表头与正文之间加一条粗分隔线</td></tr>
+          <tr><td><code>caption-top</code></td><td>加在 <code>table</code> 上，把 <code>caption</code> 说明移到表格上方</td></tr>
+          <tr><td><code>table-primary</code> 等八色</td><td>给那一行/单元格上色（配 <code>table-active</code> 表示“当前行”）</td></tr>
+          <tr><td><code>list-group-numbered</code></td><td>给 <code>&lt;ol&gt;</code> 版列表组加上序号</td></tr>
+          <tr><td><code>list-group-horizontal</code></td><td>列表项横排（可加断点，如 <code>list-group-horizontal-md</code>）</td></tr>
+          <tr><td><code>list-group-item-*</code> 八色</td><td>给某一项上色，用于状态提示</td></tr>
+          <tr><td><code>list-group-item-action</code></td><td>让可点击的列表项有悬停反馈</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 变体合影：彩色行、上方说明、序号与横排列表</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <table class="table table-sm caption-top mb-4">
+              <caption>本周练功记录（caption-top：说明在表格上方）</caption>
+              <thead>
+                <tr><th>日期</th><th>科目</th><th>状态</th></tr>
+              </thead>
+              <tbody class="table-group-divider">
+                <tr class="table-success">
+                  <td>周一</td>
+                  <td>站桩</td>
+                  <td>已完成</td>
+                </tr>
+                <tr class="table-warning">
+                  <td>周二</td>
+                  <td>吐纳</td>
+                  <td>补练中</td>
+                </tr>
+                <tr class="table-danger">
+                  <td>周三</td>
+                  <td>轻功</td>
+                  <td>缺课</td>
+                </tr>
+                <tr class="table-active">
+                  <td>周四</td>
+                  <td>剑法</td>
+                  <td>当前行</td>
+                </tr>
+              </tbody>
+            </table>
+            <ol class="list-group list-group-numbered mb-3">
+              <li class="list-group-item">先练基本功</li>
+              <li class="list-group-item">再串招式</li>
+              <li class="list-group-item">最后对练</li>
+            </ol>
+            <ul class="list-group list-group-horizontal mb-0">
+              <li class="list-group-item">剑</li>
+              <li class="list-group-item">刀</li>
+              <li class="list-group-item">枪</li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <table class="table table-sm caption-top mb-4">
+                <caption>本周练功记录（caption-top：说明在表格上方）</caption>
+                <thead>
+                  <tr><th>日期</th><th>科目</th><th>状态</th></tr>
+                </thead>
+                <tbody class="table-group-divider">
+                  <tr class="table-success">
+                    <td>周一</td>
+                    <td>站桩</td>
+                    <td>已完成</td>
+                  </tr>
+                  <tr class="table-warning">
+                    <td>周二</td>
+                    <td>吐纳</td>
+                    <td>补练中</td>
+                  </tr>
+                  <tr class="table-danger">
+                    <td>周三</td>
+                    <td>轻功</td>
+                    <td>缺课</td>
+                  </tr>
+                  <tr class="table-active">
+                    <td>周四</td>
+                    <td>剑法</td>
+                    <td>当前行</td>
+                  </tr>
+                </tbody>
+              </table>
+              <ol class="list-group list-group-numbered mb-3">
+                <li class="list-group-item">先练基本功</li>
+                <li class="list-group-item">再串招式</li>
+                <li class="list-group-item">最后对练</li>
+              </ol>
+              <ul class="list-group list-group-horizontal mb-0">
+                <li class="list-group-item">剑</li>
+                <li class="list-group-item">刀</li>
+                <li class="list-group-item">枪</li>
+              </ul>
+            </div>
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第七式</div>
         <ol>
@@ -304,7 +417,8 @@
         <li><code>list-group</code> + <code>list-group-item</code> 排出竖排榜单，<code>active</code>/<code>disabled</code> 标状态；</li>
         <li>链接版加 <code>list-group-item-action</code>，徽章用 <code>d-flex</code> 顶到右边；</li>
         <li><code>table</code> 定骨架，<code>striped</code>/<code>hover</code>/<code>bordered</code>/<code>sm</code> 换装帧；</li>
-        <li>宽表套 <code>table-responsive</code>，窄屏滚动、大字不折。</li>
+        <li>宽表套 <code>table-responsive</code>，窄屏滚动、大字不折；</li>
+        <li>变体速查：<code>table-sm</code> 紧凑、<code>table-group-divider</code> 粗分隔线、<code>caption-top</code> 说明上移、<code>table-*</code> 上色；列表组有 <code>list-group-numbered</code> 与 <code>list-group-horizontal</code>。</li>
       </ul>
 
       <blockquote>下一式，我们修炼表单——网页与访客对话的窗口。</blockquote>

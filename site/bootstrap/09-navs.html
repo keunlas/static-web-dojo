@@ -26,6 +26,7 @@
           <li>会写 tabs 与 pills 的页签切换（data-bs-toggle）</li>
           <li>会搭响应式导航栏（含折叠汉堡按钮）</li>
           <li>认识 sticky-top 与 breadcrumb</li>
+          <li>会用滚动监听（scrollspy）让目录跟着正文亮起</li>
         </ul>
       </div>
 
@@ -289,6 +290,108 @@
         <code>sticky-top</code> 更省心。
       </p>
 
+      <h2>滚动监听：让目录跟着正文走</h2>
+      <p>
+        长页面常配一个“本节目录”，读者滚到哪一段，目录里对应那一项就自动亮起来——
+        这个效果叫<strong>滚动监听（scrollspy）</strong>。Bootstrap 5.3 不用写一行 JS，
+        只要给<strong>滚动容器</strong>加两个数据属性：
+      </p>
+      <ul>
+        <li><code>data-bs-spy="scroll"</code>——告诉 Bootstrap“监听这个容器的滚动”；</li>
+        <li><code>data-bs-target="#目录的id"</code>——滚动到某个区块时，去这个目录里点亮对应的链接。</li>
+      </ul>
+      <p>
+        两个小前提：滚动容器需要 <code>position: relative</code>（我们已有 <code>position-relative</code> 工具类）；
+        目录里的链接用锚点指向各区块的 <code>id</code>（<strong>id 挂在整段内容上</strong>，而不是挂在小标题上，
+        否则标题滚出视野时高亮就断了）；容器再加 <code>tabindex="0"</code>，
+        键盘用户才能用方向键滚动它。下面右栏是可以滚动的正文，左栏是目录——滚一滚看：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 滚动监听：正文走到哪，目录亮到哪</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-4">
+              <nav class="nav flex-column" id="bs09-spy-nav">
+                <a class="nav-link" href="#bs09-spy-a">入门心法</a>
+                <a class="nav-link" href="#bs09-spy-b">吐纳要诀</a>
+                <a class="nav-link" href="#bs09-spy-c">剑法总纲</a>
+              </nav>
+            </div>
+            <div class="col-8">
+              <div class="border rounded p-3 position-relative overflow-auto" style="height:220px"
+                   data-bs-spy="scroll" data-bs-target="#bs09-spy-nav" tabindex="0">
+                <div id="bs09-spy-a">
+                  <h5>入门心法</h5>
+                  <p>修行第一步，先把心静下来。心不静，招式学得再快，也只是花架子。</p>
+                  <p>每日清晨静坐一刻，只做一件事：看自己的呼吸。日子久了，杂念自少。</p>
+                  <p class="mb-0">这一节讲的是“慢”，慢下来才看得见自己。</p>
+                </div>
+                <div id="bs09-spy-b" class="mt-4">
+                  <h5>吐纳要诀</h5>
+                  <p>气沉丹田，吐故纳新。吸气不必求满，呼气不必求尽，匀长为上。</p>
+                  <p>若觉头晕，即刻停下——练功是为长久，不是为逞一时之勇。</p>
+                  <p class="mb-0">这一节讲的是“稳”，呼吸稳了，手上的功夫才稳。</p>
+                </div>
+                <div id="bs09-spy-c" class="mt-4">
+                  <h5>剑法总纲</h5>
+                  <p>剑走轻灵，意在剑先。手腕松，步子活，眼睛盯住对方的肩而不是剑尖。</p>
+                  <p>三招练熟，胜似三十招半生不熟。招式贵精不贵多，这是全书最后一句话。</p>
+                  <p class="mb-0">这一节讲的是“准”——滚动到底，目录里亮起的正是这一节。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-4">
+                <nav class="nav flex-column" id="bs09-spy-nav">
+                  <a class="nav-link" href="#bs09-spy-a">入门心法</a>
+                  <a class="nav-link" href="#bs09-spy-b">吐纳要诀</a>
+                  <a class="nav-link" href="#bs09-spy-c">剑法总纲</a>
+                </nav>
+              </div>
+              <div class="col-8">
+                <div class="border rounded p-3 position-relative overflow-auto" style="height:220px"
+                     data-bs-spy="scroll" data-bs-target="#bs09-spy-nav" tabindex="0">
+                  <div id="bs09-spy-a">
+                    <h5>入门心法</h5>
+                    <p>修行第一步，先把心静下来。心不静，招式学得再快，也只是花架子。</p>
+                    <p>每日清晨静坐一刻，只做一件事：看自己的呼吸。日子久了，杂念自少。</p>
+                    <p class="mb-0">这一节讲的是“慢”，慢下来才看得见自己。</p>
+                  </div>
+                  <div id="bs09-spy-b" class="mt-4">
+                    <h5>吐纳要诀</h5>
+                    <p>气沉丹田，吐故纳新。吸气不必求满，呼气不必求尽，匀长为上。</p>
+                    <p>若觉头晕，即刻停下——练功是为长久，不是为逞一时之勇。</p>
+                    <p class="mb-0">这一节讲的是“稳”，呼吸稳了，手上的功夫才稳。</p>
+                  </div>
+                  <div id="bs09-spy-c" class="mt-4">
+                    <h5>剑法总纲</h5>
+                    <p>剑走轻灵，意在剑先。手腕松，步子活，眼睛盯住对方的肩而不是剑尖。</p>
+                    <p>三招练熟，胜似三十招半生不熟。招式贵精不贵多，这是全书最后一句话。</p>
+                    <p class="mb-0">这一节讲的是“准”——滚动到底，目录里亮起的正是这一节。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：滚动监听监听的是“滚动的那个元素”</div>
+        <p style="margin:0">
+          上面例子里滚动的是那口小方框，所以 <code>data-bs-spy</code> 写在它身上；
+          若整页正文都在滚动（目录固定在侧边），就把这两个属性写到 <code>&lt;body&gt;</code> 上，
+          并同样加上 <code>tabindex="0"</code>。记住这条规律：
+          <strong>谁滚动，就监听谁。</strong>（本站右侧的“本式目录”高亮是用自定义脚本算出来的，
+          思路与它一致，原理都是“滚动位置 → 点亮对应链接”。）
+        </p>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第九式</div>
         <ol>
@@ -392,7 +495,8 @@
         <li><code>nav</code>/<code>nav-item</code>/<code>nav-link</code> 是导航的最小骨架，<code>nav-tabs</code>/<code>nav-pills</code> 换外观；</li>
         <li>页签切换靠 <code>data-bs-toggle="tab"|"pill"</code> + <code>tab-content</code>/<code>tab-pane</code>，全程零 JS；</li>
         <li>导航栏六件套：<code>navbar-expand-*</code> 定断点、toggler 按开关、collapse 藏菜单、brand 挂牌匾；</li>
-        <li>深色用 <code>data-bs-theme="dark"</code>，吸顶用 <code>sticky-top</code>，面包屑是 <code>breadcrumb</code> 三件套。</li>
+        <li>深色用 <code>data-bs-theme="dark"</code>，吸顶用 <code>sticky-top</code>，面包屑是 <code>breadcrumb</code> 三件套；</li>
+        <li>滚动监听：给<strong>滚动容器</strong>写 <code>data-bs-spy="scroll"</code> 与 <code>data-bs-target</code>，目录锚点指向区块 id，容器补 <code>tabindex="0"</code>。</li>
       </ul>
 
       <blockquote>下一式，我们修炼浮层法术——模态框与下拉菜单。</blockquote>

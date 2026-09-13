@@ -26,6 +26,7 @@
           <li>会配 <code>data-bs-ride="carousel"</code> 自动播放与 <code>data-bs-interval</code> 播放间隔</li>
           <li><code>progress</code> 进度条：数值宽度与多段组合</li>
           <li><code>pagination</code> 分页（active / disabled）与 <code>spinner</code> 加载动画</li>
+          <li>变体补充：<code>carousel-fade</code> 淡入淡出、分页 <code>pagination-sm/lg</code>、<code>spinner-grow-sm</code></li>
         </ul>
       </div>
 
@@ -345,6 +346,130 @@
         </div>
       </div>
 
+      <h2>尺寸与样式补遗：carousel-fade 与尺寸变体</h2>
+      <p>
+        最后补三件小事。其一，轮播默认“横向推走”，加一个 <code>carousel-fade</code>
+        就变成“原地淡入淡出”；其二，分页有 <code>pagination-sm</code> / <code>pagination-lg</code>
+        两个尺寸；其三，spinner 的呼吸版也有小号 <code>spinner-grow-sm</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · carousel-fade：淡入淡出的轮播</div>
+        <div class="demo-preview">
+          <div class="carousel slide carousel-fade" id="bs12-demo6" data-bs-ride="carousel" data-bs-interval="2500" style="max-width:420px">
+            <div class="carousel-inner rounded overflow-hidden">
+              <div class="carousel-item active">
+                <div class="bg-primary text-white d-flex align-items-center justify-content-center" style="height:150px">
+                  <span class="h5 mb-0">一叶知秋</span>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bg-success text-white d-flex align-items-center justify-content-center" style="height:150px">
+                  <span class="h5 mb-0">两袖清风</span>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="bg-dark text-white d-flex align-items-center justify-content-center" style="height:150px">
+                  <span class="h5 mb-0">三更灯火</span>
+                </div>
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#bs12-demo6" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">上一页</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#bs12-demo6" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">下一页</span>
+            </button>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="carousel slide carousel-fade" id="bs12-demo6" data-bs-ride="carousel" data-bs-interval="2500" style="max-width:420px">
+              <div class="carousel-inner rounded overflow-hidden">
+                <div class="carousel-item active">
+                  <div class="bg-primary text-white d-flex align-items-center justify-content-center" style="height:150px">
+                    <span class="h5 mb-0">一叶知秋</span>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="bg-success text-white d-flex align-items-center justify-content-center" style="height:150px">
+                    <span class="h5 mb-0">两袖清风</span>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="bg-dark text-white d-flex align-items-center justify-content-center" style="height:150px">
+                    <span class="h5 mb-0">三更灯火</span>
+                  </div>
+                </div>
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#bs12-demo6" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">上一页</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#bs12-demo6" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">下一页</span>
+              </button>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 7 · 尺寸对照：分页三档 + spinner 小号呼吸球</div>
+        <div class="demo-preview" id="bs12-demo7">
+          <div class="border rounded p-3">
+            <p class="mb-1">小号 <code>pagination-sm</code>：</p>
+            <nav aria-label="小号分页">
+              <ul class="pagination pagination-sm mb-3">
+                <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo7">2</a></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo7">3</a></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo7">下一页</a></li>
+              </ul>
+            </nav>
+            <p class="mb-1">大号 <code>pagination-lg</code>：</p>
+            <nav aria-label="大号分页">
+              <ul class="pagination pagination-lg mb-0">
+                <li class="page-item active" aria-current="page"><span class="page-link">一</span></li>
+                <li class="page-item"><a class="page-link" href="#bs12-demo7">二</a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <p class="mb-1">小号 <code>pagination-sm</code>：</p>
+              <nav aria-label="小号分页">
+                <ul class="pagination pagination-sm mb-3">
+                  <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                  <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
+                  <li class="page-item"><a class="page-link" href="#bs12-demo7">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#bs12-demo7">3</a></li>
+                  <li class="page-item"><a class="page-link" href="#bs12-demo7">下一页</a></li>
+                </ul>
+              </nav>
+              <p class="mb-1">大号 <code>pagination-lg</code>：</p>
+              <nav aria-label="大号分页">
+                <ul class="pagination pagination-lg mb-0">
+                  <li class="page-item active" aria-current="page"><span class="page-link">一</span></li>
+                  <li class="page-item"><a class="page-link" href="#bs12-demo7">二</a></li>
+                </ul>
+              </nav>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        spinner 的呼吸版小号是 <code>spinner-grow-sm</code>——
+        <code>spinner-grow spinner-grow-sm</code> 一起写即可，用法与转圈版完全对称。
+      </p>
+
       <div class="practice">
         <div class="practice-title">练功 · 第十二式</div>
         <ol>
@@ -416,6 +541,7 @@
         <li><code>data-bs-ride="carousel"</code> 自动播放，<code>data-bs-interval</code> 定间隔，<code>carousel-caption</code> 配说明；</li>
         <li>进度条：<code>progress</code> 轨道 + <code>progress-bar</code> 填充，多段用 <code>progress-stacked</code>；</li>
         <li>分页 <code>active</code> / <code>disabled</code>，spinner 有 <code>spinner-border</code> 与 <code>spinner-grow</code> 两种样式。</li>
+        <li>补遗：<code>carousel-fade</code> 换淡入淡出；分页与 spinner 都有 <code>-sm</code>（分页另有 <code>-lg</code>）尺寸。</li>
       </ul>
 
       <blockquote>下一式，我们修炼提示与浮层——tooltip、popover 与 toast 三位浮空侠客，并第一次亲手 new 一个 Bootstrap 组件。</blockquote>

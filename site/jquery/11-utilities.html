@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十一式 · 工具函数 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="本式补遗 jQuery 工具函数：$.each / $.map / $.grep 数组三件套、$.extend 合并配置、$.param 生成查询串，以及 jQuery 4.0 的删与留。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-11">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        轻剑的招式练完了，剑鞘里还藏着几件小工具——不用选元素，直接对数组、对象、表单下手。
+        它们不起眼，却能把一串啰嗦的循环缩成一行。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>数组三件套：<code>$.each</code> 遍历、<code>$.map</code> 变换、<code>$.grep</code> 筛选</li>
+          <li>查找与合并：<code>$.inArray</code>、<code>$.merge</code>、<code>$.makeArray</code>、<code>$.uniqueSort</code></li>
+          <li><code>$.extend</code> 合并对象（浅合并与深合并），<code>$.isEmptyObject</code> / <code>$.isPlainObject</code> 判断</li>
+          <li><code>$.param</code> 把对象或表单数据变成查询串</li>
+          <li>认清 jQuery 4.0 的删与留：哪些没了、哪些还在（附实测结论）</li>
+        </ul>
+      </div>
+
+      <h2>数组三件套：each / map / grep</h2>
+      <p>
+        三个方法分工明确：<code>$.each(arr, fn)</code> 逐个走一遍（只管“看”）；
+        <code>$.map(arr, fn)</code> 把每个元素变换成新值，返回<strong>新数组</strong>；
+        <code>$.grep(arr, fn)</code> 按条件筛选，返回<strong>通过考验的那些元素</strong>。
+        回调都写成 <code>function (index, value)</code> 的形式——先下标、后值，和 <code>$(...).each()</code> 不同，
+        别记混。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一条数据流水线：筛选 → 变换 → 渲染</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <p class="mb-2">成绩单：<span id="jq11-raw" class="text-body-secondary"></span></p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-sm btn-primary" id="jq11-pass">只看及格（grep）</button>
+              <button type="button" class="btn btn-sm btn-primary" id="jq11-double">全部翻倍（map）</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq11-reset">还原</button>
+            </div>
+            <ul class="list-group" id="jq11-list"></ul>
+          </div>
+          <script>
+            $(function () {
+              var scores = [58, 92, 73, 45, 88];
+
+              function render(list) {
+                var $list = $('#jq11-list').empty();
+                $.each(list, function (i, n) {
+                  $list.append($('<li class="list-group-item"></li>').text('第 ' + (i + 1) + ' 位：' + n + ' 分'));
+                });
+              }
+
+              $('#jq11-raw').text('[' + scores.join(', ') + ']');
+              render(scores);
+
+              $('#jq11-pass').on('click', function () {
+                render($.grep(scores, function (n) { return n >= 60; }));
+              });
+              $('#jq11-double').on('click', function () {
+                render($.map(scores, function (n) { return n * 2; }));
+              });
+              $('#jq11-reset').on('click', function () {
+                render(scores);
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <p class="mb-2">成绩单：<span id="jq11-raw" class="text-body-secondary"></span></p>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-primary" id="jq11-pass">只看及格（grep）</button>
+                <button type="button" class="btn btn-sm btn-primary" id="jq11-double">全部翻倍（map）</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq11-reset">还原</button>
+              </div>
+              <ul class="list-group" id="jq11-list"></ul>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var scores = [58, 92, 73, 45, 88];
+
+            function render(list) {
+              var $list = $('#jq11-list').empty();
+              $.each(list, function (i, n) {
+                $list.append($('<li class="list-group-item"></li>').text('第 ' + (i + 1) + ' 位：' + n + ' 分'));
+              });
+            }
+
+            $('#jq11-raw').text('[' + scores.join(', ') + ']');
+            render(scores);
+
+            $('#jq11-pass').on('click', function () {
+              render($.grep(scores, function (n) { return n >= 60; }));
+            });
+            $('#jq11-double').on('click', function () {
+              render($.map(scores, function (n) { return n * 2; }));
+            });
+            $('#jq11-reset').on('click', function () {
+              render(scores);
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意“全部翻倍”只是<strong>渲染</strong>翻倍后的新数组，原始数据没被动过——
+        <code>$.map</code> 返回新数组，这正是函数式写法的好处：进来的数据永远安全。
+      </p>
+
+      <h2>查找、合并与转换</h2>
+      <p>
+        剩下几个小工具，各自解决一个具体问题：
+      </p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>用途</th><th>例子</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$.inArray(v, arr)</code></td><td>找值在数组中的下标，找不到返回 <code>-1</code></td><td><code>$.inArray('剑', bag)</code></td></tr>
+          <tr><td><code>$.merge(a, b)</code></td><td>把 b 并进 a（<strong>改动 a 并返回它</strong>，不是新数组）</td><td><code>$.merge([1,2],[3])</code></td></tr>
+          <tr><td><code>$.makeArray(obj)</code></td><td>把类数组（DOM 集合、arguments）转成真数组</td><td><code>$.makeArray(document.querySelectorAll('li'))</code></td></tr>
+          <tr><td><code>$.uniqueSort(arr)</code></td><td>去重并排序（主要给 DOM 元素数组用）</td><td><code>$.uniqueSort([3,1,3])</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 小工具速验：点一下看一行结果</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-inarray">$.inArray</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-merge">$.merge</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-makearray">$.makeArray</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-unique">$.uniqueSort</button>
+            </div>
+            <pre class="mb-0"><code id="jq11-log">点上面的按钮，结果显示在这里。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              function log(text) {
+                $('#jq11-log').text(text);
+              }
+              $('#jq11-inarray').on('click', function () {
+                log('$.inArray("剑", ["刀","剑","枪"]) → ' + $.inArray('剑', ['刀', '剑', '枪']));
+              });
+              $('#jq11-merge').on('click', function () {
+                var a = [1, 2];
+                var merged = $.merge(a, [3, 4]);
+                log('$.merge([1,2], [3,4]) → [' + merged.join(', ') + ']\na 也变成了 [' + a.join(', ') + ']（原地改动）');
+              });
+              $('#jq11-makearray').on('click', function () {
+                var arr = $.makeArray(document.querySelectorAll('#jq11-log'));
+                log('$.makeArray(元素集合) 是真数组吗？' + Array.isArray(arr) + '，长度 ' + arr.length);
+              });
+              $('#jq11-unique').on('click', function () {
+                var arr = $.uniqueSort([3, 1, 2, 3, 1]);
+                log('$.uniqueSort([3,1,2,3,1]) → [' + arr.join(', ') + ']');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-inarray">$.inArray</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-merge">$.merge</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-makearray">$.makeArray</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-unique">$.uniqueSort</button>
+              </div>
+              <pre class="mb-0"><code id="jq11-log">点上面的按钮，结果显示在这里。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            function log(text) {
+              $('#jq11-log').text(text);
+            }
+            $('#jq11-inarray').on('click', function () {
+              log('$.inArray("剑", ["刀","剑","枪"]) → ' + $.inArray('剑', ['刀', '剑', '枪']));
+            });
+            $('#jq11-merge').on('click', function () {
+              var a = [1, 2];
+              var merged = $.merge(a, [3, 4]);
+              log('$.merge([1,2], [3,4]) → [' + merged.join(', ') + ']\na 也变成了 [' + a.join(', ') + ']（原地改动）');
+            });
+            $('#jq11-makearray').on('click', function () {
+              var arr = $.makeArray(document.querySelectorAll('#jq11-log'));
+              log('$.makeArray(元素集合) 是真数组吗？' + Array.isArray(arr) + '，长度 ' + arr.length);
+            });
+            $('#jq11-unique').on('click', function () {
+              var arr = $.uniqueSort([3, 1, 2, 3, 1]);
+              log('$.uniqueSort([3,1,2,3,1]) → [' + arr.join(', ') + ']');
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>合并配置：$.extend</h2>
+      <p>
+        <code>$.extend(target, source)</code> 把 source 的属性复制进 target，常用于
+        “<strong>默认配置 + 用户配置</strong>”合并：用户给了就覆盖，没给就用默认值。
+        传 <code>true</code> 作为第一个参数是<strong>深合并</strong>——嵌套对象也逐层合并，
+        而不是整块覆盖。写插件、写组件时，这是最常见的一招。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 浅合并与深合并的区别</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-sm btn-primary" id="jq11-shallow">浅合并 $.extend</button>
+              <button type="button" class="btn btn-sm btn-primary" id="jq11-deep">深合并 $.extend(true, …)</button>
+            </div>
+            <pre class="mb-0"><code id="jq11-extend-log">默认配置：{theme:"light", page:{size:10, sort:"asc"}}
+用户配置：{page:{size:20}}</code></pre>
+          </div>
+          <script>
+            $(function () {
+              var defaults = { theme: 'light', page: { size: 10, sort: 'asc' } };
+
+              $('#jq11-shallow').on('click', function () {
+                var merged = $.extend({}, defaults, { page: { size: 20 } });
+                $('#jq11-extend-log').text('浅合并结果：' + JSON.stringify(merged) + '\n（page 整块被覆盖，sort 丢了）');
+              });
+              $('#jq11-deep').on('click', function () {
+                var merged = $.extend(true, {}, defaults, { page: { size: 20 } });
+                $('#jq11-extend-log').text('深合并结果：' + JSON.stringify(merged) + '\n（嵌套的 sort 保住了）');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-primary" id="jq11-shallow">浅合并 $.extend</button>
+                <button type="button" class="btn btn-sm btn-primary" id="jq11-deep">深合并 $.extend(true, …)</button>
+              </div>
+              <pre class="mb-0"><code id="jq11-extend-log">默认配置：{theme:"light", page:{size:10, sort:"asc"}}
+            用户配置：{page:{size:20}}</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var defaults = { theme: 'light', page: { size: 10, sort: 'asc' } };
+
+            $('#jq11-shallow').on('click', function () {
+              var merged = $.extend({}, defaults, { page: { size: 20 } });
+              $('#jq11-extend-log').text('浅合并结果：' + JSON.stringify(merged) + '\n（page 整块被覆盖，sort 丢了）');
+            });
+            $('#jq11-deep').on('click', function () {
+              var merged = $.extend(true, {}, defaults, { page: { size: 20 } });
+              $('#jq11-extend-log').text('深合并结果：' + JSON.stringify(merged) + '\n（嵌套的 sort 保住了）');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        顺带记两个判断函数：<code>$.isEmptyObject(obj)</code> 判空对象、
+        <code>$.isPlainObject(obj)</code> 判“是不是纯对象”（由 <code>{}</code> 或
+        <code>new Object()</code> 创建）。它们常与 <code>$.extend</code> 结伴出现。
+      </p>
+
+      <h2>表单转查询串：$.param</h2>
+      <p>
+        <code>$.param(obj)</code> 把对象变成 <code>key=value&amp;key=value</code> 形式的查询串，
+        中文与特殊字符会自动做 URL 编码。Ajax 用 GET 提交数据、拼查询参数时，它替你省去手写的麻烦。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 把小表单变成查询串</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="row g-2 mb-2">
+              <div class="col-sm-5">
+                <input type="text" class="form-control form-control-sm" id="jq11-name" value="张三" placeholder="姓名">
+              </div>
+              <div class="col-sm-4">
+                <input type="text" class="form-control form-control-sm" id="jq11-realm" value="终南山" placeholder="所在门派">
+              </div>
+              <div class="col-sm-3 d-grid">
+                <button type="button" class="btn btn-sm btn-primary" id="jq11-param">生成查询串</button>
+              </div>
+            </div>
+            <pre class="mb-0"><code id="jq11-param-log">点「生成查询串」试试。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              $('#jq11-param').on('click', function () {
+                var data = {
+                  name: $('#jq11-name').val(),
+                  realm: $('#jq11-realm').val(),
+                  page: 2
+                };
+                $('#jq11-param-log').text('$.param(data) → ' + $.param(data));
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="row g-2 mb-2">
+                <div class="col-sm-5">
+                  <input type="text" class="form-control form-control-sm" id="jq11-name" value="张三" placeholder="姓名">
+                </div>
+                <div class="col-sm-4">
+                  <input type="text" class="form-control form-control-sm" id="jq11-realm" value="终南山" placeholder="所在门派">
+                </div>
+                <div class="col-sm-3 d-grid">
+                  <button type="button" class="btn btn-sm btn-primary" id="jq11-param">生成查询串</button>
+                </div>
+              </div>
+              <pre class="mb-0"><code id="jq11-param-log">点「生成查询串」试试。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq11-param').on('click', function () {
+              var data = {
+                name: $('#jq11-name').val(),
+                realm: $('#jq11-realm').val(),
+                page: 2
+              };
+              $('#jq11-param-log').text('$.param(data) → ' + $.param(data));
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>jQuery 4.0 的删与留</h2>
+      <p>
+        工具函数这一带，是版本变迁的重灾区。网上不少老文章还在教的写法，在 jQuery 4.0.0
+        里已经不复存在——调用即报错。下表以本站携带的 jQuery 4.0.0 源码为准，全部核实过：
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>已经移除（调用即报错）</th><th>替代写法</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$.trim(s)</code></td><td><code>s.trim()</code>（原生字符串方法）</td></tr>
+          <tr><td><code>$.type(x)</code> / <code>$.isArray(x)</code> / <code>$.isFunction(x)</code></td><td><code>typeof</code> / <code>Array.isArray()</code> / <code>typeof x === 'function'</code></td></tr>
+          <tr><td><code>$.isNumeric(x)</code> / <code>$.isWindow(x)</code></td><td><code>typeof x === 'number'</code> / <code>x != null &amp;&amp; x === x.window</code></td></tr>
+          <tr><td><code>$.parseJSON(s)</code></td><td><code>JSON.parse(s)</code></td></tr>
+          <tr><td><code>$.now()</code></td><td><code>Date.now()</code></td></tr>
+          <tr><td><code>$.nodeName()</code> / <code>$.camelCase()</code></td><td>原生属性判断 / 自行处理字符串</td></tr>
+          <tr><td><code>.live()</code> / <code>.die()</code></td><td><code>on()</code> / <code>off()</code>（1.9 起就已废弃）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：还在但已“退居二线”的写法</div>
+        <p style="margin:0">
+          <code>.bind()</code> / <code>.unbind()</code> / <code>.delegate()</code> /
+          <code>.undelegate()</code> 与 <code>$.proxy()</code> 在 4.0.0 里<strong>仍然存在，也仍然能跑</strong>——
+          它们已经被“贬值”（deprecated），官方建议改用 <code>on()</code> / <code>off()</code> 与原生
+          <code>Function#bind</code>。教程从第五式起就只教新写法，正是这个原因：
+          不是它们坏了，而是新写法更好、更统一。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十一式</div>
+        <ol>
+          <li>用 <code>$.grep</code> 与 <code>$.map</code> 一行连写：先从 <code>[1, 2, 3, 4, 5, 6]</code> 中挑出偶数，再把每个数平方。</li>
+          <li>用 <code>$.extend(true, …)</code> 合并两份嵌套配置：默认 <code>{ui:{theme:'light', font:14}}</code>，用户 <code>{ui:{font:16}}</code>，预期结果是主题与字号都在。</li>
+          <li>思考题：为什么 <code>$.trim</code> 被移除了，而 <code>.bind()</code> 却还留着？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="筛选并平方">
+            var result = $.map($.grep([1, 2, 3, 4, 5, 6], function (n) {
+              return n % 2 === 0;
+            }), function (n) {
+              return n * n;
+            });
+            // result → [4, 16, 36]
+          </script>
+          <p>
+            <code>$.grep</code> 先筛出 <code>[2, 4, 6]</code>，<code>$.map</code> 再变换成
+            <code>[4, 16, 36]</code>。两个方法都返回新数组，可以放心链式连写。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="深合并嵌套配置">
+            var defaults = { ui: { theme: 'light', font: 14 } };
+            var user = { ui: { font: 16 } };
+            var config = $.extend(true, {}, defaults, user);
+            // config → { ui: { theme: 'light', font: 16 } }
+          </script>
+          <p>
+            第一个参数 <code>true</code> 是深合并开关，第二个 <code>{}</code> 是空目标对象——
+            从空对象起手，默认配置对象就不会被改写，这一点在写插件时尤其重要。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为它们的“替代品”位置不同。<code>$.trim</code> 的功能早已被
+            <code>String.prototype.trim()</code> 原生实现，浏览器普遍自带，jQuery 没有理由再背一份；
+            而 <code>.bind()</code> 这类方法的替代品 <code>on()</code> 仍是 jQuery 自己的 API，
+            老代码里用量巨大，一口气砍掉会伤及太多项目，所以官方选择<br>
+            “保留但贬值”：能跑、不推荐、未来某个大版本再谈移除。写新代码时，直接照新写法来就好。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>$.each</code> 遍历、<code>$.map</code> 变换、<code>$.grep</code> 筛选，前两者返回“原位”，后两者返回新数组；</li>
+        <li><code>$.inArray</code> 找不到返回 <code>-1</code>；<code>$.merge</code> 是原地改动，别拿它当“复制”；</li>
+        <li><code>$.extend</code> 合并配置，嵌套结构记得加 <code>true</code> 深合并并传入空对象当目标；</li>
+        <li><code>$.param</code> 生成查询串，配合 Ajax 的 GET 请求刚好；</li>
+        <li>版本事实要认准：<code>$.trim</code> 等已移除，<code>.bind()</code> 等只是贬值——查源码，别信道听途说。</li>
+      </ul>
+
+      <blockquote>下一式，我们把链式调用拆开看，并顺手学会量尺寸、定位置。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

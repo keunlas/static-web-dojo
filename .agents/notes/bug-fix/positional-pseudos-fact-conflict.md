@@ -30,7 +30,7 @@ grep -nE '"(bind|unbind|live|die|delegate|undelegate)":' reference/jquery/jquery
 # 无输出 → 这些才是真正被移除的
 ```
 
-## 修复方案（事实结论）
+## 修复方案（事实结论·第一次修正）
 
 以 `reference/jquery/jquery-4.0.0.js` 源码为准：
 
@@ -40,6 +40,18 @@ grep -nE '"(bind|unbind|live|die|delegate|undelegate)":' reference/jquery/jquery
 - **已彻底移除**：`.bind/.unbind/.live/.die/.delegate/.undelegate`、`$.trim`、
   `jQuery.proxy`（deprecated）；
 - `conventions.md` §6 已按上述修正，并注明“以下事实均以源码为准”。
+
+## 后续修正（同一文件的第二次翻案，2026-09 补记）
+
+上表中“已彻底移除”的 **`.bind/.unbind/.delegate/.undelegate` 与 `jQuery.proxy` 是错的**：
+它们在本仓库 `site/assets/vendor/jquery/jquery-4.0.0.min.js` 里**仍然存在且可正常调用**
+（只是 deprecated，内部转为 `on/off`）。错误来源与第一次同源——“grep 关键词没命中”
+（当时查的是带引号的 `"bind":` 对象键写法）就被当成“已移除”。
+无头 Chromium 实测：`$el.bind('click', fn)` 能绑定、`$.proxy(fn, ctx)` 返回绑定函数；
+而 `$.trim` / `$.type` / `$.isArray` / `$.isFunction` / `$.isNumeric` / `$.isWindow` /
+`$.parseJSON` / `$.now` / `.live` / `.die` 才是真正移除（`typeof` 为 undefined）。
+
+详细经过与预防升级见 `jquery4-removed-api-misjudgment.md`。
 
 ## 预防措施
 

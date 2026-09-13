@@ -21,9 +21,12 @@ node --check site/assets/js/highlight.js
 # b) 离线纯净 + 内部链接 + 公共 JS 禁用 API（现成脚本，一站式）
 bash tools/check-offline.sh
 python3 tools/check-links.py
+python3 tools/check-demo-parity.py   # 每个 .demo 的“源码块 = 预览”一致性
 
-# b2) check-offline.sh 的 2b 项已覆盖：公共 JS 里 jQuery 4 已移除 API
-#     （$.trim/.bind/.live/.delegate）——站点自己的 JS 也要守这条红线，
+# b2) check-offline.sh 的 2b 项已覆盖：公共 JS 里 jQuery 4 **已移除** API
+#     （$.trim/.type/.isArray/.isFunction/.isNumeric/.isWindow/.parseJSON/.now/.live/.die）。
+#     注意：.bind/.delegate/.hover/$.proxy 只是弃用、仍可调用，别写成“已移除”
+#     （事实清单与实测方法见 notes/bug-fix/jquery4-removed-api-misjudgment.md）。
 #     曾因 site.js 用 $.trim 导致全站搜索静默失效。
 
 # c) 搜索索引与图标页是否最新（新增页面后）
@@ -57,7 +60,9 @@ curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" http://127.0.0.1:8899/
 | 无 `Runtime.exceptionThrown` | 零 JS 报错 |
 
 **交互测试**：对含 jQuery 演示的页面，evaluate 中模拟点击并断言效果变化
-（如点击按钮后文本从 A 变 B）。
+（如点击按钮后文本从 A 变 B）。新写的演示（滚动、过渡、异步）**必须逐条做操作级断言**——
+只做静态标记检查会把“点了没反应”的问题放过去（滚动监听 id 挂错位置的教训见
+`notes/bug-fix/scrollspy-anchor-id-on-heading.md`）。
 
 **布局测试**：对含 TOC 的页面，在 ≥1400px 宽度下测量 `.toc` 与 `#main` 的
 `getBoundingClientRect()`，断言无重叠、`.toc a` 的 fontSize ≈ 13.6px（不是 32px）。

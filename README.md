@@ -76,7 +76,7 @@ python3 -m http.server 8000 --directory site
 ### 一键部署准备
 
 部署前（或更换资源版本后），在**仓库根目录**执行一次即可：同步 vendor 与藏经阁、
-生成图标大全 / 搜索索引 / 站点地图，并自动跑完离线纯净性与内部链接两项自检，
+生成图标大全 / 搜索索引 / 站点地图，并自动跑完离线纯净、内部链接、演示一致性三项自检，
 全部通过后 `site/` 即为最新产物，可直接上传：
 
 ```bash
@@ -87,6 +87,18 @@ bash deploy.sh --base https://你的域名/   # 不传 --base 则站点地图使
 > 不是构建系统：`site/` 本身仍然零构建、纯静态，部署的始终是 `site/` 目录。
 > 其中 `sitemap.xml` 是**部署时生成物，不入库**（已被 .gitignore 忽略）——
 > 它内含部署域名，必须在部署前用真实域名现生成。
+
+### 怎么读这座山
+
+打开 `site/index.html` 后，建议按顺序走：第一回《基础篇》画好 HTML / CSS / JS 的学习路线，
+第二回 Bootstrap 十八式打布局与组件功底，第三回 jQuery 十四式学会 DOM 交互，
+第四回藏经阁随查随用。每章都是“本式要点 → 现场演示 → 练功 → 小结”的节奏，
+演示上方的效果与下方的源码一一对应，可以直接抄改。
+
+读完之后，这个站还可以当字典用：顶栏搜索（快捷键 `/`）、
+藏经阁的[工具类速查](site/archive/reference/index.html)与
+[jQuery 方法速查](site/archive/reference-jquery/index.html)、
+图标大全、以及 Bootstrap 完整离线文档，都在站内。
 
 需要单独执行某个工具时：
 
@@ -104,6 +116,7 @@ python3 tools/gen-sitemap.py --base https://你的域名/  # 生成站点地图�
 ```bash
 bash tools/check-offline.sh   # 离线纯净性（无外网资源依赖）
 python3 tools/check-links.py  # 内部链接有效性
+python3 tools/check-demo-parity.py  # 演示的“源码块 = 预览”一致性
 ```
 
 ### 部署
@@ -145,4 +158,3 @@ server {
 
 面向 AI 代理与协作者的开发规范见根目录 `AGENTS.md` 与 `.agents/` 目录
 （架构、写作规范、文风指南、进度笔记、可复用技能）。
-

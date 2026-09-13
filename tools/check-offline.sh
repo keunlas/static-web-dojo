@@ -33,9 +33,14 @@ while IFS= read -r f; do
   fi
 done <<< "$files"
 
-echo "==> 2b) 公共 JS 禁用 API 扫描（jQuery 4 已移除 $.trim/.bind/.live/.delegate，应为空）"
+# 说明（jQuery 4.0.0 事实，经仓库内 reference/jquery 源码与浏览器实测核对）：
+#   已移除：$.trim / $.type / $.isArray / $.isFunction / $.isNumeric / $.isWindow /
+#           $.parseJSON / $.now / $.nodeName / $.camelCase / .live() / .die()
+#   仍在运行但不推荐：.bind/.unbind/.delegate/.undelegate/.hover、$.proxy
+# 本项只拦“已移除、调用即报错”的写法；弃用写法另行人工审阅（教程与站点统一用 on/off 等新写法）。
+echo "==> 2b) 公共 JS 禁用 API 扫描（jQuery 4 已移除的 API，应为空）"
 for f in "$SITE/assets/js/loader.js" "$SITE/assets/js/site.js" "$SITE/assets/js/highlight.js"; do
-  hits=$(grep -nE '\\\$\.(trim|proxy)\b|\.(bind|unbind|live|die|delegate|undelegate)\(' "$f" || true)
+  hits=$(grep -nE '\\\$\.(trim|type|isArray|isFunction|isNumeric|isWindow|parseJSON|now|nodeName|camelCase)\b|\.(live|die)\(' "$f" || true)
   if [ -n "$hits" ]; then
     FAIL=1
     echo "✘ $f"

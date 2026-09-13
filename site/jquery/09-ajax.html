@@ -26,6 +26,7 @@
           <li>会写 <code>$.get</code> / <code>$.post</code> 与 <code>$.getJSON</code>，认识 <code>done</code> / <code>fail</code> / <code>always</code></li>
           <li>会写 <code>$.ajax</code> 完整配置，知道 <code>load()</code> 一句话塞内容</li>
           <li>记住：本章需要本地服务器，以及为什么其他章节不用</li>
+          <li>会用 <code>serialize()</code> 打包表单，会写全局钩子（<code>ajaxStart</code> / <code>ajaxComplete</code>）</li>
         </ul>
       </div>
 
@@ -134,9 +135,13 @@
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
             $('#jq09-load').on('click', function () {
+              // 先把上一轮的状态行藏起来，每次点都从干净状态开始
+              $('#jq09-status').hide();
               $.getJSON('../data/notes.json')
                 .done(function (notes) {
                   // 成功：把每条笔记渲染成一个列表项
+                  $('#jq09-tip').hide();
+                  $('#jq09-notes').empty();
                   $.each(notes, function (index, note) {
                     var $li = $('<li>').addClass('list-group-item');
                     var $head = $('<strong>').text(note.title);
@@ -148,6 +153,7 @@
                 .fail(function () {
                   // 失败：多半是 file:// 双击打开——亮出提示框
                   $('#jq09-tip').show();
+                  $('#jq09-notes').empty();
                 })
                 .always(function () {
                   // 无论成败都收尾：显示状态行
@@ -216,13 +222,16 @@
               $.getJSON('../data/notes.json')
                 .done(function (notes) {
                   // 2. 成功后，用结果替换整个区域
-                  var titles = [];
-                  $.each(notes, function (index, note) { titles.push(note.title); });
-                  $area.html('<p class="mb-0"><strong>共 ' + notes.length + ' 条：</strong>' + titles.join('、') + '</p>');
+                  // 本地请求快如闪电，稍停 700 毫秒好让你看清“加载中”（真实项目里不需要）
+                  setTimeout(function () {
+                    var titles = [];
+                    $.each(notes, function (index, note) { titles.push(note.title); });
+                    $area.html('<p class="mb-0"><strong>共 ' + notes.length + ' 条：</strong>' + titles.join('、') + '</p>');
+                  }, 700);
                 })
                 .fail(function () {
                   // 3. 失败则换上一张警告
-                  $area.html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章。</div>');
+                  $area.html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章（命令见例 1 提示框）。</div>');
                 });
             });
           </script>
@@ -261,6 +270,131 @@
         是两种写法、同一件事，挑顺手的用；链式的 <code>done/fail/always</code> 更贴近 jQuery 的现代风格。
       </p>
 
+      <h2>表单与全局：serialize / getScript / 全局事件</h2>
+      <p>
+        还有几件常和 Ajax 搭伴的工具，一并认识一下：
+      </p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$form.serialize()</code></td><td>把表单里所有带 <code>name</code> 的控件拼成查询串（中文自动编码）</td></tr>
+          <tr><td><code>$form.serializeArray()</code></td><td>拼成 <code>[{name, value}, …]</code> 数组，方便自己加工</td></tr>
+          <tr><td><code>$.getScript(网址, 回调)</code></td><td>动态加载并执行一个 JS 文件（脚本需在本地或服务器上，file:// 下不可用）</td></tr>
+          <tr><td><code>$.ajaxSetup({…})</code></td><td>设置<strong>所有</strong> Ajax 请求的默认值（超时、请求头等）——全局生效，慎用</td></tr>
+          <tr><td><code>$(document).on('ajaxStart', fn)</code></td><td>挂着全局钩子：任何一个请求开始 / 结束（<code>ajaxComplete</code>）、成功（<code>ajaxSuccess</code>）、失败（<code>ajaxError</code>）都能统一处理——做“全局加载提示”正合适</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 表单序列化与全局事件</div>
+        <div class="demo-preview">
+          <form id="jq09-form" class="border rounded p-3 mb-0">
+            <div class="row g-2 mb-2">
+              <div class="col-sm-5">
+                <input type="text" class="form-control form-control-sm" name="name" value="阿青" placeholder="姓名">
+              </div>
+              <div class="col-sm-4">
+                <input type="text" class="form-control form-control-sm" name="realm" value="青城山" placeholder="所在地">
+              </div>
+              <div class="col-sm-3">
+                <div class="form-check mt-1">
+                  <input class="form-check-input" type="checkbox" name="subscribe" id="jq09-subscribe" value="yes" checked>
+                  <label class="form-check-label" for="jq09-subscribe">订阅</label>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-primary" id="jq09-serialize">serialize() 查询串</button>
+              <button type="button" class="btn btn-sm btn-primary" id="jq09-serializearray">serializeArray() 数组</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq09-getscript">getScript() 加载脚本</button>
+            </div>
+            <pre class="mb-0"><code id="jq09-form-log">点按钮试试；全局事件的动静也会记在这里。</code></pre>
+          </form>
+          <script>
+            $(function () {
+              function log(line) {
+                var $log = $('#jq09-form-log');
+                $log.text(($log.text() === '点按钮试试；全局事件的动静也会记在这里。' ? '' : $log.text() + '\n') + line);
+              }
+
+              // 全局钩子：不管哪个请求开始/结束，都记一行
+              $(document).on('ajaxStart', function () { log('[ajaxStart] 有请求出发了'); });
+              $(document).on('ajaxComplete', function () { log('[ajaxComplete] 有请求回来了'); });
+
+              $('#jq09-serialize').on('click', function () {
+                log('serialize() → ' + $('#jq09-form').serialize());
+              });
+              $('#jq09-serializearray').on('click', function () {
+                log('serializeArray() → ' + JSON.stringify($('#jq09-form').serializeArray()));
+              });
+              $('#jq09-getscript').on('click', function () {
+                $.getScript('../data/demo-greeting.js')
+                  .done(function () {
+                    log('getScript() 成功，脚本里留下的问候：' + window.DOJO_DEMO_GREETING);
+                  })
+                  .fail(function () {
+                    log('getScript() 失败：请用本地服务器打开本章（file:// 下不能加载脚本）。');
+                  });
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="jq09-form" class="border rounded p-3 mb-0">
+              <div class="row g-2 mb-2">
+                <div class="col-sm-5">
+                  <input type="text" class="form-control form-control-sm" name="name" value="阿青" placeholder="姓名">
+                </div>
+                <div class="col-sm-4">
+                  <input type="text" class="form-control form-control-sm" name="realm" value="青城山" placeholder="所在地">
+                </div>
+                <div class="col-sm-3">
+                  <div class="form-check mt-1">
+                    <input class="form-check-input" type="checkbox" name="subscribe" id="jq09-subscribe" value="yes" checked>
+                    <label class="form-check-label" for="jq09-subscribe">订阅</label>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-primary" id="jq09-serialize">serialize() 查询串</button>
+                <button type="button" class="btn btn-sm btn-primary" id="jq09-serializearray">serializeArray() 数组</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq09-getscript">getScript() 加载脚本</button>
+              </div>
+              <pre class="mb-0"><code id="jq09-form-log">点按钮试试；全局事件的动静也会记在这里。</code></pre>
+            </form>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            function log(line) {
+              var $log = $('#jq09-form-log');
+              $log.text(($log.text() === '点按钮试试；全局事件的动静也会记在这里。' ? '' : $log.text() + '\n') + line);
+            }
+
+            // 全局钩子：不管哪个请求开始/结束，都记一行
+            $(document).on('ajaxStart', function () { log('[ajaxStart] 有请求出发了'); });
+            $(document).on('ajaxComplete', function () { log('[ajaxComplete] 有请求回来了'); });
+
+            $('#jq09-serialize').on('click', function () {
+              log('serialize() → ' + $('#jq09-form').serialize());
+            });
+            $('#jq09-serializearray').on('click', function () {
+              log('serializeArray() → ' + JSON.stringify($('#jq09-form').serializeArray()));
+            });
+            $('#jq09-getscript').on('click', function () {
+              $.getScript('../data/demo-greeting.js')
+                .done(function () {
+                  log('getScript() 成功，脚本里留下的问候：' + window.DOJO_DEMO_GREETING);
+                })
+                .fail(function () {
+                  log('getScript() 失败：请用本地服务器打开本章（file:// 下不能加载脚本）。');
+                });
+            });
+          </script>
+        </div>
+      </div>
+
       <h2>load() 一句话塞进元素</h2>
       <p>
         最后是最偷懒的一招：<code>$el.load(网址)</code> 把服务器返回的 HTML <strong>直接塞进元素</strong>。
@@ -268,16 +402,21 @@
       </p>
 
       <div class="demo">
-        <div class="demo-caption">例 3 · load() 把片段直接塞进元素</div>
+        <div class="demo-caption">例 4 · load() 的两种写法：最简 与 带回调</div>
         <div class="demo-preview">
-          <button type="button" class="btn btn-primary" id="jq09-fragload">把章首语塞进下面</button>
+          <button type="button" class="btn btn-primary" id="jq09-fragload-simple">最简写法：把章首语塞进下面</button>
+          <button type="button" class="btn btn-outline-primary" id="jq09-fragload">取片段 + 回调善后</button>
           <div id="jq09-frag" class="border rounded p-3 mt-3" style="min-height:3rem;">
             <p class="text-muted mb-0">这里将出现本章自己的章首语（load 来的）。</p>
           </div>
           <script>
             $(function () {
+              // 最简写法：网址后加“空格 + 选择器”，只取返回内容里的一段
+              $('#jq09-fragload-simple').on('click', function () {
+                $('#jq09-frag').load('09-ajax.html .chapter-lead');
+              });
+              // 带回调的写法：加载完成/失败时好善后
               $('#jq09-fragload').on('click', function () {
-                // 加载本章自己的 .chapter-lead 一段（演示 load 的“选择器”写法）
                 $('#jq09-frag').load('09-ajax.html .chapter-lead', function (response, status) {
                   if (status === 'error') {
                     $('#jq09-frag').html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章（命令见例 1 提示框）。</div>');
@@ -289,22 +428,24 @@
         </div>
         <div class="demo-source">
           <script type="text/plain" data-lang="html" data-title="页面结构">
-            <button type="button" class="btn btn-primary" id="jq09-fragload">把章首语塞进下面</button>
+            <button type="button" class="btn btn-primary" id="jq09-fragload-simple">最简写法：把章首语塞进下面</button>
+            <button type="button" class="btn btn-outline-primary" id="jq09-fragload">取片段 + 回调善后</button>
             <div id="jq09-frag" class="border rounded p-3 mt-3" style="min-height:3rem;">
               <p class="text-muted mb-0">这里将出现本章自己的章首语（load 来的）。</p>
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            // load()：把服务器返回的 HTML 直接塞进元素
-            $('#jq09-frag').load('09-ajax.html .chapter-lead');
-
-            // 网址后加“空格 + 选择器”，只取返回内容里的一段；
-            // 再传一个回调，加载完成/失败时好善后：
-            $('#jq09-frag').load('09-ajax.html .chapter-lead', function (response, status) {
-              if (status === 'error') {
-                // 失败：多半是 file:// 双击打开
-                $('#jq09-frag').html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章。</div>');
-              }
+            // 最简写法：网址后加“空格 + 选择器”，只取返回内容里的一段
+            $('#jq09-fragload-simple').on('click', function () {
+              $('#jq09-frag').load('09-ajax.html .chapter-lead');
+            });
+            // 带回调的写法：加载完成/失败时好善后
+            $('#jq09-fragload').on('click', function () {
+              $('#jq09-frag').load('09-ajax.html .chapter-lead', function (response, status) {
+                if (status === 'error') {
+                  $('#jq09-frag').html('<div class="alert alert-warning mb-0">加载失败：请用本地服务器打开本章（命令见例 1 提示框）。</div>');
+                }
+              });
             });
           </script>
         </div>
@@ -312,7 +453,7 @@
 
       <p>
         <code>load</code> 适合加载现成的 HTML 片段；拿 JSON 数据还是 <code>getJSON</code> 顺手。
-        它也受本地服务器的限制——所以例 3 加载的是本章自己的一段内容，失败时同样会亮出提示。
+        它也受本地服务器的限制——所以例 4 加载的是本章自己的一段内容，失败时同样会亮出提示。
       </p>
 
       <div class="practice">
@@ -387,6 +528,8 @@
         <li>Ajax 是不刷新整页、悄悄取数据的飞鸽传书；</li>
         <li><code>$.get</code> / <code>$.post</code> / <code>$.getJSON</code> 是 <code>$.ajax</code> 的快捷招式，<code>done</code> / <code>fail</code> / <code>always</code> 处理三种结局；</li>
         <li><code>load()</code> 把 HTML 片段直接塞进元素；</li>
+        <li><code>serialize()</code> / <code>serializeArray()</code> 打包表单，<code>getScript()</code> 动态加载脚本；</li>
+        <li>全局钩子（<code>ajaxStart</code> / <code>ajaxComplete</code> / <code>ajaxError</code>…）适合统一做加载提示；</li>
         <li>本章需要本地服务器：<code>python3 -m http.server 8899 --directory site</code>，其余章节不受影响。</li>
       </ul>
 

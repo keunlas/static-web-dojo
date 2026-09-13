@@ -10,19 +10,21 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ├── 404.html                 # 迷路页（data-page="404"，未入 SECTIONS；见 §2 末段）
 ├── sitemap.xml              # 站点地图（部署时由 tools/gen-sitemap.py 生成，不入库）
 ├── basics/index.html        # 第一回 · 基础篇（MDN 引路）
-├── bootstrap/               # 第二回 · Bootstrap 篇（16 式）
-├── jquery/                  # 第三回 · jQuery 篇（10 式）
+├── bootstrap/               # 第二回 · Bootstrap 篇（18 式：正篇 16 + 补遗 2）
+├── jquery/                  # 第三回 · jQuery 篇（14 式：正篇 10 + 补遗 4）
 ├── archive/                 # 第四回 · 藏经阁（离线文档/示例集/图标大全）
 │   ├── index.html           # 藏经阁卷首（手写，入库）
 │   ├── icons/index.html     # 图标大全（tools/gen-icons-page.py 生成）
 │   ├── reference/index.html # 工具类速查（手写，入库，data-page="archive-reference"）
+│   ├── reference-jquery/index.html # jQuery 方法速查（手写，入库，data-page="archive-jquery"）
 │   ├── bootstrap-docs/      # Bootstrap 离线文档镜像（脚本生成，gitignore）
 │   └── examples/            # 官方示例集（脚本生成，gitignore）
 ├── demo/                    # 整页示例（综合修炼章配套，独立打开）
-├── data/                    # Ajax 章用的本地 JSON 数据
+├── data/                    # Ajax 章用的本地数据（notes.json、getScript 演示脚本）
 ├── playground/index.html    # 练功场（data-page="playground"，页头自写）
 └── assets/
     ├── css/site.css         # 纸墨风皮肤（全站唯一自定义样式）
+    ├── img/                 # 章节演示用本地示例图（手写 SVG，离线）
     ├── js/loader.js         # 公共资源加载器（每页 <head> 只引它一行）
     ├── js/site.js           # 全站目录数据 + 导航/TOC/页脚/搜索注入
     ├── js/highlight.js      # 迷你代码高亮器 + 复制按钮
@@ -35,7 +37,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 
 - `tools/` 一览：`sync-assets.sh`（同步 vendor/藏经阁）、`gen-icons-page.py`（图标大全）、
   `gen-search-index.py`（搜索索引）、`gen-sitemap.py`（站点地图）、`check-offline.sh`
-  （离线纯净扫描）、`check-links.py`（内部链接检查）、`page-template.html`（作者模板）。
+  （离线纯净扫描）、`check-links.py`（内部链接检查）、`check-demo-parity.py`
+  （演示源码块与预览一致性检查）、`verify-cdp.js`（双模式渲染验证）、`page-template.html`（作者模板）。
 - 仓库根目录 `deploy.sh`：**一键部署准备**——按部署顺序执行 sync-assets →
   gen-icons-page → gen-search-index → gen-sitemap（参数原样透传，如 `--base`）→
   check-offline → check-links，任一步失败即停止；它不是构建系统，`site/` 仍零构建。
@@ -86,6 +89,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
   - `archive-icons`（藏经阁·图标大全，登记时用章节条目的 `pageId` 字段指定）
   - `archive-reference`（藏经阁·工具类速查，同上；页头由 site.js 正常注入——只有
     `home`/`archive`/`playground` 三个 id 被 injectHeader 跳过）
+  - `archive-jquery`（藏经阁·jQuery 方法速查，同上，与工具类速查对称）
   - `playground`（练功场，SECTIONS 里的「附页」回：进侧边栏 + 翻页顺序；
     页面页头手写，故 injectHeader 跳过它——曾漏登记 SECTIONS 导致侧边栏无入口，已修）
   - `404`（迷路页，**未登记进 SECTIONS**：不进侧边栏与翻页顺序，`BY_ID` 查无 →
@@ -193,6 +197,9 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 习题答案用原生 `<details>` | 零 JS 依赖，任何环境可展开 |
 | 藏经阁打包离线文档（20MB） | 用户拍板：站内离线查阅优先于体积 |
 | sitemap 由生成器从 SECTIONS 派生、基址用 --base 传入 | 保住“单一数据源”铁律；域名/子目录部署不定，占位基址 + 部署前重生成 |
+| 正篇之外增设“补遗”章（Bootstrap 17/18、jQuery 11–14） | 对照前身查缺补漏：图片媒体、命名规律、工具函数、链式、插件、性能都补回教程，又不动正篇（综合修炼为第 16/10 式）的收束节奏 |
+| 藏经阁增设《jQuery 方法速查》，与《工具类速查》对称 | 让“入门之后当字典查”对两门技术都成立；方法的存在性/弃用状态以浏览器实测为准 |
+| 演示一致性交给 `tools/check-demo-parity.py` 机器校验 | 用户要求“源码块与预览逐字一致”，人工核对会漏（本轮即查出 4 处历史遗漏） |
 
 ## 8. 踩坑索引
 
@@ -212,5 +219,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | progress-stacked 宽度误写在 .progress-bar 上，各段按内容宽挤成一团 | `bug-fix/carousel-progress-stacked-width.md` |
 | 位置伪类“是否移除”代理说法冲突 | `bug-fix/positional-pseudos-fact-conflict.md` |
 | 404 页被“原地”渲染在深路径时相对引用全失效（含 loader 自身） | `bug-fix/404-deep-path-relative-links.md` |
+| 把“弃用”当“移除”：`.bind/.delegate/$.proxy` 仍在，移除清单被 grep 误判 | `bug-fix/jquery4-removed-api-misjudgment.md` |
+| 滚动监听 id 挂在小标题上，标题滑出视野后高亮全灭 | `bug-fix/scrollspy-anchor-id-on-heading.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。

@@ -80,6 +80,59 @@
         </p>
       </div>
 
+      <h2>动手第一课：你的第一个页面</h2>
+      <p>
+        看再多，不如亲手写一页。这一步不要 MDN、不要插件，只要一个文本编辑器和一个浏览器——
+        十分钟就能完成：
+      </p>
+      <ol>
+        <li>在桌面或任意位置新建一个文件夹，取名 <code>my-first-page</code>；</li>
+        <li>在文件夹里新建一个文本文件，<strong>重命名为 <code>index.html</code></strong>
+          （注意后缀必须是 <code>.html</code>，不是 <code>.txt</code>）；</li>
+        <li>用编辑器打开它，把下面这段代码原样抄进去、保存；</li>
+        <li>回到文件夹，<strong>双击 <code>index.html</code></strong>——浏览器里就出现了你的第一个网页；</li>
+        <li>把标题里那句话改掉，保存，再回浏览器按 <code>F5</code> 刷新——页面跟着变了，这就叫“所见即所得”。</li>
+      </ol>
+
+      <script type="text/plain" data-lang="html" data-title="第一个页面：index.html">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <title>我的第一个页面</title>
+        </head>
+        <body>
+          <h1>你好，江湖！</h1>
+          <p>这是我亲手写下的第一个网页。</p>
+        </body>
+        </html>
+      </script>
+
+      <div class="callout">
+        <div class="callout-title">三步心法：骨架、外衣、灵魂</div>
+        <ul style="margin:0">
+          <li><strong>HTML 是骨架</strong>——上面的 <code>h1</code>、<code>p</code> 就是标题与段落；</li>
+          <li><strong>CSS 是外衣</strong>——决定颜色、字号、间距与布局；</li>
+          <li><strong>JavaScript 是灵魂</strong>——让页面能对点击、输入做出反应。</li>
+        </ul>
+      </div>
+
+      <p>
+        再教你两个好习惯：其一，遇到好看的网页，右键选“查看网页源代码”，看看别人怎么写的——
+        这是最好的免费教材；其二，嫌新建文件麻烦时，先来本站的
+        <a href="../playground/index.html">练功场</a>——三栏编辑器，随手写、随手看效果，
+        代码还会自动存在你自己的浏览器里。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">新手常踩的三个小坑</div>
+        <ul style="margin:0">
+          <li>改了代码浏览器没变化——先确认<strong>已保存</strong>，再按 <code>F5</code> 刷新；</li>
+          <li>页面出现乱码——在 <code>&lt;head&gt;</code> 里补上 <code>&lt;meta charset="utf-8"&gt;</code>；</li>
+          <li>双击打开后是代码而不是网页——多半是后缀写成了 <code>.txt</code>，改名即可。</li>
+        </ul>
+      </div>
+
       <h2>修成标准</h2>
       <p>当你能做到下面两件事，就可以回来进入第二回了：</p>
       <ul>

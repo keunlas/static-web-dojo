@@ -26,6 +26,7 @@
           <li>理解 <code>closest</code> 与事件委托的黄金配合</li>
           <li>会用 <code>each()</code> 逐个处理选中的元素</li>
           <li>会用 <code>filter</code> / <code>first</code> / <code>last</code> / <code>eq</code> 缩小包围圈</li>
+          <li>会用 <code>not</code> / <code>is</code> / <code>has</code> 与 <code>Until</code> 系列做更聪明的问询</li>
         </ul>
       </div>
 
@@ -269,8 +270,9 @@
 
       <p>
         <code>index % 2 === 1</code> 挑出第 2、4 行（序号从 0 数，奇数序号正是视觉上的偶数行）。
-        顺带一提：老代码里常写的 <code>:even</code> / <code>:odd</code> 这类位置伪类，jQuery 4 已经移除——
-        逐个判断的 <code>each</code> 写法才是正道。
+        顺带一提：<code>:even</code> / <code>:odd</code> 这类位置伪类在 jQuery 4 里<strong>依然能用</strong>，
+        但官方更推荐用 <code>each</code> 或 <code>filter</code> 这种“看得见逻辑”的写法——
+        判断条件白纸黑字写在那儿，两年后回看也知道自己当时在想什么。
       </p>
 
       <div class="demo">
@@ -344,8 +346,149 @@
         <p style="margin:0">
           第一式就见过它：<code>$('p').css('color', 'red')</code> 会让<strong>所有</strong>段落变红。
           隐式遍历是 jQuery 的默认性格——“对选中的每个元素都动手”；而本式的遍历方法负责“换个圈子再动手”。
-          jQuery 4 已移除 <code>:first</code> / <code>:last</code> 等位置伪类，找位置一律用方法版。
+          位置伪类 <code>:first</code> / <code>:last</code> 在 jQuery 4 里仍然可用，但方法版
+          <code>.first()</code> / <code>.last()</code> 更清晰、也更快——官方推荐日常改用方法版。
         </p>
+      </div>
+
+      <h2>再认几门亲戚：not / is / has 与 Until 系列</h2>
+      <p>
+        除了“往上找、往下找、找兄弟”，jQuery 还备了几个更聪明的问法：
+        <code>not()</code> 是“排除掉某些”，<code>is()</code> 是“判断是不是”（返回 true / false，
+        <strong>不返回集合</strong>），<code>has()</code> 是“谁的子孙里有它”。
+      </p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>问法</th><th>返回</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>not(选择器 / 函数)</code></td><td>除了这些，剩下的给我</td><td>集合</td></tr>
+          <tr><td><code>is(选择器)</code></td><td>这批元素里<strong>有没有</strong>符合的？符合<strong>一个就算</strong> true</td><td><code>true</code> / <code>false</code></td></tr>
+          <tr><td><code>has(选择器)</code></td><td>谁的内部（子孙）藏着匹配元素</td><td>集合</td></tr>
+          <tr><td><code>parentsUntil()</code> / <code>nextUntil()</code> / <code>prevUntil()</code></td><td>边走边找，<strong>走到谁为止</strong>（不含终点）</td><td>集合</td></tr>
+          <tr><td><code>add()</code> / <code>addBack()</code> / <code>end()</code></td><td>把另一批元素、上一环或起点并进来一起操作</td><td>集合</td></tr>
+          <tr><td><code>contents()</code></td><td>连文本节点、注释节点也一并取出（主要在 iframe 场景用）</td><td>集合</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 问法练习：not / is / has / nextUntil</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <ul class="list-group mb-3" id="jq07-demo4">
+              <li class="list-group-item" id="jq07-n4-root">门派名册（我有一份子名单）
+                <ul class="list-group mt-2">
+                  <li class="list-group-item jq07-n4" id="jq07-a1" data-done="1">入门心法（已成）</li>
+                  <li class="list-group-item jq07-n4" id="jq07-a2">吐纳（未成）</li>
+                  <li class="list-group-item jq07-n4" id="jq07-a3">剑法（未成）</li>
+                  <li class="list-group-item jq07-n4" id="jq07-a4">轻功（未成）</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-not">not：挑没做成的</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-is">is：第一个做成了吗</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-has">has：谁的名单里有 ul</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-until">nextUntil：吐纳到剑法之间</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-addback">addBack：把起点也带上</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq07-n4-reset">擦掉标记</button>
+            </div>
+            <pre class="mb-0"><code id="jq07-n4-log">点按钮，看每次问中了哪些。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              function clearMark() {
+                $('#jq07-demo4 li').removeClass('border border-danger shadow-sm');
+              }
+              function mark($el) {
+                clearMark();
+                $el.addClass('border border-danger shadow-sm');
+              }
+              $('#jq07-not').on('click', function () {
+                mark($('#jq07-demo4 .jq07-n4').not('[data-done]'));
+                $('#jq07-n4-log').text('not([data-done]) 挑出 3 个没做成的。');
+              });
+              $('#jq07-is').on('click', function () {
+                var done = $('#jq07-demo4 .jq07-n4').first().is('[data-done]');
+                $('#jq07-n4-log').text('第一个是完成状态吗？is() 回答：' + done + '（返回布尔值，不是集合）。');
+              });
+              $('#jq07-has').on('click', function () {
+                mark($('#jq07-demo4 li').has('ul'));
+                $('#jq07-n4-log').text('has("ul") 找到 1 个：只有“门派名册”里藏着子名单。');
+              });
+              $('#jq07-until').on('click', function () {
+                mark($('#jq07-a2').nextUntil('#jq07-a4'));
+                $('#jq07-n4-log').text('nextUntil("#jq07-a4") 从吐纳之后走到轻功之前，命中剑法一个（不含终点）。');
+              });
+              $('#jq07-addback').on('click', function () {
+                mark($('#jq07-a2').nextUntil('#jq07-a4').addBack());
+                $('#jq07-n4-log').text('addBack() 把起点“吐纳”也加回来，现在是两个。');
+              });
+              $('#jq07-n4-reset').on('click', function () {
+                clearMark();
+                $('#jq07-n4-log').text('标记已擦掉。');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <ul class="list-group mb-3" id="jq07-demo4">
+                <li class="list-group-item" id="jq07-n4-root">门派名册（我有一份子名单）
+                  <ul class="list-group mt-2">
+                    <li class="list-group-item jq07-n4" id="jq07-a1" data-done="1">入门心法（已成）</li>
+                    <li class="list-group-item jq07-n4" id="jq07-a2">吐纳（未成）</li>
+                    <li class="list-group-item jq07-n4" id="jq07-a3">剑法（未成）</li>
+                    <li class="list-group-item jq07-n4" id="jq07-a4">轻功（未成）</li>
+                  </ul>
+                </li>
+              </ul>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-not">not：挑没做成的</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-is">is：第一个做成了吗</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-has">has：谁的名单里有 ul</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-until">nextUntil：吐纳到剑法之间</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq07-addback">addBack：把起点也带上</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq07-n4-reset">擦掉标记</button>
+              </div>
+              <pre class="mb-0"><code id="jq07-n4-log">点按钮，看每次问中了哪些。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            function clearMark() {
+              $('#jq07-demo4 li').removeClass('border border-danger shadow-sm');
+            }
+            function mark($el) {
+              clearMark();
+              $el.addClass('border border-danger shadow-sm');
+            }
+            $('#jq07-not').on('click', function () {
+              mark($('#jq07-demo4 .jq07-n4').not('[data-done]'));
+              $('#jq07-n4-log').text('not([data-done]) 挑出 3 个没做成的。');
+            });
+            $('#jq07-is').on('click', function () {
+              var done = $('#jq07-demo4 .jq07-n4').first().is('[data-done]');
+              $('#jq07-n4-log').text('第一个是完成状态吗？is() 回答：' + done + '（返回布尔值，不是集合）。');
+            });
+            $('#jq07-has').on('click', function () {
+              mark($('#jq07-demo4 li').has('ul'));
+              $('#jq07-n4-log').text('has("ul") 找到 1 个：只有“门派名册”里藏着子名单。');
+            });
+            $('#jq07-until').on('click', function () {
+              mark($('#jq07-a2').nextUntil('#jq07-a4'));
+              $('#jq07-n4-log').text('nextUntil("#jq07-a4") 从吐纳之后走到轻功之前，命中剑法一个（不含终点）。');
+            });
+            $('#jq07-addback').on('click', function () {
+              mark($('#jq07-a2').nextUntil('#jq07-a4').addBack());
+              $('#jq07-n4-log').text('addBack() 把起点“吐纳”也加回来，现在是两个。');
+            });
+            $('#jq07-n4-reset').on('click', function () {
+              clearMark();
+              $('#jq07-n4-log').text('标记已擦掉。');
+            });
+          </script>
+        </div>
       </div>
 
       <div class="practice">
@@ -400,7 +543,9 @@
         <li>元素是一棵树：<code>parent</code> / <code>parents</code> / <code>children</code> / <code>find</code> 上下认亲，<code>siblings</code> / <code>next</code> / <code>prev</code> 同级走动；</li>
         <li><code>closest</code> 从自己向上找最近匹配，是事件委托的黄金搭档；</li>
         <li><code>each(function (index, element))</code> 逐个点名，<code>index</code> 从 0 起，<code>element</code> 就是 <code>this</code>；</li>
-        <li><code>filter</code> / <code>first</code> / <code>last</code> / <code>eq</code> 缩小包围圈；隐式遍历是“对每个选中元素都动手”的默认行为。</li>
+        <li><code>filter</code> / <code>first</code> / <code>last</code> / <code>eq</code> 缩小包围圈；隐式遍历是“对每个选中元素都动手”的默认行为；</li>
+        <li><code>not</code> 排除、<code>is</code> 判断（返回布尔值）、<code>has</code> 找“子孙里有的”；<code>nextUntil</code> / <code>prevUntil</code> / <code>parentsUntil</code> 走到谁为止（不含终点）；</li>
+        <li><code>addBack()</code> 把起点或上一环并回来，<code>add()</code> 并入另一批元素。</li>
       </ul>
 
       <blockquote>下一式，我们搭积木——节点的增删改。</blockquote>

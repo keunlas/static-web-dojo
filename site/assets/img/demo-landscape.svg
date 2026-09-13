@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="修行主题示例图">
+  <rect width="800" height="600" fill="#f4edde"/>
+  <circle cx="612" cy="148" r="74" fill="#b03a2e" opacity="0.9"/>
+  <path d="M0 430 L210 246 L330 366 L470 210 L640 430 L800 300 L800 600 L0 600 Z" fill="#2b2a26" opacity="0.82"/>
+  <path d="M0 500 L180 402 L340 486 L520 372 L700 470 L800 420 L800 600 L0 600 Z" fill="#6f6a5e" opacity="0.55"/>
+  <text x="48" y="96" font-family="Georgia, 'Songti SC', SimSun, serif" font-size="56" fill="#2b2a26">山不让尘</text>
+  <text x="50" y="150" font-family="Georgia, 'Songti SC', SimSun, serif" font-size="28" fill="#6f6a5e">demo-landscape · 800 × 600</text>
+</svg>

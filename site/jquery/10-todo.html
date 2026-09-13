@@ -15,7 +15,7 @@
     <main id="main">
 
       <p class="chapter-lead">
-        十式剑诀学到最后一式，规矩不是再学新招，而是把学过的招式连成一套。
+        正篇十式学到最后一式，规矩不是再学新招，而是把学过的招式连成一套。
         本式就用 jQuery 配上 Bootstrap，从零手写一个待办清单——它小到一口气能读完，
         却把本回大半的心法全用上了：选择器、事件、增删改、类切换，外加一位新朋友 localStorage。
         写完你会发现：江湖上多数页面，翻来覆去不过这几招。
@@ -350,12 +350,43 @@
                 $('#jq10-d4-list li.done').length === 0);
             }
 
+            function add() {
+              var text = $('#jq10-d4-input').val().trim();
+              if (!text) {                                                    // 空值拦截
+                $('#jq10-d4-input').addClass('is-invalid').trigger('focus');
+                return;
+              }
+              $('#jq10-d4-input').removeClass('is-invalid');
+              $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
+                .append($('<span>').text(text))
+                .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }))
+                .appendTo('#jq10-d4-list');
+              $('#jq10-d4-input').val('').trigger('focus');
+              updateStats();                                                  // 添加之后更新统计
+            }
+
+            $('#jq10-d4-add').on('click', add);
+            $('#jq10-d4-input').on('keydown', function (e) {
+              if (e.key === 'Enter') add();
+            });
+
+            $('#jq10-d4-list').on('click', 'li', function (e) {
+              if ($(e.target).closest('.btn-del').length) return;              // 点的是 ✕，让路
+              $(this).toggleClass('done text-decoration-line-through text-muted');
+              updateStats();                                                   // 切换之后更新统计
+            });
+
+            $('#jq10-d4-list').on('click', '.btn-del', function () {
+              $(this).closest('li').remove();
+              updateStats();                                                   // 删除之后更新统计
+            });
+
             $('#jq10-d4-clear').on('click', function () {
               $('#jq10-d4-list li.done').remove();   // 选中已完成的，全部删掉
               updateStats();
             });
 
-            // 添加、切换、删除的绑定与例 3 相同，只需在各自回调末尾补一句 updateStats();
+            updateStats();                             // 页面打开先算一次，初始数字才准确
           </script>
         </div>
       </div>
@@ -642,7 +673,7 @@
         <li><code>localStorage</code> + <code>JSON</code> 让数据跨刷新存活，离线照常。</li>
       </ul>
 
-      <blockquote>第三回的十式至此全部修完。剑已佩妥，出门便是江湖——下一个待办：写你自己的页面。</blockquote>
+      <blockquote>第三回的正篇十式至此修完。剑已佩妥，出门便是江湖——接下来的第十一至十四式是四招补遗（工具函数、链式与尺寸、插件、性能心法），得空回来练；下一个待办：写你自己的页面。</blockquote>
 
       <p>
         本章完整成品已单独成页，双击打开就能用：

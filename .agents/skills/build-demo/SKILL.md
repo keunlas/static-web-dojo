@@ -88,9 +88,15 @@ description: 在章节里制作“现场演示”区块——上为可运行效�
 | 演示/答案里用 h2/h3（如官方 `accordion-header`） | 污染右侧“本式目录” | 演示内部标题用 h4/h5；site.js 已排除 .demo/.practice/details.answer 内的标题（双保险） |
 | 下拉菜单用 `<a href="#">` | 点击后页面跳到顶部 | 用 `<button class="dropdown-item">`；分页等占位链接用假锚点 `#demo4-p1` 并在正文说明 |
 | 节选源码与预览不一致引发困惑 | 读者对不上 | 节选块在 data-title 里标“（节选）/（只列与例 N 不同的部分）”，正文说明对应关系 |
+| 滚动监听（scrollspy）的 id 挂在小标题上 | 滚到底时高亮全灭（标题已滑出观察区） | id 挂**整节容器**（div），容器 `position-relative overflow-auto tabindex="0"`，演示后跑 CDP 断言 |
+| 写完演示没做机器核对 | “源码能还原预览”这条红线靠肉眼记不住 | 收尾必跑 `python3 tools/check-demo-parity.py`（本轮靠它查出 4 处历史遗漏） |
 
 **版本事实备忘（5.3.8）**：组合进度条推荐 `.progress-stacked` 包裹多条 `.progress`；
 collapse 多目标共享触发用共享 class（data API 走 `getMultipleElementsFromSelector`）。
+
+**版本事实备忘（jQuery 4.0.0）**：`.bind/.unbind/.delegate/.undelegate/.hover` 与 `$.proxy`
+只是**弃用**、仍可调用；`$.trim/.type/.isArray/.isFunction/.isNumeric/.isWindow/.parseJSON/.now/.live/.die`
+才是**已移除**——写 API 类演示前后各实测一次（见 `notes/bug-fix/jquery4-removed-api-misjudgment.md`）。
 
 ## 自查
 

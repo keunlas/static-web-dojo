@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jQuery 方法速查 | 藏经阁 · 纯静态网页的修行</title>
+<meta name="description" content="jQuery 4.0.0 常用方法速查：选择器、遍历、内容属性、类样式、节点操作、事件、效果、Ajax 与工具函数，每行一句话说明并注明学在哪一式。">
+<script src="../../assets/js/loader.js"></script>
+</head>
+<body data-page="archive-jquery">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        轻剑招式繁多，记不全很正常。这一页把 jQuery 的常用方法与选择器按类别摊开——
+        每行一句话说明，附“学在哪一式”的指路牌。翻到即用，离线可查。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">使用说明</div>
+        <ul style="margin:0">
+          <li>本页以本站携带的 <strong>jQuery 4.0.0</strong> 为准，收编的方法均经实测；
+            “第 X 式”指第三回 jQuery 篇的章节；</li>
+          <li>写法约定：实例方法写作 <code>$el.方法()</code>，静态工具写作 <code>$.方法()</code>；</li>
+          <li>被移除的老方法、仍在但已弃用的方法单独列在页面末尾——“不能用”与“不推荐”是两回事。</li>
+        </ul>
+      </div>
+
+      <h2>选择器</h2>
+      <table>
+        <thead>
+          <tr><th>写法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$('#id')</code> / <code>$('.class')</code> / <code>$('tag')</code> / <code>$('*')</code></td><td>基本四式：按 id / 类 / 标签 / 全部</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+          <tr><td><code>$('div.card')</code> / <code>$('#a .b')</code> / <code>$('#a &gt; .b')</code> / <code>$('h2, h3')</code></td><td>组合：交集、后代、子代、逗号并集</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+          <tr><td><code>$('[type="text"]')</code> / <code>$('[href^="https"]')</code> / <code>$('[data-x]')</code></td><td>属性：等于 / 前缀 ^= / 后缀 $= / 包含 *= / 存在</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+          <tr><td><code>:first</code> <code>:last</code> <code>:even</code> <code>:odd</code> <code>:eq(n)</code> <code>:lt(n)</code> <code>:gt(n)</code> <code>:nth(n)</code></td><td>位置伪类（jQuery 扩展，4.0 中仍可用；日常推荐方法版 <code>.first()/.eq()</code>）</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+          <tr><td><code>:input</code> <code>:text</code> <code>:password</code> <code>:checkbox</code> <code>:radio</code> <code>:submit</code> <code>:file</code></td><td>表单：按控件类型点名</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+          <tr><td><code>:checked</code> <code>:selected</code> <code>:disabled</code> <code>:enabled</code></td><td>表单状态：勾选 / 下拉选中 / 禁用 / 可用（实时状态，现查现用）</td><td><a href="../../jquery/02-selectors.html">第二式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>筛选与遍历</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.filter(选择器/函数)</code></td><td>从当前集合里筛出符合条件的</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.first()</code> / <code>.last()</code> / <code>.eq(n)</code> / <code>.slice(a, b)</code></td><td>按位置取：第一个 / 最后一个 / 第 n 个（0 起）/ 区间</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.not(选择器/函数)</code> / <code>.is(选择器)</code> / <code>.has(选择器)</code></td><td>排除 / 判断（返回布尔）/ 谁的子孙里有</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.parent()</code> / <code>.parents()</code> / <code>.parentsUntil(选择器)</code> / <code>.closest(选择器)</code></td><td>父亲 / 全部祖先 / 一路向上直到谁之前 / 最近的匹配（含自己）</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.children()</code> / <code>.find(选择器)</code></td><td>直接子元素 / 全部后代</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.siblings()</code> / <code>.next()</code> / <code>.prev()</code></td><td>同级全部 / 后一个 / 前一个</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.nextAll()</code> / <code>.prevAll()</code> / <code>.nextUntil(选择器)</code> / <code>.prevUntil(选择器)</code></td><td>后面全部 / 前面全部 / 走到谁为止（不含终点）</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.each(函数)</code></td><td>逐个处理，回调 <code>(index, element)</code>，<code>this</code> 是当前元素</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.map(函数)</code> / <code>.get(n)</code> / <code>.toArray()</code> / <code>.index()</code></td><td>映射成新集合 / 取原生元素 / 转数组 / 取序号</td><td><a href="../../jquery/07-traversing.html">第七式</a></td></tr>
+          <tr><td><code>.add(选择器)</code> / <code>.addBack()</code> / <code>.end()</code> / <code>.contents()</code></td><td>并入另一批 / 找回上一环 / 退回上一步 / 连文本节点一起取</td><td><a href="../../jquery/07-traversing.html">第七式</a>、<a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>内容、属性与数据</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.text(值)</code> / <code>.html(值)</code></td><td>读写文本（安全）/ 读写 HTML（传入用户输入要当心）</td><td><a href="../../jquery/03-content-attr.html">第三式</a></td></tr>
+          <tr><td><code>.val(值)</code></td><td>读写表单控件的值（input / select / textarea）</td><td><a href="../../jquery/03-content-attr.html">第三式</a></td></tr>
+          <tr><td><code>.attr(名, 值)</code> / <code>.removeAttr(名)</code></td><td>读写 HTML 属性（href、title、data-*…）</td><td><a href="../../jquery/03-content-attr.html">第三式</a></td></tr>
+          <tr><td><code>.prop(名, 值)</code> / <code>.removeProp(名)</code></td><td>读写“状态属性”（checked、disabled、selected）</td><td><a href="../../jquery/03-content-attr.html">第三式</a></td></tr>
+          <tr><td><code>.data(名, 值)</code> / <code>.removeData(名)</code></td><td>在元素上挂运行时数据（任意 JS 值，不写入 HTML）</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>.css(属性, 值)</code></td><td>读写行内样式；读回的是计算后的像素值</td><td><a href="../../jquery/04-class-style.html">第四式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>类、尺寸与位置</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.addClass()</code> / <code>.removeClass()</code> / <code>.toggleClass()</code> / <code>.hasClass()</code></td><td>加 / 去 / 切换 / 判断类名，样式交给 CSS</td><td><a href="../../jquery/04-class-style.html">第四式</a></td></tr>
+          <tr><td><code>.width()</code> / <code>.height()</code></td><td>内容区宽高（传值即设置）</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>.innerWidth()</code> / <code>.innerHeight()</code></td><td>内容区 + 内边距</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>.outerWidth([true])</code> / <code>.outerHeight([true])</code></td><td>加边框；传 <code>true</code> 再加外边距</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>.offset()</code> / <code>.position()</code></td><td>相对文档 / 相对最近定位祖先的位置，返回 <code>{top, left}</code></td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>.scrollTop([值])</code> / <code>.scrollLeft([值])</code></td><td>读写滚动位置；<code>.scrollTop(0)</code> 即回到顶部</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>节点操作</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$('&lt;li&gt;')</code></td><td>凭空造节点，再用 <code>.text()</code> / <code>.addClass()</code> 妆点</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.append()</code> / <code>.prepend()</code></td><td>插进子级末尾 / 开头</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.after()</code> / <code>.before()</code></td><td>插到同级之后 / 之前</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.appendTo()</code> / <code>.prependTo()</code> / <code>.insertAfter()</code> / <code>.insertBefore()</code></td><td>反向写法：主语宾语互换，效果相同</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.remove()</code> / <code>.empty()</code> / <code>.detach()</code></td><td>连事件删除 / 只清内容 / 摘下来留着事件</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.clone([true])</code></td><td>复制节点；<code>true</code> 连事件一起复制</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.wrap()</code> / <code>.wrapAll()</code> / <code>.wrapInner()</code> / <code>.unwrap()</code></td><td>各自包 / 合起来包 / 包内容 / 拆父级</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+          <tr><td><code>.replaceWith()</code> / <code>.replaceAll()</code></td><td>整段替换（正写 / 反写）</td><td><a href="../../jquery/08-manipulation.html">第八式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>事件</h2>
+      <table>
+        <thead>
+          <tr><th>写法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.on('click', 函数)</code> / <code>.off('click')</code></td><td>绑定 / 解绑（事件名的统一入口）</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>.on('click', '选择器', 函数)</code></td><td>事件委托：动态元素一出生就响应</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>.one('click', 函数)</code></td><td>只响应一次，之后自动解绑</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>.trigger('事件名')</code> / <code>.triggerHandler('事件名')</code></td><td>主动触发（含默认行为）/ 只跑处理函数</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>.hover(进入, 离开)</code></td><td><code>mouseenter</code> + <code>mouseleave</code> 的快捷写法</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>$(function () {…})</code></td><td>文档就绪后执行（<code>$(document).ready</code> 的简写）</td><td><a href="../../jquery/01-intro.html">第一式</a></td></tr>
+          <tr><td>事件名（部分）</td><td><code>click</code> <code>dblclick</code> <code>mouseenter</code> <code>mouseleave</code> <code>mousemove</code> <code>keydown</code> <code>keyup</code> <code>submit</code> <code>change</code> <code>input</code> <code>focus</code> <code>blur</code> <code>scroll</code> <code>resize</code></td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td>事件对象</td><td><code>e.preventDefault()</code> 拦默认行为、<code>e.stopPropagation()</code> 截冒泡、<code>e.stopImmediatePropagation()</code> 连同级后续处理函数一并拦下、<code>e.target</code> 事件源头</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>效果与动画</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>.hide()</code> / <code>.show()</code> / <code>.toggle()</code></td><td>显隐三件套；带速度参数即成动画</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+          <tr><td><code>.fadeIn()</code> / <code>.fadeOut()</code> / <code>.fadeToggle()</code> / <code>.fadeTo(时长, 透明度)</code></td><td>淡入 / 淡出 / 切换 / 淡到指定透明度</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+          <tr><td><code>.slideUp()</code> / <code>.slideDown()</code> / <code>.slideToggle()</code></td><td>滑动收起 / 展开 / 切换</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+          <tr><td><code>.animate(属性, 时长[, 回调])</code></td><td>自定义数值动画，支持 <code>'show'/'hide'/'toggle'</code> 特殊值</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+          <tr><td><code>.stop([清队列][, 跳到终点])</code></td><td>急停：当前 / 连队列一起停</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+          <tr><td><code>.delay(毫秒)</code> / <code>.queue()</code> / <code>.clearQueue()</code> / <code>.finish()</code></td><td>排队等待 / 查看队列 / 清空队列 / 全部跑到终点</td><td><a href="../../jquery/06-effects.html">第六式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Ajax</h2>
+      <p class="text-body-secondary">注意：Ajax 需要通过 http(s) 打开页面；<code>file://</code> 双击时本章演示会走失败分支（章节内有说明）。</p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$.get(url, 回调)</code> / <code>$.post(url, 数据, 回调)</code></td><td>GET 取 / POST 交</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$.getJSON(url)</code></td><td>取 JSON 并自动解析</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$.ajax({…})</code></td><td>完整配置：url / method / dataType / success / error / timeout…</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>.done()</code> / <code>.fail()</code> / <code>.always()</code></td><td>成功 / 失败 / 无论成败（链式三结局）</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$el.load(url [选择器])</code></td><td>把返回的 HTML（或其中一段）直接塞进元素</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$.getScript(url)</code></td><td>动态加载并执行一个 JS 文件</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$.ajaxSetup({…})</code></td><td>设置全局默认值（超时、请求头等），全局生效、慎用</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>$form.serialize()</code> / <code>$form.serializeArray()</code></td><td>把带 <code>name</code> 的控件打包成查询串 / 数组</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+          <tr><td><code>ajaxStart</code> / <code>ajaxSend</code> / <code>ajaxSuccess</code> / <code>ajaxError</code> / <code>ajaxComplete</code> / <code>ajaxStop</code></td><td>全局钩子：任何一个请求的生命周期都能统一处理（做加载提示正合适）</td><td><a href="../../jquery/09-ajax.html">第九式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>工具函数（$.*）</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$.each(obj, fn)</code></td><td>遍历数组或对象，回调 <code>(index, value)</code></td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.map(arr, fn)</code> / <code>$.grep(arr, fn)</code></td><td>映射成新数组 / 按条件筛选（都返回新数组）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.inArray(v, arr)</code></td><td>找下标，找不到返回 <code>-1</code></td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.merge(a, b)</code> / <code>$.makeArray(obj)</code> / <code>$.uniqueSort(arr)</code></td><td>合并（原地）/ 类数组转真数组 / 去重排序</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.extend([true,] 目标, 源…)</code></td><td>合并对象；第一个参数传 <code>true</code> 为深合并（插件默认选项就靠它）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.isEmptyObject(obj)</code> / <code>$.isPlainObject(obj)</code></td><td>判空对象 / 判纯对象</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.param(obj)</code></td><td>对象转查询串（自动 URL 编码）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.parseHTML()</code> / <code>$.parseXML()</code></td><td>把字符串解析成 DOM 节点数组 / XML 文档</td><td>—</td></tr>
+          <tr><td><code>$.contains(a, b)</code> / <code>$.escapeSelector(s)</code></td><td>判断包含关系 / 转义特殊字符的选择器</td><td>—</td></tr>
+          <tr><td><code>$.noConflict()</code></td><td>把 <code>$</code> 让还给别的库（页面同时用多个库时才需要）</td><td>—</td></tr>
+          <tr><td><code>$.fn.extend({…})</code></td><td>往 jQuery 原型上挂自定义插件方法</td><td><a href="../../jquery/13-plugins.html">第十三式</a></td></tr>
+          <tr><td><code>$.extend({…})</code></td><td>扩展全局工具函数（<code>$.你的工具()</code>）</td><td><a href="../../jquery/13-plugins.html">第十三式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>链式调用与集合</h2>
+      <table>
+        <thead>
+          <tr><th>写法</th><th>说明</th><th class="text-nowrap" style="width:5.5rem">学在哪</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$el.addClass('a').text('b').show()</code></td><td>大多数方法返回自身，可一路点下去</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>$el.find('p').addClass('x').end().addClass('y')</code></td><td><code>.end()</code> 退回上一环，接着操作原集合</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>$el.find('.item').addBack()</code></td><td>把上一环（或起点）并回来一起操作</td><td><a href="../../jquery/12-chaining.html">第十二式</a></td></tr>
+          <tr><td><code>$el.length</code> / <code>$el[i]</code> / <code>$el.get(i)</code></td><td>集合大小 / 取第 i 个原生元素</td><td><a href="../../jquery/01-intro.html">第一式</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>jQuery 4.0 的移除与弃用清单</h2>
+      <p>这一节请务必看清——它区分了“已经不存在”和“还在但不推荐”两件事：</p>
+      <table>
+        <thead>
+          <tr><th>状态</th><th>成员</th><th style="width:5.5rem">替代写法</th></tr>
+        </thead>
+        <tbody>
+          <tr><td rowspan="2"><strong>已移除</strong>（调用即报错）</td>
+            <td><code>$.trim()</code>、<code>$.parseJSON()</code>、<code>$.now()</code></td>
+            <td><code>s.trim()</code>、<code>JSON.parse()</code>、<code>Date.now()</code></td></tr>
+          <tr><td><code>$.type()</code>、<code>$.isArray()</code>、<code>$.isFunction()</code>、<code>$.isNumeric()</code>、<code>$.isWindow()</code>、<code>$.nodeName()</code>、<code>$.camelCase()</code>、<code>.live()</code>、<code>.die()</code></td>
+            <td><code>typeof</code> / <code>Array.isArray()</code> / 原生判断；事件用 <code>on()</code> / <code>off()</code></td></tr>
+          <tr><td><strong>仍在、已弃用</strong></td>
+            <td><code>.bind()</code>、<code>.unbind()</code>、<code>.delegate()</code>、<code>.undelegate()</code>、<code>$.proxy()</code></td>
+            <td><code>on()</code> / <code>off()</code>、原生 <code>Function#bind</code>——功能还能用，但写新代码就用新写法</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法：版本事实以源码与实测为准</div>
+        <p style="margin:0">
+          网上不少文章把“弃用”说成“移除”，也有的把“仍然可用”写成“早就没了”。
+          本站本页的结论全部对照仓库内 <code>reference/jquery/jquery-4.0.0.js</code> 源码并在浏览器中实测过——
+          遇到分歧，认源码，别认传闻。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">一句话记忆</div>
+        <p style="margin:0">
+          选择器找对象，遍历换圈子，text / html / val 管内容，attr / prop / data 管属性与数据；
+          on / off 管事件，fade / slide / animate 管动画，$el.load / $.get / $.getJSON 管取数，
+          $.* 是工具箱。链子断了找 <code>.end()</code>，忘了怎么写——回这一页。
+        </p>
+      </div>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

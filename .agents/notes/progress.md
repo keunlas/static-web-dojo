@@ -3,7 +3,57 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：sitemap.xml 改为不入库）
+## 当前状态（全站完成 ✅ · 最后更新：对照前身查缺补漏 + 入门审查 + 字典强化）
+
+### 🆕 最新一轮（对照前身查缺补漏 · 新人入门审查 · 字典化）
+
+用户把项目前身 `static-webpage-tutorial`（29 节 Bootstrap + 12 节 jQuery 的 API 手册式教程）
+放进仓库 `tmp/`，要求：①对照前身查缺补漏；②重新审查整站，确保新人能入门；
+③入门之后能当字典查。本轮交付：
+
+- **差距盘点（逐节 + 逐类名/逐方法比对，非凭印象）**：Bootstrap 缺图片媒体、滚动监听、
+  类名命名规律与一批组件/工具类变体；jQuery 缺表单选择器、遍历/操作/效果/事件/Ajax 的
+  一批方法，以及工具函数、链式与尺寸、插件、性能四块整章。
+- **新增 Bootstrap 两式（补遗）**：**第十七式《图片与媒体》**（img-fluid / img-thumbnail /
+  figure / ratio / object-fit，示例图是站内手写 SVG `site/assets/img/`，零外链）、
+  **第十八式《类名命名规律》**（公式、方向与断点暗号、八系速览、三条查名路）。
+  正篇仍是 16 式（综合修炼为第 16 式），补遗排在正篇之后，避免打断原有收束节奏。
+- **新增 jQuery 四式（补遗）**：**第十一式《工具函数》**（$.each/map/grep/inArray/merge/
+  makeArray/extend/param/uniqueSort + 4.0 版本事实）、**第十二式《链式与尺寸》**
+  （.end()/.addBack()、尺寸四层、offset/position/scrollTop、.data()）、
+  **第十三式《插件与扩展》**（$.fn 插件模板、$.extend 默认选项、第三方插件三问）、
+  **第十四式《性能心法》**（缓存选择器、限定范围、批量 DOM、委托与原生替代，含现场计时对比）。
+- **现有章节补遗（8 处）**：jQuery 02 表单选择器（:input/:checked/:selected/:disabled）、
+  05 的 one/trigger/triggerHandler、06 的 fadeTo/delay/queue/finish、07 的 not/is/has 与
+  Until 系列、08 的 wrap/replaceWith/insertX、09 的 serialize/getScript/全局 ajax 事件；
+  Bootstrap 09 滚动监听（scrollspy）、07 表格与列表变体、08 表单配件（floating/尺寸/颜色/
+  range/is-valid）、10 模态尺寸与下拉附件、12 carousel-fade 与分页/spinner 尺寸、04 颜色
+  边框补遗（subtle/emphasis/link-*/opacity/边框方向）、05 工具栏与链接形按钮。
+- **字典强化**：藏经阁新增 **《jQuery 方法速查》**（`site/archive/reference-jquery/`，
+  选择器/遍历/内容/类样式/尺寸/节点/事件/效果/Ajax/工具函数/链式 + 移除与弃用清单，
+  方法存在性全部经无头浏览器实测）；**《工具类速查》扩编**（浮动/垂直对齐/图片媒体/布局小助手/
+  链接与透明度/组件变体后缀表）；藏经阁卷首页新增「剑」字卡与指路。
+- **新人入门审查**：基础篇新增《动手第一课：你的第一个页面》（十分钟手写第一页、
+  查看源码、练功场入口、三个新手坑）；首页新增《怎么用这个站》（阅读顺序、每章读法、
+  搜索与两张速查表、离线使用说明）；README 新增《怎么读这座山》。
+- **事实纠正（重要）**：实测发现文档把 jQuery 4.0.0 的“弃用”当成“移除”——
+  `.bind/.unbind/.delegate/.undelegate/.hover` 与 `$.proxy` **仍然存在可调用**；
+  真正移除的是 `$.trim/.type/.isArray/.isFunction/.isNumeric/.isWindow/.parseJSON/.now/
+  .nodeName/.camelCase` 与 `.live/.die`。已同步修正 conventions §6、verify-offline 技能、
+  `tools/check-offline.sh` 2b 项、坑档案，并在新章节写入正确版本事实。
+- **新工具**：`tools/check-demo-parity.py`——“源码块必须能 100% 还原预览”这条红线的
+  机器校验（HTML 标签多重集 + JS 归一化对比），已并入 `deploy.sh` 第 7 步。
+  本轮靠它查出并修复 **4 处历史遗漏**：11-collapse 例 2（源码缺 `<p>` 包裹、文案不一致）、
+  09-ajax 三例（状态清理、700ms 停留、load 两种写法）、10-todo 例 4（源码用“与例 3 相同”
+  替代完整代码，违反用户红线）。
+- **踩坑归档**：`bug-fix/jquery4-removed-api-misjudgment.md`（grep 未命中 ≠ 不存在，
+  API 存在性必须调用级实测）、`bug-fix/scrollspy-anchor-id-on-heading.md`
+  （滚动监听 id 要挂整节容器，挂小标题上滚到底会全灭）。
+- **验证**：`node --check` 全绿；`check-offline.sh` / `check-links.py`（44 页）/
+  `check-demo-parity.py`（41 页、124 个演示）全绿；无头 Chromium **http:// 41/41 页、
+  file:// 41/41 页零 JS 报错**；新演示交互断言 21 项（grep/map/param、.end/尺寸/data、
+  插件、计时、scrollspy 高亮到“剑法总纲”、is-invalid 反馈、modal-lg 弹出、
+  getScript 在 http 下成功加载等）全部通过。
 
 ### 🆕 最新一轮（sitemap.xml 从 git 移除、改为部署时生成 · 用户反馈）
 
@@ -225,27 +275,31 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
 
 - 工程骨架、`.gitignore`、`tools/sync-assets.sh`（vendor + 藏经阁 + 图标页一体再生成）
 - 公共资产：loader.js（链式加载 + jQuery 排队桩 + DOJO.ready + favicon）、site.js
-  （26 章数据源 + 导航/页头/TOC/页脚/全站搜索注入，TOC 排除演示区标题）、
+  （SECTIONS 单一数据源：18+14 式与藏经阁/练功场条目 + 导航/页头/TOC/页脚/全站搜索注入，
+  TOC 排除演示区标题）、
   highlight.js、search-index.js（生成）、site.css（纸墨风皮肤）
-- 页面：首页、基础篇（MDN 引路）、四个分卷首页、**Bootstrap 16 式**、
-  **jQuery 10 式**（全部 ✅ 已写已验）、藏经阁（卷首/离线文档/示例集/图标大全 2078 个）、
+- 页面：首页（含“怎么用这个站”）、基础篇（MDN 引路 + 动手第一课）、四个分卷首页、
+  **Bootstrap 18 式**（正篇 16 + 补遗 2）、**jQuery 14 式**（正篇 10 + 补遗 4）、
+  藏经阁（卷首/离线文档/示例集/图标大全 2078 个/工具类速查/jQuery 方法速查）、
   练功场（三栏编辑 + srcdoc 预览 + localStorage）、**404 迷路页**（深路径免疫，
   见 `bug-fix/404-deep-path-relative-links.md`）
-- 整页示例：`demo/portfolio`、`demo/todo`（独立页、含内嵌 favicon）；`data/notes.json`
+- 整页示例：`demo/portfolio`、`demo/todo`（独立页、含内嵌 favicon）；
+  `data/notes.json` 与 `data/demo-greeting.js`（getScript 演示）；`assets/img/`（演示 SVG 两枚）
 - 工具：check-offline.sh、check-links.py、gen-icons-page.py、gen-search-index.py、
   **gen-sitemap.py（sitemap.xml 生成器）**、**根目录 deploy.sh（一键部署准备）**、
-  verify-cdp.js、page-template.html
+  **check-demo-parity.py（演示源码块一致性）**、verify-cdp.js、page-template.html
 - AI 代理文档体系：AGENTS.md + notes（architecture / conventions / style-guide /
-  progress / **bug-fix 坑档案一坑一文件 × 9**）+ 7 篇 skills（含 doc-sync 纪律与
+  progress / **bug-fix 坑档案一坑一文件 × 14**）+ 7 篇 skills（含 doc-sync 纪律与
   “用户指令优先”铁律）
 - README：教程定位 + 网站构建/部署/检查说明（nginx 示例）
 
-### ✅ 终验证据（全站 35 个页面）
+### ✅ 终验证据（全站 41 个页面）
 
 - 静态：`node --check` 全部 JS 通过；`check-offline.sh` ✔ 无外网资源依赖
-  （仅 7 条 MDN/VS Code `<a>` 文字外链）；`check-links.py` ✔ 35 页内部链接全部有效
-- 渲染：CDP 无头浏览器 **http:// 模式 35/35 页零 JS 报错**；
-  **file:// 双击模式 35/35 页零报错**
+  （仅 7 条 MDN/VS Code `<a>` 文字外链）；`check-links.py` ✔ 44 页内部链接全部有效；
+  `check-demo-parity.py` ✔ 41 页 124 个演示源码块与预览一致
+- 渲染：CDP 无头浏览器 **http:// 模式 41/41 页零 JS 报错**；
+  **file:// 双击模式 41/41 页零报错**；新演示交互断言 21 项全过
 - 交互实测：jQuery 演示点击改文、事件委托（新元素响应/直接绑定不响应）、增删克隆、
   Ajax http 加载 8 条 JSON / file 优雅降级提示、待办清单增删切换统计持久化、
   portfolio 移动端汉堡折叠、图标过滤 heart→55、练功场 srcdoc 组装——
@@ -292,6 +346,12 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
 
 ### 遗留说明（非阻塞）
 
+- 补遗章的“正篇 / 补遗”分层是**有意设计**：综合修炼仍是第 16 / 10 式，
+  只在卷首页与本文件说明总量（18 式 / 14 式）；
+- 第十七式的示例图是站内手写 SVG（`site/assets/img/`）——教程演示不引入任何位图，
+  要放真实照片时读者用自己的本地图片即可；
+- jQuery 方法速查页的方法清单来自 4.0.0 实测；将来升级 jQuery 大版本时，
+  先重跑存在性实测再改进度说明（页面内已注明“以本站携带版本为准”）；
 - 站内暗色模式不影响 `demo/` 下两个整页示例（portfolio/todo，独立成品未用 loader）；
 - `site/archive/bootstrap-docs/` 镜像内自带的文档站内搜索依赖第三方索引，可能不可用，
   以目录浏览为主（藏经阁页面已注明）；
@@ -307,7 +367,7 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
 
 slug 与 data-page 已固定，写章节时**必须逐字一致**：
 
-### 第二回 · Bootstrap 篇（16 式）
+### 第二回 · Bootstrap 篇（18 式：正篇 16 + 补遗 2）
 
 | num | 文件 | data-page | 状态 |
 | --- | --- | --- | --- |
@@ -327,8 +387,10 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 | 14 | bootstrap/14-icons.html 图标库 | bootstrap-14 | ✅ 已写已验 |
 | 15 | bootstrap/15-responsive.html 响应式心法 | bootstrap-15 | ✅ 已写已验 |
 | 16 | bootstrap/16-project.html 综合修炼 | bootstrap-16 | ✅ 已写已验（配套 demo/portfolio ✅） |
+| 17 | bootstrap/17-media.html 图片与媒体（补遗） | bootstrap-17 | ✅ 已写已验（示例图为站内 SVG） |
+| 18 | bootstrap/18-naming.html 类名命名规律（补遗） | bootstrap-18 | ✅ 已写已验 |
 
-### 第三回 · jQuery 篇（10 式）
+### 第三回 · jQuery 篇（14 式：正篇 10 + 补遗 4）
 
 | num | 文件 | data-page | 状态 |
 | --- | --- | --- | --- |
@@ -342,12 +404,31 @@ slug 与 data-page 已固定，写章节时**必须逐字一致**：
 | 08 | jquery/08-manipulation.html 节点的增删改 | jquery-08 | ✅ 已写已验（增删/克隆实测） |
 | 09 | jquery/09-ajax.html Ajax | jquery-09 | ✅ 已写已验（http 加载 / file 降级实测） |
 | 10 | jquery/10-todo.html 综合修炼 | jquery-10 | ✅ 已写已验（配套 demo/todo ✅） |
+| 11 | jquery/11-utilities.html 工具函数（补遗） | jquery-11 | ✅ 已写已验（含 4.0 版本事实实测） |
+| 12 | jquery/12-chaining.html 链式与尺寸（补遗） | jquery-12 | ✅ 已写已验 |
+| 13 | jquery/13-plugins.html 插件与扩展（补遗） | jquery-13 | ✅ 已写已验 |
+| 14 | jquery/14-performance.html 性能心法（补遗） | jquery-14 | ✅ 已写已验（含现场计时对比） |
+
+### 第四回 · 藏经阁（页面）
+
+| 文件 | data-page | 状态 |
+| --- | --- | --- |
+| archive/icons/index.html 图标大全 | archive-icons | ✅（生成物，tools/gen-icons-page.py） |
+| archive/reference/index.html 工具类速查 | archive-reference | ✅ 本轮扩编（浮动/媒体/布局小助手/链接透明度/组件变体表） |
+| archive/reference-jquery/index.html jQuery 方法速查 | archive-jquery | ✅ 本轮新增（方法存在性全部浏览器实测） |
 
 ## 注意事项
 
-- 新增“图标大全/练功场/搜索/工具类速查”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
+- 新增“图标大全/练功场/搜索/两张速查页”页面时，需要同步登记到 site.js（读 register-chapter 技能）；
+  藏经阁条目用 `pageId` 指定 data-page，登记后自动进侧边栏与翻页链；
 - `site/archive/icons/index.html`、`site/playground/index.html` 建好后，侧边栏“藏经阁”与
-  PAGES 顺序需更新；速查页已登记（archive-reference，进侧边栏 + 翻页链）；
+  PAGES 顺序需更新；两张速查页已登记（archive-reference / archive-jquery，均进侧边栏 + 翻页链）；
+- 补遗章（Bootstrap 17/18、jQuery 11–14）排在正篇之后：正文与卷首页明确“正篇 16 / 10 式 +
+  补遗”，改这些说法时全站搜一遍（首页、404、分卷页、16-project、10-todo 都有）；
+- 章节演示改完立刻跑 `python3 tools/check-demo-parity.py`（源码块必须能 100% 还原预览，
+  引擎已抓过多次历史遗漏）；新增交互类演示必须做操作级断言，别只看静态标记；
+- jQuery 4.0.0 版本事实：**弃用 ≠ 移除**（`.bind/.delegate/$.proxy` 仍在）——
+  引用版本结论前先读 `bug-fix/jquery4-removed-api-misjudgment.md` 并实测；
 - `site/sitemap.xml` 是部署时生成物且**不入库**（.gitignore）：增删章节后跑
   `python3 tools/gen-sitemap.py --base https://你的域名/`；
   部署前一次性准备全部产物用根目录 `bash deploy.sh --base https://你的域名/`（含自检）；

@@ -25,6 +25,7 @@
           <li>会用 <code>on('事件名', fn)</code> 绑定事件，认识常用事件名</li>
           <li>明白回调里的 <code>this</code> 与 <code>$(this)</code>，会用 <code>e.preventDefault()</code> 与 <code>e.stopPropagation()</code></li>
           <li>掌握事件委托，让“新添加的元素”一出生就能响应；会用 <code>off()</code> 解绑</li>
+          <li>会用 <code>one()</code> 绑定“只响一次”的事件，用 <code>trigger()</code> / <code>triggerHandler()</code> 主动触发</li>
         </ul>
       </div>
 
@@ -329,6 +330,96 @@
 
       <p>常见用法是“只许点一次”——处理函数里先 <code>off</code> 再干活。</p>
 
+      <h2>只响一次与主动出击：one / trigger</h2>
+      <p>
+        “只许点一次”有更省事的写法：<code>one('事件名', fn)</code>——它是 <code>on</code> 的孪生兄弟，
+        区别只在<strong>响应过一次就自动解绑</strong>。领券、签到、首次提示，都适合用它。
+      </p>
+      <p>
+        反过来，能不能用代码“替用户点一下”？可以。两个方法一对难兄难弟：
+      </p>
+      <table>
+        <thead>
+          <tr><th>写法</th><th>行为</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>$el.trigger('focus')</code></td><td>模拟真实事件：冒泡、触发默认行为（如让输入框获得焦点），返回 jQuery 对象</td></tr>
+          <tr><td><code>$el.triggerHandler('focus')</code></td><td>只把绑定的处理函数跑一遍：不冒泡、不触发默认行为，返回处理函数的返回值</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · one 领一次、trigger 遥控一次</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3" id="jq05-demo4">
+            <p class="mb-2">
+              入场券：<button type="button" class="btn btn-sm btn-primary" id="jq05-ticket">领取一次</button>
+              <span class="ms-2 text-body-secondary" id="jq05-ticket-log">还没领过。</span>
+            </p>
+            <hr>
+            <div class="mb-2">
+              <input type="text" class="form-control form-control-sm" id="jq05-focus" placeholder="专注用输入框（看光标会不会进来）" style="max-width:20rem">
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq05-trigger">trigger('focus')</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq05-handler">triggerHandler('focus')</button>
+            </div>
+            <pre class="mb-0"><code id="jq05-trigger-log">点两个按钮，观察输入框与这行字的区别。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              $('#jq05-ticket').one('click', function () {
+                $('#jq05-ticket-log').text('票已领走——再点也不响，因为 one 自动解绑了。');
+              });
+
+              $('#jq05-focus').on('focus', function () {
+                $('#jq05-trigger-log').text('输入框收到 focus 事件（处理函数跑了）。');
+              });
+              $('#jq05-trigger').on('click', function () {
+                $('#jq05-focus').trigger('focus');   // 事件跑，光标也真的进去了
+              });
+              $('#jq05-handler').on('click', function () {
+                $('#jq05-focus').triggerHandler('focus');   // 只跑处理函数，光标不动
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3" id="jq05-demo4">
+              <p class="mb-2">
+                入场券：<button type="button" class="btn btn-sm btn-primary" id="jq05-ticket">领取一次</button>
+                <span class="ms-2 text-body-secondary" id="jq05-ticket-log">还没领过。</span>
+              </p>
+              <hr>
+              <div class="mb-2">
+                <input type="text" class="form-control form-control-sm" id="jq05-focus" placeholder="专注用输入框（看光标会不会进来）" style="max-width:20rem">
+              </div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq05-trigger">trigger('focus')</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq05-handler">triggerHandler('focus')</button>
+              </div>
+              <pre class="mb-0"><code id="jq05-trigger-log">点两个按钮，观察输入框与这行字的区别。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            $('#jq05-ticket').one('click', function () {
+              $('#jq05-ticket-log').text('票已领走——再点也不响，因为 one 自动解绑了。');
+            });
+
+            $('#jq05-focus').on('focus', function () {
+              $('#jq05-trigger-log').text('输入框收到 focus 事件（处理函数跑了）。');
+            });
+            $('#jq05-trigger').on('click', function () {
+              $('#jq05-focus').trigger('focus');   // 事件跑，光标也真的进去了
+            });
+            $('#jq05-handler').on('click', function () {
+              $('#jq05-focus').triggerHandler('focus');   // 只跑处理函数，光标不动
+            });
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第五式</div>
         <ol>
@@ -381,7 +472,8 @@
         <li><code>on()</code> 是事件统一入口，快捷方法都是它的马甲；</li>
         <li>回调里的 <code>this</code> 是当事人，<code>$(this)</code> 让它进入 jQuery 招式体系；</li>
         <li><code>preventDefault()</code> 拦默认行为，<code>stopPropagation()</code> 截冒泡；</li>
-        <li>动态元素靠事件委托，<code>off()</code> 让绑定有始有终。</li>
+        <li>动态元素靠事件委托，<code>off()</code> 让绑定有始有终；</li>
+        <li><code>one()</code> 是“只响一次”的 <code>on()</code>；<code>trigger()</code> 连默认行为一起触发，<code>triggerHandler()</code> 只跑处理函数。</li>
       </ul>
 
       <blockquote>下一式，修炼显隐与动画——hide、fadeIn、slideUp 轮番登场，页面开始有了呼吸。</blockquote>

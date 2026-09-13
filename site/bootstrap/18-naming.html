@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十八式 · 类名命名规律 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="本式补遗 Bootstrap 类名命名规律：属性-断点-值 的通用公式、方向与断点暗号、各系规律速览，以及查类名的三条路。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-18">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        一路练到这里，你可能已经发现：Bootstrap 的类名不是一盘散沙，而是一套有规矩的语言。
+        学会这套规矩，你就不必死记硬背——遇到没见过的类名，也能一眼猜个八九不离十。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>记住通用公式：<code>{属性}-{断点}-{值}</code>，属性在前、值在后</li>
+          <li>看懂方向暗号 <code>s</code> / <code>e</code> / <code>x</code> / <code>y</code> 与断点前缀的位置</li>
+          <li>把间距、颜色、显隐、弹性、栅格几大系的规律串成一张网</li>
+          <li>学会三条查类名的路：工具类速查页、离线文档、浏览器开发者工具</li>
+        </ul>
+      </div>
+
+      <h2>通用公式：属性在前，值在后</h2>
+      <p>
+        绝大多数工具类都能套进同一个公式：<strong>先说要改什么，再说改成什么</strong>。
+        中间如果夹着一个断点（<code>sm</code> / <code>md</code> / <code>lg</code> /
+        <code>xl</code> / <code>xxl</code>），它就表示“从该断点起生效”。
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>类名</th><th>拆解</th><th>含义</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>mt-3</code></td><td>margin-top · 无断点 · 3 档</td><td>上边距 1rem</td></tr>
+          <tr><td><code>px-lg-4</code></td><td>padding 左右 · lg 起 · 4 档</td><td>lg 及以上，左右内边距 1.5rem</td></tr>
+          <tr><td><code>d-md-none</code></td><td>display · md 起 · none</td><td>md 及以上隐藏</td></tr>
+          <tr><td><code>text-center</code></td><td>text-align · 无断点 · center</td><td>文字居中</td></tr>
+          <tr><td><code>bg-success-subtle</code></td><td>背景色 · 主题色 success · subtle 变体</td><td>柔和绿底</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：说反了就全错</div>
+        <p style="margin:0">
+          英文里的顺序是“做什么在前、怎么做在后”。<code>text-primary</code> 对，
+          <code>primary-text</code> 错；<code>mt-3</code> 对，<code>3-mt</code> 错。
+          记住这一点，一大半“类名明明写了却没效果”的怪事都能自己破案。
+        </p>
+      </div>
+
+      <h2>两个暗号：方向与断点</h2>
+      <p>
+        方向暗号藏在间距类里。Bootstrap 不用 <code>l</code>（left）和 <code>r</code>（right），
+        而是用 <code>s</code>（start，起点）和 <code>e</code>（end，终点）——
+        这样阿拉伯语等从右往左排的页面也能正确理解“起点”与“终点”。
+        <code>x</code> 管左右两边，<code>y</code> 管上下两边，什么都不加则管四边。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 方向后缀对照</div>
+        <div class="demo-preview">
+          <div class="border rounded p-2 bg-body-tertiary">
+            <div class="bg-primary text-white rounded p-1 ms-3">ms-3：左侧留出间距</div>
+            <div class="bg-primary text-white rounded p-1 me-3 mt-2">me-3：右侧留出间距</div>
+            <div class="bg-primary text-white rounded p-1 mx-auto mt-2" style="width:60%">mx-auto：左右均分，居中</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-2 bg-body-tertiary">
+              <div class="bg-primary text-white rounded p-1 ms-3">ms-3：左侧留出间距</div>
+              <div class="bg-primary text-white rounded p-1 me-3 mt-2">me-3：右侧留出间距</div>
+              <div class="bg-primary text-white rounded p-1 mx-auto mt-2" style="width:60%">mx-auto：左右均分，居中</div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        断点暗号则规定了“什么时候生效”。五个断点都是
+        <strong>“此宽度及以上”</strong>的语义：<code>sm</code> ≥576px、<code>md</code> ≥768px、
+        <code>lg</code> ≥992px、<code>xl</code> ≥1200px、<code>xxl</code> ≥1400px。
+        断点缩写永远夹在属性与值之间，比如 <code>p-md-4</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 断点前缀：拖动窗口宽度看变化</div>
+        <div class="demo-preview">
+          <div class="border rounded p-2">
+            <div class="bg-primary text-white rounded p-2 mb-2">始终显示</div>
+            <div class="bg-success text-white rounded p-2 mb-2 d-none d-md-block">md 及以上才显示（d-none d-md-block）</div>
+            <div class="bg-danger text-white rounded p-2 mb-0 d-md-none">md 以下才显示（d-md-none）</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-2">
+              <div class="bg-primary text-white rounded p-2 mb-2">始终显示</div>
+              <div class="bg-success text-white rounded p-2 mb-2 d-none d-md-block">md 及以上才显示（d-none d-md-block）</div>
+              <div class="bg-danger text-white rounded p-2 mb-0 d-md-none">md 以下才显示（d-md-none）</div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>八大系规律速览</h2>
+      <p>
+        把公式套进各个体系，就得到下面这八张“翻译表”。不必背诵，混个脸熟——
+        真到用时，去<a href="../archive/reference/index.html">工具类速查</a>翻一眼即可。
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>体系</th><th>公式</th><th>例子</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>间距</td><td><code>m/p</code> + 方向 <code>t/b/s/e/x/y</code> - 档位 0–5</td><td><code>mt-3</code>、<code>px-4</code>、<code>mx-auto</code></td></tr>
+          <tr><td>颜色</td><td><code>text/bg/border/link/btn</code> - 八色名（-subtle / -emphasis 为深浅变体）</td><td><code>text-danger</code>、<code>bg-warning-subtle</code></td></tr>
+          <tr><td>显隐</td><td><code>d</code> - 断点 - 显示值</td><td><code>d-flex</code>、<code>d-lg-none</code></td></tr>
+          <tr><td>弹性</td><td><code>flex/justify-content/align-items/gap</code> - 值</td><td><code>flex-wrap</code>、<code>align-items-center</code>、<code>gap-3</code></td></tr>
+          <tr><td>文本</td><td><code>text</code> - 值；字号、字重、行高各有前缀 <code>fs/fw/lh</code></td><td><code>text-truncate</code>、<code>fw-bold</code>、<code>lh-lg</code></td></tr>
+          <tr><td>边框圆角</td><td><code>border</code>（-方向 / -颜色 / -粗细）、<code>rounded</code> - 档位</td><td><code>border-top-0</code>、<code>border-2</code>、<code>rounded-pill</code></td></tr>
+          <tr><td>位置尺寸</td><td><code>position</code> - 定位方式；<code>top/start/end/bottom</code> - 0/50/100；<code>w/h</code> - 百分比</td><td><code>position-relative</code>、<code>start-50</code>、<code>w-75</code></td></tr>
+          <tr><td>栅格</td><td><code>container</code> - 断点 / <code>col</code> - 断点 - 列数 / <code>offset/order</code> - 断点 - 值</td><td><code>col-md-4</code>、<code>offset-lg-3</code>、<code>order-2</code></td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        组件们的变体也守规矩：<strong>尺寸后缀</strong>统一用 <code>-sm</code> / <code>-lg</code>
+        （按钮、表单、模态框、分页都照此办理），<strong>颜色变体</strong>直接接八色名
+        （<code>btn-primary</code>、<code>alert-success</code>、<code>table-warning</code>、
+        <code>list-group-item-info</code>），<strong>样式变体</strong>则有各自的名字
+        （<code>table-striped</code>、<code>nav-tabs</code>、<code>btn-outline-primary</code>）。
+        同一个 <code>success</code> 在按钮上是按钮色、在文字上是文字色、在边框上是边框色——
+        学会一个词，处处认得它。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 同一个色名，跨界复用</div>
+        <div class="demo-preview" id="bs18-demo3">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" class="btn btn-success">btn-success</button>
+            <span class="badge text-bg-success">text-bg-success</span>
+            <span class="text-success">text-success</span>
+            <span class="border border-success rounded px-2 py-1">border-success</span>
+            <a href="#bs18-demo3" class="link-success">link-success</a>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <button type="button" class="btn btn-success">btn-success</button>
+              <span class="badge text-bg-success">text-bg-success</span>
+              <span class="text-success">text-success</span>
+              <span class="border border-success rounded px-2 py-1">border-success</span>
+              <a href="#bs18-demo3" class="link-success">link-success</a>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>三条查类名的路</h2>
+      <p>
+        规律能覆盖大多数情况，但总有记不准的时候——这很正常，工具就是拿来查的。
+        本站为你备了三条路，全部离线可用：
+      </p>
+      <ul>
+        <li><strong>先翻速查页</strong>：<a href="../archive/reference/index.html">藏经阁 · 工具类速查</a>
+          收编了全部常用工具类，每个取值一句话说明，翻到即用；</li>
+        <li><strong>再查离线文档</strong>：完整的官方文档镜像在
+          <a href="../archive/bootstrap-docs/index.html">藏经阁 · Bootstrap 离线文档</a>，
+          组件、工具类、定制方法应有尽有；</li>
+        <li><strong>最后问浏览器</strong>：在页面上右键“检查”，选中元素，看
+          Styles 面板里这些类名到底算出了什么——<strong>计算样式不会骗人</strong>。
+          想验证某个类名是否存在，也可以在 Elements 面板里改了试试。</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-title">经验之谈：类名写错了怎么排查</div>
+        <ul style="margin:0">
+          <li>先看拼写：八色名都是完整单词（<code>secondary</code> 不是 <code>second</code>）；</li>
+          <li>再看顺序：属性在前、断点在中间、值在最后；</li>
+          <li>然后看断点：<code>d-none d-md-block</code> 是“先藏后显”，少写前半句就会一直显示；</li>
+          <li>最后看环境：有些类只在特定组件里生效（比如 <code>accordion-*</code> 要配合手风琴结构）。</li>
+        </ul>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十八式</div>
+        <ol>
+          <li>写出类名：让内边距左右各 1.5rem，且只在 lg 及以上生效。</li>
+          <li>写出类名：文字在 md 及以上居中，md 以下保持左对齐。</li>
+          <li>思考题：<code>border-0</code> 与 <code>border-top-0</code> 有什么区别？分别用在什么场合？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="lg 及以上左右内边距 1.5rem">
+            <div class="px-lg-4">lg 及以上左右各 1.5rem 内边距</div>
+          </script>
+          <p>
+            拆解：<code>p</code>（padding）+ <code>x</code>（左右两边）+ <code>lg</code>（lg 起生效）
+            + <code>4</code>（1.5rem 档）。断点在属性之后、值之前，这是格式的硬要求。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="md 起文字居中">
+            <p class="text-start text-md-center mb-0">md 以下左对齐，md 及以上居中</p>
+          </script>
+          <p>
+            两个类叠加：<code>text-start</code> 是无断点的兜底（小屏左对齐），
+            <code>text-md-center</code> 从 md 起接管。移动优先的写法就是“先写小屏，
+            再用断点类覆盖大屏”——兜底在前，覆盖在后。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>border-0</code> 去掉<strong>四边</strong>的边框，适合彻底不要边框的场景；
+            <code>border-top-0</code> 只去掉上边一条，其余三边保留——适合“卡片列表里相邻两项
+            之间的分隔线只留一条”这类精细活。规律是一样的：先写 <code>border</code>，
+            再在方向（<code>top/end/bottom/start</code>）后面接 <code>-0</code>，
+            表示“把这个方向的边框取消”。理解了这层，<code>border-end-0</code>、
+            <code>border-bottom-0</code> 自然也就通了。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>通用公式 <code>{属性}-{断点}-{值}</code>：属性在前、值在后、断点居中；</li>
+        <li>方向暗号 <code>s/e/x/y</code> 来自 start/end，为多语言排版留了余地；</li>
+        <li>断点一律“此宽度及以上生效”，移动优先就是“小屏兜底、断点覆盖”；</li>
+        <li>八色名与尺寸后缀跨组件通用，记住一套词，处处都能对上号；</li>
+        <li>记不准不丢人：速查页 → 离线文档 → 浏览器检查，三条路都在你手边。</li>
+      </ul>
+
+      <blockquote>第二回到此收束。下一回，我们换一柄轻剑——jQuery 篇。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

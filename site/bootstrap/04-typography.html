@@ -336,6 +336,68 @@
         </details>
       </div>
 
+      <h2>颜色与边框的补遗</h2>
+      <p>
+        八色系还有几个“深浅变体”和“专用出口”：<code>bg-*-subtle</code> 是柔和浅底，
+        <code>text-*-emphasis</code> 是加深的文字色，两者搭配最不容易翻车；
+        <code>link-*</code> 专门管链接颜色；<code>opacity-*</code> 控制整块元素的透明度；
+        边框还有粗细档与“只留一边 / 去掉一边”的写法。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · 深浅变体、链接色、透明度与边框方向</div>
+        <div class="demo-preview" id="bs04-demo6">
+          <div class="border rounded p-3 mb-3">
+            <p class="mb-2">链接色：<a href="#bs04-demo6" class="link-primary">link-primary</a> ·
+              <a href="#bs04-demo6" class="link-success">link-success</a> ·
+              <a href="#bs04-demo6" class="link-danger">link-danger</a></p>
+            <div class="row g-2">
+              <div class="col-6 col-md-3"><div class="bg-primary-subtle text-primary-emphasis rounded p-2 text-center">primary-subtle</div></div>
+              <div class="col-6 col-md-3"><div class="bg-warning-subtle text-warning-emphasis rounded p-2 text-center">warning-subtle</div></div>
+              <div class="col-6 col-md-3"><div class="bg-success-subtle text-success-emphasis rounded p-2 text-center">success-subtle</div></div>
+              <div class="col-6 col-md-3"><div class="bg-danger-subtle text-danger-emphasis rounded p-2 text-center">danger-subtle</div></div>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-100">opacity-100</div></div>
+            <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-75">opacity-75</div></div>
+            <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-50">opacity-50</div></div>
+            <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-25">opacity-25</div></div>
+          </div>
+          <div>
+            <div class="border border-4 border-primary rounded p-2 mb-2">border-4：粗边框</div>
+            <div class="border border-top-0 rounded p-2 mb-2">border-top-0：去掉上边那一根</div>
+            <div class="border border-4 border-start border-success rounded p-2 mb-0">border-start + border-4：左侧粗线</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3 mb-3">
+              <p class="mb-2">链接色：<a href="#bs04-demo6" class="link-primary">link-primary</a> ·
+                <a href="#bs04-demo6" class="link-success">link-success</a> ·
+                <a href="#bs04-demo6" class="link-danger">link-danger</a></p>
+              <div class="row g-2">
+                <div class="col-6 col-md-3"><div class="bg-primary-subtle text-primary-emphasis rounded p-2 text-center">primary-subtle</div></div>
+                <div class="col-6 col-md-3"><div class="bg-warning-subtle text-warning-emphasis rounded p-2 text-center">warning-subtle</div></div>
+                <div class="col-6 col-md-3"><div class="bg-success-subtle text-success-emphasis rounded p-2 text-center">success-subtle</div></div>
+                <div class="col-6 col-md-3"><div class="bg-danger-subtle text-danger-emphasis rounded p-2 text-center">danger-subtle</div></div>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-100">opacity-100</div></div>
+              <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-75">opacity-75</div></div>
+              <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-50">opacity-50</div></div>
+              <div class="col-6 col-md-3"><div class="bg-dark text-white rounded p-2 text-center opacity-25">opacity-25</div></div>
+            </div>
+            <div>
+              <div class="border border-4 border-primary rounded p-2 mb-2">border-4：粗边框</div>
+              <div class="border border-top-0 rounded p-2 mb-2">border-top-0：去掉上边那一根</div>
+              <div class="border border-4 border-start border-success rounded p-2 mb-0">border-start + border-4：左侧粗线</div>
+            </div>
+          </script>
+        </div>
+      </div>
+
       <h2>本式小结</h2>
       <ul>
         <li>大标题 <code>display-1</code> 到 <code>display-6</code>（5rem 递减到 2.5rem），引导段 <code>lead</code>；</li>

@@ -64,6 +64,8 @@
 | --- | --- |
 | 新写一章教程 | 读 `notes/conventions.md` + `skills/write-chapter/SKILL.md` → 写文件 → 登记章节 → 按 `skills/verify-offline/SKILL.md` 自查 |
 | 章节里加演示 | 读 `skills/build-demo/SKILL.md` |
+| 核对“演示源码块 = 预览” | `python3 tools/check-demo-parity.py`（可传单文件；`deploy.sh` 第 7 步自动跑） |
+| 查 Bootstrap 类名 / jQuery 方法 | 藏经阁「工具类速查」`site/archive/reference/`、「jQuery 方法速查」`site/archive/reference-jquery/` |
 | 调整全站导航/目录 | 只改 `site/assets/js/site.js` 的 `SECTIONS`，读 `skills/register-chapter/SKILL.md` |
 | 部署前一键准备全部产物 | `bash deploy.sh --base https://你的域名/`（依次：sync-assets → gen-icons-page → gen-search-index → gen-sitemap → check-offline → check-links） |
 | 增删章节后重新生成站点地图 | `python3 tools/gen-sitemap.py --base https://你的域名/`（**sitemap.xml 不入库**，部署时生成，部署前换成真实域名） |

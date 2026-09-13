@@ -220,12 +220,103 @@
         </tbody>
       </table>
 
+      <h2>浮动、清除与垂直对齐</h2>
+      <p>这几个是老一辈 CSS 的看家本领，Bootstrap 把它们也封成了工具类。</p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>float-start</code> / <code>float-end</code> / <code>float-none</code></td><td>左浮 / 右浮 / 不浮动（可加断点，如 <code>float-md-end</code>）</td></tr>
+          <tr><td><code>clearfix</code></td><td>加在父元素上，包住里面浮动的子元素（防止父元素高度塌陷）</td></tr>
+          <tr><td><code>align-baseline</code> / <code>-top</code> / <code>-middle</code> / <code>-bottom</code></td><td>行内元素相对基线的垂直对齐（常用于图标与文字并排）</td></tr>
+          <tr><td><code>align-text-top</code> / <code>align-text-bottom</code></td><td>按“文字顶 / 底”对齐，图标配文字时比数字对齐更稳</td></tr>
+        </tbody>
+      </table>
+
+      <h2>图片与媒体：img-* / ratio / object-fit-*</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>img-fluid</code></td><td>最大宽度 100%（不超出容器）、高度自动，响应式图片的必备类</td></tr>
+          <tr><td><code>img-thumbnail</code></td><td>细边框 + 内边距 + 圆角，一键相册效果</td></tr>
+          <tr><td><code>figure</code> / <code>figure-img</code> / <code>figure-caption</code></td><td>图配说明的语义组合（图 + figcaption）</td></tr>
+          <tr><td><code>ratio ratio-16x9</code> / <code>-4x3</code> / <code>-1x1</code></td><td>固定比例容器，里面的图片/视频/iframe 自动填满</td></tr>
+          <tr><td><code>object-fit-contain</code> / <code>-cover</code> / <code>-fill</code> / <code>-scale</code> / <code>-none</code></td><td>内容与容器比例不一致时：留白 / 裁切 / 拉伸 / 缩放 / 原样（常配 <code>h-100 w-100</code>）</td></tr>
+          <tr><td><code>rounded-circle</code></td><td>配合对象裁切可做正圆头像（<code>object-fit: cover</code> + 等宽高）</td></tr>
+        </tbody>
+      </table>
+      <p>教程位置：第十七式《图片与媒体》。</p>
+
+      <h2>布局小助手：stacks / stretched-link / vr</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>vstack</code> / <code>hstack</code></td><td>垂直 / 水平堆叠（默认 gap 1rem，可再用 <code>gap-*</code> 调），比手写 d-flex 少一行</td></tr>
+          <tr><td><code>stretched-link</code></td><td>把链接的“可点击范围”撑满所在的定位父元素——整张卡片可点，就靠它</td></tr>
+          <tr><td><code>vr</code></td><td>一条竖直分隔线（垂直规则线），横向布局里的“|”</td></tr>
+          <tr><td><code>min-vh-100</code> / <code>vw-100</code> / <code>vh-100</code></td><td>最小视口高度 100% / 视口宽 100% / 视口高 100%</td></tr>
+          <tr><td><code>z-0</code> – <code>z-3</code>、<code>z-n1</code></td><td>层级 z-index：0–3 与 -1（配合 position-relative 使用）</td></tr>
+        </tbody>
+      </table>
+
+      <h2>链接与透明度</h2>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>link-primary</code> 等八色</td><td>链接文字颜色（不同于 <code>text-*</code>，会处理悬停态）</td></tr>
+          <tr><td><code>link-underline-opacity-0</code> – <code>-100</code></td><td>下划线浓度：0 即去掉下划线</td></tr>
+          <tr><td><code>link-offset-1</code> – <code>link-offset-3</code></td><td>下划线与文字的间距</td></tr>
+          <tr><td><code>opacity-0</code> – <code>opacity-100</code></td><td>整块元素透明度 0 / 25 / 50 / 75 / 100</td></tr>
+          <tr><td><code>border-opacity-25</code> 等</td><td>边框颜色浓度（常与 <code>border-*</code> 同用）</td></tr>
+        </tbody>
+      </table>
+
+      <h2>组件变体后缀速览</h2>
+      <p>
+        完整组件的用法请查<a href="../bootstrap-docs/index.html">离线文档</a>与对应章节；
+        这里先记一份“变体后缀表”，遇到没见过的类名可以对号入座。
+      </p>
+      <table>
+        <thead>
+          <tr><th>组件</th><th>可用后缀 / 配件</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>按钮 <code>btn</code></td><td>八色、<code>btn-outline-*</code>、<code>btn-link</code>、<code>btn-sm/lg</code>、<code>active</code>、<code>disabled</code></td></tr>
+          <tr><td>按钮组</td><td><code>btn-group</code>、<code>btn-group-vertical</code>、<code>btn-toolbar</code></td></tr>
+          <tr><td>徽章 <code>badge</code></td><td><code>text-bg-*</code> 八色、<code>rounded-pill</code> 胶囊</td></tr>
+          <tr><td>提示框 <code>alert</code></td><td>八色、<code>alert-dismissible</code> + <code>btn-close</code>（深底上配 <code>btn-close-white</code>）、<code>alert-heading</code></td></tr>
+          <tr><td>引用 <code>blockquote</code></td><td>站点皮肤自带纸墨样式；署名行可加 <code>blockquote-footer</code></td></tr>
+          <tr><td>表单控件</td><td><code>form-control-sm/lg</code>、<code>form-control-plaintext</code>、<code>form-control-color</code>、<code>form-range</code>、<code>form-floating</code>、<code>is-valid</code> / <code>is-invalid</code></td></tr>
+          <tr><td>选择控件</td><td><code>form-select</code>（<code>-sm/lg</code>）、<code>form-check</code>、<code>form-switch</code>、<code>form-check-inline</code></td></tr>
+          <tr><td>卡片 <code>card</code></td><td><code>card-header/footer</code>、<code>card-img-top</code>、<code>card-body</code>、<code>card-group</code>、<code>stretched-link</code></td></tr>
+          <tr><td>表格 <code>table</code></td><td><code>table-striped</code>、<code>table-hover</code>、<code>table-bordered</code>、<code>table-borderless</code>、<code>table-sm</code>、<code>table-group-divider</code>、<code>caption-top</code>、八色行</td></tr>
+          <tr><td>列表组 <code>list-group</code></td><td><code>list-group-flush</code>、<code>list-group-numbered</code>、<code>list-group-horizontal</code>、<code>list-group-item-action</code>、八色项</td></tr>
+          <tr><td>导航</td><td><code>nav-tabs</code>、<code>nav-pills</code>、<code>nav-underline</code>、<code>nav-fill</code> / <code>nav-justified</code>、<code>breadcrumb</code>、<code>navbar-expand-*</code>、<code>sticky-top</code></td></tr>
+          <tr><td>模态框 <code>modal</code></td><td><code>modal-sm/lg/xl</code>、<code>modal-fullscreen(-*-down)</code>、<code>modal-dialog-centered</code>、<code>modal-dialog-scrollable</code>；“点不掉的弹窗”用 <code>data-bs-backdrop="static"</code></td></tr>
+          <tr><td>下拉菜单 <code>dropdown</code></td><td><code>dropup</code> / <code>dropend</code> / <code>dropstart</code>、<code>dropdown-menu-end</code>、<code>dropdown-header</code>、<code>dropdown-divider</code>、<code>dropdown-toggle-split</code></td></tr>
+          <tr><td>折叠 / 手风琴</td><td><code>collapse</code>、<code>collapse-horizontal</code>、<code>accordion</code>、<code>accordion-flush</code>、<code>data-bs-parent</code> 互斥</td></tr>
+          <tr><td>轮播 <code>carousel</code></td><td><code>carousel-fade</code>、<code>carousel-caption</code>、<code>carousel-indicators</code>、<code>data-bs-ride</code>、<code>data-bs-interval</code></td></tr>
+          <tr><td>进度与分页</td><td><code>progress-stacked</code>、<code>progress-bar-striped</code>、<code>progress-bar-animated</code>、<code>pagination-sm/lg</code></td></tr>
+          <tr><td>加载动画</td><td><code>spinner-border</code> / <code>spinner-grow</code>（各带 <code>-sm</code>）、<code>visually-hidden</code> 状态说明</td></tr>
+          <tr><td>浮层</td><td><code>tooltip</code> / <code>popover</code>（需 JS 初始化）、<code>toast</code>（<code>toast-container</code> + JS 显示）、<code>offcanvas</code></td></tr>
+        </tbody>
+      </table>
+
       <div class="practice">
         <div class="practice-title">一句话记忆</div>
         <p style="margin:0">
           栅格管布局、间距管呼吸、文本管脸面、颜色管情绪；
           方向后缀 t/b/s/e/x/y 记一次，断点前缀 sm/md/lg/xl/xxl 记一次，
-          剩下的组合拳，怕忘就来翻这一页。
+         剩下的组合拳，怕忘就来翻这一页。
+         组件变体后缀（<code>-sm</code> / <code>-lg</code> / 八色名 / <code>-outline</code>）也是同一套逻辑：
+         记住规律，比记住类名管用。
         </p>
       </div>
 

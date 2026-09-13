@@ -23,7 +23,8 @@ description: 在 site/assets/js/site.js 的 SECTIONS 中登记新章节或新页
 ```
 
 字段说明：
-- `num`：两位字符串（'01'…'16'），生成 data-page `bootstrap-02` 与印章文字；
+- `num`：两位字符串（Bootstrap 篇 '01'…'18'、jQuery 篇 '01'…'14'），
+  生成 data-page `bootstrap-02` 与印章文字；补遗章排在正篇之后（综合修炼仍是第 16 / 10 式）；
 - `href`：**相对站点根**的路径（不要带 `../`）；
 - `title`：章节名（同时是页头 h1 与侧边栏文字）；
 - `desc`：一句话简介（分卷页卡片与搜索索引使用）。
@@ -37,8 +38,12 @@ description: 在 site/assets/js/site.js 的 SECTIONS 中登记新章节或新页
   { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' }
   ```
   无 `num` 且无 `pageId` 的条目（如离线文档、示例集）只进侧边栏、不进翻页顺序。
-- 练功场等独立工具页：在 `SECTIONS` 之后向 `PAGES` 数组手动追加条目，
-  页面自身 `<body data-page="playground">`，页头需自写（site.js 只给有对应“回”的页面注入页头）。
+- 练功场等独立工具页：**同样登记进 `SECTIONS`**（用一个 `chapters: []` 的“附页”回，
+  如 `{ id: 'playground', label: '附页', title: '练功场', pageTitle: '在线练功场',
+  href: 'playground/index.html', seal: '练', desc: '…', chapters: [] }`），
+  侧边栏与翻页顺序会自动生成；页面自身 `<body data-page="playground">`、页头手写
+  （`injectHeader` 会跳过 `home` / `archive` / `playground` 三个 id）。
+  **不要**再手工 `PAGES.push`——那会绕开单一数据源（曾因此让练功场没有侧边栏入口）。
 
 ## 3. 验证
 

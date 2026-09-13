@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十三式 · 插件与扩展 | 第三回 jQuery 篇 | 纯静态网页的修行</title>
+<meta name="description" content="本式补遗 jQuery 插件：在 $.fn 上添加自定义方法、用 $.extend 处理默认选项、扩展全局工具函数，以及使用第三方插件的注意事项。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="jquery-13">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        轻剑用到顺手处，招式便想自己创。jQuery 的一大好处就在这儿：
+        你写好的动作，可以收进 <code>$.fn</code> 里，从此变成人人可用的新招式——这就是插件。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>插件就是挂在 <code>$.fn</code> 上的方法：<code>$('#x').你的方法()</code></li>
+          <li>用 <code>$.fn.extend</code> 一次注册多个方法，记得 <code>return this</code> 保住链式</li>
+          <li>用 <code>$.extend</code> 合并默认选项，让插件可配置</li>
+          <li>用 <code>$.extend</code> 扩展全局工具函数（<code>$.你的工具()</code>）</li>
+          <li>接第三方插件前先问三件事：加载顺序、依赖、能否离线</li>
+        </ul>
+      </div>
+
+      <h2>插件长什么样</h2>
+      <p>
+        jQuery 对象身上的所有方法都存在 <code>$.fn</code>（其实就是
+        <code>$.prototype</code> 的别名）里。<code>$.fn.addClass</code>、<code>$.fn.fadeIn</code>
+        都是挂上去的方法——所以你往 <code>$.fn</code> 上再挂一个函数，就造出了新招式：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="最小插件的骨架">
+        $.fn.hello = function () {
+          this.text('你好，江湖！');   // this 是选中的那批元素
+          return this;                 // 返回自己，链式调用才不会断
+        };
+
+        $('#title').hello().addClass('text-danger');   // 新招式照常接在链子上
+      </script>
+
+      <p>
+        三步走：给 <code>$.fn</code> 加方法 → 在方法里操作 <code>this</code> → 返回 <code>this</code>。
+        “返回 <code>this</code>”不是客套，而是让后续方法还能接着点——插件若忘了它，
+        <code>$('#title').hello().addClass(...)</code> 会在中间断掉。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 第一个插件：highlight（用 $.fn.extend 注册）</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <p class="mb-2">修行语录：<span class="jq13-quote">日拱一卒</span>、<span class="jq13-quote">功不唐捐</span>。</p>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-primary" id="jq13-mark">点亮语录（调用插件）</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq13-unmark">擦掉高亮</button>
+            </div>
+          </div>
+          <script>
+            $(function () {
+              $.fn.extend({
+                highlight: function (color) {
+                  return this.css('background-color', color || '#ffe9a8').addClass('rounded px-1');
+                }
+              });
+
+              $('#jq13-mark').on('click', function () {
+                $('.jq13-quote').highlight().addClass('fw-bold');
+              });
+              $('#jq13-unmark').on('click', function () {
+                $('.jq13-quote').css('background-color', '').removeClass('rounded px-1 fw-bold');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <p class="mb-2">修行语录：<span class="jq13-quote">日拱一卒</span>、<span class="jq13-quote">功不唐捐</span>。</p>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-primary" id="jq13-mark">点亮语录（调用插件）</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq13-unmark">擦掉高亮</button>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="注册插件">
+            $.fn.extend({
+              highlight: function (color) {
+                return this.css('background-color', color || '#ffe9a8').addClass('rounded px-1');
+              }
+            });
+          </script>
+          <script type="text/plain" data-lang="js" data-title="调用插件">
+            $('#jq13-mark').on('click', function () {
+              $('.jq13-quote').highlight().addClass('fw-bold');
+            });
+            $('#jq13-unmark').on('click', function () {
+              $('.jq13-quote').css('background-color', '').removeClass('rounded px-1 fw-bold');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意调用那一行：<code>.highlight().addClass('fw-bold')</code>——插件返回了
+        <code>this</code>，所以 <code>addClass</code> 还能接上。这就是“保住链式”的实惠。
+      </p>
+
+      <h2>带选项的插件：默认值 + 用户值</h2>
+      <p>
+        好用的插件都带设置项。标准做法是<strong>先立一份默认选项</strong>，再用
+        <code>$.extend</code> 把用户传进来的覆盖上去。这样调用者可以只写关心的一两项，
+        其余走默认值：
+      </p>
+
+      <script type="text/plain" data-lang="js" data-title="带默认选项的插件写法">
+        $.fn.tagIt = function (options) {
+          var settings = $.extend({
+            label: '已阅',
+            color: 'primary'
+          }, options);
+
+          return this.each(function () {
+            $(this).append(
+              $('<span>').addClass('badge text-bg-' + settings.color).text(settings.label)
+            );
+          });
+        };
+      </script>
+
+      <p>
+        这里多了两件宝贝：其一，<code>var settings = $.extend(默认, options)</code>；
+        其二，<code>return this.each(function () { … })</code>——<code>each</code>
+        会遍历选中的每一个元素，让插件对一批元素逐个生效。这是 jQuery 插件的经典模板，
+        背下来也不亏。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 可配置的插件：给任务盖章</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <ul class="list-group mb-3" id="jq13-tasks">
+              <li class="list-group-item">晨练站桩</li>
+              <li class="list-group-item">临帖一页</li>
+              <li class="list-group-item">读文档半小时</li>
+            </ul>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-primary" id="jq13-stamp">全部盖章「已阅」</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-stamp-red">盖上红章「紧要」</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq13-unstamp">撕掉章</button>
+            </div>
+          </div>
+          <script>
+            $(function () {
+              $.fn.tagIt = function (options) {
+                var settings = $.extend({
+                  label: '已阅',
+                  color: 'primary'
+                }, options);
+
+                return this.each(function () {
+                  $(this).append(
+                    $('<span>').addClass('badge text-bg-' + settings.color + ' ms-2 jq13-badge').text(settings.label)
+                  );
+                });
+              };
+
+              $('#jq13-stamp').on('click', function () {
+                $('#jq13-tasks > li').tagIt();
+              });
+              $('#jq13-stamp-red').on('click', function () {
+                $('#jq13-tasks > li').tagIt({ label: '紧要', color: 'danger' });
+              });
+              $('#jq13-unstamp').on('click', function () {
+                $('#jq13-tasks .jq13-badge').remove();
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <ul class="list-group mb-3" id="jq13-tasks">
+                <li class="list-group-item">晨练站桩</li>
+                <li class="list-group-item">临帖一页</li>
+                <li class="list-group-item">读文档半小时</li>
+              </ul>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-primary" id="jq13-stamp">全部盖章「已阅」</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-stamp-red">盖上红章「紧要」</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq13-unstamp">撕掉章</button>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="注册插件（带选项）">
+            $.fn.tagIt = function (options) {
+              var settings = $.extend({
+                label: '已阅',
+                color: 'primary'
+              }, options);
+
+              return this.each(function () {
+                $(this).append(
+                  $('<span>').addClass('badge text-bg-' + settings.color + ' ms-2 jq13-badge').text(settings.label)
+                );
+              });
+            };
+          </script>
+          <script type="text/plain" data-lang="js" data-title="调用插件">
+            $('#jq13-stamp').on('click', function () {
+              $('#jq13-tasks > li').tagIt();
+            });
+            $('#jq13-stamp-red').on('click', function () {
+              $('#jq13-tasks > li').tagIt({ label: '紧要', color: 'danger' });
+            });
+            $('#jq13-unstamp').on('click', function () {
+              $('#jq13-tasks .jq13-badge').remove();
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>扩展全局工具：$.extend 的另一种用法</h2>
+      <p>
+        给 <code>$.fn</code> 加方法，得到的是“元素身上的招式”；
+        给 <code>$</code> 本身加方法（用 <code>$.extend({...})</code>），得到的是
+        “不依赖元素的小工具”，用法类似上一式的 <code>$.map</code>：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三个自造的小工具</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-maxof">$.maxOf(3, 9, 5)</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-sum">$.sum([2, 4, 6])</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-once">$.once(fn) 防重复</button>
+            </div>
+            <pre class="mb-0"><code id="jq13-log">点按钮，看自造工具的结果。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              $.extend({
+                maxOf: function () {
+                  return Math.max.apply(null, arguments);
+                },
+                sum: function (arr) {
+                  return $.map(arr, function (n) { return n; })
+                    .reduce(function (a, b) { return a + b; }, 0);
+                },
+                once: function (fn) {
+                  var done = false;
+                  return function () {
+                    if (done) { return '（已执行过，不再重复）'; }
+                    done = true;
+                    return fn.apply(this, arguments);
+                  };
+                }
+              });
+
+              $('#jq13-maxof').on('click', function () {
+                $('#jq13-log').text('$.maxOf(3, 9, 5) → ' + $.maxOf(3, 9, 5));
+              });
+              $('#jq13-sum').on('click', function () {
+                $('#jq13-log').text('$.sum([2, 4, 6]) → ' + $.sum([2, 4, 6]));
+              });
+              var firstTime = $.once(function () { return '第一次执行，开工！'; });
+              $('#jq13-once').on('click', function () {
+                $('#jq13-log').text('$.once 的结果：' + firstTime());
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-maxof">$.maxOf(3, 9, 5)</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-sum">$.sum([2, 4, 6])</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq13-once">$.once(fn) 防重复</button>
+              </div>
+              <pre class="mb-0"><code id="jq13-log">点按钮，看自造工具的结果。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="扩展全局工具">
+            $.extend({
+              maxOf: function () {
+                return Math.max.apply(null, arguments);
+              },
+              sum: function (arr) {
+                return $.map(arr, function (n) { return n; })
+                  .reduce(function (a, b) { return a + b; }, 0);
+              },
+              once: function (fn) {
+                var done = false;
+                return function () {
+                  if (done) { return '（已执行过，不再重复）'; }
+                  done = true;
+                  return fn.apply(this, arguments);
+                };
+              }
+            });
+          </script>
+          <script type="text/plain" data-lang="js" data-title="调用">
+            $('#jq13-maxof').on('click', function () {
+              $('#jq13-log').text('$.maxOf(3, 9, 5) → ' + $.maxOf(3, 9, 5));
+            });
+            $('#jq13-sum').on('click', function () {
+              $('#jq13-log').text('$.sum([2, 4, 6]) → ' + $.sum([2, 4, 6]));
+            });
+            var firstTime = $.once(function () { return '第一次执行，开工！'; });
+            $('#jq13-once').on('click', function () {
+              $('#jq13-log').text('$.once 的结果：' + firstTime());
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>用别人的插件：先问三件事</h2>
+      <ul>
+        <li><strong>顺序</strong>：插件文件必须排在 jQuery 之后，否则它找不到 <code>$</code> 可挂；</li>
+        <li><strong>依赖</strong>：有些插件还要 Popper、Moment 之类的伙伴，缺一个就罢工；</li>
+        <li><strong>离线</strong>：把插件文件下载到本地、放进自己的 js 目录——本站不引用任何 CDN，
+          你的项目也不必。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：插件是别人的手，接口是你们的约</div>
+        <p style="margin:0">
+          用第三方插件前，先读它调用的那几行 API（通常就是 <code>$(选择器).插件名({选项})</code>）；
+          用久了自己写的插件，也要遵守同样的规矩：<strong>命名带前缀、选项有默认值、
+          方法返回 this</strong>。前人立约，后人省事——这就是为什么 jQuery 生态里
+          几十万个插件能彼此相安无事。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十三式</div>
+        <ol>
+          <li>写一个插件 <code>$.fn.flash()</code>：先 <code>fadeOut(200)</code> 再 <code>fadeIn(200)</code>，
+            并保证返回 <code>this</code>。</li>
+          <li>给例 2 的 <code>tagIt</code> 插件加一个 <code>size</code> 选项（例如 <code>'sm'</code> / <code>''</code>），
+            控制徽章大小（提示：<code>badge</code> 没有尺寸类，可改用 <code>fs-6</code> 之类的字号类）。</li>
+          <li>思考题：为什么插件里不能直接用 <code>settings</code> 这个变量名存“每次调用”的设置，
+            而要先 <code>var settings = $.extend(…)</code>？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="flash 插件">
+            $.fn.flash = function () {
+              return this.fadeOut(200).fadeIn(200);
+            };
+          </script>
+          <p>
+            <code>fadeOut</code> 本身返回 <code>this</code>，所以直接用它的返回值即可；
+            但“显式写一个 <code>return this</code>”是更稳的习惯——将来改动内部实现时，
+            不会不小心把链式弄断。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="加 size 选项">
+            $.fn.tagIt = function (options) {
+              var settings = $.extend({
+                label: '已阅',
+                color: 'primary',
+                size: ''
+              }, options);
+
+              return this.each(function () {
+                $(this).append(
+                  $('<span>')
+                    .addClass('badge text-bg-' + settings.color + ' ms-2 jq13-badge')
+                    .addClass(settings.size)
+                    .text(settings.label)
+                );
+              });
+            };
+
+            // 调用：小一号的徽章
+            $('#jq13-tasks > li').tagIt({ size: 'fs-6' });
+          </script>
+          <p>
+            新选项写进默认值对象后，调用者不传就照旧，传了就生效——
+            插件的选项表就这样一点点长出来。真实项目里，还会把默认值暴露成
+            <code>$.fn.tagIt.defaults</code>，方便全局改。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为插件方法可能被调用很多次，每次的选项都不同。<code>settings</code> 若是插件外的
+            “共享变量”，第二次调用就会覆盖第一次的值，先前的元素也会跟着变——
+            典型的“一个变量管两家事”。写成 <code>var settings = $.extend(默认, options)</code>，
+            每次调用都得到<strong>属于自己的那一份</strong>设置，互不干扰。
+            这也是上一式“深合并时传空对象当目标”的同一个道理：<strong>别把别人的默认值改了</strong>。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>插件 = 挂在 <code>$.fn</code> 上的方法，模板是“合并选项 → <code>this.each(操作)</code> → <code>return this</code>”；</li>
+        <li><code>$.fn.extend</code> 一次注册多个方法，<code>$.extend</code> 扩展全局工具；</li>
+        <li>默认选项用 <code>$.extend</code> 合并，调用者只用写与默认不同的部分；</li>
+        <li>接第三方插件先看顺序、依赖与离线，再谈好不好用；</li>
+        <li>插件的分寸感：做一件事、名字带前缀、永远把 jQuery 对象还回去。</li>
+      </ul>
+
+      <blockquote>下一式，我们说说“快”——不是招式快，而是让招式少费力气：性能心法。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

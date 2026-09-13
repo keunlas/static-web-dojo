@@ -25,6 +25,7 @@
           <li>认识基本选择器：<code>#id</code>、<code>.class</code>、<code>tag</code> 与 <code>*</code>，与 CSS 同源同形</li>
           <li>会用组合选择器：<code>tag.class</code>、后代、子代与逗号并集</li>
           <li>了解属性选择器与位置选择器，会用 <code>$(selector).length</code> 判断命中数量</li>
+          <li>认识表单选择器：<code>:input</code>、<code>:checked</code>、<code>:selected</code>、<code>:disabled</code></li>
         </ul>
       </div>
 
@@ -308,6 +309,160 @@
         这类“先广撒网、再精挑”的两步走——这正是第七式（遍历）的主线，此处先打个照面。
       </p>
 
+      <h2>表单选择器</h2>
+      <p>
+        表单是网页里最需要“挑挑拣拣”的地方：哪些框填了、哪些勾了、哪些被禁用……
+        jQuery 为表单备了一组专用伪类，写法上都以冒号开头，可以直接拼在别的选择器后面。
+      </p>
+      <table>
+        <thead>
+          <tr><th>选择器</th><th>选中谁</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:input</code></td><td>全部表单控件：input、textarea、select、button 一个不落</td></tr>
+          <tr><td><code>:text</code> / <code>:password</code> / <code>:file</code></td><td>按 <code>type</code> 挑文本框 / 密码框 / 文件框</td></tr>
+          <tr><td><code>:checkbox</code> / <code>:radio</code> / <code>:submit</code></td><td>按 <code>type</code> 挑复选框 / 单选按钮 / 提交按钮</td></tr>
+          <tr><td><code>:checked</code></td><td>被勾选的复选框、单选按钮，以及被选中的下拉项</td></tr>
+          <tr><td><code>:selected</code></td><td>下拉框里被选中的 <code>&lt;option&gt;</code></td></tr>
+          <tr><td><code>:disabled</code> / <code>:enabled</code></td><td>被禁用 / 可用的控件</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法：状态伪类要“现查现用”</div>
+        <p style="margin:0">
+          勾选、选中、禁用都是<strong>实时状态</strong>——用户在页面上一点，结果就变了。
+          所以这类选择器不要只查一次存起来，最好在事件回调里“当下再查一遍”，才能跟上用户的动作。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 表单选择器点名</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3" id="jq02-demo5">
+            <div class="row g-2 mb-2">
+              <div class="col-sm-6">
+                <input type="text" class="form-control form-control-sm" id="jq02-d5-text" value="阿青">
+              </div>
+              <div class="col-sm-6">
+                <select class="form-select form-select-sm" id="jq02-d5-select" aria-label="兵器">
+                  <option>刀</option>
+                  <option selected>剑</option>
+                  <option>枪</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-check mb-1">
+              <input class="form-check-input" type="checkbox" id="jq02-d5-remember" checked>
+              <label class="form-check-label" for="jq02-d5-remember">记名（已勾选）</label>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="jq02-d5-lock" disabled>
+              <label class="form-check-label" for="jq02-d5-lock">闭关中（禁用）</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-all">所有控件 :input</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-checked">选中的 :checked</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-disabled">禁用的 :disabled</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq02-d5-reset">擦掉标记</button>
+            </div>
+            <pre class="mb-0"><code id="jq02-d5-log">点上面的按钮，看看各选中了几个。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              function clearMark() {
+                $('#jq02-demo5 input, #jq02-demo5 select, #jq02-demo5 button')
+                  .css('outline', '');
+              }
+              function mark($el) {
+                clearMark();
+                $el.css('outline', '2px solid #b03a2e');
+              }
+              $('#jq02-d5-all').on('click', function () {
+                var $hit = $('#jq02-demo5 :input');
+                mark($hit);
+                $('#jq02-d5-log').text(':input 命中 ' + $hit.length + ' 个控件（连按钮也算在内）');
+              });
+              $('#jq02-d5-checked').on('click', function () {
+                var $hit = $('#jq02-demo5 :checked');
+                mark($hit);
+                $('#jq02-d5-log').text(':checked 命中 ' + $hit.length + ' 个（勾选的复选框 + 选中的下拉项）');
+              });
+              $('#jq02-d5-disabled').on('click', function () {
+                var $hit = $('#jq02-demo5 :disabled');
+                mark($hit);
+                $('#jq02-d5-log').text(':disabled 命中 ' + $hit.length + ' 个（闭关中的那个）');
+              });
+              $('#jq02-d5-reset').on('click', function () {
+                clearMark();
+                $('#jq02-d5-log').text('标记已擦掉，再点上面三个按钮对比。');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3" id="jq02-demo5">
+              <div class="row g-2 mb-2">
+                <div class="col-sm-6">
+                  <input type="text" class="form-control form-control-sm" id="jq02-d5-text" value="阿青">
+                </div>
+                <div class="col-sm-6">
+                  <select class="form-select form-select-sm" id="jq02-d5-select" aria-label="兵器">
+                    <option>刀</option>
+                    <option selected>剑</option>
+                    <option>枪</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-check mb-1">
+                <input class="form-check-input" type="checkbox" id="jq02-d5-remember" checked>
+                <label class="form-check-label" for="jq02-d5-remember">记名（已勾选）</label>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="jq02-d5-lock" disabled>
+                <label class="form-check-label" for="jq02-d5-lock">闭关中（禁用）</label>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-all">所有控件 :input</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-checked">选中的 :checked</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq02-d5-disabled">禁用的 :disabled</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq02-d5-reset">擦掉标记</button>
+              </div>
+              <pre class="mb-0"><code id="jq02-d5-log">点上面的按钮，看看各选中了几个。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            function clearMark() {
+              $('#jq02-demo5 input, #jq02-demo5 select, #jq02-demo5 button')
+                .css('outline', '');
+            }
+            function mark($el) {
+              clearMark();
+              $el.css('outline', '2px solid #b03a2e');
+            }
+            $('#jq02-d5-all').on('click', function () {
+              var $hit = $('#jq02-demo5 :input');
+              mark($hit);
+              $('#jq02-d5-log').text(':input 命中 ' + $hit.length + ' 个控件（连按钮也算在内）');
+            });
+            $('#jq02-d5-checked').on('click', function () {
+              var $hit = $('#jq02-demo5 :checked');
+              mark($hit);
+              $('#jq02-d5-log').text(':checked 命中 ' + $hit.length + ' 个（勾选的复选框 + 选中的下拉项）');
+            });
+            $('#jq02-d5-disabled').on('click', function () {
+              var $hit = $('#jq02-demo5 :disabled');
+              mark($hit);
+              $('#jq02-d5-log').text(':disabled 命中 ' + $hit.length + ' 个（闭关中的那个）');
+            });
+            $('#jq02-d5-reset').on('click', function () {
+              clearMark();
+              $('#jq02-d5-log').text('标记已擦掉，再点上面三个按钮对比。');
+            });
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第二式</div>
         <ol>
@@ -354,9 +509,10 @@
       <h2>本式小结</h2>
       <ul>
         <li>jQuery 选择器与 CSS 同源，会 CSS 就掌握了它的大半；</li>
-        <li>基本、组合、属性、位置四大类选择器，按需取用；</li>
+        <li>基本、组合、属性、位置、表单五大类选择器，按需取用；</li>
         <li><code>$(selector).length</code> 判断命中数量，命中 0 个也不报错；</li>
-        <li>位置伪类是 jQuery 扩展，江湖上更推崇 <code>.first()</code>、<code>.eq()</code> 等方法。</li>
+        <li>位置伪类是 jQuery 扩展，江湖上更推崇 <code>.first()</code>、<code>.eq()</code> 等方法；</li>
+        <li><code>:checked</code>、<code>:disabled</code> 这类状态选择器要“现查现用”，别缓存太久。</li>
       </ul>
 
       <blockquote>下一式，修炼内容与属性——text、html、val 三兄弟轮番登场，attr 与 prop 的恩怨也一并了结。</blockquote>

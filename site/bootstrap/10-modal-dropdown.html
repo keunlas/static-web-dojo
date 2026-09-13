@@ -26,6 +26,7 @@
           <li>会用 <code>data-bs-toggle="modal"</code> + <code>data-bs-target="#id"</code> 触发模态框，用 <code>data-bs-dismiss="modal"</code> 关闭</li>
           <li>掌握 <code>modal-dialog-centered</code> 垂直居中与 <code>modal-dialog-scrollable</code> 框内滚动</li>
           <li>会搭下拉菜单：菜单项、分割线、禁用项，以及 <code>dropend</code> 弹出方向</li>
+          <li>认识模态尺寸类（<code>modal-sm/lg/xl/fullscreen</code>）与下拉附件（<code>dropdown-menu-end</code>、<code>dropdown-header</code>、分割按钮）</li>
         </ul>
       </div>
 
@@ -303,6 +304,119 @@
         </div>
       </div>
 
+      <h2>更多变体：模态尺寸与下拉菜单的附件</h2>
+      <p>
+        模态框与下拉菜单的“尺寸、附属小件”也成体系。模态框改尺寸，只动
+        <code>modal-dialog</code> 这一个类；下拉菜单除了方向，还有右对齐、标题与分栏线：
+      </p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>加在谁身上</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>modal-sm</code> / <code>modal-lg</code> / <code>modal-xl</code></td><td><code>modal-dialog</code></td><td>小 / 大 / 特大号弹窗</td></tr>
+          <tr><td><code>modal-fullscreen</code></td><td><code>modal-dialog</code></td><td>铺满全屏；还有 <code>modal-fullscreen-sm-down</code> 等“小屏才全屏”的版本</td></tr>
+          <tr><td><code>dropdown-menu-end</code></td><td><code>dropdown-menu</code></td><td>菜单右对齐，适合放在页面右缘的按钮</td></tr>
+          <tr><td><code>dropdown-header</code> / <code>dropdown-divider</code></td><td>菜单项容器里</td><td>分区标题 / 一条分栏线</td></tr>
+          <tr><td><code>dropdown-toggle-split</code></td><td>分割按钮的后半颗</td><td>主按钮干活、小箭头只管开菜单</td></tr>
+        </tbody>
+      </table>
+      <p>
+        分割按钮（split button）是下拉菜单的常见搭配：主按钮执行“最常用的一招”，
+        旁边的小箭头才展开全部选项。结构上就是 <code>btn-group</code> 里并排两颗 <code>btn</code>，
+        第二颗带 <code>dropdown-toggle dropdown-toggle-split</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 大号弹窗 + 分割按钮 + 右对齐菜单</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs10-demo5">
+              打开大号公告（modal-lg）
+            </button>
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline-primary">练剑</button>
+              <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">展开更多练功选项</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><h5 class="dropdown-header">今日课表</h5></li>
+                <li><button class="dropdown-item" type="button">练剑</button></li>
+                <li><button class="dropdown-item" type="button">练拳</button></li>
+                <li><button class="dropdown-item active" type="button">打坐（已选）</button></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item disabled" type="button" aria-disabled="true">下山（未解锁）</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="modal fade" id="bs10-demo5" tabindex="-1" aria-labelledby="bs10-demo5-label" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="bs10-demo5-label">门派公告</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                  <p>同一个 <code>modal</code>，只是把 <code>modal-dialog</code> 从默认换成
+                    <code>modal-lg</code>——宽度立刻变得从容，适合放长一点的通知。</p>
+                  <p class="mb-0">若内容再长，就再补一个 <code>modal-dialog-scrollable</code>：
+                    框内滚动、页面不动。尺寸与行为两个类，各管一段。</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">知道了</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bs10-demo5">
+                打开大号公告（modal-lg）
+              </button>
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary">练剑</button>
+                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                  <span class="visually-hidden">展开更多练功选项</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><h5 class="dropdown-header">今日课表</h5></li>
+                  <li><button class="dropdown-item" type="button">练剑</button></li>
+                  <li><button class="dropdown-item" type="button">练拳</button></li>
+                  <li><button class="dropdown-item active" type="button">打坐（已选）</button></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><button class="dropdown-item disabled" type="button" aria-disabled="true">下山（未解锁）</button></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="modal fade" id="bs10-demo5" tabindex="-1" aria-labelledby="bs10-demo5-label" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="bs10-demo5-label">门派公告</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>同一个 <code>modal</code>，只是把 <code>modal-dialog</code> 从默认换成
+                      <code>modal-lg</code>——宽度立刻变得从容，适合放长一点的通知。</p>
+                    <p class="mb-0">若内容再长，就再补一个 <code>modal-dialog-scrollable</code>：
+                      框内滚动、页面不动。尺寸与行为两个类，各管一段。</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">知道了</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第十式</div>
         <ol>
@@ -385,7 +499,9 @@
         <li>模态框三层结构：<code>modal</code> → <code>modal-dialog</code> → <code>modal-content</code>（header / body / footer）；</li>
         <li>触发用 <code>data-bs-toggle="modal"</code> + <code>data-bs-target="#id"</code>，关闭用 <code>data-bs-dismiss="modal"</code>；</li>
         <li><code>modal-dialog-centered</code> 垂直居中，<code>modal-dialog-scrollable</code> 框内滚动；</li>
-        <li>下拉菜单靠 <code>data-bs-toggle="dropdown"</code> 自动生效，分割线、禁用项与方向类各司其职。</li>
+        <li>尺寸只动一处：<code>modal-dialog</code> 上加 <code>modal-sm/lg/xl/fullscreen</code>；</li>
+        <li>下拉菜单靠 <code>data-bs-toggle="dropdown"</code> 自动生效，分割线、禁用项与方向类各司其职；</li>
+        <li><code>dropdown-menu-end</code> 右对齐、<code>dropdown-header</code> 分区标题、<code>dropdown-toggle-split</code> 分割按钮——菜单的“附件”也成体系。</li>
       </ul>
 
       <blockquote>下一式，我们修炼折叠与手风琴——把长内容折起来，等读者伸手一推，再徐徐展开。</blockquote>

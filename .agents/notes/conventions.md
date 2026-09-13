@@ -122,8 +122,14 @@
   深色导航栏用 `data-bs-theme="dark"`（`navbar-dark` 已弃用）；
   input-group 内放 invalid-feedback 需给 input-group 加 `has-validation`。
 - jQuery 4.0.0（以下事实均以 `reference/jquery/jquery-4.0.0.js` 源码为准）：
-  - **已彻底移除**（调用即报错）：`.bind/.unbind/.live/.die/.delegate/.undelegate`、`$.trim`、
-    `jQuery.proxy`（deprecated）——用 `on/off`、原生 `String.prototype.trim()`、原生 `Function#bind` 替代；
+  - **已彻底移除**（调用即报错）：`$.trim`、`$.type`、`$.isArray`、`$.isFunction`、`$.isNumeric`、
+    `$.isWindow`、`$.parseJSON`、`$.now`、`$.nodeName`、`$.camelCase`、`.live`、`.die`——
+    用原生 `String.prototype.trim()` / `typeof` / `Array.isArray()` / `JSON.parse()` / `Date.now()` 与
+    `on/off` 替代；
+  - **仍在、只是弃用**（别再写成“已移除”！）：`.bind/.unbind/.delegate/.undelegate/.hover` 与
+    `$.proxy`——它们只是 `on/off` 等新 API 的马甲，仍可调用；教程统一教新写法是风格与未来兼容考虑。
+    **核实方式：`tools/check-offline.sh` 的 2b 项 + 浏览器实测（悬案记录见
+    `bug-fix/jquery4-removed-api-misjudgment.md`）**；
   - **仍然存在可用**：位置伪类选择器 `:first/:last/:even/:odd/:eq/:lt/:gt/:nth`
     （源码 `jQuery.expr.pseudos` 约 1874–1929 行，`createPositionalPseudo`）——
     教程推荐 `.first()/.eq()` 方法是**风格建议**（性能与可读性更好），不是兼容性要求，不要写成“4.0 已移除”；
@@ -148,4 +154,7 @@ grep -c '<script' <你写的文件> && grep -c '</script>' <你写的文件>
 python3 -c "open('<你写的文件>','rb').read().decode('utf-8')"
 # 4) data-page 与文件名和 site.js 登记一致（人工核对）
 # 5) 浏览器验证见 skills/verify-offline/SKILL.md
+# 6) 演示源码块与预览一致性（机器核对，全站或单文件）
+python3 tools/check-demo-parity.py
+python3 tools/check-demo-parity.py site/jquery/10-todo.html
 ```

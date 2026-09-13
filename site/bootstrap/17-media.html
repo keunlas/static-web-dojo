@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十七式 · 图片与媒体 | 第二回 Bootstrap 篇 | 纯静态网页的修行</title>
+<meta name="description" content="本式补遗图片与媒体：img-fluid 响应式图片、img-thumbnail 缩略图、figure 图文混排、ratio 固定比例容器与 object-fit 裁切。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="bootstrap-17">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        十六式走完，架子、组件、心法都齐了，还剩一位常客没正式打过招呼——图片。
+        页面里迟早要放图，而图放不好，再漂亮的布局也会东倒西歪。这一式补上这一课。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li><code>img-fluid</code>：让大图自动缩到容器宽度，永不撑破页面</li>
+          <li><code>img-thumbnail</code> 与 <code>rounded</code> 系：给图片加边框与圆角</li>
+          <li><code>figure</code> / <code>figcaption</code>：图片配说明的标准写法</li>
+          <li><code>ratio</code> 固定比例容器与 <code>object-fit</code> 裁切配合</li>
+        </ul>
+      </div>
+
+      <h2>响应式图片：img-fluid</h2>
+      <p>
+        一张原始尺寸 1200 像素宽的图，碰上只有 200 多像素宽的容器，默认会<strong>撑破</strong>容器，
+        在手机上更是直接顶出屏幕。给 <code>&lt;img&gt;</code> 加上 <code>img-fluid</code>，
+        它会翻译成两条规则：<code>max-width: 100%</code>（不许超过容器）与
+        <code>height: auto</code>（高度按比例跟着缩，不变形）。
+      </p>
+      <p>下面左右两栏做对照——同样的图、同样的窄容器，只看一个类的差别：</p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · img-fluid 前后对照</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <p class="mb-1"><strong>不加类</strong>：按原始尺寸溢出，被容器裁掉</p>
+              <div class="border rounded overflow-hidden" style="max-width:260px;max-height:170px">
+                <img src="../assets/img/demo-wide.svg" alt="未加 img-fluid 的示例图">
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <p class="mb-1"><strong>加 img-fluid</strong>：缩到容器宽度</p>
+              <div class="border rounded overflow-hidden" style="max-width:260px;max-height:170px">
+                <img src="../assets/img/demo-wide.svg" class="img-fluid" alt="加了 img-fluid 的示例图">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <p class="mb-1"><strong>不加类</strong>：按原始尺寸溢出，被容器裁掉</p>
+                <div class="border rounded overflow-hidden" style="max-width:260px;max-height:170px">
+                  <img src="../assets/img/demo-wide.svg" alt="未加 img-fluid 的示例图">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <p class="mb-1"><strong>加 img-fluid</strong>：缩到容器宽度</p>
+                <div class="border rounded overflow-hidden" style="max-width:260px;max-height:170px">
+                  <img src="../assets/img/demo-wide.svg" class="img-fluid" alt="加了 img-fluid 的示例图">
+                </div>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：响应式页面里的图片默认都要 img-fluid</div>
+        <p style="margin:0">
+          可以记成一句口诀：<strong>“图片若无 img-fluid，手机上准出洋相。”</strong>
+          容器靠栅格自适应，图片也必须有“不许超出”的谦逊——两者都谦逊，页面才稳。
+        </p>
+      </div>
+
+      <h2>缩略图与圆角</h2>
+      <p>
+        <code>img-thumbnail</code> 给图片配一圈细边、一点内边距和圆角，像相册里压好的照片：
+        省去手写边框样式。<code>rounded</code> 系工具类则由你自己控制圆角：
+        <code>rounded</code>（小圆角）、<code>rounded-3</code>（更大）、
+        <code>rounded-circle</code>（正圆，配合 <code>object-fit: cover</code> 做头像）、
+        <code>rounded-pill</code>（胶囊形）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 缩略图、圆角与正圆头像</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap align-items-end gap-3">
+            <div class="text-center">
+              <img src="../assets/img/demo-landscape.svg" class="img-thumbnail" style="width:160px" alt="img-thumbnail 缩略图">
+              <p class="small text-body-secondary mt-1 mb-0">img-thumbnail</p>
+            </div>
+            <div class="text-center">
+              <img src="../assets/img/demo-landscape.svg" class="img-fluid rounded" style="width:160px" alt="圆角图片">
+              <p class="small text-body-secondary mt-1 mb-0">rounded</p>
+            </div>
+            <div class="text-center">
+              <img src="../assets/img/demo-landscape.svg" class="img-fluid rounded-circle" style="width:120px;height:120px;object-fit:cover" alt="正圆头像">
+              <p class="small text-body-secondary mt-1 mb-0">rounded-circle</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap align-items-end gap-3">
+              <div class="text-center">
+                <img src="../assets/img/demo-landscape.svg" class="img-thumbnail" style="width:160px" alt="img-thumbnail 缩略图">
+                <p class="small text-body-secondary mt-1 mb-0">img-thumbnail</p>
+              </div>
+              <div class="text-center">
+                <img src="../assets/img/demo-landscape.svg" class="img-fluid rounded" style="width:160px" alt="圆角图片">
+                <p class="small text-body-secondary mt-1 mb-0">rounded</p>
+              </div>
+              <div class="text-center">
+                <img src="../assets/img/demo-landscape.svg" class="img-fluid rounded-circle" style="width:120px;height:120px;object-fit:cover" alt="正圆头像">
+                <p class="small text-body-secondary mt-1 mb-0">rounded-circle</p>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <h2>图文混排：figure 与 figcaption</h2>
+      <p>
+        图片配一句说明，标准的写法是 <code>figure</code> 包图、<code>figcaption</code> 写说明。
+        Bootstrap 再给它们配上三个类：<code>figure</code> 是外框，<code>figure-img</code>
+        给图片留出与说明文字的间距，<code>figure-caption</code> 把说明文字调成小号灰字。
+        用语义化标签的好处是：读屏软件、搜索引擎都明白“这张图带着说明”，
+        而不只是“两段挨着的文字”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 带说明的图（figure）</div>
+        <div class="demo-preview">
+          <figure class="figure">
+            <img src="../assets/img/demo-landscape.svg" class="figure-img img-fluid rounded" style="max-width:320px" alt="修行主题示例图">
+            <figcaption class="figure-caption">图一：山不让尘，川不辞盈——学页面也一样，一行一行来。</figcaption>
+          </figure>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <figure class="figure">
+              <img src="../assets/img/demo-landscape.svg" class="figure-img img-fluid rounded" style="max-width:320px" alt="修行主题示例图">
+              <figcaption class="figure-caption">图一：山不让尘，川不辞盈——学页面也一样，一行一行来。</figcaption>
+            </figure>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        若说明文字想居中，给 <code>figcaption</code> 加一个 <code>text-center</code> 即可；
+        <code>figure</code> 也可以放进卡片、栅格列里，它本身只是一个语义容器。
+      </p>
+
+      <h2>固定比例容器：ratio 与 object-fit</h2>
+      <p>
+        响应式页面里最恼人的是“图片高度不定”：图没加载完，页面高度会跳；栅格里的图比例不一，
+        卡片高矮不齐。Bootstrap 的 <code>ratio</code> 用一个容器把位置先占好——
+        <code>ratio-16x9</code>、<code>ratio-4x3</code>、<code>ratio-1x1</code>
+        分别固定 16:9、4:3、1:1 的比例，里面的图片填满容器。
+      </p>
+      <p>
+        又因为比例是固定的，图片自己的比例往往对不上，这时就该 <code>object-fit</code> 出场：
+        <code>object-fit-cover</code> 填满并裁掉多余部分（不变形，适合照片缩略图），
+        <code>object-fit-contain</code> 完整显示并且可能留白（不变形，适合图表与截图）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 同一张图，三种比例，两种裁法</div>
+        <div class="demo-preview">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="ratio ratio-16x9 border rounded overflow-hidden">
+                <img src="../assets/img/demo-wide.svg" class="object-fit-cover" alt="16:9 横幅">
+              </div>
+              <p class="small text-body-secondary mt-1 mb-0">ratio-16x9 + object-fit-cover</p>
+            </div>
+            <div class="col-md-4">
+              <div class="ratio ratio-1x1 border rounded overflow-hidden">
+                <img src="../assets/img/demo-wide.svg" class="object-fit-cover" alt="1:1 方形">
+              </div>
+              <p class="small text-body-secondary mt-1 mb-0">ratio-1x1 + object-fit-cover</p>
+            </div>
+            <div class="col-md-4">
+              <div class="ratio ratio-4x3 border rounded overflow-hidden">
+                <img src="../assets/img/demo-wide.svg" class="object-fit-contain" alt="4:3 完整显示">
+              </div>
+              <p class="small text-body-secondary mt-1 mb-0">ratio-4x3 + object-fit-contain</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="ratio ratio-16x9 border rounded overflow-hidden">
+                  <img src="../assets/img/demo-wide.svg" class="object-fit-cover" alt="16:9 横幅">
+                </div>
+                <p class="small text-body-secondary mt-1 mb-0">ratio-16x9 + object-fit-cover</p>
+              </div>
+              <div class="col-md-4">
+                <div class="ratio ratio-1x1 border rounded overflow-hidden">
+                  <img src="../assets/img/demo-wide.svg" class="object-fit-cover" alt="1:1 方形">
+                </div>
+                <p class="small text-body-secondary mt-1 mb-0">ratio-1x1 + object-fit-cover</p>
+              </div>
+              <div class="col-md-4">
+                <div class="ratio ratio-4x3 border rounded overflow-hidden">
+                  <img src="../assets/img/demo-wide.svg" class="object-fit-contain" alt="4:3 完整显示">
+                </div>
+                <p class="small text-body-secondary mt-1 mb-0">ratio-4x3 + object-fit-contain</p>
+              </div>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">补充：ratio 里还能放什么</div>
+        <p style="margin:0">
+          <code>ratio</code> 容器不挑内容：图片、<code>iframe</code>（比如内嵌地图）、
+          <code>video</code> 都可以放进去，容器会按固定比例给它们留好位置。
+          单独用 <code>object-fit-*</code> 时，记得让图片的宽高同时被约束
+          （如 <code>h-100 w-100</code>），不然它不知道自己该适配哪个框。
+        </p>
+      </div>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十七式</div>
+        <ol>
+          <li>把例 1 右栏的图片改成“<code>img-fluid</code> + <code>mx-auto</code> 居中”，并让它不超过 260px 宽。</li>
+          <li>用 <code>ratio-1x1</code> + <code>object-fit-cover</code> 做一个正方形的“头像块”，里面放例 4 的横幅图。</li>
+          <li>思考题：为什么 <code>ratio</code> 容器里的图片不必再写 <code>img-fluid</code>？</li>
+        </ol>
+
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="缩到容器内并居中">
+            <div class="border rounded overflow-hidden" style="max-width:260px">
+              <img src="../assets/img/demo-landscape.svg" class="img-fluid mx-auto d-block" alt="居中且不超宽的示例图">
+            </div>
+          </script>
+          <p>
+            <code>img-fluid</code> 负责“不许超出容器”，<code>mx-auto</code> 负责水平居中。
+            但 <code>&lt;img&gt;</code> 默认是行内元素，行内元素不认 <code>mx-auto</code>，
+            所以要补一个 <code>d-block</code> 把它变成块级元素——这对搭档在图片居中时几乎形影不离。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="正方形头像块">
+            <div class="ratio ratio-1x1 border rounded overflow-hidden" style="max-width:180px">
+              <img src="../assets/img/demo-wide.svg" class="object-fit-cover" alt="正方形头像块">
+            </div>
+          </script>
+          <p>
+            <code>ratio-1x1</code> 把容器固定成正方形，<code>object-fit-cover</code>
+            让图片铺满这个正方形并裁掉多余部分——比例稳定、图片不变形，
+            是相册网格与头像的标准做法。
+          </p>
+        </details>
+
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>ratio</code> 的内部规则是“子元素绝对定位、宽高都拉满 100%”，
+            图片的尺寸由容器说了算，天然不会超出容器，也就用不着 <code>img-fluid</code>
+            再补一道“不许超出”的限制。此时真正需要你决策的是另一件事：
+            图片比例与容器不一致时，是裁掉（<code>cover</code>）还是留白（<code>contain</code>）。
+          </p>
+        </details>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>响应式页面里的图片统统加 <code>img-fluid</code>，它是防溢出的第一道保险；</li>
+        <li><code>img-thumbnail</code> 一键出相册效果，<code>rounded</code> 系自己控制圆角；</li>
+        <li>图配说明用 <code>figure</code> + <code>figcaption</code>（配 <code>figure-img</code> / <code>figure-caption</code>），语义清晰；</li>
+        <li><code>ratio</code> 先占好位置，<code>object-fit</code> 决定图怎么填：cover 裁、contain 留白。</li>
+      </ul>
+
+      <blockquote>下一式，我们回头把这一路的类名规律梳理成一张地图——学会读类名，才算真正把 Bootstrap 收进了自己的书袋。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

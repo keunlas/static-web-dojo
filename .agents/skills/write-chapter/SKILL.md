@@ -30,7 +30,9 @@ description: 从章节大纲产出一章合格教程页（site/bootstrap 与 sit
 4. **写练功**：2 道动手题 + 1 道思考题；每个 `details.answer` 给代码 + 白话解释；
    思考题给“为什么”层面的解释。
 5. **登记**：确认 slug 已在 site.js（新页面才需要登记，见 `skills/register-chapter/SKILL.md`）。
-6. **自查**：跑 conventions.md 第 7 节的检查命令；浏览器双模式验证（`skills/verify-offline/SKILL.md`）。
+6. **自查**：跑 conventions.md 第 7 节的检查命令 + `python3 tools/check-demo-parity.py`
+   （源码块必须能还原预览）；浏览器双模式验证（`skills/verify-offline/SKILL.md`），
+   新演示逐条做交互断言。
 7. **更新** `.agents/notes/progress.md` 中对应章节状态为 ✅。
    **注意**：并行多代理场景下，共享文档（含 progress.md）一律由协调者（父代理）统一更新，
    子代理只在自己的交付报告里说明，不要直接改（见 `skills/doc-sync/SKILL.md`）；独立单人工作时可自行更新。
@@ -40,6 +42,7 @@ description: 从章节大纲产出一章合格教程页（site/bootstrap 与 sit
 - [ ] 骨架与 template 一致，data-page 正确，无 h1；
 - [ ] 五段式齐全：章首语、要点、≥3 个演示、练功 3 题含答案、小结与预告；
 - [ ] 所有源码块 `<script type="text/plain" data-lang="…">`，`</script>` 已写成 `<\/script>`；
+- [ ] `python3 tools/check-demo-parity.py` 全绿（源码块与预览逐字一致，含 JS 逻辑）；
 - [ ] 预览交互用 `$(function(){})` / `DOJO.ready`，id 全页唯一；
 - [ ] 无外网资源引用；MDN 外链 ≤2；
 - [ ] API 与 Bootstrap 5.3.8 / jQuery 4.0.0 行为一致（有疑问查离线文档）；

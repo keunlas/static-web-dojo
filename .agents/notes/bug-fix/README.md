@@ -49,6 +49,8 @@
 | `carousel-caption-overlap.md` | carousel-caption 绝对定位钉在底部，内容块太矮时与标题文字重叠 |
 | `carousel-progress-stacked-width.md` | progress-stacked 的宽度写在 .progress-bar 上，各段按内容宽挤成一团 |
 | `404-deep-path-relative-links.md` | 404 页被“原地”渲染在深路径时相对引用全失效（含 loader 自身），需逐级上探 + SITE_ROOT 改写 |
+| `jquery4-removed-api-misjudgment.md` | 把“弃用”当“移除”：`.bind/.delegate/$.proxy` 其实仍在，移除清单被 grep 误判 |
+| `scrollspy-anchor-id-on-heading.md` | 滚动监听的 id 挂在小标题上，标题滑出视野后高亮全灭；id 应挂整节容器 |
 
 ## 使用约定
 

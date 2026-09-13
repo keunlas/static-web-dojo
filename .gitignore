@@ -4,3 +4,6 @@ site/archive/examples/
 
 # sitemap.xml 是部署时生成物（tools/gen-sitemap.py），基址随部署域名变化，不入库
 site/sitemap.xml
+
+# 一些临时文件（不需要提交到 Github）
+/tmp/

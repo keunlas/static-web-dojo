@@ -26,6 +26,7 @@
           <li>掌握 <code>append</code> / <code>prepend</code> / <code>after</code> / <code>before</code> 四个安放方位</li>
           <li>分清 <code>remove()</code> 与 <code>empty()</code>，知道 <code>detach()</code> 留了一手</li>
           <li>用 <code>clone(true)</code> 连事件一起复制</li>
+          <li>会用 <code>wrap</code> / <code>wrapAll</code> / <code>wrapInner</code> / <code>unwrap</code> 包装与拆包，<code>replaceWith</code> 整段替换</li>
         </ul>
       </div>
 
@@ -302,6 +303,133 @@
         </p>
       </div>
 
+      <h2>包与换：wrap / replaceWith 与反向插入</h2>
+      <p>
+        节点操作还有两路细活：一路是“<strong>包装</strong>”——给现成的内容加一层外衣；
+        一路是“<strong>替换</strong>”——把旧节点整段换掉。它们各有几个方法，配对很好记：
+      </p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>做什么</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>wrap(结构)</code></td><td>给<strong>每一个</strong>选中元素各包一层</td></tr>
+          <tr><td><code>wrapAll(结构)</code></td><td>把所有选中元素<strong>合起来</strong>包进同一层</td></tr>
+          <tr><td><code>wrapInner(结构)</code></td><td>只把元素<strong>内部的内容</strong>包起来（外壳保留）</td></tr>
+          <tr><td><code>unwrap()</code></td><td>拆掉选中元素的<strong>父级</strong>（跟 wrap 反着来）</td></tr>
+          <tr><td><code>replaceWith(新内容)</code></td><td>把选中元素整段换成新内容</td></tr>
+          <tr><td><code>insertAfter(目标)</code> / <code>insertBefore(目标)</code></td><td>与 <code>after</code> / <code>before</code> 效果相同，只是“主语宾语”互换</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 包一包、换一换</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="d-flex flex-wrap gap-2 mb-3" id="jq08-wrap-stage">
+              <span class="badge text-bg-secondary jq08-note">晨练</span>
+              <span class="badge text-bg-secondary jq08-note">临帖</span>
+              <span class="badge text-bg-secondary jq08-note">夜读</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrap">wrap：各自包一层</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrapall">wrapAll：合成一包</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrapinner">wrapInner：内容穿衣</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-unwrap">unwrap：拆掉外衣</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-replace">replaceWith：换掉第一张</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq08-wrap-reset">还原</button>
+            </div>
+            <pre class="mb-0"><code id="jq08-wrap-log">依次演示不同的包法；点「还原」随时回到最初。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              var original = $('#jq08-wrap-stage').html();
+              function log(text) {
+                $('#jq08-wrap-log').text(text);
+              }
+              $('#jq08-wrap').on('click', function () {
+                $('#jq08-wrap-stage .jq08-note').wrap('<span class="border border-danger rounded px-1 d-inline-block"></span>');
+                log('wrap()：每一张字条外面各包了一层红边小盒。');
+              });
+              $('#jq08-wrapall').on('click', function () {
+                $('#jq08-wrap-stage').html(original);
+                $('#jq08-wrap-stage .jq08-note').wrapAll('<div class="border border-primary rounded p-2 d-inline-flex gap-2"></div>');
+                log('wrapAll()：三张字条被合起来包进同一个蓝边盒子。');
+              });
+              $('#jq08-wrapinner').on('click', function () {
+                $('#jq08-wrap-stage').html(original);
+                $('#jq08-wrap-stage .jq08-note').wrapInner('<strong class="text-uppercase"></strong>');
+                log('wrapInner()：外壳（徽章）没变，里面的文字被套上了粗体。');
+              });
+              $('#jq08-unwrap').on('click', function () {
+                $('#jq08-wrap-stage .jq08-note').parent().unwrap();
+                log('parent().unwrap()：把字条的父级拆掉——外衣没了，字条还在。');
+              });
+              $('#jq08-replace').on('click', function () {
+                $('#jq08-wrap-stage .jq08-note').first().replaceWith('<span class="badge text-bg-danger jq08-note">改练剑法</span>');
+                log('replaceWith()：第一张字条整段换成了新的。');
+              });
+              $('#jq08-wrap-reset').on('click', function () {
+                $('#jq08-wrap-stage').html(original);
+                log('已还原成最初的三张字条。');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="d-flex flex-wrap gap-2 mb-3" id="jq08-wrap-stage">
+                <span class="badge text-bg-secondary jq08-note">晨练</span>
+                <span class="badge text-bg-secondary jq08-note">临帖</span>
+                <span class="badge text-bg-secondary jq08-note">夜读</span>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrap">wrap：各自包一层</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrapall">wrapAll：合成一包</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-wrapinner">wrapInner：内容穿衣</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-unwrap">unwrap：拆掉外衣</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq08-replace">replaceWith：换掉第一张</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq08-wrap-reset">还原</button>
+              </div>
+              <pre class="mb-0"><code id="jq08-wrap-log">依次演示不同的包法；点「还原」随时回到最初。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var original = $('#jq08-wrap-stage').html();
+            function log(text) {
+              $('#jq08-wrap-log').text(text);
+            }
+            $('#jq08-wrap').on('click', function () {
+              $('#jq08-wrap-stage .jq08-note').wrap('<span class="border border-danger rounded px-1 d-inline-block"></span>');
+              log('wrap()：每一张字条外面各包了一层红边小盒。');
+            });
+            $('#jq08-wrapall').on('click', function () {
+              $('#jq08-wrap-stage').html(original);
+              $('#jq08-wrap-stage .jq08-note').wrapAll('<div class="border border-primary rounded p-2 d-inline-flex gap-2"></div>');
+              log('wrapAll()：三张字条被合起来包进同一个蓝边盒子。');
+            });
+            $('#jq08-wrapinner').on('click', function () {
+              $('#jq08-wrap-stage').html(original);
+              $('#jq08-wrap-stage .jq08-note').wrapInner('<strong class="text-uppercase"></strong>');
+              log('wrapInner()：外壳（徽章）没变，里面的文字被套上了粗体。');
+            });
+            $('#jq08-unwrap').on('click', function () {
+              $('#jq08-wrap-stage .jq08-note').parent().unwrap();
+              log('parent().unwrap()：把字条的父级拆掉——外衣没了，字条还在。');
+            });
+            $('#jq08-replace').on('click', function () {
+              $('#jq08-wrap-stage .jq08-note').first().replaceWith('<span class="badge text-bg-danger jq08-note">改练剑法</span>');
+              log('replaceWith()：第一张字条整段换成了新的。');
+            });
+            $('#jq08-wrap-reset').on('click', function () {
+              $('#jq08-wrap-stage').html(original);
+              log('已还原成最初的三张字条。');
+            });
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第八式</div>
         <ol>
@@ -357,7 +485,8 @@
         <li><code>$('&lt;li&gt;')</code> 凭空造节点，<code>text</code> / <code>attr</code> / <code>addClass</code> 妆点它；</li>
         <li><code>append</code> / <code>prepend</code> 插进子级末尾 / 开头，<code>after</code> / <code>before</code> 插到同级后 / 前，<code>appendTo</code> 等是反向写法；</li>
         <li><code>remove()</code> 连事件一起删，<code>empty()</code> 只清内容，<code>detach()</code> 删而留事件；</li>
-        <li><code>clone(true)</code> 连事件一起复制，复制品也有灵魂。</li>
+        <li><code>clone(true)</code> 连事件一起复制，复制品也有灵魂；</li>
+        <li><code>wrap</code> 各自包、<code>wrapAll</code> 合成包、<code>wrapInner</code> 包内容、<code>unwrap</code> 拆父级；<code>replaceWith</code> 换掉整个节点。</li>
       </ul>
 
       <blockquote>下一式，页面不刷新也能取数据——Ajax。</blockquote>

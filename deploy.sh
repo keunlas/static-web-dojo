@@ -8,6 +8,7 @@
 #   4. tools/gen-sitemap.py          生成站点地图（参数原样透传，如 --base https://你的域名/）
 #   5. tools/check-offline.sh        离线纯净性自检（无外网资源依赖）
 #   6. tools/check-links.py          内部链接有效性自检
+#   7. tools/check-demo-parity.py    演示源码块一致性自检（源码必须能还原预览）
 #
 # 用法：
 #   bash deploy.sh                                   # sitemap 使用占位域名（部署前必须换成真实域名）
@@ -23,28 +24,32 @@ cd "$ROOT"
 echo "════════ 纯静态网页的修行 · 部署准备 ════════"
 
 echo ""
-echo "==> [1/6] 同步本地资源（vendor + 藏经阁）"
+echo "==> [1/7] 同步本地资源（vendor + 藏经阁）"
 bash tools/sync-assets.sh
 
 echo ""
-echo "==> [2/6] 生成图标大全页"
+echo "==> [2/7] 生成图标大全页"
 python3 tools/gen-icons-page.py
 
 echo ""
-echo "==> [3/6] 生成全站搜索索引"
+echo "==> [3/7] 生成全站搜索索引"
 python3 tools/gen-search-index.py
 
 echo ""
-echo "==> [4/6] 生成站点地图"
+echo "==> [4/7] 生成站点地图"
 python3 tools/gen-sitemap.py "$@"
 
 echo ""
-echo "==> [5/6] 离线纯净性自检"
+echo "==> [5/7] 离线纯净性自检"
 bash tools/check-offline.sh
 
 echo ""
-echo "==> [6/6] 内部链接自检"
+echo "==> [6/7] 内部链接自检"
 python3 tools/check-links.py
+
+echo ""
+echo "==> [7/7] 演示源码块一致性自检"
+python3 tools/check-demo-parity.py
 
 echo ""
 echo "════════ 部署准备完成：site/ 已是最新产物，可直接上传部署 ════════"

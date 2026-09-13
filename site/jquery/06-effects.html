@@ -26,6 +26,7 @@
           <li>会用 <code>fade</code> 系与 <code>slide</code> 系两组现成动画</li>
           <li>学会 <code>animate()</code> 自定义数值动画，并诚实认识它的边界</li>
           <li>理解动画队列与 <code>stop()</code>，用回调函数安排“动画之后的事”</li>
+          <li>队列细活：<code>fadeTo</code> 指定透明度、<code>delay</code> 停顿、<code>queue</code> 看队、<code>finish</code> / <code>clearQueue</code> 催队与清队</li>
         </ul>
       </div>
 
@@ -310,6 +311,112 @@
           <code>fade</code>/<code>slide</code> 系列是第二个参数），适合“走完这步再干别的”。</li>
       </ul>
 
+      <h2>队列的细活：fadeTo / delay / queue / finish</h2>
+      <p>
+        队列既然是“一队动画”，就能插队、排队、看队、催队。四件细活，各有各的用处：
+      </p>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>做什么</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fadeTo(时长, 透明度)</code></td><td>淡到<strong>指定</strong>透明度（<code>fadeIn</code> 只能淡到 1、<code>fadeOut</code> 只能淡到 0）</td></tr>
+          <tr><td><code>delay(毫秒)</code></td><td>在队列里空等一会儿再继续（“停顿”也是一个队列任务）</td></tr>
+          <tr><td><code>queue()</code></td><td>读出还没有执行的队列（<code>.queue().length</code> 就是排队数）</td></tr>
+          <tr><td><code>clearQueue()</code> / <code>finish()</code></td><td>清空队列（停在中途）/ 让整个队列一口气全部跑到终点</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 排队、停顿与催队</div>
+        <div class="demo-preview">
+          <div class="border rounded p-3">
+            <div class="bg-primary rounded mb-3" id="jq06-queue-box" style="width:120px;height:60px"></div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-primary" id="jq06-delay-run">淡出 → 停 0.6 秒 → 淡入</button>
+              <button type="button" class="btn btn-sm btn-primary" id="jq06-fadeto">fadeTo 到半透明</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-queue-len">看队列长度</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-finish">finish 全部跑完</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-clear">clearQueue 清队</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="jq06-queue-reset">还原</button>
+            </div>
+            <pre class="mb-0"><code id="jq06-queue-log">先连点几下「淡出 → 停 0.6 秒 → 淡入」，再点「看队列长度」。</code></pre>
+          </div>
+          <script>
+            $(function () {
+              var $box = $('#jq06-queue-box');
+              function log(text) {
+                $('#jq06-queue-log').text(text);
+              }
+              $('#jq06-delay-run').on('click', function () {
+                $box.fadeOut(300).delay(600).fadeIn(300);
+              });
+              $('#jq06-fadeto').on('click', function () {
+                $box.fadeTo(400, 0.3);
+              });
+              $('#jq06-queue-len').on('click', function () {
+                log('当前队列里还排着 ' + $box.queue().length + ' 个任务（0 表示都跑完了）。');
+              });
+              $('#jq06-finish').on('click', function () {
+                $box.finish();
+                log('finish()：队列里的动画全部跳到终点，元素停在最终样子。');
+              });
+              $('#jq06-clear').on('click', function () {
+                $box.clearQueue();
+                log('clearQueue()：队列清空，动画停在中途，不再往下走。');
+              });
+              $('#jq06-queue-reset').on('click', function () {
+                $box.stop(true, true).css('opacity', 1).show();
+                log('已还原：方块回到原样。');
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="border rounded p-3">
+              <div class="bg-primary rounded mb-3" id="jq06-queue-box" style="width:120px;height:60px"></div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-primary" id="jq06-delay-run">淡出 → 停 0.6 秒 → 淡入</button>
+                <button type="button" class="btn btn-sm btn-primary" id="jq06-fadeto">fadeTo 到半透明</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-queue-len">看队列长度</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-finish">finish 全部跑完</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="jq06-clear">clearQueue 清队</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="jq06-queue-reset">还原</button>
+              </div>
+              <pre class="mb-0"><code id="jq06-queue-log">先连点几下「淡出 → 停 0.6 秒 → 淡入」，再点「看队列长度」。</code></pre>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本">
+            var $box = $('#jq06-queue-box');
+            function log(text) {
+              $('#jq06-queue-log').text(text);
+            }
+            $('#jq06-delay-run').on('click', function () {
+              $box.fadeOut(300).delay(600).fadeIn(300);
+            });
+            $('#jq06-fadeto').on('click', function () {
+              $box.fadeTo(400, 0.3);
+            });
+            $('#jq06-queue-len').on('click', function () {
+              log('当前队列里还排着 ' + $box.queue().length + ' 个任务（0 表示都跑完了）。');
+            });
+            $('#jq06-finish').on('click', function () {
+              $box.finish();
+              log('finish()：队列里的动画全部跳到终点，元素停在最终样子。');
+            });
+            $('#jq06-clear').on('click', function () {
+              $box.clearQueue();
+              log('clearQueue()：队列清空，动画停在中途，不再往下走。');
+            });
+            $('#jq06-queue-reset').on('click', function () {
+              $box.stop(true, true).css('opacity', 1).show();
+              log('已还原：方块回到原样。');
+            });
+          </script>
+        </div>
+      </div>
+
       <div class="practice">
         <div class="practice-title">练功 · 第六式</div>
         <ol>
@@ -362,7 +469,8 @@
         <li><code>hide</code> / <code>show</code> / <code>toggle</code> 是显隐三件套，带速度参数即成动画（fast=200 毫秒、slow=600 毫秒、默认 400 毫秒）；</li>
         <li><code>fade</code> 系动透明度、<code>slide</code> 系动高度，各有各的“消失感”；</li>
         <li><code>animate()</code> 只能动画数值属性，颜色动画需要插件；</li>
-        <li>动画会排队；<code>stop()</code> / <code>stop(true)</code> 急停，回调函数安排“之后的事”。</li>
+        <li>动画会排队；<code>stop()</code> / <code>stop(true)</code> 急停，回调函数安排“之后的事”；</li>
+        <li><code>delay()</code> 是“排队等一会儿”，<code>finish()</code> 让队列一口气跑完，<code>clearQueue()</code> 把队伍解散。</li>
       </ul>
 
       <blockquote>下一式，我们去元素家族里认亲——遍历。</blockquote>

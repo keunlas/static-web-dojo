@@ -59,7 +59,9 @@
         { num: '13', href: 'bootstrap/13-overlays.html', title: '提示与浮层', desc: 'tooltip、popover 与 toast' },
         { num: '14', href: 'bootstrap/14-icons.html', title: '图标库', desc: 'bootstrap-icons 的引入与使用' },
         { num: '15', href: 'bootstrap/15-responsive.html', title: '响应式心法', desc: '移动优先的思路总结' },
-        { num: '16', href: 'bootstrap/16-project.html', title: '综合修炼', desc: '手写一个作品集主页' }
+        { num: '16', href: 'bootstrap/16-project.html', title: '综合修炼', desc: '手写一个作品集主页' },
+        { num: '17', href: 'bootstrap/17-media.html', title: '图片与媒体', desc: 'img-fluid、figure、ratio 与 object-fit' },
+        { num: '18', href: 'bootstrap/18-naming.html', title: '类名命名规律', desc: '读懂类名的钥匙：公式、暗号与速查三路' }
       ]
     },
     {
@@ -79,7 +81,11 @@
         { num: '07', href: 'jquery/07-traversing.html', title: '遍历', desc: 'parent、children、find 与 each' },
         { num: '08', href: 'jquery/08-manipulation.html', title: '节点的增删改', desc: 'append、before、remove 与 clone' },
         { num: '09', href: 'jquery/09-ajax.html', title: 'Ajax', desc: 'load、get、post 与本地 JSON' },
-        { num: '10', href: 'jquery/10-todo.html', title: '综合修炼', desc: 'jQuery + Bootstrap 写一个待办清单' }
+        { num: '10', href: 'jquery/10-todo.html', title: '综合修炼', desc: 'jQuery + Bootstrap 写一个待办清单' },
+        { num: '11', href: 'jquery/11-utilities.html', title: '工具函数', desc: '$ 家族：each、map、grep、extend、param 与 4.0 版本事实' },
+        { num: '12', href: 'jquery/12-chaining.html', title: '链式与尺寸', desc: '退一步的 .end()、尺寸与位置、.data() 数据缓存' },
+        { num: '13', href: 'jquery/13-plugins.html', title: '插件与扩展', desc: '$.fn 自定义插件与 $.extend 默认选项' },
+        { num: '14', href: 'jquery/14-performance.html', title: '性能心法', desc: '缓存选择器、限定范围、批量 DOM 与委托' }
       ]
     },
     {
@@ -88,12 +94,13 @@
       title: '藏经阁',
       href: 'archive/index.html',
       seal: '四',
-      desc: '离线文档、官方示例与图标大全，无需联网即可查阅。',
+      desc: '离线文档、官方示例、图标大全与速查表，无需联网即可查阅。',
       chapters: [
         { num: '', href: 'archive/bootstrap-docs/index.html', title: 'Bootstrap 离线文档', desc: '' },
         { num: '', href: 'archive/examples/index.html', title: '官方示例集', desc: '' },
         { num: '', pageId: 'archive-icons', href: 'archive/icons/index.html', title: '图标大全', desc: '' },
-        { num: '', pageId: 'archive-reference', href: 'archive/reference/index.html', title: '工具类速查', desc: '' }
+        { num: '', pageId: 'archive-reference', href: 'archive/reference/index.html', title: '工具类速查', desc: '' },
+        { num: '', pageId: 'archive-jquery', href: 'archive/reference-jquery/index.html', title: 'jQuery 方法速查', desc: '' }
       ]
     },
     {
