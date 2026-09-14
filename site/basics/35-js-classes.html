@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十五式 · 类与原型 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="构造函数与 new 的四步、原型与原型链、class 语法与私有字段、extends 继承与 super、this 的绑定，以及组合优于继承的建议。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-35">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        造一个对象不难，难的是一次造一百个“长得一样、只是名字不同”的对象。
+        这一式讲的就是这件事：<strong>先做一副模具，再拿它批量生产</strong>——
+        这副模具在 JavaScript 里有两种写法：老的“构造函数 + 原型”，新的 <code>class</code>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 <code>new</code> 在后面做了哪四件事，明白“实例”与“原型”的关系</li>
+          <li>会用 <code>class</code> 声明类：<code>constructor</code>、方法、<code>get</code>/<code>set</code>、<code>static</code>、私有字段 <code>#</code></li>
+          <li>会用 <code>extends</code> 与 <code>super</code> 做继承，知道 <code>instanceof</code> 怎么判断</li>
+          <li>会处理 <code>this</code>：<code>call</code> / <code>apply</code> / <code>bind</code>，以及回调里丢失 this 的老问题</li>
+        </ul>
+      </div>
+
+      <h2>先看老写法：构造函数 + 原型</h2>
+      <p>
+        在 <code>class</code> 出现之前，JavaScript 是这样批量造对象的：
+        写一个函数，里面用 <code>this</code> 给实例挂属性；用 <code>new</code> 调用它；
+        方法则挂在函数的 <code>prototype</code> 上，让所有实例共享。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="构造函数 + 原型">
+        function User(name, days) {
+          this.name = name;      // 每个实例自己的属性
+          this.days = days;
+        }
+
+        // 方法挂在原型上：所有实例共享同一个函数（省内存）
+        User.prototype.greet = function () {
+          return `我是${this.name}，已练 ${this.days} 天`;
+        };
+
+        const a = new User("墨白", 21);
+        const b = new User("路人甲", 3);
+        a.greet();                 // "我是墨白，已练 21 天"
+        a instanceof User;         // true
+        Object.hasOwn(a, "name");  // true —— 自己的属性
+        Object.hasOwn(a, "greet"); // false —— greet 在原型上
+      </script>
+      <p>用 <code>new</code> 调用这个函数时，发生了四件事：</p>
+      <ol>
+        <li>造一个<strong>空对象</strong>，并把它的原型指向 <code>User.prototype</code>；</li>
+        <li>把函数里的 <code>this</code> 绑定到这个新对象；</li>
+        <li>执行函数体（于是 <code>this.name = …</code> 挂到了新对象上）；</li>
+        <li><strong>返回这个新对象</strong>——除非函数体显式返回了一个对象（那就会返回那个对象）。</li>
+      </ol>
+      <p>
+        于是就有了“原型链”：实例自己没有的属性，会沿着
+        <code>实例 → User.prototype → Object.prototype → null</code> 一路往上找。
+        <code>instanceof</code> 也是沿着这条链判断的。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 构造函数与原型：实例、私有属性与共享方法</div>
+        <div class="demo-preview">
+          <ul id="js35-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list1 = document.getElementById('js35-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            function Member(name, days) {
+              this.name = name;
+              this.days = days;
+            }
+            Member.prototype.greet = function () {
+              return '我是' + this.name + '，已练 ' + this.days + ' 天';
+            };
+
+            var a = new Member("墨白", 21);
+            var b = new Member("路人甲", 3);
+
+            say1('两个实例：' + a.greet() + '；' + b.greet());
+            say1('instanceof Member：a → ' + (a instanceof Member) + '，b → ' + (b instanceof Member));
+            say1('自有属性 vs 原型方法：Object.hasOwn(a, "name") → ' + Object.hasOwn(a, "name")
+              + '，Object.hasOwn(a, "greet") → ' + Object.hasOwn(a, "greet"));
+            say1('它们共享同一个方法吗？a.greet === b.greet → ' + (a.greet === b.greet)
+              + '（省内存的原因）');
+            say1('属性各自独立：a.name = ' + a.name + '，b.name = ' + b.name);
+
+            var proto = Object.getPrototypeOf(a);
+            say1('实例的原型就是 Member.prototype 吗？' + (proto === Member.prototype));
+            say1('原型链往上：Object.getPrototypeOf(Member.prototype) === Object.prototype → '
+              + (Object.getPrototypeOf(Member.prototype) === Object.prototype));
+
+            var chain = ['实例 a'];
+            var cur = Object.getPrototypeOf(a);
+            while (cur) {
+              chain.push(cur === Object.prototype
+                ? 'Object.prototype'
+                : (cur.constructor && cur.constructor.name ? cur.constructor.name + '.prototype' : '（匿名原型）'));
+              cur = Object.getPrototypeOf(cur);
+            }
+            say1('沿原型链向上：' + chain.join(' → ') + ' → null');
+
+            Member.prototype.greet = function () {
+              return '（方法被换掉了）我是' + this.name;
+            };
+            say1('改了原型上的方法，所有实例立刻跟着变：' + a.greet() + '；' + b.greet());
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js35-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list1 = document.getElementById('js35-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            function Member(name, days) {
+              this.name = name;
+              this.days = days;
+            }
+            Member.prototype.greet = function () {
+              return '我是' + this.name + '，已练 ' + this.days + ' 天';
+            };
+
+            var a = new Member("墨白", 21);
+            var b = new Member("路人甲", 3);
+
+            say1('两个实例：' + a.greet() + '；' + b.greet());
+            say1('instanceof Member：a → ' + (a instanceof Member) + '，b → ' + (b instanceof Member));
+            say1('自有属性 vs 原型方法：Object.hasOwn(a, "name") → ' + Object.hasOwn(a, "name")
+              + '，Object.hasOwn(a, "greet") → ' + Object.hasOwn(a, "greet"));
+            say1('它们共享同一个方法吗？a.greet === b.greet → ' + (a.greet === b.greet)
+              + '（省内存的原因）');
+            say1('属性各自独立：a.name = ' + a.name + '，b.name = ' + b.name);
+
+            var proto = Object.getPrototypeOf(a);
+            say1('实例的原型就是 Member.prototype 吗？' + (proto === Member.prototype));
+            say1('原型链往上：Object.getPrototypeOf(Member.prototype) === Object.prototype → '
+              + (Object.getPrototypeOf(Member.prototype) === Object.prototype));
+
+            var chain = ['实例 a'];
+            var cur = Object.getPrototypeOf(a);
+            while (cur) {
+              chain.push(cur === Object.prototype
+                ? 'Object.prototype'
+                : (cur.constructor && cur.constructor.name ? cur.constructor.name + '.prototype' : '（匿名原型）'));
+              cur = Object.getPrototypeOf(cur);
+            }
+            say1('沿原型链向上：' + chain.join(' → ') + ' → null');
+
+            Member.prototype.greet = function () {
+              return '（方法被换掉了）我是' + this.name;
+            };
+            say1('改了原型上的方法，所有实例立刻跟着变：' + a.greet() + '；' + b.greet());
+          </script>
+        </div>
+      </div>
+      <p>
+        注意最后两行：<strong>方法属于原型，不属于实例本身</strong>。
+        所以改一次原型，所有实例立刻跟着变——这是省内存的代价，也是“别随便改内置对象原型”的原因。
+      </p>
+
+      <h2>新写法：class</h2>
+      <p>
+        <code>class</code> 把上面那套写法包成了更好看的语法，行为和原型一模一样，
+        只是多了几条更严格的规矩：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="class 的完整长相">
+        class Member {
+          #secret = "只有我能看";        // 私有字段：外部访问会报错
+          static total = 0;               // 静态字段：挂在类自己身上
+
+          constructor(name, days = 0) {
+            this.name = name;             // 实例字段
+            this.days = days;
+            Member.total += 1;            // 每造一个人就加一
+          }
+
+          greet() {                       // 方法（挂在 Member.prototype 上）
+            return `我是${this.name}，已练 ${this.days} 天`;
+          }
+
+          get level() {                   // getter：像属性一样读
+            if (this.days >= 60) return "小成";
+            if (this.days >= 20) return "入门";
+            return "新来";
+          }
+
+          set level(value) {              // setter：像属性一样写
+            this.days = value === "小成" ? 60 : 20;
+          }
+
+          static describe() {             // 静态方法：用类名调用
+            return `目前共有 ${Member.total} 位member`;
+          }
+        }
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · class 的全部零件（含私有字段与静态成员）</div>
+        <div class="demo-preview">
+          <ul id="js35-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js35-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            class Trainee {
+              #secret = "只有我能看";
+              static total = 0;
+
+              constructor(name, days) {
+                this.name = name;
+                this.days = days || 0;
+                Trainee.total += 1;
+              }
+
+              greet() {
+                return '我是' + this.name + '，已练 ' + this.days + ' 天';
+              }
+
+              get level() {
+                if (this.days >= 60) { return "小成"; }
+                if (this.days >= 20) { return "入门"; }
+                return "新来";
+              }
+
+              set level(value) {
+                this.days = value === "小成" ? 60 : 20;
+              }
+
+              static describe() {
+                return '目前共有 ' + Trainee.total + ' 位学员';
+              }
+            }
+
+            var t1 = new Trainee("墨白", 21);
+            var t2 = new Trainee("路人甲");
+            say2('构造实例：' + t1.greet() + '；' + t2.greet());
+            say2('getter 像属性一样读：t1.level → ' + t1.level + '，t2.level → ' + t2.level);
+            t2.level = "小成";
+            say2('setter 像属性一样写：t2.level = "小成" 之后 days = ' + t2.days + '，level = ' + t2.level);
+            say2('静态成员挂在类上：Trainee.describe() → ' + Trainee.describe());
+            say2('实例上没有 static：t1.describe → ' + t1.describe);
+
+            say2('私有字段从外部访问：t1["#secret"]（当普通字符串键去读）→ ' + t1["#secret"]
+              + '；真正写成 t1.#secret 是语法错误，解析阶段就被拦下，这里写不出来');
+
+            say2('方法在原型上，不在实例上：Object.hasOwn(t1, "greet") → ' + Object.hasOwn(t1, "greet")
+              + '，typeof t1.greet → ' + typeof t1.greet);
+            say2('instanceof：t1 instanceof Trainee → ' + (t1 instanceof Trainee));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js35-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js35-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            class Trainee {
+              #secret = "只有我能看";
+              static total = 0;
+
+              constructor(name, days) {
+                this.name = name;
+                this.days = days || 0;
+                Trainee.total += 1;
+              }
+
+              greet() {
+                return '我是' + this.name + '，已练 ' + this.days + ' 天';
+              }
+
+              get level() {
+                if (this.days >= 60) { return "小成"; }
+                if (this.days >= 20) { return "入门"; }
+                return "新来";
+              }
+
+              set level(value) {
+                this.days = value === "小成" ? 60 : 20;
+              }
+
+              static describe() {
+                return '目前共有 ' + Trainee.total + ' 位学员';
+              }
+            }
+
+            var t1 = new Trainee("墨白", 21);
+            var t2 = new Trainee("路人甲");
+            say2('构造实例：' + t1.greet() + '；' + t2.greet());
+            say2('getter 像属性一样读：t1.level → ' + t1.level + '，t2.level → ' + t2.level);
+            t2.level = "小成";
+            say2('setter 像属性一样写：t2.level = "小成" 之后 days = ' + t2.days + '，level = ' + t2.level);
+            say2('静态成员挂在类上：Trainee.describe() → ' + Trainee.describe());
+            say2('实例上没有 static：t1.describe → ' + t1.describe);
+
+            say2('私有字段从外部访问：t1["#secret"]（当普通字符串键去读）→ ' + t1["#secret"]
+              + '；真正写成 t1.#secret 是语法错误，解析阶段就被拦下，这里写不出来');
+
+            say2('方法在原型上，不在实例上：Object.hasOwn(t1, "greet") → ' + Object.hasOwn(t1, "greet")
+              + '，typeof t1.greet → ' + typeof t1.greet);
+            say2('instanceof：t1 instanceof Trainee → ' + (t1 instanceof Trainee));
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里有一行值得多看两眼：<code>t1["#secret"]</code> 读出来是 <code>undefined</code>——
+        因为 <code>#secret</code> 不是一个普通的属性名，
+        用方括号配字符串去“猜”它，什么也拿不到；
+        而真正写成 <code>t1.#secret</code> 的话，浏览器在<strong>解析阶段</strong>就报语法错误，
+        脚本根本跑不起来。私有字段的私有，是语法级别的私有，不是靠约定。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">class 与构造函数的三点不同</div>
+        <ul style="margin:0">
+          <li><strong>不能提前用</strong>：类声明也有“暂时性死区”，在 <code>class</code> 之前 <code>new</code> 它会报
+            <code>ReferenceError</code>（而函数声明是可以提前调用的，第二十八式）；</li>
+          <li><strong>不能用普通函数的方式调用</strong>：<code>Trainee("墨白")</code>（不加 new）会报
+            <code>TypeError: Class constructor cannot be invoked without 'new'</code>；</li>
+          <li><strong>类体里永远是严格模式</strong>，而且类的方法默认<strong>不可枚举</strong>——
+            因此 <code>for…in</code> 不会翻出方法来（构造函数原型上的方法会）。</li>
+        </ul>
+      </div>
+
+      <h2>继承：extends 与 super</h2>
+      <p>
+        “学员”与“教练”共享一部分行为时，不必复制代码——让一个类<strong>继承</strong>另一个类：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="继承的写法">
+        class Member {
+          constructor(name) { this.name = name; }
+          greet() { return `我是${this.name}`; }
+        }
+
+        class Coach extends Member {          // Coach 继承 Member
+          constructor(name, field) {
+            super(name);                      // 先调用父类构造函数（必须先于 this）
+            this.field = field;               // 再加自己的属性
+          }
+          greet() {                           // 重写父类方法
+            return super.greet() + `，教${this.field}`;
+          }
+          teach() { return `${this.name}开始授课`; }
+        }
+
+        const c = new Coach("墨白", "站桩");
+        c.greet();            // "我是墨白，教站桩"（用了父类实现 + 自己的补充）
+        c instanceof Coach;   // true
+        c instanceof Member;  // true —— 原型链上有 Member
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 继承现场：super、重写与 instanceof 链</div>
+        <div class="demo-preview">
+          <ul id="js35-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js35-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            class Base {
+              constructor(name) { this.name = name; }
+              greet() { return '我是' + this.name; }
+              static kind() { return "普通成员"; }
+            }
+
+            class Coach extends Base {
+              constructor(name, field) {
+                super(name);
+                this.field = field;
+              }
+              greet() {
+                return super.greet() + '，教' + this.field;
+              }
+              teach() { return this.name + '开始授课：' + this.field; }
+              static kind() { return "教练"; }
+            }
+
+            var c = new Coach("墨白", "站桩");
+            var m = new Base("路人甲");
+            say3('普通成员：' + m.greet());
+            say3('教练（重写了 greet，并调用 super）：' + c.greet());
+            say3('子类自有方法：' + c.teach());
+            say3('父类的实例没有子类方法：typeof m.teach → ' + typeof m.teach);
+            say3('instanceof 会沿原型链：c instanceof Coach → ' + (c instanceof Coach)
+              + '，c instanceof Base → ' + (c instanceof Base)
+              + '，m instanceof Coach → ' + (m instanceof Coach));
+            say3('静态方法也被继承：Coach.kind() → ' + Coach.kind() + '；Base.kind() → ' + Base.kind());
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js35-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js35-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            class Base {
+              constructor(name) { this.name = name; }
+              greet() { return '我是' + this.name; }
+              static kind() { return "普通成员"; }
+            }
+
+            class Coach extends Base {
+              constructor(name, field) {
+                super(name);
+                this.field = field;
+              }
+              greet() {
+                return super.greet() + '，教' + this.field;
+              }
+              teach() { return this.name + '开始授课：' + this.field; }
+              static kind() { return "教练"; }
+            }
+
+            var c = new Coach("墨白", "站桩");
+            var m = new Base("路人甲");
+            say3('普通成员：' + m.greet());
+            say3('教练（重写了 greet，并调用 super）：' + c.greet());
+            say3('子类自有方法：' + c.teach());
+            say3('父类的实例没有子类方法：typeof m.teach → ' + typeof m.teach);
+            say3('instanceof 会沿原型链：c instanceof Coach → ' + (c instanceof Coach)
+              + '，c instanceof Base → ' + (c instanceof Base)
+              + '，m instanceof Coach → ' + (m instanceof Coach));
+            say3('静态方法也被继承：Coach.kind() → ' + Coach.kind() + '；Base.kind() → ' + Base.kind());
+          </script>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="callout-title">经验：组合往往比继承更好用</div>
+        <p style="margin:0">
+          继承适合“确实是一种”（教练确实是一种成员）；
+          但当层次变深、“到底该继承谁”开始纠结时，通常说明该换成<strong>组合</strong>：
+          把能力做成小对象或函数，需要谁就“装”给谁
+          （比如 <code>canTeach(coach)</code>、把 <code>logger</code> 作为参数传进去）。
+          JavaScript 只支持单继承，这一条建议在真实项目里帮你避开的坑比你想的多。
+        </p>
+      </div>
+
+      <h2>this 的三种“搬运”方式：call / apply / bind</h2>
+      <p>
+        <code>this</code> 由“怎么调用”决定（第三十一、三十三式），
+        而这三个方法可以<strong>临时指定</strong>它：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>怎么传参</th>
+            <th>返回什么</th>
+            <th>典型用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fn.call(thisArg, a, b)</code></td><td>参数一个个写</td><td>函数的返回值</td><td>借用方法、一次性指定 this</td></tr>
+          <tr><td><code>fn.apply(thisArg, [a, b])</code></td><td>参数放数组</td><td>函数的返回值</td><td>把数组当成参数表传进去</td></tr>
+          <tr><td><code>fn.bind(thisArg, a)</code></td><td>可预先固定部分参数</td><td><strong>新函数</strong>（this 被锁住）</td><td>给回调绑定 this（事件处理里最常见）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 方法借用与 this 绑定（含“回调丢 this”的修法）</div>
+        <div class="demo-preview">
+          <ul id="js35-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js35-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var person = {
+              name: "墨白",
+              intro: function (suffix) {
+                return '我是' + this.name + (suffix || "");
+              }
+            };
+            var other = { name: "路人甲" };
+
+            say4('正常调用：' + person.intro());
+            say4('call 借用：' + person.intro.call(other, "，请多指教"));
+            say4('apply 借用（参数用数组）：' + person.intro.apply(other, ["，久仰"]));
+
+            var bound = person.intro.bind(other, "（被 bind 固定住了）");
+            say4('bind 生成新函数：' + bound() + '；再传参数也改不掉被固定的 this');
+
+            var counter = {
+              total: 0,
+              add: function (n) { this.total += n; return this.total; }
+            };
+            var addAlone = counter.add;
+            var brokenNote;
+            try {
+              brokenNote = '得到 ' + addAlone(5);
+            } catch (err) {
+              brokenNote = err.name + '：' + err.message;
+            }
+            say4('把方法摘出来直接调用 → ' + brokenNote + '（严格模式下 this 是 undefined）');
+
+            var fixed = counter.add.bind(counter);
+            say4('bind 之后再调用 → ' + fixed(5) + '，counter.total 变成 ' + counter.total);
+
+            // 用回调演示“this 丢失”与“箭头函数修法”
+            [1, 2].forEach(function (n) {
+              var obj = {
+                label: "第 " + n + " 项",
+                showBroken: function () { return this === undefined ? '（this 丢了）' : this.label; },
+                showArrow: function () {
+                  var self = this;
+                  return (() => self.label)();
+                }
+              };
+              var cb = obj.showBroken;
+              say4('直接传方法指针 → ' + cb());
+              say4('用箭头函数包一层 → ' + obj.showArrow());
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js35-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js35-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var person = {
+              name: "墨白",
+              intro: function (suffix) {
+                return '我是' + this.name + (suffix || "");
+              }
+            };
+            var other = { name: "路人甲" };
+
+            say4('正常调用：' + person.intro());
+            say4('call 借用：' + person.intro.call(other, "，请多指教"));
+            say4('apply 借用（参数用数组）：' + person.intro.apply(other, ["，久仰"]));
+
+            var bound = person.intro.bind(other, "（被 bind 固定住了）");
+            say4('bind 生成新函数：' + bound() + '；再传参数也改不掉被固定的 this');
+
+            var counter = {
+              total: 0,
+              add: function (n) { this.total += n; return this.total; }
+            };
+            var addAlone = counter.add;
+            var brokenNote;
+            try {
+              brokenNote = '得到 ' + addAlone(5);
+            } catch (err) {
+              brokenNote = err.name + '：' + err.message;
+            }
+            say4('把方法摘出来直接调用 → ' + brokenNote + '（严格模式下 this 是 undefined）');
+
+            var fixed = counter.add.bind(counter);
+            say4('bind 之后再调用 → ' + fixed(5) + '，counter.total 变成 ' + counter.total);
+
+            [1, 2].forEach(function (n) {
+              var obj = {
+                label: "第 " + n + " 项",
+                showBroken: function () { return this === undefined ? '（this 丢了）' : this.label; },
+                showArrow: function () {
+                  var self = this;
+                  return (() => self.label)();
+                }
+              };
+              var cb = obj.showBroken;
+              say4('直接传方法指针 → ' + cb());
+              say4('用箭头函数包一层 → ' + obj.showArrow());
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        这三兄弟在真实项目里的出场顺序是：<strong><code>bind</code> 最多</strong>
+        （把事件回调里的 <code>this</code> 锁在组件上），<code>call</code> 偶尔用来借用方法，
+        <code>apply</code> 更少见（展开语法 <code>...</code> 已经把它最常见的用途接走了）。
+      </p>
+
+      <h2>把零件拼起来：一个 Todo 类</h2>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 综合演练：用 class 写一个待办清单（含私有字段与 getter）</div>
+        <div class="demo-preview">
+          <ul id="js35-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js35-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            class TodoList {
+              #items = [];
+
+              add(text) {
+                this.#items.push({ text: text, done: false });
+                return this;                       // 返回自己 → 可以链式调用
+              }
+
+              toggle(index) {
+                var item = this.#items[index];
+                if (!item) { return this; }
+                item.done = !item.done;
+                return this;
+              }
+
+              get size() { return this.#items.length; }
+
+              get remaining() { return this.#items.filter(function (i) { return !i.done; }).length; }
+
+              toString() {
+                return this.#items.map(function (i, index) {
+                  return (index + 1) + '. ' + (i.done ? '✔' : '□') + ' ' + i.text;
+                }).join('　');
+              }
+            }
+
+            var todo = new TodoList();
+            todo.add("抄写页面骨架").add("拆解一个网页").add("写自己的主页");
+            say5('添加三项后：' + todo.toString());
+            say5('size = ' + todo.size + '，remaining = ' + todo.remaining);
+
+            todo.toggle(1);
+            say5('完成第二项后：' + todo.toString());
+            say5('size = ' + todo.size + '，remaining = ' + todo.remaining);
+
+            say5('链式调用：todo.add("复习").toggle(0).size → ' + todo.add("复习").toggle(0).size);
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js35-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js35-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            class TodoList {
+              #items = [];
+
+              add(text) {
+                this.#items.push({ text: text, done: false });
+                return this;                       // 返回自己 → 可以链式调用
+              }
+
+              toggle(index) {
+                var item = this.#items[index];
+                if (!item) { return this; }
+                item.done = !item.done;
+                return this;
+              }
+
+              get size() { return this.#items.length; }
+
+              get remaining() { return this.#items.filter(function (i) { return !i.done; }).length; }
+
+              toString() {
+                return this.#items.map(function (i, index) {
+                  return (index + 1) + '. ' + (i.done ? '✔' : '□') + ' ' + i.text;
+                }).join('　');
+              }
+            }
+
+            var todo = new TodoList();
+            todo.add("抄写页面骨架").add("拆解一个网页").add("写自己的主页");
+            say5('添加三项后：' + todo.toString());
+            say5('size = ' + todo.size + '，remaining = ' + todo.remaining);
+
+            todo.toggle(1);
+            say5('完成第二项后：' + todo.toString());
+            say5('size = ' + todo.size + '，remaining = ' + todo.remaining);
+
+            say5('链式调用：todo.add("复习").toggle(0).size → ' + todo.add("复习").toggle(0).size);
+          </script>
+        </div>
+      </div>
+      <p>
+        这个小类里集中了本式的所有关键点：
+        <strong>私有字段</strong> <code>#items</code> 把数据锁在里面、
+        <strong>getter</strong> 提供只读的统计、
+        <strong>方法返回 <code>this</code></strong> 让调用可以链起来，
+        而外部只能通过 <code>add</code> / <code>toggle</code> 这些“明面上的门”来改变它。
+        这正是面向对象最初想解决的问题：<strong>把数据和操作数据的方法放在一起，并控制别人怎么碰它</strong>。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>new</code> 做了四件事：造对象、绑 <code>this</code>、执行函数体、返回对象；</li>
+        <li>属性写在实例上、方法挂在原型上；原型链让实例“借到”方法，<code>instanceof</code> 顺着链判断；</li>
+        <li><code>class</code> 是原型写法的语法糖，但更严格：不能提前用、不能不加 <code>new</code> 调用、类体自动严格模式、方法不可枚举；</li>
+        <li>类的零件：<code>constructor</code>、方法、<code>get</code>/<code>set</code>、<code>static</code>、私有字段 <code>#</code>；</li>
+        <li>继承用 <code>extends</code>，构造函数里先 <code>super()</code>，重写时可 <code>super.方法()</code> 复用父类实现；</li>
+        <li><code>call</code> / <code>apply</code> / <code>bind</code> 用来指定 <code>this</code>，
+          其中 <code>bind</code> 返回新函数，是回调场景的主力；</li>
+        <li>方法被摘出来单独调用会丢 <code>this</code>；修法有二：<code>bind</code> 绑定，
+          或用箭头函数包一层（箭头函数沿用外层的 <code>this</code>）；</li>
+        <li>继承不是唯一出路：层次一深就该考虑组合。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十五式</div>
+        <ol>
+          <li>写一个 <code>Book</code> 类：书名、作者、页数；一个 <code>get summary()</code>
+            返回「《书名》／作者／N 页」；再写一个静态方法 <code>Book.count()</code>
+            统计一共创建过几本书（用静态字段）。</li>
+          <li>写 <code>EBook extends Book</code>，多一个文件大小字段，
+            重写 <code>summary</code>，并在其中调用父类版本补充信息。</li>
+          <li>思考：为什么把方法挂在原型（或写在类里）比在每个实例上各写一份更划算？
+            除了省内存，还有什么好处？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="Book 类">
+            "use strict";
+
+            class Book {
+              static #total = 0;
+
+              constructor(title, author, pages) {
+                this.title = title;
+                this.author = author;
+                this.pages = pages;
+                Book.#total += 1;
+              }
+
+              get summary() {
+                return `《${this.title}》／${this.author}／${this.pages} 页`;
+              }
+
+              static count() {
+                return Book.#total;
+              }
+            }
+
+            console.log(new Book("修行笔记", "墨白", 260).summary);
+            console.log(new Book("网站是怎么写成的", "路人甲", 320).summary);
+            console.log(Book.count());   // 2
+          </script>
+          <p>
+            注意两点：<code>get summary()</code> 读的时候<strong>不加括号</strong>
+            （写成 <code>book.summary</code>）；静态字段也可以是私有的，
+            用 <code>static #total</code> 表示“这个计数器只有类自己能改”。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="EBook 继承 Book">
+            "use strict";
+
+            class EBook extends Book {
+              constructor(title, author, pages, sizeMB) {
+                super(title, author, pages);
+                this.sizeMB = sizeMB;
+              }
+
+              get summary() {
+                return `${super.summary}／电子版 ${this.sizeMB} MB`;
+              }
+            }
+
+            const ebook = new EBook("修行笔记（电子版）", "墨白", 260, 4.2);
+            console.log(ebook.summary);
+            // 《修行笔记（电子版）》／墨白／260 页／电子版 4.2 MB
+            console.log(ebook instanceof EBook, ebook instanceof Book);  // true true
+          </script>
+          <p>
+            两个细节：子类构造函数里<strong>必须先 <code>super()</code> 再用 <code>this</code></strong>
+            （要用父类的初始化逻辑先把对象建起来）；getter 里用
+            <code>super.summary</code> 可以复用父类写法，只补上自己的部分。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            首先是<strong>省内存</strong>：一千个实例只存一份方法，而不是一千份。
+            其次（也是更重要的）是<strong>一致性</strong>：方法只有一处，改一次全体生效——
+            演示里“改了原型上的方法，所有实例立刻跟着变”就是这个意思；
+            如果每个实例各存一份，就得一千次修改，漏改任何一处都会长出“行为不一致的怪对象”。
+            第三个好处是<strong>可检查性</strong>：<code>instanceof</code>、
+            <code>Object.hasOwn</code>、原型链都建立在“属性在实例、方法在原型”这条分工上，
+            调试时能一眼看出“这个能力是这一类东西共有的，还是这一个实例特有的”。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把错误当成信息：错误处理与调试。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>第一回 · 基础篇 · MDN 引路 | 纯静态网页的修行</title>
-<meta name="description" content="HTML、CSS、JavaScript 基础知识的推荐学习路线，全部指向 MDN Web Docs。">
+<title>第一回 · 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="HTML、CSS、JavaScript 三样基本功的完整教程：四十三式从零讲到能写能查，不再需要自己摸索入门路线。">
 <script src="../assets/js/loader.js"></script>
 </head>
 <body data-page="basics">
@@ -15,141 +15,89 @@
     <main id="main">
 
       <p class="chapter-lead">
-        工欲善其事，必先利其器。在进入 Bootstrap 与 jQuery 的修炼之前，你需要先扎好三样基本功：
-        HTML、CSS、JavaScript。
+        工欲善其事，必先利其器。在拜会 Bootstrap 与 jQuery 之前，先把三样基本功练扎实：
+        HTML 立骨架、CSS 裁外衣、JavaScript 点灵魂。这一回不再只是画路线图——我们一式一式地陪你练。
       </p>
 
       <p>
-        这三样基本功，我们<strong>不在这里重复造轮子</strong>——互联网上有一处公认的武学圣地：
-        <a href="https://developer.mozilla.org/zh-CN/">MDN Web Docs（Mozilla 开发者网络）</a>。
-        它的中文文档质量极高、结构清晰、随学随查，是学习网页技术最值得信赖的地方。
-        下面的路线图告诉你<strong>按什么顺序学、学到什么程度</strong>，就可以回来继续修炼。
+        基础篇按<strong>先会不会、再熟不熟、最后全不全</strong>的顺序编排：
+        第一部分讲 HTML（网页的结构），第二部分讲 CSS（网页的样式），第三部分讲 JavaScript（网页的行为）。
+        每一式都是“<strong>讲解 → 现场演示 → 看源码 → 练功</strong>”的节奏；
+        读完之后，这一回还兼作字典：忘了某个标签、属性或方法，回头翻对应的一式即可。
       </p>
 
-      <h2>路线总览</h2>
-      <p>建议按以下顺序推进。每一站都是一个里程碑，练熟了再走下一站。</p>
+      <div class="callout">
+        <div class="callout-title">修炼建议</div>
+        <ul style="margin:0">
+          <li><strong>按顺序读</strong>：三部分是从零搭起来的，跳着读容易断线；已有基础的话，也可从自己最弱的一式切入；</li>
+          <li><strong>动手才算学过</strong>：每个演示都值得亲手改一改——改坏了刷新就重来，没有代价；</li>
+          <li><strong>随时练手</strong>：打开<a href="../playground/index.html">练功场</a>，HTML / CSS / JS 三栏随便写、即时看效果，代码存在你自己的浏览器里；</li>
+          <li><strong>卡住先查</strong>：顶栏的搜索框（按 <kbd>/</kbd> 聚焦）能搜全站，包括这一回的每一式。</li>
+        </ul>
+      </div>
+
+      <h2>本回目录</h2>
+      <div id="chapter-list"></div>
+
+      <h2>三部分速览</h2>
+      <p>
+        本回规划四十三式：HTML 12 式、CSS 14 式、JavaScript 16 式，外加一式结业。
+        每一部分的最后一式都是<strong>综合修炼</strong>——把该部分学到的东西合成一个能跑的作品。
+      </p>
       <table>
         <thead>
           <tr>
-            <th>里程碑</th>
-            <th>内容</th>
-            <th>MDN 入口</th>
-            <th>修成标准</th>
+            <th>部分</th>
+            <th>式数</th>
+            <th>你会学到</th>
+            <th>练成标准</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>第一站</td>
-            <td>HTML 基础：标签、语义、表单</td>
-            <td><a href="https://developer.mozilla.org/zh-CN/docs/Learn/HTML">MDN · HTML 学习区</a></td>
-            <td>能手写常见标签，知道“语义化”是什么</td>
+            <td><strong>HTML · 骨架</strong></td>
+            <td>12 式</td>
+            <td>文档结构、文本、列表与链接、图片、音视频、表格、表单、语义化、全局属性、无障碍</td>
+            <td>能手写一个语义清晰、结构完整的页面</td>
           </tr>
           <tr>
-            <td>第二站</td>
-            <td>CSS 基础：选择器、盒模型、颜色与文本</td>
-            <td><a href="https://developer.mozilla.org/zh-CN/docs/Learn/CSS">MDN · CSS 学习区</a></td>
-            <td>能看懂“这个元素为什么长这样”</td>
+            <td><strong>CSS · 外衣</strong></td>
+            <td>14 式</td>
+            <td>选择器与层叠、盒模型、单位与颜色、排版、背景边框、定位、Flex、Grid、响应式、过渡动画、变量</td>
+            <td>能独立排出一个响应式的多栏页面，并说清每个值的来历</td>
           </tr>
           <tr>
-            <td>第三站</td>
-            <td>CSS 布局：Flexbox 与 Grid</td>
-            <td><a href="https://developer.mozilla.org/zh-CN/docs/Learn/CSS/CSS_layout">MDN · CSS 布局</a></td>
-            <td>能独立排出一个三栏布局（这一站是重头戏）</td>
+            <td><strong>JavaScript · 灵魂</strong></td>
+            <td>16 式</td>
+            <td>语法与类型、运算符、流程控制、函数与作用域、数组与对象、类与原型、错误处理、DOM、事件、异步、存储</td>
+            <td>能写脚本读取表单、操作页面、记住数据、处理异步</td>
           </tr>
           <tr>
-            <td>第四站</td>
-            <td>JavaScript 语法：变量、函数、对象、数组</td>
-            <td><a href="https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript">MDN · JavaScript 学习区</a></td>
-            <td>能读懂并写出简单函数</td>
-          </tr>
-          <tr>
-            <td>第五站</td>
-            <td>DOM 操作：找到元素、修改元素</td>
-            <td><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Document_Object_Model">MDN · DOM 指南</a></td>
-            <td>能点一个按钮、改一段文字</td>
+            <td><strong>结业</strong></td>
+            <td>1 式</td>
+            <td>回顾全篇、查文档的方法、下一步往哪走</td>
+            <td>有一张自己的“继续修行地图”</td>
           </tr>
         </tbody>
       </table>
 
-      <div class="callout warn">
-        <div class="callout-title">关于布局：给你打个预防针</div>
-        <p style="margin:0">
-          CSS 布局是新手最容易卡住的地方，请务必把 <strong>Flexbox 与 Grid</strong> 练熟。
-          好消息是：第二回的 Bootstrap 栅格系统，本质上就是把 Grid/Flex 封装成了好用的类名——
-          基础打得好，后面事半功倍；基础虚，后面步步维艰。
-        </p>
-      </div>
-
-      <h2>动手第一课：你的第一个页面</h2>
-      <p>
-        看再多，不如亲手写一页。这一步不要 MDN、不要插件，只要一个文本编辑器和一个浏览器——
-        十分钟就能完成：
-      </p>
-      <ol>
-        <li>在桌面或任意位置新建一个文件夹，取名 <code>my-first-page</code>；</li>
-        <li>在文件夹里新建一个文本文件，<strong>重命名为 <code>index.html</code></strong>
-          （注意后缀必须是 <code>.html</code>，不是 <code>.txt</code>）；</li>
-        <li>用编辑器打开它，把下面这段代码原样抄进去、保存；</li>
-        <li>回到文件夹，<strong>双击 <code>index.html</code></strong>——浏览器里就出现了你的第一个网页；</li>
-        <li>把标题里那句话改掉，保存，再回浏览器按 <code>F5</code> 刷新——页面跟着变了，这就叫“所见即所得”。</li>
-      </ol>
-
-      <script type="text/plain" data-lang="html" data-title="第一个页面：index.html">
-        <!doctype html>
-        <html lang="zh-CN">
-        <head>
-          <meta charset="utf-8">
-          <title>我的第一个页面</title>
-        </head>
-        <body>
-          <h1>你好，江湖！</h1>
-          <p>这是我亲手写下的第一个网页。</p>
-        </body>
-        </html>
-      </script>
-
-      <div class="callout">
-        <div class="callout-title">三步心法：骨架、外衣、灵魂</div>
-        <ul style="margin:0">
-          <li><strong>HTML 是骨架</strong>——上面的 <code>h1</code>、<code>p</code> 就是标题与段落；</li>
-          <li><strong>CSS 是外衣</strong>——决定颜色、字号、间距与布局；</li>
-          <li><strong>JavaScript 是灵魂</strong>——让页面能对点击、输入做出反应。</li>
-        </ul>
-      </div>
-
-      <p>
-        再教你两个好习惯：其一，遇到好看的网页，右键选“查看网页源代码”，看看别人怎么写的——
-        这是最好的免费教材；其二，嫌新建文件麻烦时，先来本站的
-        <a href="../playground/index.html">练功场</a>——三栏编辑器，随手写、随手看效果，
-        代码还会自动存在你自己的浏览器里。
-      </p>
-
-      <div class="callout warn">
-        <div class="callout-title">新手常踩的三个小坑</div>
-        <ul style="margin:0">
-          <li>改了代码浏览器没变化——先确认<strong>已保存</strong>，再按 <code>F5</code> 刷新；</li>
-          <li>页面出现乱码——在 <code>&lt;head&gt;</code> 里补上 <code>&lt;meta charset="utf-8"&gt;</code>；</li>
-          <li>双击打开后是代码而不是网页——多半是后缀写成了 <code>.txt</code>，改名即可。</li>
-        </ul>
-      </div>
-
-      <h2>修成标准</h2>
-      <p>当你能做到下面两件事，就可以回来进入第二回了：</p>
+      <h2>把这一回当字典用</h2>
       <ul>
-        <li>不看教程，手写一个带标题、段落、图片和链接的 HTML 页面；</li>
-        <li>用 CSS 把它排成“页头 + 两栏内容 + 页脚”的布局，并让它在手机宽度下不散架。</li>
+        <li><strong>忘了标签怎么写？</strong>看侧边栏定位到对应的一式，正文里通常有一张属性速查表；</li>
+        <li><strong>忘了某个取值是什么效果？</strong>用顶栏搜索（按 <kbd>/</kbd> 聚焦）搜属性名，命中即跳转；</li>
+        <li><strong>想看真实效果？</strong>每一式的演示都可运行，源码就在效果下方，照着抄、随手改；</li>
+        <li><strong>想要更细的条目？</strong>见下方“课外阅读”——那里是官方文档，负责把细节讲到穷尽。</li>
       </ul>
 
-      <div class="practice">
-        <div class="practice-title">练功 · 第一回</div>
-        <ol>
-          <li>去 MDN 把“HTML 学习区”的<strong>入门</strong>部分过一遍（约一到两天）。</li>
-          <li>每天手写一个小页面：自我介绍页、菜谱页、宠物介绍页……什么都可以，写就对了。</li>
-          <li>遇到不懂的属性或标签，直接去 MDN 搜索——养成“查文档”的习惯，这是整个修行的内功。</li>
-        </ol>
+      <div class="callout">
+        <div class="callout-title">课外阅读：MDN Web Docs</div>
+        <p style="margin:0">
+          本站负责把知识讲成一条线，把新手从零带到能写能查；
+          <a href="https://developer.mozilla.org/zh-CN/docs/Learn">MDN Web Docs</a>
+          则是网工的公共藏经阁：每个标签、属性、方法都有权威词条。
+          学完某一部分后，去 MDN 翻同主题的页面，看看还有哪些细节本站没展开——那是很有效的进阶练法。
+        </p>
       </div>
-
-      <blockquote>练完这一回，回到这里。第二回，我们拜会江湖前辈 Bootstrap。</blockquote>
 
     </main>
     <footer class="site-footer" id="site-footer"></footer>

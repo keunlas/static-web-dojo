@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十五式 · 层叠、继承与优先级 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="层叠的四大裁决因素、继承与四个关键字（inherit/initial/unset/revert）、!important 的正确用法、@layer 分层，以及样式不生效的排查清单。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-15">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        CSS 名字里的那个 C（Cascading）常被忽略，但它才是这门手艺的核心：
+        <strong>当多条规则同时指向一个元素，到底听谁的</strong>。
+        这一式把“谁说了算”的规矩一次讲清——它也是“为什么我这里改了没反应”的终极答案。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>说清层叠的四步裁决：来源与重要性 → 层（<code>@layer</code>）→ 特异性 → 出现顺序</li>
+          <li>知道哪些属性会继承、哪些不会，会用 <code>inherit</code> / <code>initial</code> / <code>unset</code> / <code>revert</code></li>
+          <li>知道 <code>!important</code> 什么时候值得用、什么时候是自找麻烦</li>
+          <li>会按一份排查清单定位“样式不生效”的问题</li>
+        </ul>
+      </div>
+
+      <h2>层叠：四条裁决规则</h2>
+      <p>
+        浏览器给一个元素算样式时，会把所有命中的规则拿出来排队，依次比四件事——
+        <strong>前面比出结果就不再看后面</strong>：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>顺序</th>
+            <th>比什么</th>
+            <th>典型情况</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>来源与重要性</strong></td>
+            <td>我们写的作者样式会盖过浏览器默认样式；带 <code>!important</code> 的比不带的更“重”</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>层（<code>@layer</code>）</strong></td>
+            <td>同一来源内的普通声明：层里写的比层外写的弱；层与层之间按声明顺序，后声明的赢</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>特异性（权重）</strong></td>
+            <td>第十四式的四位计分板：行内 &gt; ID &gt; 类/属性/伪类 &gt; 元素/伪元素</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>出现顺序</strong></td>
+            <td>四条全平：谁写在后面听谁的（“层叠”的字面意思）</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        把“来源与重要性”展开，会得到一张更细的顺序表（从弱到强，适用于普通项目的理解）：
+      </p>
+      <ol>
+        <li>浏览器默认样式（你能用 <code>* { margin: 0 }</code> 之类的重置盖掉它）；</li>
+        <li>用户自己设的样式（例如浏览器设置里“最小字号”——这是无障碍入口，别轻易无视）；</li>
+        <li><strong>我们写的普通样式</strong>（日常写的都在这层）；</li>
+        <li>动画（<code>@keyframes</code> 正在播放时的值）；</li>
+        <li><strong>我们写的 <code>!important</code></strong>；</li>
+        <li>用户设的 <code>!important</code>；</li>
+        <li>浏览器默认的 <code>!important</code>；</li>
+        <li>过渡（<code>transition</code> 进行中的值，短暂但优先级最高）。</li>
+      </ol>
+      <p>
+        注意第 5、6 条：<strong>一旦加上 <code>!important</code>，来源的高低会反转</strong>——
+        普通样式里作者赢过用户，带了 <code>!important</code> 之后用户反而赢过作者。
+        这不是设计失误，而是给读者留的一把“最终否决权”。
+      </p>
+
+      <h2>特异性与顺序的现场实验</h2>
+      <p>
+        第十四式讲了计分板，这里看它怎么实战。下面两条规则写的是同一个元素，
+        但一条用元素选择器、一条用 ID 选择器：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · ID 赢过元素；同分规则则后写者赢</div>
+        <div class="demo-preview">
+          <style>
+            /* 规则 A：元素选择器（个位 1 分） */
+            #css15-demo1 p { color: #2f6db3; }
+            /* 规则 B：ID 选择器（百位 1 分）—— 无论写在哪里，它都赢 */
+            #css15-demo1 #win { color: #b03a2e; font-weight: 700; }
+            /* 规则 C 与 D 分数完全相同，看谁写在后面 */
+            #css15-demo1 .tie { background: #f4edde; }
+            #css15-demo1 .tie { background: #e9f0e4; }
+          </style>
+          <div id="css15-demo1">
+            <p>我是普通段落：被元素选择器选中，所以是蓝色。</p>
+            <p id="win">我带着 id="win"：ID 的分数更高，所以是朱砂色。</p>
+            <p class="tie" style="margin-bottom: 0">我带着 class="tie"：两条同分规则争我，
+              后写的那条（浅绿底）赢了。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css15-demo1">
+              <p>我是普通段落：被元素选择器选中，所以是蓝色。</p>
+              <p id="win">我带着 id="win"：ID 的分数更高，所以是朱砂色。</p>
+              <p class="tie" style="margin-bottom: 0">我带着 class="tie"：两条同分规则争我，
+                后写的那条（浅绿底）赢了。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            /* 规则 A：元素选择器（个位 1 分） */
+            #css15-demo1 p { color: #2f6db3; }
+            /* 规则 B：ID 选择器（百位 1 分）—— 无论写在哪里，它都赢 */
+            #css15-demo1 #win { color: #b03a2e; font-weight: 700; }
+            /* 规则 C 与 D 分数完全相同，看谁写在后面 */
+            #css15-demo1 .tie { background: #f4edde; }
+            #css15-demo1 .tie { background: #e9f0e4; }
+          </script>
+        </div>
+      </div>
+      <p>
+        你可以把演示里的两条 <code>.tie</code> 规则调换位置试试，背景色会跟着换——
+        这正是“同分看顺序”。在真实项目里，样式表可能有几千行，
+        <strong>能靠“写清楚”解决的场合，就别靠“比谁写得靠后”</strong>。
+      </p>
+
+      <h2>继承：有些属性会“传给孩子”</h2>
+      <p>
+        第二个常被混淆的机制是<strong>继承</strong>：某些属性如果元素自己没有写，
+        就会取父元素的计算值。规律大致是——<strong>跟“文字”有关的会继承，
+        跟“盒子”有关的不继承</strong>：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>属性</th>
+            <th>为什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>会继承</strong></td>
+            <td><code>color</code>、<code>font-*</code>、<code>line-height</code>、
+              <code>letter-spacing</code>、<code>text-align</code>、<code>visibility</code>、
+              <code>cursor</code>、<code>list-style</code>、<code>direction</code></td>
+            <td>文字风格应该整段统一，不必给每个 <code>span</code> 重复写一遍</td>
+          </tr>
+          <tr>
+            <td><strong>不继承</strong></td>
+            <td><code>margin</code>、<code>padding</code>、<code>border</code>、<code>width</code> /
+              <code>height</code>、<code>background</code>、<code>display</code>、
+              <code>position</code>、<code>overflow</code>、<code>box-shadow</code></td>
+            <td>“盒子”的行为是每个元素自己的事，若继承会让布局灾难</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 文字样式会继承，盒子样式不会</div>
+        <div class="demo-preview">
+          <style>
+            #css15-demo2 .parent {
+              color: #b03a2e; font-family: Georgia, "Songti SC", serif;
+              line-height: 2; border: 3px solid #d4cab0; padding: .6rem .9rem;
+            }
+            #css15-demo2 .child { font-size: .95rem; }
+          </style>
+          <div id="css15-demo2">
+            <div class="parent">
+              我是父容器：设了颜色、字体、行高，还有一圈边框。
+              <span class="child">我是里面的 span：颜色、字体、行高都继承了，但<span style="font-weight: 700">我没有边框</span>——盒子属性不外传。</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css15-demo2">
+              <div class="parent">
+                我是父容器：设了颜色、字体、行高，还有一圈边框。
+                <span class="child">我是里面的 span：颜色、字体、行高都继承了，但<span style="font-weight: 700">我没有边框</span>——盒子属性不外传。</span>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css15-demo2 .parent {
+              color: #b03a2e; font-family: Georgia, "Songti SC", serif;
+              line-height: 2; border: 3px solid #d4cab0; padding: .6rem .9rem;
+            }
+            #css15-demo2 .child { font-size: .95rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        有一个容易懵的特例：<code>text-decoration</code>（下划线、删除线）<strong>不继承</strong>，
+        但画的时候会“拖”到后代文字上——看上去像继承，其实不是。
+        你可以把它理解为“装饰沿着文本框画过去”，所以给父元素加下划线，
+        后代也会有下划线，但这跟继承机制无关。
+      </p>
+
+      <h2>四个关键字：inherit / initial / unset / revert</h2>
+      <p>
+        继承不是只能默默发生，也能手动指挥。每个属性都可以取这四个特殊值：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>关键字</th>
+            <th>含义</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>inherit</code></td>
+            <td>强行取父元素的值（对不继承的属性也管用）</td>
+            <td><code>border: inherit</code> 让子元素也长出一样的边框</td>
+          </tr>
+          <tr>
+            <td><code>initial</code></td>
+            <td>回到 CSS 规范里这个属性的初始值</td>
+            <td><code>color: initial</code> 通常变回黑色（不是父元素色）</td>
+          </tr>
+          <tr>
+            <td><code>unset</code></td>
+            <td>“没写”的意思：会继承的按继承处理，不继承的按 initial 处理</td>
+            <td>清掉一条本不该设的规则时最省事</td>
+          </tr>
+          <tr>
+            <td><code>revert</code></td>
+            <td>退回上一级来源（通常是浏览器默认样式）</td>
+            <td>在被打乱样式的页面里“回到原生样子”</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        还有一个大招：<code>all</code> 属性可以一次性作用于所有属性，
+        例如 <code>all: unset</code> 会把一个元素的所有样式清空（常用于隔离第三方组件）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 同一个父元素下，三个孩子三个说法</div>
+        <div class="demo-preview">
+          <style>
+            #css15-demo3 .box { color: #b03a2e; font-weight: 700; border: 2px solid #d4cab0; padding: .5rem .7rem; }
+            #css15-demo3 .i1 { color: inherit; }        /* 取父元素：朱砂 */
+            #css15-demo3 .i2 { color: initial; }        /* 回到初始值：黑 */
+            #css15-demo3 .i3 { border: inherit; }       /* 强行继承边框 */
+            #css15-demo3 .i4 { border: unset; }         /* 不继承的属性 → initial（无边框） */
+          </style>
+          <div id="css15-demo3">
+            <div class="box">
+              <p style="margin: 0">父元素：朱砂色、加粗、有边框。</p>
+              <p class="i1" style="margin: 0">子元素 color: inherit —— 还是朱砂色。</p>
+              <p class="i2" style="margin: 0">子元素 color: initial —— 回到默认的黑。</p>
+              <p class="i3" style="margin: 0">子元素 border: inherit —— 边框照抄父元素。</p>
+              <p class="i4" style="margin: 0">子元素 border: unset —— 边框消失（initial）。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css15-demo3">
+              <div class="box">
+                <p style="margin: 0">父元素：朱砂色、加粗、有边框。</p>
+                <p class="i1" style="margin: 0">子元素 color: inherit —— 还是朱砂色。</p>
+                <p class="i2" style="margin: 0">子元素 color: initial —— 回到默认的黑。</p>
+                <p class="i3" style="margin: 0">子元素 border: inherit —— 边框照抄父元素。</p>
+                <p class="i4" style="margin: 0">子元素 border: unset —— 边框消失（initial）。</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css15-demo3 .box { color: #b03a2e; font-weight: 700; border: 2px solid #d4cab0; padding: .5rem .7rem; }
+            #css15-demo3 .i1 { color: inherit; }        /* 取父元素：朱砂 */
+            #css15-demo3 .i2 { color: initial; }        /* 回到初始值：黑 */
+            #css15-demo3 .i3 { border: inherit; }       /* 强行继承边框 */
+            #css15-demo3 .i4 { border: unset; }         /* 不继承的属性 → initial（无边框） */
+          </script>
+        </div>
+      </div>
+
+      <h2>!important 与 @layer：两个“打破常规”的工具</h2>
+      <p>
+        <code>!important</code> 写在声明末尾（分号之前），它让这条声明在
+        “来源与重要性”那一关直接升级。值得用的场合其实很有限：
+      </p>
+      <ul>
+        <li><strong>覆盖改不动的第三方样式</strong>（例如嵌入的组件库）时，作为最后手段；</li>
+        <li><strong>工具类</strong>（如“隐藏”“居中”这类单用途类名），需要稳定压过组件样式时；</li>
+        <li><strong>临时调试</strong>：确认一下某条属性到底能不能生效，查完就删。</li>
+      </ul>
+      <p>
+        它的代价也很明确：一旦用上，别人想覆盖你就只能也加 <code>!important</code>，
+        于是样式表里长出一串互相攀比的感叹号，谁也不知道最后听谁的。
+        <strong>能用选择器写清楚的地方，不要用感叹号。</strong>
+      </p>
+      <p>
+        <code>@layer</code>（分层）是较新的机制，它给样式表内部排了一个优先级序列：
+        <strong>层与层之间按“声明顺序”比较，后声明的赢；而层内写的普通规则，
+        整体比层外写的普通规则更弱</strong>。这带来一个非常好用的性质：
+        你可以把第三方样式或自己的基础样式放进层里，之后再写页面样式时，
+        不必堆选择器权重就能轻松覆盖。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · @layer：先声明的层反而输</div>
+        <div class="demo-preview">
+          <style>
+            @layer base, special;   /* 先声明顺序：special 排在后面，所以 special 赢 */
+            #css15-demo4 .note { padding: .5rem .8rem; border: 2px solid #d4cab0; }
+            @layer special { #css15-demo4 .note { color: #b03a2e; border-color: #b03a2e; } }
+            @layer base { #css15-demo4 .note { color: #2f6db3; border-color: #2f6db3; } }
+          </style>
+          <div id="css15-demo4">
+            <p class="note" style="margin: 0">这段文字来自 special 层（写在 base 层之前，却赢了）。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css15-demo4">
+              <p class="note" style="margin: 0">这段文字来自 special 层（写在 base 层之前，却赢了）。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            @layer base, special;   /* 先声明顺序：special 排在后面，所以 special 赢 */
+            #css15-demo4 .note { padding: .5rem .8rem; border: 2px solid #d4cab0; }
+            @layer special { #css15-demo4 .note { color: #b03a2e; border-color: #b03a2e; } }
+            @layer base { #css15-demo4 .note { color: #2f6db3; border-color: #2f6db3; } }
+          </script>
+        </div>
+      </div>
+      <p>
+        把 <code>@layer base, special;</code> 里的顺序对调，颜色就会翻转——
+        这是“层与层之间按声明顺序，而不是按书写位置”的直接证据。
+        再仔细看一眼那圈边框：文字已经变成朱砂色，边框却还是灰的——
+        因为那条 <code>border</code> 规则写在<strong>层外</strong>，
+        而<strong>层外的普通规则强过层内的普通规则</strong>，所以两个层里的
+        <code>border-color</code> 都没能改掉它。这正是分层机制的用法：
+        想让一部分样式“好被覆盖”，把它放进层里；想让它“稳如泰山”，就留在层外。
+      </p>
+
+      <h2>排查清单：样式为什么没生效</h2>
+      <p>遇到“我改了没反应”，按这个顺序过一遍，九成的问题能在前三步找到：</p>
+      <ol>
+        <li><strong>选择器命中了吗</strong>：类名拼写、大小写、层级关系（<code>.a .b</code> 与 <code>.a &gt; .b</code> 不同）；</li>
+        <li><strong>打开开发者工具看 Styles 面板</strong>：命中的规则里，被划掉的那行就是输掉的那条，
+          右边还会写着它是被哪条规则盖住的；</li>
+        <li><strong>是不是继承来的</strong>：你在容器上改颜色，孩子自己有规则就会不听话；</li>
+        <li><strong>属性名或值写错</strong>：<code>colour</code>、<code>font-size: 14</code>（缺单位）、
+          全角冒号——这三样新手天天中；</li>
+        <li><strong>样式表的顺序</strong>：后引入的样式表赢；</li>
+        <li><strong>有行内样式或 <code>!important</code> 在场</strong>：它们的“分量”在前面几关就赢了；</li>
+        <li><strong>缓存</strong>：改了文件却不刷新，先按一下 <kbd>Ctrl</kbd> + <kbd>F5</kbd> 强制刷新。</li>
+      </ol>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>层叠四步：来源与重要性 → 层 → 特异性 → 出现顺序；前面分出胜负就不看后面；</li>
+        <li>普通样式里作者 &gt; 用户 &gt; 浏览器默认；带 <code>!important</code> 时顺序反转；</li>
+        <li>会继承的多是文字类属性，不会继承的多是盒子类属性；<code>text-decoration</code> 会“画过去”但不是继承；</li>
+        <li><code>inherit</code> 取父值、<code>initial</code> 取规范初始值、<code>unset</code> 看属性是否默认继承、<code>revert</code> 退回上一层来源；</li>
+        <li><code>!important</code> 只留给“覆盖第三方 / 工具类 / 临时调试”，它不是常规武器；</li>
+        <li><code>@layer</code> 让顺序可声明、让基础样式好被覆盖；层外普通规则强于层内普通规则；</li>
+        <li>样式不生效时，先看选择器、再看 DevTools 的划掉行、再看继承与顺序。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十五式</div>
+        <ol>
+          <li>写三条指向同一段落的规则（元素、类、ID 各一条），预测谁赢，
+            再用开发者工具验证你的预测。</li>
+          <li>用 <code>inherit</code> 与 <code>initial</code> 各写一条规则，
+            让一个子元素分别“照抄父元素颜色”与“回到默认颜色”。</li>
+          <li>思考：为什么规范要让“用户的 <code>!important</code>”强过“作者的 <code>!important</code>”？
+            它保护的是谁？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="三条规则">
+            p { color: #2f6db3; }
+            .intro { color: #2e7d32; }
+            #lead { color: #b03a2e; }
+          </script>
+          <p>
+            结论：<code>#lead</code> 赢（百位 1 分）。若把 <code>#lead</code> 换成第二个类选择器，
+            则变成“后写者赢”。在 Styles 面板里，输掉的两条会被划掉，
+            鼠标停在上面还能看到它是被谁盖住的——这比背规则更好用。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="照抄与重置">
+            .card { color: #b03a2e; }
+            .card .copy { color: inherit; }   /* 跟着父元素走 */
+            .card .reset { color: initial; }  /* 回到默认色 */
+          </script>
+          <p>
+            要点：<code>color</code> 本来就是会继承的属性，
+            <code>inherit</code> 的实战价值更多体现在“本来不继承”的属性上，
+            例如 <code>border: inherit</code>、<code>text-align: inherit</code>（按钮里的文字对齐）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            它保护的是<strong>读者</strong>，尤其是需要无障碍设置的读者。
+            例如低视力用户可能在浏览器里装插件强制“字号最小 20px、对比度更高”，
+            这类设置通常以用户 <code>!important</code> 的形式生效。
+            如果作者写的 <code>!important</code> 能压过它，那网站就可以无视用户的视力需求；
+            规范把最终否决权留给用户，是把“我的屏幕我做主”写进了语言本身。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把“方框”这件事说透：盒模型、内边距、外边距与溢出。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

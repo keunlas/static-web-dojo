@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四十式 · 浏览器与本地存储 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="window 与视口信息、navigator、location 与 hashchange、localStorage 与 sessionStorage，以及 file:// 下为什么不能 fetch 本地文件。">
+<script src="../assets/js/loader.js"></script>
+<script src="../data/demo-greeting.js"></script>
+</head>
+<body data-page="basics-40">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前面三十九式，我们都在操心“页面里”的事。这一式往外看一圈：
+        窗口有多大、人在哪一页、来过几次——浏览器早把这些藏在一排现成的对象里，
+        顺手还能在本地存点东西，关了页面也不丢。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>window</code> 读视口尺寸与滚动位置，知道它同时是全局对象</li>
+          <li>会用 <code>location</code> 读当前地址、改 <code>hash</code>，并监听 <code>hashchange</code></li>
+          <li>会用 <code>localStorage</code> 存取字符串与对象（<code>JSON.stringify</code> / <code>parse</code>）</li>
+          <li>分得清 <code>localStorage</code> 与 <code>sessionStorage</code>，知道存的是本机、不上传</li>
+          <li>说得清 file:// 下为什么 <code>fetch</code> 读不了本地文件，以及静态站点该怎么带数据</li>
+        </ul>
+      </div>
+
+      <h2>window：浏览器递给你的总管家</h2>
+      <p>
+        <code>window</code> 是页面里的“全局对象”：你在顶层写的 <code>var</code>、
+        声明的函数，最后都挂在它名下（所以 <code>window.setTimeout</code>
+        与直接写 <code>setTimeout</code> 是一回事）。它还负责报告浏览器窗口的状态：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>问它什么</th>
+            <th>回答</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>window.innerWidth / innerHeight</code></td><td>视口（内容区）的宽高，像素</td></tr>
+          <tr><td><code>window.scrollY / scrollX</code></td><td>已经向下 / 向右滚了多少</td></tr>
+          <tr><td><code>window.devicePixelRatio</code></td><td>屏幕像素比（高分屏常见 2，打印设计稿时会用到）</td></tr>
+          <tr><td><code>window.localStorage</code></td><td>本地仓库（本式后半段的主角）</td></tr>
+          <tr><td><code>window.scrollTo(x, y)</code></td><td>滚到指定位置（第三式的锚点跳转就是它的功劳）</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法</div>
+        <p style="margin:0">
+          浏览器不是只给你一块画布，而是给了你一整套屋子：窗口、地址、历史、仓库。
+          先知道屋里有什么，遇事才不至于自己造轮子。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 窗口有多大、滚到哪了（拖动窗口或滚页面再点一次）</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js40-demo1-read">读一次窗口信息</button>
+            <button type="button" id="js40-demo1-scroll">让页面向下滚 300px</button>
+          </p>
+          <ul id="js40-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var out1 = document.getElementById('js40-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out1.appendChild(li);
+            }
+
+            function read1(prefix) {
+              say1(prefix + '：视口 ' + window.innerWidth + ' × ' + window.innerHeight
+                + '，已向下滚 ' + Math.round(window.scrollY) + ' px'
+                + '，屏幕像素比 ' + window.devicePixelRatio);
+            }
+
+            document.getElementById('js40-demo1-read').addEventListener('click', function () {
+              read1('你问的时候');
+            });
+
+            document.getElementById('js40-demo1-scroll').addEventListener('click', function () {
+              var target = window.scrollY + 300;
+              window.scrollTo(0, target);            // 本站开了平滑滚动，得等它滚完
+              setTimeout(function () {
+                read1('滚完之后（目标 ' + target + ' px）');
+              }, 800);
+            });
+
+            var lastLog1 = 0;
+            window.addEventListener('scroll', function () {
+              var now = Date.now();
+              if (now - lastLog1 < 200) return;      // 简单节流：每 200ms 最多记一行（第三十八式）
+              lastLog1 = now;
+              read1('滚动中');
+            });
+
+            read1('页面加载时');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js40-demo1-read">读一次窗口信息</button>
+              <button type="button" id="js40-demo1-scroll">让页面向下滚 300px</button>
+            </p>
+            <ul id="js40-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out1 = document.getElementById('js40-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out1.appendChild(li);
+            }
+
+            function read1(prefix) {
+              say1(prefix + '：视口 ' + window.innerWidth + ' × ' + window.innerHeight
+                + '，已向下滚 ' + Math.round(window.scrollY) + ' px'
+                + '，屏幕像素比 ' + window.devicePixelRatio);
+            }
+
+            document.getElementById('js40-demo1-read').addEventListener('click', function () {
+              read1('你问的时候');
+            });
+
+            document.getElementById('js40-demo1-scroll').addEventListener('click', function () {
+              var target = window.scrollY + 300;
+              window.scrollTo(0, target);            // 本站开了平滑滚动，得等它滚完
+              setTimeout(function () {
+                read1('滚完之后（目标 ' + target + ' px）');
+              }, 800);
+            });
+
+            var lastLog1 = 0;
+            window.addEventListener('scroll', function () {
+              var now = Date.now();
+              if (now - lastLog1 < 200) return;      // 简单节流：每 200ms 最多记一行（第三十八式）
+              lastLog1 = now;
+              read1('滚动中');
+            });
+
+            read1('页面加载时');
+          </script>
+        </div>
+      </div>
+
+      <h2>location 与它的邻居们</h2>
+      <p>
+        想知道“我现在在哪一页”，问 <code>location</code>；想带着读者走，
+        改它的属性就等于导航——<code>location.href = "…"</code> 会跳转，
+        <code>location.reload()</code> 会刷新。常用的一族对象先认个门：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>对象</th>
+            <th>管什么</th>
+            <th>常用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>window</code></td><td>全局对象、视口与滚动</td><td><code>innerWidth</code>、<code>scrollY</code>、<code>scrollTo()</code></td></tr>
+          <tr><td><code>document</code></td><td>页面本身（第三十七式）</td><td><code>querySelector()</code>、<code>title</code></td></tr>
+          <tr><td><code>location</code></td><td>当前地址</td><td><code>href</code>、<code>protocol</code>、<code>hash</code>、<code>reload()</code></td></tr>
+          <tr><td><code>history</code></td><td>前进 / 后退</td><td><code>back()</code>、<code>pushState()</code></td></tr>
+          <tr><td><code>navigator</code></td><td>浏览器与系统信息</td><td><code>language</code>、<code>onLine</code>、<code>userAgent</code></td></tr>
+          <tr><td><code>localStorage</code></td><td>本地仓库（下面细说）</td><td><code>getItem()</code>、<code>setItem()</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        地址里那个 <code>#</code> 后面的部分叫 <strong>hash</strong>（锚点）。
+        改 hash 不会让页面重新加载，却会留下历史记录、还能触发
+        <code>hashchange</code> 事件——早年的“单页应用”就是靠它做路由的，
+        现在做“页内小导航”依然好用。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 读地址、改 hash、听 hashchange</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js40-demo2-read">读一次 location</button>
+            <button type="button" id="js40-demo2-hash">把 hash 改成 #dojo40</button>
+            <button type="button" id="js40-demo2-clear">清掉 hash</button>
+          </p>
+          <ul id="js40-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var out2 = document.getElementById('js40-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out2.appendChild(li);
+            }
+
+            function read2(prefix) {
+              say2(prefix + '：href = ' + location.href);
+              say2('协议 = ' + location.protocol + '，主机 = ' + (location.host || '（本地文件没有主机）')
+                + '，hash = ' + (location.hash || '（空）'));
+              say2('浏览器语言 = ' + navigator.language + '，是否联网 = ' + navigator.onLine);
+            }
+
+            document.getElementById('js40-demo2-read').addEventListener('click', function () {
+              read2('你问的时候');
+            });
+
+            document.getElementById('js40-demo2-hash').addEventListener('click', function () {
+              location.hash = 'dojo40';
+            });
+
+            document.getElementById('js40-demo2-clear').addEventListener('click', function () {
+              location.hash = '';                     // 留下一个空锚点，页面不刷新
+            });
+
+            window.addEventListener('hashchange', function () {
+              say2('hashchange 事件：地址栏的锚点变成了「' + (location.hash || '（空）') + '」');
+            });
+
+            read2('页面加载时');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js40-demo2-read">读一次 location</button>
+              <button type="button" id="js40-demo2-hash">把 hash 改成 #dojo40</button>
+              <button type="button" id="js40-demo2-clear">清掉 hash</button>
+            </p>
+            <ul id="js40-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out2 = document.getElementById('js40-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out2.appendChild(li);
+            }
+
+            function read2(prefix) {
+              say2(prefix + '：href = ' + location.href);
+              say2('协议 = ' + location.protocol + '，主机 = ' + (location.host || '（本地文件没有主机）')
+                + '，hash = ' + (location.hash || '（空）'));
+              say2('浏览器语言 = ' + navigator.language + '，是否联网 = ' + navigator.onLine);
+            }
+
+            document.getElementById('js40-demo2-read').addEventListener('click', function () {
+              read2('你问的时候');
+            });
+
+            document.getElementById('js40-demo2-hash').addEventListener('click', function () {
+              location.hash = 'dojo40';
+            });
+
+            document.getElementById('js40-demo2-clear').addEventListener('click', function () {
+              location.hash = '';                     // 留下一个空锚点，页面不刷新
+            });
+
+            window.addEventListener('hashchange', function () {
+              say2('hashchange 事件：地址栏的锚点变成了「' + (location.hash || '（空）') + '」');
+            });
+
+            read2('页面加载时');
+          </script>
+        </div>
+      </div>
+      <p>
+        上面表格里还留着一位没细说的邻居：<code>history</code>。
+        它管的是浏览器那对<strong>前进 / 后退</strong>按钮与地址栏的历史记录——
+        除了 <code>history.back()</code> / <code>history.forward()</code>，
+        现代还有一个 <code>history.pushState(状态, 标题, 地址)</code>：
+        <strong>它能在不刷新页面的前提下，把地址栏换成另一个地址并留下一条历史记录</strong>
+        （点后退还能回来）。这本来是为“无刷新改地址”准备的：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="history 的基本用法（进阶参考）">
+        history.pushState({ page: "list" }, "", "/list");   // 地址栏变成 /list，页面不刷新
+        history.back();                                     // 等同于用户点“后退”
+
+        // 用户点前进/后退时，通知你“地址又变了”
+        window.addEventListener("popstate", function (event) {
+          console.log("现在的位置状态：", event.state);
+        });
+      </script>
+      <div class="callout warn">
+        <div class="callout-title">本站为什么只用 hash、不用 pushState</div>
+        <p style="margin:0">
+          在 <code>file://</code> 下打开本站时，<code>pushState</code> 换“真实路径”的那一条
+          <strong>会被浏览器直接拒绝</strong>——实际报的是
+          <code>SecurityError</code>：本地文件的来源是 <code>null</code>，
+          不允许凭空造出一个 <code>file:///…</code> 地址（实测于 Chromium：
+          <code>history.pushState({}, "", "/tmp")</code> 抛错，
+          而换成 <code>"#dummy"</code> 这样的锚点就正常）。
+          所以本站的页内跳转一律走 <strong>hash</strong>（<code>#</code> 那一段）——
+          它不涉及服务器，刷新也不会坏。
+          等你把站点放到真实服务器上，<code>pushState</code> 就是“无刷新改地址”的正经工具：
+          它的第一参数是<strong>状态对象</strong>（不能是函数），会在
+          <code>popstate</code> 事件里原样还给你。
+        </p>
+      </div>
+
+      <h2>本地仓库：localStorage 与 sessionStorage</h2>
+      <p>
+        刷新一下页面，JavaScript 里的变量就全没了；想让一小块数据留下来
+        （主题偏好、草稿、练习进度），就用浏览器给的<strong>本地仓库</strong>。
+        它只存在这台电脑的这个浏览器里，<strong>不会自动上传</strong>，
+        也不该拿来存密码、身份证号这类敏感信息。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>操作</th>
+            <th>写法</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>存 / 改一条</td><td><code>localStorage.setItem("键", "值")</code></td><td>同名键会被覆盖</td></tr>
+          <tr><td>读一条</td><td><code>localStorage.getItem("键")</code></td><td>没有这个键时返回 <code>null</code></td></tr>
+          <tr><td>删一条 / 全清</td><td><code>removeItem("键")</code> / <code>clear()</code></td><td><code>clear()</code> 只清本站自己的存储</td></tr>
+          <tr><td>存对象</td><td><code>JSON.stringify(对象)</code> 存、<code>JSON.parse(字符串)</code> 读</td><td>仓库只会存字符串</td></tr>
+          <tr><td>换个仓库</td><td><code>sessionStorage.setItem(…)</code></td><td>关掉标签页就清空，别的用法一样</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 存几条便签：刷新页面也还在，还能跨标签页同步</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <input id="js40-demo3-input" type="text" placeholder="写一条便签，保存到 localStorage" size="26">
+            <button type="button" id="js40-demo3-save">保存</button>
+            <button type="button" id="js40-demo3-clear">全部清空</button>
+          </p>
+          <ul id="js40-demo3-list" style="margin: 0"></ul>
+          <p id="js40-demo3-state" style="margin: .5rem 0 0">存的是本机浏览器的数据：刷新这一页（F5）也还在。</p>
+          <script>
+            "use strict";
+            var KEY3 = 'dojo40-notes';
+            var input3 = document.getElementById('js40-demo3-input');
+            var list3 = document.getElementById('js40-demo3-list');
+            var state3 = document.getElementById('js40-demo3-state');
+            var notes3 = [];
+
+            function load3() {
+              try {
+                notes3 = JSON.parse(localStorage.getItem(KEY3)) || [];
+              } catch (error) {
+                notes3 = [];                          // 存储里被人手改坏了，退回空列表
+                state3.textContent = '存储里的内容不是合法 JSON，已重置。';
+              }
+            }
+
+            function render3() {
+              list3.textContent = '';
+              notes3.forEach(function (text) {
+                var li = document.createElement('li');
+                li.textContent = text;
+                list3.appendChild(li);
+              });
+              state3.textContent = 'localStorage 里现在有 ' + notes3.length
+                + ' 条（刷新这一页也还在；键名是 ' + KEY3 + '）。';
+            }
+
+            document.getElementById('js40-demo3-save').addEventListener('click', function () {
+              var text = input3.value.trim();
+              if (!text) return;
+              notes3.push(text);
+              localStorage.setItem(KEY3, JSON.stringify(notes3));  // 存之前先转成字符串
+              input3.value = '';
+              render3();
+            });
+
+            document.getElementById('js40-demo3-clear').addEventListener('click', function () {
+              localStorage.removeItem(KEY3);
+              notes3 = [];
+              render3();
+            });
+
+            window.addEventListener('storage', function () {   // 别的标签页改了，这里重新读一遍
+              load3();
+              render3();
+            });
+
+            load3();
+            render3();
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <input id="js40-demo3-input" type="text" placeholder="写一条便签，保存到 localStorage" size="26">
+              <button type="button" id="js40-demo3-save">保存</button>
+              <button type="button" id="js40-demo3-clear">全部清空</button>
+            </p>
+            <ul id="js40-demo3-list" style="margin: 0"></ul>
+            <p id="js40-demo3-state" style="margin: .5rem 0 0">存的是本机浏览器的数据：刷新这一页（F5）也还在。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var KEY3 = 'dojo40-notes';
+            var input3 = document.getElementById('js40-demo3-input');
+            var list3 = document.getElementById('js40-demo3-list');
+            var state3 = document.getElementById('js40-demo3-state');
+            var notes3 = [];
+
+            function load3() {
+              try {
+                notes3 = JSON.parse(localStorage.getItem(KEY3)) || [];
+              } catch (error) {
+                notes3 = [];                          // 存储里被人手改坏了，退回空列表
+                state3.textContent = '存储里的内容不是合法 JSON，已重置。';
+              }
+            }
+
+            function render3() {
+              list3.textContent = '';
+              notes3.forEach(function (text) {
+                var li = document.createElement('li');
+                li.textContent = text;
+                list3.appendChild(li);
+              });
+              state3.textContent = 'localStorage 里现在有 ' + notes3.length
+                + ' 条（刷新这一页也还在；键名是 ' + KEY3 + '）。';
+            }
+
+            document.getElementById('js40-demo3-save').addEventListener('click', function () {
+              var text = input3.value.trim();
+              if (!text) return;
+              notes3.push(text);
+              localStorage.setItem(KEY3, JSON.stringify(notes3));  // 存之前先转成字符串
+              input3.value = '';
+              render3();
+            });
+
+            document.getElementById('js40-demo3-clear').addEventListener('click', function () {
+              localStorage.removeItem(KEY3);
+              notes3 = [];
+              render3();
+            });
+
+            window.addEventListener('storage', function () {   // 别的标签页改了，这里重新读一遍
+              load3();
+              render3();
+            });
+
+            load3();
+            render3();
+          </script>
+        </div>
+      </div>
+
+      <h2>数据从哪来：file:// 的那道坎</h2>
+      <p>
+        前面的便签是“自己写、自己读”。可很多场景要读<strong>现成的数据文件</strong>
+        （一份 JSON、一篇文章）。在联网的网站上，这用 <code>fetch</code> 就行：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="fetch 的常规写法（联网环境下）">
+        async function loadNotes() {
+          const res = await fetch("data/notes.json");   // 向服务器要文件
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const notes = await res.json();               // 解析成对象 / 数组
+          console.log(notes);
+        }
+      </script>
+      <div class="callout warn">
+        <div class="callout-title">双击打开时会撞上的那道坎</div>
+        <p style="margin:0">
+          本站的铁律是“双击即开”，而浏览器出于安全考虑
+          <strong>不允许 <code>file://</code> 页面用 fetch / XHR 读本地文件</strong>
+          （否则任何一个网页都能偷看你硬盘里的东西）。这时想读数据，有两个办法：
+          起一个本地服务器（<code>python3 -m http.server</code>，第九式那样），
+          或者<strong>把数据写成 JS 文件，用 <code>&lt;script src&gt;</code> 引进来</strong>——
+          脚本自古可以跨源加载，本站的全站搜索索引就是这么存的。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 页面加载时就把数据带进来，不联网也能读</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js40-demo4-read">读一读页面加载时带进来的数据</button>
+          </p>
+          <p style="margin: .4rem 0 0"><strong id="js40-demo4-out">（还没读过）</strong></p>
+          <script>
+            "use strict";
+            var out4 = document.getElementById('js40-demo4-out');
+            document.getElementById('js40-demo4-read').addEventListener('click', function () {
+              out4.textContent = window.DOJO_DEMO_GREETING
+                ? '读到：' + window.DOJO_DEMO_GREETING
+                : '没读到——数据文件没加载成功';
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js40-demo4-read">读一读页面加载时带进来的数据</button>
+            </p>
+            <p style="margin: .4rem 0 0"><strong id="js40-demo4-out">（还没读过）</strong></p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out4 = document.getElementById('js40-demo4-out');
+            document.getElementById('js40-demo4-read').addEventListener('click', function () {
+              out4.textContent = window.DOJO_DEMO_GREETING
+                ? '读到：' + window.DOJO_DEMO_GREETING
+                : '没读到——数据文件没加载成功';
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这个演示能成立，是因为本章页面自己的 <code>head</code> 里就挂了这样一行
+        （真的挂着，不是示意）：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="本页 head 里的那一行">
+        <script src="../data/demo-greeting.js"><\/script>
+      </script>
+      <script type="text/plain" data-lang="js" data-title="而 site/data/demo-greeting.js 的全部内容只有一行">
+        window.DOJO_DEMO_GREETING = '取经归来，仍是少年。';
+      </script>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>window</code> 是全局对象，也报告视口与滚动：<code>innerWidth</code>、
+          <code>scrollY</code>、<code>scrollTo()</code>；</li>
+        <li><code>location</code> 管地址：<code>href</code> 跳转、<code>hash</code> 是锚点、
+          <code>hashchange</code> 能听出锚点变了；</li>
+        <li><code>localStorage</code> 存字符串、留到下次打开；<code>sessionStorage</code>
+          只活到关标签页；对象要先 <code>JSON.stringify</code>；</li>
+        <li>本地仓库只在这台电脑、这个浏览器里，涉及隐私的数据别往里放；</li>
+        <li>file:// 下 <code>fetch</code> 读不了本地文件：要么起本地服务器，
+          要么把数据写成 JS 用 <code>&lt;script src&gt;</code> 引进来；</li>
+        <li>键名加项目前缀（如 <code>dojo40-notes</code>），别用 <code>data</code>
+          这种谁都会用的名字，免得和别处的存储打架。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四十式</div>
+        <ol>
+          <li>做一个“主题开关”：一个复选框控制页面变深色，用
+            <code>localStorage</code> 记住选择，刷新后仍然生效
+            （提示：把值存成 <code>"dark"</code> / <code>"light"</code> 两个字符串之一）。</li>
+          <li>做一个“页内小导航”：三个按钮分别把 <code>location.hash</code>
+            改成 <code>#one</code> / <code>#two</code> / <code>#three</code>，
+            并监听 <code>hashchange</code>，在页面上写出“现在停在 #几”。</li>
+          <li>思考：为什么 <code>fetch</code> 在 file:// 下读不了本地 JSON，
+            而 <code>&lt;script src="…"&gt;</code> 可以？这给“纯静态站点怎么带数据”
+            什么启示？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="记住主题偏好">
+            "use strict";
+
+            const KEY = "dojo-theme";
+            const box = document.getElementById("theme-toggle");
+
+            function apply(theme) {
+              document.documentElement.setAttribute("data-bs-theme", theme);
+              box.checked = theme === "dark";
+            }
+
+            apply(localStorage.getItem(KEY) || "light");   // 打开页面先读一次
+
+            box.addEventListener("change", () => {
+              const theme = box.checked ? "dark" : "light";
+              localStorage.setItem(KEY, theme);
+              apply(theme);
+            });
+          </script>
+          <p>
+            三点值得留意：①键名带项目前缀，避免与别的存储撞车；
+            ②打开页面时先读一次并应用，否则“记住了”等于没记；
+            ③读写都走同一个 <code>apply</code> 函数，界面与存储不会各说各话。
+            （本站顶栏的明暗切换就是这套路数。）
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" class="jump" data-hash="one">第一区</button>
+            <button type="button" class="jump" data-hash="two">第二区</button>
+            <button type="button" class="jump" data-hash="three">第三区</button>
+            <p id="jump-echo">现在停在（还没有选）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+
+            const echo = document.getElementById("jump-echo");
+
+            // 委托：三个按钮一个监听（第三十八式）
+            document.addEventListener("click", (event) => {
+              const btn = event.target.closest(".jump");
+              if (!btn) return;
+              location.hash = btn.dataset.hash;   // 改 hash 不刷新页面
+            });
+
+            function show() {
+              echo.textContent = "现在停在 " + (location.hash || "（还没有选）");
+            }
+
+            window.addEventListener("hashchange", show);
+            show();
+          </script>
+          <p>
+            改 <code>hash</code> 不会让页面重新加载，却会留下历史记录——
+            所以浏览器的“后退”键能回到上一个锚点，这也是它能当路由用的原因。
+            若要让浏览器跳到对应位置，页面上还得有一个 <code>id</code> 与它同名
+            （第三式的锚点链接）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>fetch</code> 受<strong>同源策略</strong>约束：页面只能向“同一个源”要数据。
+            file:// 页面没有像样的源（不同机器、不同目录都算不同源），
+            浏览器干脆一律拦下它对本地文件的读取——这是为了防止网页偷看你的硬盘。
+            <code>&lt;script src&gt;</code> 则是浏览器自古放行的“跨源通道”（脚本、
+            图片、样式表都算），所以把它当数据通道用是可行的：
+            数据文件里写一句 <code>window.MY_DATA = […]</code>，页面里就能直接用。
+            启示：纯静态站点要带数据，可以把数据嵌进 JS（本站的搜索索引
+            <code>assets/js/search-index.js</code> 就是这么生成的）；
+            一旦数据要“按需获取、可能变动”，那就该交给服务器了——
+            这也是下一式要聊的边界。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，回顾来路、看看前头：现代 JavaScript 的版图与继续修炼的地图。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

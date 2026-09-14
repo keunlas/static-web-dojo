@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十四式 · 字符串、正则、数字与日期 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="字符串方法速查、正则表达式的元字符与方法、数字精度与 Math、Number 转换、Date 与时区坑、Intl 本地化格式化。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-34">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        这一式把四样“日常工具”打包讲完：<strong>字符串</strong>（处理文字）、
+        <strong>正则</strong>（按模式找文字）、<strong>数字</strong>（算账与格式化）、
+        <strong>日期</strong>（时间轴上的位置）。它们没有惊天动地的原理，但谁熟谁省事。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>掌握字符串的查找、截取、替换、拆分、修剪、补齐与重复方法</li>
+          <li>看懂正则的常用元字符与标志，会用 <code>test</code>、<code>match</code>、<code>replace</code> 解决常见问题</li>
+          <li>知道浮点数的精度陷阱，会用 <code>Math</code>、<code>toFixed</code>、<code>toLocaleString</code> 处理数字</li>
+          <li>会创建、读取、格式化日期，并避开时区与“月份从 0 开始”的坑</li>
+        </ul>
+      </div>
+
+      <h2>字符串方法速查</h2>
+      <p>
+        先记住一条性质：<strong>字符串不可变</strong>——所有方法都返回<strong>新字符串</strong>，
+        原来那个一动不动（第二十八式提过）。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>想做的事</th>
+            <th>方法</th>
+            <th>例子与结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>长度</td><td><code>length</code></td><td><code>"日拱一卒".length</code> → 4</td></tr>
+          <tr><td>找有没有</td><td><code>includes</code> / <code>startsWith</code> / <code>endsWith</code></td><td><code>"修行笔记".startsWith("修行")</code> → true</td></tr>
+          <tr><td>找位置</td><td><code>indexOf</code> / <code>lastIndexOf</code></td><td>找不到返回 <code>-1</code></td></tr>
+          <tr><td>取一段</td><td><code>slice(起, 止)</code> / <code>substring(起, 止)</code></td><td><code>slice</code> 支持负数（从末尾数）；<code>substring</code> 会把负数当 0 且会自动交换参数</td></tr>
+          <tr><td>取一个字符</td><td><code>at(i)</code> / <code>charAt(i)</code> / <code>str[i]</code></td><td><code>at(-1)</code> 取最后一个；越界的 <code>charAt</code> 返回空串、<code>str[i]</code> 返回 undefined</td></tr>
+          <tr><td>替换</td><td><code>replace(找, 换)</code> / <code>replaceAll</code></td><td><code>replace</code> 只换<strong>第一个</strong>；全换用 <code>replaceAll</code> 或带 <code>g</code> 的正则</td></tr>
+          <tr><td>拆成数组</td><td><code>split(分隔符)</code></td><td><code>"a,b,c".split(",")</code> → <code>["a","b","c"]</code></td></tr>
+          <tr><td>大小写</td><td><code>toUpperCase</code> / <code>toLowerCase</code></td><td>对中文无效果</td></tr>
+          <tr><td>去空白</td><td><code>trim</code> / <code>trimStart</code> / <code>trimEnd</code></td><td>表单输入先 <code>trim()</code> 是标准动作</td></tr>
+          <tr><td>补齐到固定长度</td><td><code>padStart</code> / <code>padEnd</code></td><td><code>"7".padStart(2, "0")</code> → <code>"07"</code>（时间格式化常用）</td></tr>
+          <tr><td>重复</td><td><code>repeat(n)</code></td><td><code>"-".repeat(10)</code> → 十条横线</td></tr>
+          <tr><td>比较排序</td><td><code>localeCompare</code></td><td>按语言规则比较，排序中文时比 <code>&gt;</code> 靠谱</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 字符串方法速查（每一行都是实测）</div>
+        <div class="demo-preview">
+          <table id="js34-demo1-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody1 = document.querySelector('#js34-demo1-out tbody');
+            function row1(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+
+            var s = "  日拱一卒，功不唐捐  ";
+            row1('"日拱一卒".length', "日拱一卒".length, '一个汉字算一个字符');
+            row1('s.trim()', s.trim(), '去掉两头的空白');
+            row1('s.trim().includes("功不唐捐")', s.trim().includes("功不唐捐"), '找有没有');
+            row1('s.trim().indexOf("一卒")', s.trim().indexOf("一卒"), '找位置');
+            row1('s.trim().slice(0, 2)', s.trim().slice(0, 2), '从第 0 位取到第 2 位之前');
+            row1('s.trim().slice(-2)', s.trim().slice(-2), '负数表示从末尾数');
+            row1('s.trim().at(-1)', s.trim().at(-1), '取最后一个字符');
+            row1('"a-b-c".replace("-", "+")', "a-b-c".replace("-", "+"), 'replace 只换第一个');
+            row1('"a-b-c".replaceAll("-", "+")', "a-b-c".replaceAll("-", "+"), 'replaceAll 全换');
+            row1('"1,2,3".split(",")', JSON.stringify("1,2,3".split(",")), '拆成数组');
+            row1('"7".padStart(2, "0")', "7".padStart(2, "0"), '补齐两位');
+            row1('"abc".toUpperCase()', "abc".toUpperCase(), '转大写');
+            row1('"-".repeat(5)', "-".repeat(5), '重复');
+            row1('"B".localeCompare("a")', "B".localeCompare("a"), '按语言规则比较（负数表示排在前面）');
+            row1('"👨‍👩‍👧".length', "👨‍👩‍👧".length, 'length 数的是 UTF-16 编码单元，所以偏大');
+            row1('[... "👨‍👩‍👧"].length', [..."👨‍👩‍👧"].length, '展开后按码点算；想按“几个人”算要用 Intl.Segmenter');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js34-demo1-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody1 = document.querySelector('#js34-demo1-out tbody');
+            function row1(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+
+            var s = "  日拱一卒，功不唐捐  ";
+            row1('"日拱一卒".length', "日拱一卒".length, '一个汉字算一个字符');
+            row1('s.trim()', s.trim(), '去掉两头的空白');
+            row1('s.trim().includes("功不唐捐")', s.trim().includes("功不唐捐"), '找有没有');
+            row1('s.trim().indexOf("一卒")', s.trim().indexOf("一卒"), '找位置');
+            row1('s.trim().slice(0, 2)', s.trim().slice(0, 2), '从第 0 位取到第 2 位之前');
+            row1('s.trim().slice(-2)', s.trim().slice(-2), '负数表示从末尾数');
+            row1('s.trim().at(-1)', s.trim().at(-1), '取最后一个字符');
+            row1('"a-b-c".replace("-", "+")', "a-b-c".replace("-", "+"), 'replace 只换第一个');
+            row1('"a-b-c".replaceAll("-", "+")', "a-b-c".replaceAll("-", "+"), 'replaceAll 全换');
+            row1('"1,2,3".split(",")', JSON.stringify("1,2,3".split(",")), '拆成数组');
+            row1('"7".padStart(2, "0")', "7".padStart(2, "0"), '补齐两位');
+            row1('"abc".toUpperCase()', "abc".toUpperCase(), '转大写');
+            row1('"-".repeat(5)', "-".repeat(5), '重复');
+            row1('"B".localeCompare("a")', "B".localeCompare("a"), '按语言规则比较（负数表示排在前面）');
+            row1('"👨‍👩‍👧".length', "👨‍👩‍👧".length, 'length 数的是 UTF-16 编码单元，所以偏大');
+            row1('[... "👨‍👩‍👧"].length', [..."👨‍👩‍👧"].length, '展开后按码点算；想按“几个人”算要用 Intl.Segmenter');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">emoji 与 <code>length</code> 的错位</div>
+        <p style="margin:0">
+          <code>"👨‍👩‍👧".length</code> 会得到一个远大于 1 的数字——
+          因为 <code>length</code> 数的是 UTF-16 编码单元，而一个 emoji 可能由好几个组成。
+          想按“人眼看到的字符”处理，用展开语法 <code>[...str]</code> 或
+          <code>Array.from(str)</code> 转成数组再操作（第二十八式与第三十二式都用过这一招）。
+        </p>
+      </div>
+
+      <h2>正则表达式：按模式找文字</h2>
+      <p>
+        正则是“一段描述文字模式的迷你语言”。它长得吓人，但日常真正会用到的没几个：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>\d</code> / <code>\w</code> / <code>\s</code></td><td>数字 / 字母数字下划线 / 空白</td><td><code>\d{3}</code> 表示三个数字</td></tr>
+          <tr><td><code>.</code></td><td>任意一个字符（默认不含换行）</td><td><code>a.c</code> 匹配 <code>abc</code>、<code>a c</code></td></tr>
+          <tr><td><code>[abc]</code> / <code>[^abc]</code></td><td>其中一个 / 除了这些</td><td><code>[0-9a-f]</code> 十六进制字符</td></tr>
+          <tr><td><code>*</code> <code>+</code> <code>?</code> <code>{n,m}</code></td><td>0 次以上 / 1 次以上 / 0 或 1 次 / n 到 m 次</td><td><code>\d+</code> 一个或多个数字</td></tr>
+          <tr><td><code>*?</code> <code>+?</code></td><td>惰性匹配（尽量少匹配）</td><td><code>&lt;.+?&gt;</code> 只吃到一个标签</td></tr>
+          <tr><td><code>^</code> / <code>$</code></td><td>开头 / 结尾</td><td><code>^\d+$</code> 整串都是数字</td></tr>
+          <tr><td><code>( )</code> / <code>(?&lt;name&gt; )</code></td><td>捕获组 / 具名捕获组</td><td>提取年月日：<code>(\d{4})-(\d{2})-(\d{2})</code></td></tr>
+          <tr><td><code>|</code></td><td>或者</td><td><code>cat|dog</code></td></tr>
+          <tr><td>标志 <code>g</code> / <code>i</code> / <code>m</code> / <code>u</code></td><td>全局 / 忽略大小写 / 多行 / 按 Unicode</td><td><code>/abc/gi</code></td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>用途</th>
+            <th>返回</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>正则.test(字符串)</code></td><td>有没有匹配</td><td><code>true</code> / <code>false</code>（最常用）</td></tr>
+          <tr><td><code>正则.exec(字符串)</code></td><td>取出匹配与捕获组</td><td>数组或 <code>null</code>；带 <code>g</code> 时可用 <code>lastIndex</code> 连续找</td></tr>
+          <tr><td><code>字符串.match(正则)</code></td><td>匹配结果</td><td>不带 <code>g</code> 像 <code>exec</code>；带 <code>g</code> 返回全部匹配（丢掉捕获组）</td></tr>
+          <tr><td><code>字符串.matchAll(正则)</code></td><td>一次拿全所有匹配与捕获组</td><td>迭代器，用 <code>[...结果]</code> 展开；<strong>正则必须带 <code>g</code></strong></td></tr>
+          <tr><td><code>字符串.replace(正则, 替换)</code></td><td>替换（<code>g</code> 时全替换）</td><td>替换串里可用 <code>$1</code>、<code>$&lt;name&gt;</code>，也可以传函数</td></tr>
+          <tr><td><code>字符串.search(正则)</code></td><td>第一次出现的位置</td><td>下标或 <code>-1</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 正则的日常用法（校验、提取、替换、具名组）</div>
+        <div class="demo-preview">
+          <ul id="js34-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js34-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var phoneRe = /^1[3-9]\d{9}$/;
+            say2('手机号校验：13800000000 → ' + phoneRe.test("13800000000")
+              + '；12345678901 → ' + phoneRe.test("12345678901"));
+
+            var looseMail = /^[\w.+-]+@[\w-]+\.[\w.]+$/;
+            say2('邮箱粗校验：mo@example.com → ' + looseMail.test("mo@example.com")
+              + '；mo@example → ' + looseMail.test("mo@example"));
+
+            var mixed = "订单 A-2026-0914 已发货，金额 128 元";
+            var nums = mixed.match(/\d+/g);
+            say2('提取所有数字：' + JSON.stringify(nums));
+
+            var dateText = "2026-09-14";
+            var m = dateText.match(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/);
+            say2('具名捕获组：year = ' + m.groups.year + '，month = ' + m.groups.month + '，day = ' + m.groups.day);
+
+            say2('替换所有空白为下划线："a b  c".replace(/\\s+/g, "_") → '
+              + "a b  c".replace(/\s+/g, "_"));
+
+            say2('替换里用捕获组重排："2026-09-14" → ' + dateText.replace(
+              /(\d{4})-(\d{2})-(\d{2})/, "$3/$2/$1"));
+
+            say2('替换传函数：把数字都乘以 2 → ' + "价格 3 和 5".replace(/\d+/g, function (d) {
+              return Number(d) * 2;
+            }));
+
+            var hits = [..."a1 b22 c333".matchAll(/[a-z](\d+)/g)].map(function (item) {
+              return item[1];
+            });
+            say2('matchAll 一次性取全部捕获组：' + JSON.stringify(hits));
+
+            say2('忽略大小写：/hello/i.test("HELLO") → ' + /hello/i.test("HELLO"));
+            say2('（提示：正则适合校验"长得像不像"，真要确认邮箱/手机号是否真实存在，还得发验证码或邮件。）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js34-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js34-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var phoneRe = /^1[3-9]\d{9}$/;
+            say2('手机号校验：13800000000 → ' + phoneRe.test("13800000000")
+              + '；12345678901 → ' + phoneRe.test("12345678901"));
+
+            var looseMail = /^[\w.+-]+@[\w-]+\.[\w.]+$/;
+            say2('邮箱粗校验：mo@example.com → ' + looseMail.test("mo@example.com")
+              + '；mo@example → ' + looseMail.test("mo@example"));
+
+            var mixed = "订单 A-2026-0914 已发货，金额 128 元";
+            var nums = mixed.match(/\d+/g);
+            say2('提取所有数字：' + JSON.stringify(nums));
+
+            var dateText = "2026-09-14";
+            var m = dateText.match(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/);
+            say2('具名捕获组：year = ' + m.groups.year + '，month = ' + m.groups.month + '，day = ' + m.groups.day);
+
+            say2('替换所有空白为下划线："a b  c".replace(/\\s+/g, "_") → '
+              + "a b  c".replace(/\s+/g, "_"));
+
+            say2('替换里用捕获组重排："2026-09-14" → ' + dateText.replace(
+              /(\d{4})-(\d{2})-(\d{2})/, "$3/$2/$1"));
+
+            say2('替换传函数：把数字都乘以 2 → ' + "价格 3 和 5".replace(/\d+/g, function (d) {
+              return Number(d) * 2;
+            }));
+
+            var hits = [..."a1 b22 c333".matchAll(/[a-z](\d+)/g)].map(function (item) {
+              return item[1];
+            });
+            say2('matchAll 一次性取全部捕获组：' + JSON.stringify(hits));
+
+            say2('忽略大小写：/hello/i.test("HELLO") → ' + /hello/i.test("HELLO"));
+            say2('（提示：正则适合校验"长得像不像"，真要确认邮箱/手机号是否真实存在，还得发验证码或邮件。）');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">正则的两条纪律</div>
+        <ul style="margin:0">
+          <li><strong>不要用正则解析 HTML</strong>：嵌套结构它处理不了，要用 <code>DOMParser</code> 或
+            让数据以 JSON 形式传来（第三十七式会讲解析 HTML 的正确方式）；</li>
+          <li><strong>复杂正则要写注释、要测试</strong>：邮箱这类“标准允许的范围极广”的格式，
+            用一条正则做到 100% 精确几乎不可能——够用就好，别追求完美。</li>
+        </ul>
+      </div>
+
+      <h2>数字：精度、转换与 Math</h2>
+      <p>
+        先说那个著名的问题：<code>0.1 + 0.2</code> <strong>不等于</strong> <code>0.3</code>。
+        原因是计算机用二进制存小数，而 0.1 与 0.2 在二进制里都是无限循环小数，
+        存进来就已经带了舍入误差。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="几条与数字有关的经验">
+        // 1. 比小数时别用 ===，比较差值是否足够小
+        Math.abs((0.1 + 0.2) - 0.3) < Number.EPSILON;   // true
+
+        // 2. 金额用“分”作整数运算，显示时再除以 100
+        const cents = 1999 + 2999;        // 4998 分
+        (cents / 100).toFixed(2);         // "49.98"
+
+        // 3. toFixed 是“按二进制实际值舍入”，别指望它四舍五入得完美
+        (1.005).toFixed(2);               // "1.00"（不是 "1.01"）
+        (1.005 + Number.EPSILON).toFixed(2); // "1.01"  —— 工程上的常见补丁
+
+        // 4. 字符串转数字：Number() 要求整串合法，parseInt 能解析多少算多少
+        Number("12");        // 12
+        Number("12px");      // NaN
+        parseInt("12px", 10); // 12
+        parseInt("px12", 10); // NaN
+
+        // 5. 生成 [min, max] 的随机整数
+        const rand = Math.floor(Math.random() * (10 - 1 + 1)) + 1;   // 1–10
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 精度、取整与格式化（数字的日常）</div>
+        <div class="demo-preview">
+          <table id="js34-demo3-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody3 = document.querySelector('#js34-demo3-out tbody');
+            function row3(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+
+            row3('0.1 + 0.2', 0.1 + 0.2, '经典精度问题');
+            row3('0.1 + 0.2 === 0.3', 0.1 + 0.2 === 0.3, '所以别用 === 比小数');
+            row3('Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON', Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON, '这样比才可靠');
+            row3('(1.005).toFixed(2)', (1.005).toFixed(2), 'toFixed 按实际二进制值舍入，不是我们以为的四舍五入');
+            row3('(1.005 + Number.EPSILON).toFixed(2)', (1.005 + Number.EPSILON).toFixed(2), '常见补丁');
+            row3('Number("12")', Number("12"), '整串合法才给数字');
+            row3('Number("12px")', Number("12px"), '出现非数字就是 NaN');
+            row3('parseInt("12px", 10)', parseInt("12px", 10), '能解析多少算多少');
+            row3('parseFloat("3.14kg")', parseFloat("3.14kg"), '同上，保留小数');
+            row3('Number.isInteger(5.0)', Number.isInteger(5.0), '5.0 也是整数');
+            row3('Number.isNaN(NaN)', Number.isNaN(NaN), '判断 NaN 的正确姿势');
+            row3('Math.round(2.5) / Math.round(-2.5)', Math.round(2.5) + ' / ' + Math.round(-2.5), '注意负数方向');
+            row3('Math.floor(2.9) / Math.ceil(2.1) / Math.trunc(-2.9)', Math.floor(2.9) + ' / ' + Math.ceil(2.1) + ' / ' + Math.trunc(-2.9), '向下 / 向上 / 去掉小数');
+            row3('Math.min(...[3, 7, 2]) / Math.max(...[3, 7, 2])', Math.min(3, 7, 2) + ' / ' + Math.max(3, 7, 2), '展开传参');
+            row3('Math.sqrt(144) / 2 ** 10', Math.sqrt(144) + ' / ' + 2 ** 10, '开方与幂');
+            row3('(1234567.891).toLocaleString("zh-CN")', (1234567.891).toLocaleString("zh-CN"), '千分位（本地化输出）');
+            row3('Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }).format(1234.5)',
+              new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }).format(1234.5),
+              '货币格式化');
+            row3('Math.floor(Math.random() * 10) + 1', '（每次不同）', '1–10 的随机整数公式');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js34-demo3-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody3 = document.querySelector('#js34-demo3-out tbody');
+            function row3(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+
+            row3('0.1 + 0.2', 0.1 + 0.2, '经典精度问题');
+            row3('0.1 + 0.2 === 0.3', 0.1 + 0.2 === 0.3, '所以别用 === 比小数');
+            row3('Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON', Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON, '这样比才可靠');
+            row3('(1.005).toFixed(2)', (1.005).toFixed(2), 'toFixed 按实际二进制值舍入，不是我们以为的四舍五入');
+            row3('(1.005 + Number.EPSILON).toFixed(2)', (1.005 + Number.EPSILON).toFixed(2), '常见补丁');
+            row3('Number("12")', Number("12"), '整串合法才给数字');
+            row3('Number("12px")', Number("12px"), '出现非数字就是 NaN');
+            row3('parseInt("12px", 10)', parseInt("12px", 10), '能解析多少算多少');
+            row3('parseFloat("3.14kg")', parseFloat("3.14kg"), '同上，保留小数');
+            row3('Number.isInteger(5.0)', Number.isInteger(5.0), '5.0 也是整数');
+            row3('Number.isNaN(NaN)', Number.isNaN(NaN), '判断 NaN 的正确姿势');
+            row3('Math.round(2.5) / Math.round(-2.5)', Math.round(2.5) + ' / ' + Math.round(-2.5), '注意负数方向');
+            row3('Math.floor(2.9) / Math.ceil(2.1) / Math.trunc(-2.9)', Math.floor(2.9) + ' / ' + Math.ceil(2.1) + ' / ' + Math.trunc(-2.9), '向下 / 向上 / 去掉小数');
+            row3('Math.min(...[3, 7, 2]) / Math.max(...[3, 7, 2])', Math.min(3, 7, 2) + ' / ' + Math.max(3, 7, 2), '展开传参');
+            row3('Math.sqrt(144) / 2 ** 10', Math.sqrt(144) + ' / ' + 2 ** 10, '开方与幂');
+            row3('(1234567.891).toLocaleString("zh-CN")', (1234567.891).toLocaleString("zh-CN"), '千分位（本地化输出）');
+            row3('Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }).format(1234.5)',
+              new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }).format(1234.5),
+              '货币格式化');
+            row3('Math.floor(Math.random() * 10) + 1', '（每次不同）', '1–10 的随机整数公式');
+          </script>
+        </div>
+      </div>
+
+      <h2>日期：时间轴上的位置</h2>
+      <p>
+        <code>Date</code> 对象表示一个具体时刻。创建方式有好几种，<strong>每一种的“解释方式”不同</strong>：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="创建日期的几种方式">
+        new Date();                          // 此刻
+        Date.now();                          // 此刻的毫秒数（数字，比较与计算都用它）
+        new Date(2026, 8, 14);               // 本地时间：2026 年 9 月 14 日 —— 月份从 0 开始！
+        new Date(2026, 8, 14, 9, 30);        // 带上时分
+        new Date("2026-09-14");              // ISO 字符串：按 UTC 解析
+        new Date("2026/09/14");              // 非 ISO 写法：按本地时间解析
+        new Date(1757808000000);             // 时间戳（毫秒）
+        new Date("2026-09-14T09:30:00+08:00"); // 带时区偏移，最没有歧义
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>读取字段</th>
+            <th>方法</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>年 / 月 / 日</td><td><code>getFullYear()</code> / <code>getMonth()</code> / <code>getDate()</code></td><td><strong><code>getMonth()</code> 返回 0–11</strong>，显示时要 <code>+1</code></td></tr>
+          <tr><td>星期</td><td><code>getDay()</code></td><td>0 是周日，6 是周六</td></tr>
+          <tr><td>时分秒</td><td><code>getHours()</code> / <code>getMinutes()</code> / <code>getSeconds()</code></td><td>本地时区的值</td></tr>
+          <tr><td>毫秒时间戳</td><td><code>getTime()</code> / <code>Date.now()</code></td><td>做差就能得到毫秒差</td></tr>
+          <tr><td>UTC 版本</td><td><code>getUTCHours()</code> 等</td><td>需要“与本地时区无关”时用</td></tr>
+          <tr><td>格式化</td><td><code>toLocaleDateString()</code> / <code>Intl.DateTimeFormat</code></td><td><strong>推荐</strong>：不要手拼字符串，本地化交给浏览器</td></tr>
+          <tr><td>ISO 字符串</td><td><code>toISOString()</code></td><td>永远是 UTC，形如 <code>2026-09-14T01:30:00.000Z</code>，适合传数据</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 创建、读取、格式化与计算日期</div>
+        <div class="demo-preview">
+          <ul id="js34-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js34-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var d = new Date(2026, 8, 14, 9, 30, 0);      // 本地时间：2026 年 9 月 14 日 9:30
+            say4('构造（月份从 0 开始，所以 8 表示 9 月）：' + d.getFullYear() + ' 年 '
+              + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 '
+              + d.getHours() + ':' + String(d.getMinutes()).padStart(2, "0"));
+            say4('星期：getDay() = ' + d.getDay() + '（0 是周日，那天是周一 → 1）');
+            say4('时间戳：getTime() = ' + d.getTime() + '（毫秒）');
+            say4('ISO 字符串（转成 UTC）：' + d.toISOString());
+            say4('本地化日期：' + d.toLocaleDateString("zh-CN"));
+            say4('本地化日期时间：' + d.toLocaleString("zh-CN"));
+            say4('自定义格式（Intl）：' + new Intl.DateTimeFormat("zh-CN", {
+              year: "numeric", month: "long", day: "numeric", weekday: "long"
+            }).format(d));
+
+            var days = 45;
+            var later = new Date(d.getTime() + days * 24 * 60 * 60 * 1000);
+            say4('加 ' + days + ' 天：' + later.toLocaleDateString("zh-CN"));
+
+            var deadline = new Date(2026, 9, 1);
+            var diffMs = deadline - d;
+            say4('两个日期相减得到毫秒差：' + diffMs + '，也就是约 '
+              + Math.round(diffMs / (24 * 60 * 60 * 1000)) + ' 天');
+
+            say4('注意：ISO 写法按 UTC 解析 —— new Date("2026-09-14").toISOString() → '
+              + new Date("2026-09-14").toISOString() + '（在本地时间里可能不是当天零点）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js34-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js34-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var d = new Date(2026, 8, 14, 9, 30, 0);      // 本地时间：2026 年 9 月 14 日 9:30
+            say4('构造（月份从 0 开始，所以 8 表示 9 月）：' + d.getFullYear() + ' 年 '
+              + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 '
+              + d.getHours() + ':' + String(d.getMinutes()).padStart(2, "0"));
+            say4('星期：getDay() = ' + d.getDay() + '（0 是周日，那天是周一 → 1）');
+            say4('时间戳：getTime() = ' + d.getTime() + '（毫秒）');
+            say4('ISO 字符串（转成 UTC）：' + d.toISOString());
+            say4('本地化日期：' + d.toLocaleDateString("zh-CN"));
+            say4('本地化日期时间：' + d.toLocaleString("zh-CN"));
+            say4('自定义格式（Intl）：' + new Intl.DateTimeFormat("zh-CN", {
+              year: "numeric", month: "long", day: "numeric", weekday: "long"
+            }).format(d));
+
+            var days = 45;
+            var later = new Date(d.getTime() + days * 24 * 60 * 60 * 1000);
+            say4('加 ' + days + ' 天：' + later.toLocaleDateString("zh-CN"));
+
+            var deadline = new Date(2026, 9, 1);
+            var diffMs = deadline - d;
+            say4('两个日期相减得到毫秒差：' + diffMs + '，也就是约 '
+              + Math.round(diffMs / (24 * 60 * 60 * 1000)) + ' 天');
+
+            say4('注意：ISO 写法按 UTC 解析 —— new Date("2026-09-14").toISOString() → '
+              + new Date("2026-09-14").toISOString() + '（在本地时间里可能不是当天零点）');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">日期的三个常见坑</div>
+        <ul style="margin:0">
+          <li><strong>月份从 0 开始</strong>：<code>getMonth()</code> 拿到 8 表示九月，显示时记得 <code>+1</code>；</li>
+          <li><strong>字符串解析有歧义</strong>：<code>"2026-09-14"</code>（ISO）按 UTC 解析，
+            <code>"2026/09/14"</code> 按本地时间解析。要精确控制，用
+            <code>new Date(2026, 8, 14)</code> 或带偏移的 <code>"2026-09-14T00:00:00+08:00"</code>；</li>
+          <li><strong>Date 是可变的</strong>：<code>setFullYear()</code> 这类方法会改<strong>自己</strong>，
+            不像字符串那样返回新对象。要“另一个日期”就 <code>new Date(原.getTime())</code>。</li>
+        </ul>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>字符串不可变，方法都返回新串；速查里最常用的：<code>trim</code>、<code>includes</code>、
+          <code>slice</code>、<code>replaceAll</code>、<code>split</code>、<code>padStart</code>、<code>repeat</code>；</li>
+        <li><code>replace</code> 只换第一个，全换用 <code>replaceAll</code> 或 <code>/g</code>；
+          <code>length</code> 数的是编码单元，emoji 要用 <code>[...str]</code>；</li>
+        <li>正则：<code>test</code> 判断有没有、<code>match/matchAll</code> 取结果、
+          <code>replace</code> 做替换（可用 <code>$1</code> 与函数）；具名组让代码更好读；
+          别用正则解析 HTML；</li>
+        <li>数字：<code>0.1 + 0.2 !== 0.3</code> 是精度问题，比小数用
+          <code>Number.EPSILON</code>；金额建议用“分”做整数运算；</li>
+        <li><code>Number()</code> 要整串合法、<code>parseInt/parseFloat</code> 能解析多少算多少；
+          <code>Math.floor/ceil/round/trunc/min/max/random</code> 是日常工具；</li>
+        <li>格式化交给 <code>toLocaleString</code> 与 <code>Intl.NumberFormat</code>，别手拼千分位；</li>
+        <li>日期：月份从 0 开始、ISO 字符串按 UTC 解析、<code>Date</code> 自身可变；
+          计算用毫秒差，显示用 <code>Intl.DateTimeFormat</code>。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十四式</div>
+        <ol>
+          <li>把 <code>"  墨白   "</code> 清洗成 <code>"墨白"</code>，再把
+            <code>"2026-09-14"</code> 改写成 <code>"2026 年 9 月 14 日"</code>（用字符串方法或正则都行）。</li>
+          <li>写一个函数 <code>formatPrice(fen)</code>：传入“分”，返回形如
+            <code>¥49.98</code> 的字符串（用整数运算与 <code>toFixed</code>）。</li>
+          <li>思考：为什么“比较两个浮点数是否相等”不能直接用
+            <code>===</code>？请用 <code>0.1 + 0.2</code> 说明，并说出两种可行的替代做法。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="清洗与改写">
+            "use strict";
+
+            const raw = "  墨白   ";
+            console.log(raw.trim());                 // "墨白"
+
+            const iso = "2026-09-14";
+            const [y, m, d] = iso.split("-").map(Number);
+            console.log(`${y} 年 ${m} 月 ${d} 日`);     // 2026 年 9 月 14 日
+
+            // 用正则也能一行搞定：
+            console.log(iso.replace(/(\d{4})-(\d{2})-(\d{2})/, "$1 年 $2 月 $3 日"));
+          </script>
+          <p>
+            两种做法都值得会：<strong>拆开再拼</strong>适合还要对数字做运算的场合
+            （比如 <code>Number(m) + 1</code>）；<strong>正则替换</strong>适合格式规整、只做重排的场合。
+            注意 <code>split("-")</code> 得到的是字符串数组，要计算就得先 <code>Number()</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="以分为单位格式化价格">
+            "use strict";
+
+            function formatPrice(fen) {
+              if (!Number.isInteger(fen)) return "金额必须是整数分";
+              const yuan = fen / 100;
+              return "¥" + yuan.toFixed(2);
+            }
+
+            console.log(formatPrice(4998));   // ¥49.98
+            console.log(formatPrice(5));      // ¥0.05
+            console.log(formatPrice(100000)); // ¥1000.00
+          </script>
+          <p>
+            要点：<strong>内部一律用整数“分”做加减</strong>，只在最后显示时除以 100 并用
+            <code>toFixed(2)</code> 补两位小数——这样能绕开浮点误差累计的问题
+            （1999 + 2999 这种整数加法永远是精确的）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>0.1</code> 与 <code>0.2</code> 在二进制里都是无限循环小数，
+            存进 64 位浮点数时已经被舍入过；两个舍入过的值相加，
+            结果自然与“十进制里算完再舍入”的 <code>0.3</code> 不完全相等——
+            实测是 <code>0.30000000000000004</code>。
+            两种替代做法：
+            ①<strong>比差值</strong>：<code>Math.abs(a - b) &lt; Number.EPSILON</code>；
+            ②<strong>换成整数运算</strong>（比如金额用“分”、长度用“毫米”），
+            算完再换算回小数显示。第三种工程做法是引入专门的十进制库，但那是后话。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把代码组织成“会说话的模板”：类与原型。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

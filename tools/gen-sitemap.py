@@ -27,6 +27,8 @@ HOME = "index.html"
 
 # SECTIONS 之外的独立成品页（demo/ 整页示例，章节正文有链接），一并收录。
 EXTRA_PAGES = [
+    "demo/html-home/index.html",
+    "demo/html-home-styled/index.html",
     "demo/portfolio/index.html",
     "demo/todo/index.html",
 ]

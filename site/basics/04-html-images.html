@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四式 · 图片 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="img 的 src 与 alt、宽高属性、图片格式怎么选、响应式图片的 srcset 与 picture，以及图文的正确组合方式。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-04">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        一页全是字，看久了眼睛发涩。该给页面添几张图了——
+        但在网页里放图，讲究的不是“好看”，而是<strong>说清楚这张图是什么</strong>。
+        这一式把 <code>img</code> 的每一样家当都过一遍。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会写完整的 <code>img</code>：<code>src</code>、<code>alt</code>、<code>width</code> 与 <code>height</code></li>
+          <li>知道什么时候该写 <code>alt=""</code>，什么时候必须认真写描述</li>
+          <li>看得懂常见图片格式的取舍，知道 SVG 为什么适合图标与示意图</li>
+          <li>见过响应式图片的两套写法：<code>srcset</code> / <code>sizes</code> 与 <code>picture</code></li>
+        </ul>
+      </div>
+
+      <h2>img 的三样家当</h2>
+      <p>
+        <code>img</code> 是少数没有结束标签的元素，它的信息全靠属性：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>必填？</th>
+            <th>作用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>src</code></td>
+            <td>必填</td>
+            <td>图片文件在哪（相对路径或完整地址）</td>
+          </tr>
+          <tr>
+            <td><code>alt</code></td>
+            <td>必填</td>
+            <td>替代文字：图片加载失败时显示，读屏软件会念出来</td>
+          </tr>
+          <tr>
+            <td><code>width</code> / <code>height</code></td>
+            <td>强烈建议</td>
+            <td>给浏览器预留空间，避免图片加载完成后把下面的内容“顶下去”</td>
+          </tr>
+          <tr>
+            <td><code>loading="lazy"</code></td>
+            <td>按需</td>
+            <td>滚动到附近才加载，长页面下方的大图值得写上</td>
+          </tr>
+          <tr>
+            <td><code>decoding="async"</code></td>
+            <td>按需</td>
+            <td>提示浏览器异步解码，减少卡顿（老浏览器会忽略，无副作用）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一张写全属性的图片</div>
+        <div class="demo-preview">
+          <img src="../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图，画着一轮红日与远山" width="320" height="240">
+          <p class="mt-2 mb-0">宽高属性写的是数字（像素），不带单位；只写一个，另一维会按比例自动算出来。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <img src="../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图，画着一轮红日与远山" width="320" height="240">
+            <p class="mt-2 mb-0">宽高属性写的是数字（像素），不带单位；只写一个，另一维会按比例自动算出来。</p>
+          </script>
+        </div>
+      </div>
+
+      <h3>alt 怎么写才算合格</h3>
+      <p>
+        <code>alt</code> 是全篇最容易写敷衍的属性，但它的价值极高：
+        读屏软件的读者、图片加载失败的读者、搜索引擎，靠的都是它。三种情况分开处理：
+      </p>
+      <ul>
+        <li><strong>图片是内容</strong>：写它传递的信息，比如“纸墨风格的山水示意图，一轮红日与远山”。
+          不要把开头的“图片”“照片”写进去——读屏软件会自己念“图片”，重复了；</li>
+        <li><strong>图片纯装饰</strong>（分隔线、背景花纹）：写空值 <code>alt=""</code>，
+          读屏软件会直接跳过，不会念一堆废话；</li>
+        <li><strong>图片本身是链接</strong>：<code>alt</code> 要写“点了会去哪”，如“回到首页”；
+          因为这时链接的文字就是这张图。</li>
+      </ul>
+      <p>
+        还有一条底线：<strong>不要把文字做成图片</strong>。图片里的字没法选中、没法翻译、
+        放大就模糊，读屏软件也读不出来。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：图片加载失败时的那行字</div>
+        <p style="margin:0">
+          断网打开页面时，<code>alt</code> 就成了图片的替身。你可以把它当成一个自检标准：
+          <strong>如果把它当成图注来读也通顺，那这条 alt 就是合格的</strong>。
+        </p>
+      </div>
+
+      <h2>图片是行内元素</h2>
+      <p>
+        这一点和很多人的直觉相反：<code>img</code> 默认是<strong>行内</strong>元素，
+        会和文字排在同一行，并且<strong>默认按文字基线对齐</strong>——
+        于是图片下方常常莫名其妙多出一点空隙。这个现象以后学 CSS 会彻底解决，
+        现在先认识它。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 图片与文字同排时，底边对不齐</div>
+        <div class="demo-preview">
+          <p>看这行文字和图片是并排的<img src="../assets/img/demo-wide.svg" alt="横幅示意图，写着“日拱一卒”" width="150">，注意图片底部的空隙。</p>
+          <p class="mb-0">解决办法：把它单独放一段（如例 1），或者用 CSS 调整对齐与显示方式。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>看这行文字和图片是并排的<img src="../assets/img/demo-wide.svg" alt="横幅示意图，写着“日拱一卒”" width="150">，注意图片底部的空隙。</p>
+            <p class="mb-0">解决办法：把它单独放一段（如例 1），或者用 CSS 调整对齐与显示方式。</p>
+          </script>
+        </div>
+      </div>
+
+      <h2>图文配对：figure 与 figcaption</h2>
+      <p>
+        有图有说明时，别用两个段落硬拼，用 <code>figure</code>（图组）包起来、
+        用 <code>figcaption</code>（图注）写说明。好处是机器知道“这段文字是在说这张图”，
+        而且图注放在图片上方或下方都合法。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 图片配图注</div>
+        <div class="demo-preview">
+          <figure class="mb-0">
+            <img src="../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图" width="280" height="210">
+            <figcaption>图 1 · 山不让尘，川不辞盈。</figcaption>
+          </figure>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <figure class="mb-0">
+              <img src="../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图" width="280" height="210">
+              <figcaption>图 1 · 山不让尘，川不辞盈。</figcaption>
+            </figure>
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>figure</code> 不只装图片：一段代码、一段引言配上说明，同样可以这样组合。
+      </p>
+
+      <h2>常见图片格式怎么选</h2>
+      <p>浏览器能显示很多格式，选择的标准是“内容类型 + 体积 + 兼容性”：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>格式</th>
+            <th>适合</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>.jpg</code> / <code>.jpeg</code></td>
+            <td>照片、颜色丰富的图</td>
+            <td>有损压缩，反复编辑会越存越糊；不支持透明</td>
+          </tr>
+          <tr>
+            <td><code>.png</code></td>
+            <td>截图、需要透明或锐利边缘的图</td>
+            <td>无损，体积通常比 JPEG 大</td>
+          </tr>
+          <tr>
+            <td><code>.gif</code></td>
+            <td>极短的循环小动画</td>
+            <td>颜色最多 256 色，画质差；新项目更推荐视频或 CSS 动画</td>
+          </tr>
+          <tr>
+            <td><code>.webp</code></td>
+            <td>现代网站的通用选择（照片与图形都行）</td>
+            <td>支持透明与动画，体积通常小于 JPEG / PNG；老浏览器可能不认</td>
+          </tr>
+          <tr>
+            <td><code>.avif</code></td>
+            <td>追求更小体积的照片</td>
+            <td>压缩率更高，但编码慢、兼容性略逊于 WebP</td>
+          </tr>
+          <tr>
+            <td><code>.svg</code></td>
+            <td>图标、logo、示意图</td>
+            <td><strong>矢量</strong>：放大不糊，体积小，还能用文本编辑器改</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        SVG 值得单独说一句：它其实是一段描述图形的 XML 文本，本站所有示例图都是手写的 SVG。
+        它既能用 <code>img</code> 引入，也能直接写进 HTML——
+        当普通标签用时，它的每个图形元素都能被 CSS 选中、上色。
+      </p>
+
+      <h2>响应式图片：按屏幕挑一张</h2>
+      <p>
+        手机屏幕小、网速可能慢，给它一张 2000 像素宽的大图是浪费；高清屏又需要更清晰的图。
+        HTML 提供了两套写法让浏览器自己挑：
+      </p>
+      <ul>
+        <li><strong><code>srcset</code> + <code>sizes</code></strong>：同一张图的多个尺寸，
+          告诉浏览器“每个文件多宽”“显示时大约占多宽”，由它决定下载哪个；</li>
+        <li><strong><code>picture</code> + <code>source</code></strong>：不同条件下用<strong>不同的图</strong>，
+          比如窄屏换成竖版构图、或者优先用 WebP、不支持时退回 JPEG。</li>
+      </ul>
+
+      <script type="text/plain" data-lang="html" data-title="同一张图的三种尺寸（srcset + sizes）">
+        <img src="images/mountain-800.jpg"
+             srcset="images/mountain-400.jpg 400w,
+                     images/mountain-800.jpg 800w,
+                     images/mountain-1600.jpg 1600w"
+             sizes="(max-width: 600px) 100vw, 800px"
+             alt="云雾中的山脊" width="800" height="600" loading="lazy">
+      </script>
+
+      <script type="text/plain" data-lang="html" data-title="不同条件用不同的图（picture）">
+        <picture>
+          <source media="(max-width: 600px)" srcset="images/mountain-portrait.jpg">
+          <source srcset="images/mountain.webp" type="image/webp">
+          <img src="images/mountain.jpg" alt="云雾中的山脊" width="800" height="600">
+        </picture>
+      </script>
+
+      <p>
+        这两种写法都需要准备多个图片文件，所以更适合有素材管道的项目；
+        本站的示例图是 SVG，天生可以无限缩放，用不上 <code>srcset</code>。
+        记住它们的存在与用途，等以后真的用上再回来抄语法即可。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">别忘了图片也能被点击</div>
+        <p style="margin:0">
+          想让图片点开看大图，把 <code>img</code> 包进 <code>a</code> 里就行：
+          <code>&lt;a href="big.jpg"&gt;&lt;img src="small.jpg" alt="…"&gt;&lt;/a&gt;</code>。
+          这时 <code>alt</code> 要写“点开看大图”的意图，而不是描述图片内容。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>img</code> 的三样家当：<code>src</code> 找图、<code>alt</code> 说明图、<code>width</code>/<code>height</code> 预留位置；</li>
+        <li>内容图写清描述，装饰图写 <code>alt=""</code>，链接图写“点了去哪”；</li>
+        <li>图片是行内元素，默认按基线对齐，所以会看到“底部空隙”；</li>
+        <li>图文配对用 <code>figure</code> + <code>figcaption</code>；</li>
+        <li>格式选择：照片用 JPEG/WebP，透明与截图用 PNG，图标示意图用 SVG，GIF 已基本过时；</li>
+        <li>响应式图片两套写法：<code>srcset</code>/<code>sizes</code> 挑尺寸，<code>picture</code> 挑不同图。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四式</div>
+        <ol>
+          <li>建一个 <code>images</code> 文件夹，放一张自己的图片，用一个 HTML 文件把它显示出来：
+            写好 <code>alt</code>，限制宽度为 300 左右，并配一句图注。</li>
+          <li>写一段“点击缩略图看大图”的链接（图片文件不存在也没关系，先把结构写对）。</li>
+          <li>思考：一张纯装饰用的花纹图片，为什么推荐写 <code>alt=""</code> 而不是写“花纹图片”？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="带图注的图片">
+            <figure>
+              <img src="images/cat.jpg" alt="一只橘猫趴在窗台上晒太阳" width="300">
+              <figcaption>我家橘猫 · 摄于某个懒洋洋的午后</figcaption>
+            </figure>
+          </script>
+          <p>
+            检查点：<code>alt</code> 读起来像一句人话，没有“图片”二字；
+            <code>width</code> 只写一个维度，高度自动按比例；图注在 <code>figcaption</code> 里。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="缩略图链接">
+            <a href="images/cat-large.jpg">
+              <img src="images/cat-thumb.jpg" alt="点开看橘猫大图" width="160">
+            </a>
+          </script>
+          <p>
+            要点：<code>a</code> 包住 <code>img</code>，<code>href</code> 指向大图；
+            <code>alt</code> 写的是这个链接的用途。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为装饰图不承载信息，写描述只会让读屏软件的读者白听一段废话。
+            <code>alt=""</code> 是一个明确的信号：“这张图可以忽略”。
+            反过来，如果一张图删掉后读者会失去信息，那它就必须有像样的 <code>alt</code>。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，页面上要响起声音、动起画面：音视频与嵌入。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

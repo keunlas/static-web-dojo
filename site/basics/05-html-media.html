@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第五式 · 音视频与嵌入 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="video 与 audio 的写法与属性、字幕轨 track、自动播放的规矩，以及 iframe 嵌入页面时的安全与无障碍要点。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-05">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        图片是静的，视频与音频是活的。HTML 早就不需要插件就能播放它们——
+        这一式就把播放器请进页面，顺便说清浏览器给“自动播放”立下的规矩。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>video</code> 与 <code>audio</code>，并用多个 <code>source</code> 做格式回退</li>
+          <li>认得 <code>controls</code>、<code>poster</code>、<code>preload</code>、<code>muted</code>、<code>loop</code> 等属性</li>
+          <li>知道自动播放的限制，不乱用自动播放</li>
+          <li>会为视频配字幕轨（<code>track</code>），会用 <code>iframe</code> 安全地嵌入内容</li>
+        </ul>
+      </div>
+
+      <h2>视频：video 元素</h2>
+      <p>
+        播放视频只用 <code>video</code> 一个元素，配 <code>controls</code> 属性就能得到浏览器自带的播放条。
+        视频文件用 <code>source</code> 子元素引入，可以准备多个格式让浏览器挑：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一个完整的视频播放器（点播放按钮试试，字幕已配好）</div>
+        <div class="demo-preview">
+          <video controls width="320" height="180" poster="../assets/img/demo-wide.svg" preload="metadata">
+            <source src="../assets/media/demo-fade.mp4" type="video/mp4">
+            <source src="../assets/media/demo-fade.webm" type="video/webm">
+            <track kind="subtitles" src="../assets/media/demo-fade.zh.vtt" srclang="zh" label="中文" default>
+            你的浏览器不支持 video 元素，可以<a href="../assets/media/demo-fade.mp4">下载这段视频</a>观看。
+          </video>
+          <p class="mt-2 mb-0">这段约 2 秒的示例画面由本站用 ffmpeg 生成：两幅示意图之间的淡入淡出。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <video controls width="320" height="180" poster="../assets/img/demo-wide.svg" preload="metadata">
+              <source src="../assets/media/demo-fade.mp4" type="video/mp4">
+              <source src="../assets/media/demo-fade.webm" type="video/webm">
+              <track kind="subtitles" src="../assets/media/demo-fade.zh.vtt" srclang="zh" label="中文" default>
+              你的浏览器不支持 video 元素，可以<a href="../assets/media/demo-fade.mp4">下载这段视频</a>观看。
+            </video>
+            <p class="mt-2 mb-0">这段约 2 秒的示例画面由本站用 ffmpeg 生成：两幅示意图之间的淡入淡出。</p>
+          </script>
+        </div>
+      </div>
+
+      <p>常用的属性都在下面这张表里：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>controls</code></td>
+            <td>显示播放控件</td>
+            <td>不写它，用户就没法播放（除非你在 JS 里自己控制）</td>
+          </tr>
+          <tr>
+            <td><code>poster</code></td>
+            <td>封面图</td>
+            <td>播放前显示的那一帧，给张有信息量的图体验更好</td>
+          </tr>
+          <tr>
+            <td><code>preload</code></td>
+            <td>预加载策略</td>
+            <td><code>none</code> 不预载、<code>metadata</code> 只取时长等信息、<code>auto</code> 尽量预载</td>
+          </tr>
+          <tr>
+            <td><code>muted</code></td>
+            <td>静音开始</td>
+            <td>布尔属性；自动播放几乎都要靠它才被允许</td>
+          </tr>
+          <tr>
+            <td><code>loop</code></td>
+            <td>循环播放</td>
+            <td>适合短动画、氛围片段</td>
+          </tr>
+          <tr>
+            <td><code>playsinline</code></td>
+            <td>在页面内播放</td>
+            <td>iOS 上不加这个，视频往往会被强制全屏播放</td>
+          </tr>
+          <tr>
+            <td><code>width</code> / <code>height</code></td>
+            <td>预留尺寸</td>
+            <td>与图片同理，避免加载时页面跳动</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：自动播放的三条硬规矩</div>
+        <ul style="margin:0">
+          <li>带声音的自动播放会被浏览器一律拦截——这是为了防止吓人一跳的广告；</li>
+          <li>“静音 + 自动播放”通常被允许，但移动端系统还可能再拦一道；</li>
+          <li>所以：<strong>能不用自动播放就不用</strong>；必须用时，写 <code>autoplay muted loop playsinline</code> 四件套，并给用户一个暂停的方法。</li>
+        </ul>
+      </div>
+
+      <h2>音频：audio 元素</h2>
+      <p>
+        <code>audio</code> 与 <code>video</code> 的写法几乎一样，区别只是没有画面，
+        所以 <code>width</code>、<code>height</code>、<code>poster</code> 都派不上用场。
+        在页面上它显示成一条小巧的播放条。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 音频播放器（点播放会听到一声轻响，音量已调低）</div>
+        <div class="demo-preview">
+          <audio controls preload="none">
+            <source src="../assets/media/demo-tone.mp3" type="audio/mpeg">
+            你的浏览器不支持 audio 元素，可以<a href="../assets/media/demo-tone.mp3">下载这段音频</a>收听。
+          </audio>
+          <p class="mt-2 mb-0">示例音频是 ffmpeg 合成的 1.8 秒纯音，用来说明 <code>audio</code> 的写法。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <audio controls preload="none">
+              <source src="../assets/media/demo-tone.mp3" type="audio/mpeg">
+              你的浏览器不支持 audio 元素，可以<a href="../assets/media/demo-tone.mp3">下载这段音频</a>收听。
+            </audio>
+            <p class="mt-2 mb-0">示例音频是 ffmpeg 合成的 1.8 秒纯音，用来说明 <code>audio</code> 的写法。</p>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        实际项目中，音频最常见的用途是播客与背景音。要记住两件事：
+        其一，<strong>永远不要偷偷自动播放背景音乐</strong>；
+        其二，纯音频内容要给文字版（听障读者与“不方便开声音”的场合都需要）。
+      </p>
+
+      <h2>给视频配字幕：track</h2>
+      <p>
+        <code>track</code> 是 <code>video</code> / <code>audio</code> 的子元素，用来挂<strong>字幕轨</strong>。
+        它的内容是 WebVTT 格式（<code>.vtt</code>）的纯文本文件——一条条时间轴加文字，
+        和唱片的歌词页差不多：
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="track 的写法">
+        <video controls src="clip.mp4">
+          <track kind="subtitles" src="clip.zh.vtt" srclang="zh" label="中文" default>
+          <track kind="captions" src="clip.en.vtt" srclang="en" label="English">
+        </video>
+      </script>
+
+      <script type="text/plain" data-lang="html" data-title="clip.zh.vtt（WebVTT 文件）">
+        WEBVTT
+
+        00:00:00.000 --> 00:00:01.800
+        日拱一卒，功不唐捐。
+
+        00:00:01.800 --> 00:00:02.400
+        山不让尘，川不辞盈。
+      </script>
+
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>kind</code></td>
+            <td>字幕的类型：<code>subtitles</code> 翻译字幕、<code>captions</code> 含音效描述的字幕、<code>descriptions</code> 画面描述（供看不见画面的读者）、<code>chapters</code> 章节跳转</td>
+          </tr>
+          <tr>
+            <td><code>src</code></td>
+            <td>WebVTT 文件的地址</td>
+          </tr>
+          <tr>
+            <td><code>srclang</code></td>
+            <td>字幕语言，如 <code>zh</code>、<code>en</code></td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td>播放器里显示的语言名，如“中文”</td>
+          </tr>
+          <tr>
+            <td><code>default</code></td>
+            <td>默认启用这条字幕</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        例 1 的播放器里就挂着一条中文字幕：点开播放按钮，再把视频拉到后半段，
+        字幕会显示“山不让尘，川不辞盈”。<strong>给视频配字幕不是加分项，是及格线</strong>——
+        它同时帮到听障读者、在嘈杂环境里看视频的人、以及需要翻译的读者。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">已知限制：file:// 下字幕轨会被浏览器拦下</div>
+        <p style="margin:0">
+          浏览器把每个 <code>file://</code> 页面当成彼此隔离的“独立来源”，
+          因此双击打开本站时，<strong>字幕文件（.vtt）加载会被拒绝</strong>，
+          例 1 的字幕不会出现（播放器本身正常）。用
+          <code>python3 -m http.server</code> 起本地服务器或部署后再看，字幕即生效。
+          这与第三回第九式 Ajax 的限制同源，都来自浏览器的本地文件安全策略。
+        </p>
+      </div>
+
+      <h2>嵌入别人的内容：iframe</h2>
+      <p>
+        <code>iframe</code>（内联框架）能在你的页面里开一扇窗，窗外是另一个文档：
+        另一个网页、一张 SVG、一份文档，浏览器能显示的东西它基本都能装。
+        和图片一样，它需要几个必填的“说明”属性：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 用 iframe 嵌一张会跟着窗口缩放的 SVG</div>
+        <div class="demo-preview">
+          <iframe src="../assets/img/demo-frame.svg" title="嵌入的示例插图" width="360" height="180" loading="lazy"></iframe>
+          <p class="mt-2 mb-0">窗口里的内容是一个独立文档：它有自己的滚动条，也不与外层共享样式与脚本。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <iframe src="../assets/img/demo-frame.svg" title="嵌入的示例插图" width="360" height="180" loading="lazy"></iframe>
+            <p class="mt-2 mb-0">窗口里的内容是一个独立文档：它有自己的滚动条，也不与外层共享样式与脚本。</p>
+          </script>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>src</code></td>
+            <td>要嵌入的文档地址</td>
+            <td>站内用相对路径，站外用完整地址</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>这个窗口里是什么</td>
+            <td><strong>必填</strong>：读屏软件靠它介绍这个框，缺失时等同于“无标题内容”</td>
+          </tr>
+          <tr>
+            <td><code>width</code> / <code>height</code></td>
+            <td>窗口尺寸</td>
+            <td>也可以用 CSS 控制</td>
+          </tr>
+          <tr>
+            <td><code>loading="lazy"</code></td>
+            <td>滚动到附近再加载</td>
+            <td>页面底部的地图、视频之类值得写上</td>
+          </tr>
+          <tr>
+            <td><code>sandbox</code></td>
+            <td>给嵌入内容加限制</td>
+            <td>嵌入不受信任的内容时使用，默认会禁用脚本与表单等能力，再按需放开</td>
+          </tr>
+          <tr>
+            <td><code>allow</code></td>
+            <td>授予特定权限</td>
+            <td>如 <code>allow="fullscreen"</code> 允许整屏</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <div class="callout-title">iframe 的两条注意事项</div>
+        <ul style="margin:0">
+          <li><strong>它是“别人的地盘”</strong>：iframe 里的页面有自己的样式与脚本，
+            外层的 CSS 管不到它（反过来也一样），调试时要分别看；</li>
+          <li><strong>站外内容要谨慎</strong>：嵌入别人网站等于把那段内容交给对方控制，
+            对方挂了你的页面就空一块，所以重要内容不要只靠 iframe。</li>
+        </ul>
+      </div>
+
+      <h2>降级内容与历史包袱</h2>
+      <p>
+        例 1、例 2 里，<code>video</code> / <code>audio</code> 标签<strong>内部</strong>还写了一段文字。
+        那段文字只在浏览器不支持该元素时显示——今天的浏览器基本都支持，
+        所以它更像是给特例环境的“降落伞”。
+      </p>
+      <p>
+        另外两个元素偶尔还会遇到：<code>object</code> 与 <code>embed</code>。
+        它们能嵌入的东西更杂（PDF、Flash 时代的遗留物等），但控制力差、无障碍支持弱，
+        <strong>新项目要嵌内容，优先用 <code>iframe</code></strong>。
+      </p>
+      <p>
+        还有一个老属性要避免：<code>frameborder="0"</code>。它是过时写法，
+        想去掉 iframe 的边框，用一句 CSS 就好：<code>iframe { border: 0 }</code>（第十九式会细讲边框）。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>video</code> / <code>audio</code> 靠 <code>controls</code> 显示控件，靠 <code>source</code> 引入文件；</li>
+        <li>常见属性：<code>poster</code> 封面、<code>preload</code> 预载、<code>muted</code> 静音、<code>loop</code> 循环、<code>playsinline</code> 页内播放；</li>
+        <li>自动播放的限制针对的是“有声音”，但态度上应当<strong>能不用就不用</strong>；</li>
+        <li><code>track</code> 挂 WebVTT 字幕，<code>kind</code> 有 subtitles / captions / descriptions / chapters；</li>
+        <li><code>iframe</code> 嵌入其他文档，<code>title</code> 必填、<code>loading="lazy"</code> 按需、<code>sandbox</code> 保安全；</li>
+        <li><code>object</code> / <code>embed</code> 属于遗留手段，新项目优先 <code>iframe</code>；<code>frameborder</code> 已过时，用 CSS。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第五式</div>
+        <ol>
+          <li>找一段你自己的视频（或先用例 1 的文件），写成带封面、双格式回退、中文字幕的播放器。</li>
+          <li>把一张 SVG（可用本站 <code>assets/img/</code> 里的示例图）放进 iframe：
+            给它写 <code>title</code>，并让宽度占满容器（试试 <code>width="100%"</code>）。</li>
+          <li>思考：为什么浏览器敢拦截“带声音的自动播放”，却允许静音自动播放？这条规则保护的是谁？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="带封面与字幕的播放器">
+            <video controls width="480" poster="cover.jpg" preload="metadata">
+              <source src="clip.mp4" type="video/mp4">
+              <source src="clip.webm" type="video/webm">
+              <track kind="subtitles" src="clip.zh.vtt" srclang="zh" label="中文" default>
+              你的浏览器不支持 video 元素，可以<a href="clip.mp4">下载视频</a>观看。
+            </video>
+          </script>
+          <p>
+            检查点：<code>controls</code> 在；两个 <code>source</code> 的 <code>type</code> 与文件类型一致；
+            <code>track</code> 是最后一个子元素（规范建议放在 source 之后）；
+            <code>srclang</code> 与 <code>label</code> 都写了。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="占满容器的 iframe">
+            <iframe src="images/demo.svg" title="嵌入的示意图" width="100%" height="220" loading="lazy"></iframe>
+          </script>
+          <p>
+            <code>width="100%"</code> 让窗口跟着容器宽度走。注意：嵌入的 SVG
+            自身若写死了宽度，就会在窗口里被裁切——这也是本站示例图写成
+            <code>width="100%"</code> + <code>viewBox</code> 的原因（见第四式的格式表）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            它保护的是<strong>用户</strong>：网页往往在后台标签页、通勤路上、深夜的房间里被打开，
+            突然响起的广告音既打扰本人也打扰旁人。静音自动播放通常不会造成这种干扰，
+            所以被放过。记住这个立场的来源，就明白为什么“静音自动播放”也应当克制使用——
+            它消耗流量、电池与注意力，而用户没要求看。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把数据排整齐：表格的行、列、表头与合并单元格。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十八式 · 变量与数据类型 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="变量的声明与命名、let/const/var 的区别、七种原始类型与 typeof、原始值与引用值的差别、真假值与类型转换、模板字符串。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-28">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        编程的第一步是“给东西起名字”。在 JavaScript 里，这件事叫<strong>变量</strong>；
+        而每样东西都有自己的<strong>类型</strong>——字符串、数字、真假、空……
+        这一式把这两块地基打牢，后面所有的招式都站在它上面。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会声明变量，知道 <code>let</code>、<code>const</code>、<code>var</code> 该怎么选</li>
+          <li>认得七种原始类型与对象，会用 <code>typeof</code> 辨认可它们的类型</li>
+          <li>分得清“原始值”与“引用值”：赋值与比较时的差别是新手一大坑</li>
+          <li>记得住八个“假值”，会做类型转换，会用模板字符串拼字符串</li>
+        </ul>
+      </div>
+
+      <h2>变量：名字与值</h2>
+      <p>
+        变量是一张“标签”：你给某个值贴上一个名字，以后就用这个名字找它。
+        声明只需一个关键字：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="声明与赋值">
+        let greeting = "你好，江湖！";   // 声明一个变量并赋值
+        const year = 2026;              // 声明一个“不打算改”的常量
+
+        greeting = "你好，墨白！";       // 可以改
+        // year = 2027;                 // ✘ 会报错：Assignment to constant variable
+      </script>
+      <p>
+        命名有硬规矩，也有软约定：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>规则</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>必须</strong></td>
+            <td>只能用字母、数字、下划线 <code>_</code>、美元符号 <code>$</code>；
+              不能以数字开头；不能与保留字（<code>let</code>、<code>class</code>、<code>return</code>…）同名；
+              <strong>区分大小写</strong>（<code>name</code> 与 <code>Name</code> 是两个变量）</td>
+          </tr>
+          <tr>
+            <td><strong>建议</strong></td>
+            <td>用驼峰命名：<code>userName</code>、<code>totalPrice</code>；
+              常量可以用全大写：<code>MAX_RETRY</code>；
+              名字要能读出意思——<code>list</code> 不如 <code>todoList</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        中文变量名在 JavaScript 里居然是合法的（<code>let 名字 = "墨白"</code> 能跑），
+        但请忍住不要用：输入法切换、协作、搜索都会变成麻烦。
+      </p>
+
+      <h2>let、const、var 该怎么选</h2>
+      <p>
+        三个关键字长得像，行为差得远。先把表格看清楚：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th><code>let</code></th>
+            <th><code>const</code></th>
+            <th><code>var</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>作用域</td>
+            <td>块级（<code>{ }</code> 之内）</td>
+            <td>块级</td>
+            <td><strong>函数级</strong>（块管不住它）</td>
+          </tr>
+          <tr>
+            <td>能否重新赋值</td>
+            <td>能</td>
+            <td><strong>不能</strong>（但对象内部的属性可以改）</td>
+            <td>能</td>
+          </tr>
+          <tr>
+            <td>能否重复声明同名</td>
+            <td>不能（报错）</td>
+            <td>不能</td>
+            <td>能（后一个覆盖前一个，静默发生）</td>
+          </tr>
+          <tr>
+            <td>声明前访问</td>
+            <td colspan="2">报错（暂时性死区）</td>
+            <td>得到 <code>undefined</code>（变量提升）</td>
+          </tr>
+          <tr>
+            <td>建议</td>
+            <td>需要改值时用</td>
+            <td><strong>默认就用它</strong></td>
+            <td>别用；只在读老代码时认识它</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        为什么“默认用 <code>const</code>”？因为它把“我不打算改”明确写进了代码：
+        后来的人（包括三个月后的你）看到 <code>const</code> 就不必担心它被改过；
+        真需要改的时候再降级成 <code>let</code>，改动的意图一目了然。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 块级作用域：<code>let</code> 出不了这个花括号</div>
+        <div class="demo-preview">
+          <ul id="js28-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list1 = document.getElementById('js28-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            {
+              let insideLet = "我是 let，被关在花括号里";
+              var insideVar = "我是 var，能跑出花括号";
+              say1("块内：insideLet = " + insideLet);
+            }
+
+            say1("块外：typeof insideLet → " + typeof insideLet + "（访问不到）");
+            say1("块外：insideVar = " + insideVar + "（var 管不住自己）");
+            say1("用 let 做循环变量，出了循环就失效：");
+            for (let i = 0; i < 1; i++) { /* 只是演示 */ }
+            say1("循环外：typeof i → " + typeof i);
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js28-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list1 = document.getElementById('js28-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            {
+              let insideLet = "我是 let，被关在花括号里";
+              var insideVar = "我是 var，能跑出花括号";
+              say1("块内：insideLet = " + insideLet);
+            }
+
+            say1("块外：typeof insideLet → " + typeof insideLet + "（访问不到）");
+            say1("块外：insideVar = " + insideVar + "（var 管不住自己）");
+            say1("用 let 做循环变量，出了循环就失效：");
+            for (let i = 0; i < 1; i++) { /* 只是演示 */ }
+            say1("循环外：typeof i → " + typeof i);
+          </script>
+        </div>
+      </div>
+      <p>
+        用 <code>typeof</code> 去探“不存在的名字”不会报错（它会回答 <code>"undefined"</code>），
+        所以这个演示能安全地把结论摆出来。真去读那个变量，
+        浏览器会给你 <code>ReferenceError: insideLet is not defined</code>——
+        第二十七式学的报错，在这里派上用场。
+      </p>
+
+      <h2>数据类型：七种原始值 + 对象</h2>
+      <p>
+        JavaScript 的值分成两大类：<strong>原始值</strong>（简单、不可变）与<strong>对象</strong>（复合）。
+        原始值有七种：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>例子</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>string</code></td><td><code>"日拱一卒"</code>、<code>'abc'</code>、<code>`模板`</code></td><td>文本；单引号双引号反引号都行</td></tr>
+          <tr><td><code>number</code></td><td><code>42</code>、<code>3.14</code>、<code>-0.5</code>、<code>NaN</code></td><td>整数与小数都是它；还有 <code>Infinity</code></td></tr>
+          <tr><td><code>boolean</code></td><td><code>true</code> / <code>false</code></td><td>真假两值，判断的基础</td></tr>
+          <tr><td><code>undefined</code></td><td><code>undefined</code></td><td>“还没有值”：声明了没赋值、函数没返回值</td></tr>
+          <tr><td><code>null</code></td><td><code>null</code></td><td>“故意置空”：明确表示这里没有东西</td></tr>
+          <tr><td><code>bigint</code></td><td><code>9007199254740993n</code></td><td>超大整数（超过 <code>Number.MAX_SAFE_INTEGER</code> 时用）</td></tr>
+          <tr><td><code>symbol</code></td><td><code>Symbol("id")</code></td><td>唯一标识，做对象里的“绝不重名”的键</td></tr>
+        </tbody>
+      </table>
+      <p>
+        除了这七种，其余都是<strong>对象</strong>：数组、函数、日期、正则、<code>Map</code>……
+        它们都是“装满属性的盒子”。类型认不准时，用 <code>typeof</code> 问一下：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>表达式</th>
+            <th>结果</th>
+            <th>提醒</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>typeof "abc"</code></td><td><code>"string"</code></td><td></td></tr>
+          <tr><td><code>typeof 42</code></td><td><code>"number"</code></td><td>小数、<code>NaN</code>、<code>Infinity</code> 都是它</td></tr>
+          <tr><td><code>typeof true</code></td><td><code>"boolean"</code></td><td></td></tr>
+          <tr><td><code>typeof undefined</code></td><td><code>"undefined"</code></td><td></td></tr>
+          <tr><td><code>typeof null</code></td><td><strong><code>"object"</code></strong></td><td>历史遗留问题，至今没改（改了会破坏老网站）；判断 null 请用 <code>x === null</code></td></tr>
+          <tr><td><code>typeof 10n</code></td><td><code>"bigint"</code></td><td></td></tr>
+          <tr><td><code>typeof Symbol()</code></td><td><code>"symbol"</code></td><td></td></tr>
+          <tr><td><code>typeof []</code></td><td><code>"object"</code></td><td>数组是对象；判断数组用 <code>Array.isArray(x)</code></td></tr>
+          <tr><td><code>typeof function(){}</code></td><td><code>"function"</code></td><td>函数也是对象，但 <code>typeof</code> 给它开了小灶</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · typeof 全家福（脚本把每种值都问一遍）</div>
+        <div class="demo-preview">
+          <table id="js28-demo2-out" style="width: 100%">
+            <thead><tr><th>值</th><th>typeof</th><th>补充</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody2 = document.querySelector('#js28-demo2-out tbody');
+            function row2(value, note) {
+              var tr = document.createElement('tr');
+              var td1 = document.createElement('td');
+              var td2 = document.createElement('td');
+              var td3 = document.createElement('td');
+              td1.textContent = String(value);
+              td2.textContent = typeof value;
+              td3.textContent = note || '';
+              tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+              tbody2.appendChild(tr);
+            }
+            row2("日拱一卒", "文本");
+            row2(42, "整数");
+            row2(3.14, "小数也是 number");
+            row2(NaN, "type 也是 number，但它不等于自己");
+            row2(true, "真假值");
+            row2(undefined, "声明了没赋值");
+            row2(null, "注意：历史遗留，返回 object");
+            row2(10n, "大整数");
+            row2(Symbol("id"), "唯一标识");
+            row2([1, 2, 3], "数组也是对象 → Array.isArray 判断：" + Array.isArray([1, 2, 3]));
+            row2(function () { }, "函数有小灶");
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js28-demo2-out" style="width: 100%">
+              <thead><tr><th>值</th><th>typeof</th><th>补充</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody2 = document.querySelector('#js28-demo2-out tbody');
+            function row2(value, note) {
+              var tr = document.createElement('tr');
+              var td1 = document.createElement('td');
+              var td2 = document.createElement('td');
+              var td3 = document.createElement('td');
+              td1.textContent = String(value);
+              td2.textContent = typeof value;
+              td3.textContent = note || '';
+              tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+              tbody2.appendChild(tr);
+            }
+            row2("日拱一卒", "文本");
+            row2(42, "整数");
+            row2(3.14, "小数也是 number");
+            row2(NaN, "type 也是 number，但它不等于自己");
+            row2(true, "真假值");
+            row2(undefined, "声明了没赋值");
+            row2(null, "注意：历史遗留，返回 object");
+            row2(10n, "大整数");
+            row2(Symbol("id"), "唯一标识");
+            row2([1, 2, 3], "数组也是对象 → Array.isArray 判断：" + Array.isArray([1, 2, 3]));
+            row2(function () { }, "函数有小灶");
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">两个数字的坑，先打个招呼</div>
+        <ul style="margin:0">
+          <li><code>0.1 + 0.2 !== 0.3</code>：浮点数精度问题（第三十四式细说，先记住“别用 <code>===</code> 直接比小数”）；</li>
+          <li><code>NaN !== NaN</code>：<code>NaN</code> 是“不是数字”，任何数都不等于它。
+            判断请用 <code>Number.isNaN(x)</code>，别用 <code>x === NaN</code>（永远是 false）。</li>
+        </ul>
+      </div>
+
+      <h2>原始值与对象：一个关键差别</h2>
+      <p>
+        原始值是<strong>按值</strong>比较与复制的；对象是<strong>按引用</strong>的——
+        变量里装的不是内容，而是“内容放在哪”的地址。这一条差别，决定了新手最常遇到的误解：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 赋值与比较：原始值 vs 对象</div>
+        <div class="demo-preview">
+          <ul id="js28-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js28-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            // 原始值：复制的是内容
+            var a = "甲";
+            var b = a;
+            b = "乙";
+            say3('原始值：a = ' + a + '，b = ' + b + ' —— 改 b 不影响 a');
+
+            // 对象：复制的是“地址”
+            var boxA = { name: "甲" };
+            var boxB = boxA;
+            boxB.name = "乙";
+            say3('对象：boxA.name = ' + boxA.name + '，boxB.name = ' + boxB.name
+              + ' —— 两个名字指向同一个盒子');
+
+            // 比较
+            say3('比较原始值："甲" === "甲" → ' + ("甲" === "甲"));
+            say3('比较对象：{name:"甲"} === {name:"甲"} → ' + ({ name: "甲" } === { name: "甲" })
+              + ' —— 长得一样，但不是同一个盒子');
+            say3('同一个盒子跟自己比：boxA === boxA → ' + (boxA === boxA));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js28-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js28-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            // 原始值：复制的是内容
+            var a = "甲";
+            var b = a;
+            b = "乙";
+            say3('原始值：a = ' + a + '，b = ' + b + ' —— 改 b 不影响 a');
+
+            // 对象：复制的是“地址”
+            var boxA = { name: "甲" };
+            var boxB = boxA;
+            boxB.name = "乙";
+            say3('对象：boxA.name = ' + boxA.name + '，boxB.name = ' + boxB.name
+              + ' —— 两个名字指向同一个盒子');
+
+            // 比较
+            say3('比较原始值："甲" === "甲" → ' + ("甲" === "甲"));
+            say3('比较对象：{name:"甲"} === {name:"甲"} → ' + ({ name: "甲" } === { name: "甲" })
+              + ' —— 长得一样，但不是同一个盒子');
+            say3('同一个盒子跟自己比：boxA === boxA → ' + (boxA === boxA));
+          </script>
+        </div>
+      </div>
+      <p>
+        这一段是很多“灵异现象”的根源：把对象传进函数、来回赋值、
+        以为改的是副本，结果原对象也被改了。<strong>记住那张比喻</strong>：
+        原始值像便签上抄下来的字，对象像写着地址的纸条——抄地址不等于复制房子。
+      </p>
+      <p>
+        顺带说一句“不可变”：<strong>原始值本身永远不能改</strong>。
+        <code>var s = "abc"; s[0] = "x";</code> 之后 <code>s</code> 仍是 <code>"abc"</code>
+        （严格模式下这一句还会直接报错）。所谓“改字符串”，其实都是造了一个新字符串再让变量指过去。
+      </p>
+
+      <h2>真假值：判断的底层规则</h2>
+      <p>
+        <code>if (…)</code>、<code>while (…)</code> 里的东西都会被转成真假。
+        转换规则很简单——<strong>假值只有八个</strong>，其余一切都是真：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>八个假值（falsy）</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>false</code></td>
+            <td>假本身</td>
+          </tr>
+          <tr>
+            <td><code>0</code>、<code>-0</code>、<code>0n</code></td>
+            <td>数字零（含 BigInt 零）</td>
+          </tr>
+          <tr>
+            <td><code>""</code>（空字符串）</td>
+            <td>注意：<code>" "</code>（含空格）是<strong>真</strong>、<code>"0"</code> 也是真</td>
+          </tr>
+          <tr>
+            <td><code>null</code>、<code>undefined</code></td>
+            <td>“空”的两种写法</td>
+          </tr>
+          <tr>
+            <td><code>NaN</code></td>
+            <td>“不是数字”也是假</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        反过来，容易被误认为假的“真值”有：空数组 <code>[]</code>、空对象 <code>{}</code>、
+        字符串 <code>"0"</code>、字符串 <code>"false"</code>。
+        <strong>对象永远是真</strong>，哪怕它里面什么都没有。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 真假值与类型转换速查（脚本当场算给你看）</div>
+        <div class="demo-preview">
+          <table id="js28-demo4-out" style="width: 100%">
+            <thead><tr><th>值</th><th>Boolean()</th><th>Number()</th><th>String()</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p class="mt-2 mb-0" id="js28-demo4-note" style="font-size: .82rem; color: #6f6a5e">
+            正在计算……
+          </p>
+          <script>
+            "use strict";
+            var tbody4 = document.querySelector('#js28-demo4-out tbody');
+            var samples4 = [false, true, 0, 1, "", "0", "  ", null, undefined, NaN, [], {}];
+            samples4.forEach(function (v) {
+              var tr = document.createElement('tr');
+              [String(v), String(Boolean(v)), String(Number(v)), String(v)].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody4.appendChild(tr);
+            });
+            document.getElementById('js28-demo4-note').textContent =
+              '注意几处反直觉的地方："0" 转成布尔是真、转成数字是 0；"  "（空格）转数字是 0；'
+              + '空数组转数字是 0、转字符串是空串；NaN 转成字符串是 "NaN"。';
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js28-demo4-out" style="width: 100%">
+              <thead><tr><th>值</th><th>Boolean()</th><th>Number()</th><th>String()</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="mt-2 mb-0" id="js28-demo4-note" style="font-size: .82rem; color: #6f6a5e">
+              正在计算……
+            </p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody4 = document.querySelector('#js28-demo4-out tbody');
+            var samples4 = [false, true, 0, 1, "", "0", "  ", null, undefined, NaN, [], {}];
+            samples4.forEach(function (v) {
+              var tr = document.createElement('tr');
+              [String(v), String(Boolean(v)), String(Number(v)), String(v)].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody4.appendChild(tr);
+            });
+            document.getElementById('js28-demo4-note').textContent =
+              '注意几处反直觉的地方："0" 转成布尔是真、转成数字是 0；"  "（空格）转数字是 0；'
+              + '空数组转数字是 0、转字符串是空串；NaN 转成字符串是 "NaN"。';
+          </script>
+        </div>
+      </div>
+      <p>三条转换纪律，能省下无数 bug：</p>
+      <ul>
+        <li><strong>别靠隐式转换</strong>：<code>"1" + 1</code> 得到 <code>"11"</code>（字符串拼接），
+          <code>"1" - 1</code> 却得到 <code>0</code>（减法只能算数）——这种“看运气”的行为要主动避开；</li>
+        <li><strong>比较一律用 <code>===</code></strong>：宽松相等 <code>==</code> 会先转类型再比，
+          <code>0 == ""</code>、<code>"1" == 1</code> 都为真，是 bug 温床。
+          （唯一常用的例外：<code>x == null</code> 可以一次判掉 <code>null</code> 与 <code>undefined</code>。）</li>
+        <li><strong>转数字用 <code>Number()</code>，解析字符串用 <code>parseInt(s, 10)</code></strong>：
+          前者要求整串都是数字，后者会“能解析多少算多少”（第三十四式细讲）。</li>
+      </ul>
+
+      <h2>模板字符串：拼字符串的正经做法</h2>
+      <p>
+        用反引号 <code>`</code> 包起来的字符串叫模板字符串，它有两个本事：
+        <strong>可以插值</strong>（<code>${表达式}</code>）、<strong>可以换行</strong>。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="模板字符串">
+        const name = "墨白";
+        const n = 3;
+
+        // 老写法：用 + 拼接，容易漏空格、括号套括号
+        const old = "我是" + name + "，练了 " + n + " 天。";
+
+        // 新写法：插值，读起来就像一句话
+        const modern = `我是${name}，练了 ${n} 天，平均每天 ${Math.round(1440 / n)} 分钟的功课。`;
+
+        // 还能跨行
+        const letter = `墨白：
+
+          明日卯时，练功场见。
+        `;
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 模板字符串现场：拼一句话与一张小卡片</div>
+        <div class="demo-preview">
+          <p id="js28-demo5-sentence" style="margin: 0 0 .6rem"></p>
+          <div id="js28-demo5-card" style="border: 1px solid #d4cab0; border-radius: 8px; padding: .6rem .8rem; background: #fffdf7; font-size: .88rem"></div>
+          <script>
+            "use strict";
+            var name5 = "墨白";
+            var days5 = 21;
+            var minutes5 = 640;
+
+            document.getElementById('js28-demo5-sentence').textContent =
+              `我是${name5}，已经练了 ${days5} 天，累计 ${minutes5} 分钟，平均每天约 ${Math.round(minutes5 / days5)} 分钟。`;
+
+            document.getElementById('js28-demo5-card').innerHTML =
+              `<strong>${name5}的练功卡</strong><br>` +
+              `天数：${days5} 天<br>` +
+              `总时长：${minutes5} 分钟<br>` +
+              `状态：${minutes5 > 600 ? "超额完成" : "继续加油"}`;
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p id="js28-demo5-sentence" style="margin: 0 0 .6rem"></p>
+            <div id="js28-demo5-card" style="border: 1px solid #d4cab0; border-radius: 8px; padding: .6rem .8rem; background: #fffdf7; font-size: .88rem"></div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var name5 = "墨白";
+            var days5 = 21;
+            var minutes5 = 640;
+
+            document.getElementById('js28-demo5-sentence').textContent =
+              `我是${name5}，已经练了 ${days5} 天，累计 ${minutes5} 分钟，平均每天约 ${Math.round(minutes5 / days5)} 分钟。`;
+
+            document.getElementById('js28-demo5-card').innerHTML =
+              `<strong>${name5}的练功卡</strong><br>` +
+              `天数：${days5} 天<br>` +
+              `总时长：${minutes5} 分钟<br>` +
+              `状态：${minutes5 > 600 ? "超额完成" : "继续加油"}`;
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>${…}</code> 里可以放任何表达式：变量、计算、三元判断、函数调用都行，
+        这正是它比 <code>+</code> 拼接好用的原因。
+        本演示的第二块用了 <code>innerHTML</code> 与 <code>&lt;br&gt;</code>——
+        那是往页面里插标签的做法；如果内容来自用户输入，<strong>绝不能这么干</strong>
+        （会带来 XSS 风险），要用 <code>textContent</code>。第三十七式会把这层安全讲清楚。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>变量是给值起的名字；命名只能用字母/数字/<code>_</code>/<code>$</code>，不能数字开头，区分大小写；</li>
+        <li>默认 <code>const</code>，需要改值再用 <code>let</code>，<code>var</code> 只用于读懂老代码；</li>
+        <li>七种原始类型：string / number / boolean / undefined / null / bigint / symbol；其余都是对象；</li>
+        <li><code>typeof null</code> 返回 <code>"object"</code> 是历史遗留；判断数组用 <code>Array.isArray()</code>；</li>
+        <li>原始值按值复制与比较，对象按引用——赋值过去的是“地址”；</li>
+        <li>假值只有八个：<code>false / 0 / -0 / 0n / "" / null / undefined / NaN</code>，对象一律为真；</li>
+        <li>比较一律用 <code>===</code>，转换用 <code>Number()</code> / <code>String()</code> / <code>Boolean()</code>，别依赖隐式转换；</li>
+        <li>拼字符串用模板字符串：反引号 + <code>${…}</code>，能插值也能换行。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十八式</div>
+        <ol>
+          <li>声明三个变量：姓名（<code>const</code>）、今日练功分钟数（<code>let</code>）、
+            一句感想（模板字符串），然后用 <code>console.log</code> 拼成一句话打印出来。</li>
+          <li>把下面这些值分别丢进 <code>Boolean()</code>，先猜猜结果再验证：
+            <code>""</code>、<code>"0"</code>、<code>[]</code>、<code>{}</code>、<code>NaN</code>、<code>" "</code>。</li>
+          <li>思考：<code>const</code> 声明的对象，为什么还能改它的属性？
+            那 <code>const</code> 到底“锁住”了什么？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="三个变量与一句话">
+            "use strict";
+
+            const name = "墨白";
+            let minutes = 45;
+            const feeling = `今天练了 ${minutes} 分钟，比昨天多 10 分钟。`;
+
+            console.log(`${name} 说：${feeling}`);
+            // 控制台输出：墨白 说：今天练了 45 分钟，比昨天多 10 分钟。
+
+            minutes = 60;   // let 可以改；下一句话会跟着更新
+            console.log(`${name} 加练之后：${minutes} 分钟。`);
+          </script>
+          <p>
+            检查点：<code>name</code> 用 <code>const</code>（不会改），
+            <code>minutes</code> 用 <code>let</code>（会改），模板字符串里用的是反引号而不是引号。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="六个值转布尔">
+            Boolean("");     // false —— 空字符串是假值
+            Boolean("0");    // true  —— 非空字符串都是真（哪怕内容是 0）
+            Boolean([]);     // true  —— 对象一律为真，空数组也是
+            Boolean({});     // true  —— 同上
+            Boolean(NaN);    // false —— NaN 是假值
+            Boolean(" ");    // true  —— 空格也是字符，非空即真
+          </script>
+          <p>
+            口诀：<strong>空、零、假、null、undefined、NaN 是假，别的都是真</strong>。
+            特别小心 <code>"0"</code> 与 <code>[]</code>——它们看着“空”，其实都是真。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>const</code> 锁住的是<strong>变量与值之间的那条“绑定”</strong>，
+            而不是值本身。
+            对于对象，变量里装的是“地址”：<code>const box = {…}</code> 的意思是
+            “<code>box</code> 这个名字永远指向这个盒子”，但盒子里的东西可以随便改：
+            <code>box.name = "乙"</code> 完全合法；而 <code>box = {…}</code>（让它指向另一个盒子）
+            会被拒绝。
+            想要连内容都不能改，得用 <code>Object.freeze(box)</code>（冻结是浅层的，
+            嵌套对象仍可改——第三十三式会细说）。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把值放在一起算：运算符与表达式。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

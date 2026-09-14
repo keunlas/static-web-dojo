@@ -23,13 +23,13 @@ while IFS= read -r f; do
   fi
 done <<< "$files"
 
-echo "==> 2) 禁用技术扫描（应为空：type=module / fetch / XMLHttpRequest）"
+echo "==> 2) 禁用技术扫描（只看真实脚本：type=module / fetch / XMLHttpRequest）"
+# 说明：正文与 text/plain 教学源码块里出现这些字眼是应该的（JS 篇要讲它们），
+# 因此本项交给 tools/check-offline-tech.py 做“脚本感知”的扫描：只拦会真正执行的代码。
 while IFS= read -r f; do
-  hits=$(grep -nE 'type="module"|fetch\(|XMLHttpRequest' "$f" || true)
-  if [ -n "$hits" ]; then
+  if ! out=$(python3 "$ROOT/tools/check-offline-tech.py" "$f"); then
     FAIL=1
-    echo "✘ $f"
-    echo "$hits" | sed 's/^/    /'
+    echo "$out"
   fi
 done <<< "$files"
 

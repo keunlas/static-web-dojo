@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十二式 · 综合修炼：语义化个人主页 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="HTML 部分收官：跟着拆解一步步手写一个语义化个人主页，含成品页、六步拆解与自检清单。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-12">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        HTML 十式学完，该交一份答卷了。这一式不教新标签，只做一件事：
+        <strong>用最纯粹的 HTML，手写一个像样的个人主页</strong>——
+        一行 CSS 都不加，因为骨架没搭好，穿什么衣服都撑不起来。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>把前十式的零件拼成一页完整作品，知道每个元素“为什么在这一格”</li>
+          <li>用六步拆解法从骨架写到页脚，每一步都能单独验收</li>
+          <li>用一份自检清单给作品打分，找出自己的盲区</li>
+        </ul>
+      </div>
+
+      <h2>成品先看</h2>
+      <p>
+        先看结果，再学过程。下面是本式的成品页——<strong>它故意不加任何样式</strong>：
+        浏览器的默认字体、默认间距、蓝色链接，一览无余。
+        丑是必须的，你能一眼看清整个页面的骨架：
+      </p>
+      <p>
+        <a href="../demo/html-home/index.html">打开成品：墨白的主页（纯 HTML 版）</a>
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">为什么故意不打扮</div>
+        <p style="margin:0">
+          如果一开始就套上漂亮的 CSS，你看到的是“样式撑起来的效果”，
+          甚至会为了视觉硬把结构掰歪。这一版就是让结构<strong>光着身子</strong>接受检查：
+          标题层级对不对？地标齐不齐？表单能不能用键盘填完？
+          等第二十六式，我们再回来给它裁衣服——那时你会发现，好骨架配衣服很省力。
+        </p>
+      </div>
+
+      <h2>动手拆解</h2>
+      <p>
+        整个页面按“从上到下、一块一节”组装，一共六步。建议你打开编辑器，
+        把下面每一段按顺序拼进自己的 <code>index.html</code>，边写边在浏览器里刷新。
+      </p>
+
+      <h3>第一步 · 骨架与 head</h3>
+      <p>
+        先立骨架，并把 <code>head</code> 写完整（第十式的手艺）。
+        这一页没有样式表，所以 <code>head</code> 里只留编码、视口、标题与描述：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第一步：骨架与 head">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>墨白的主页 | 基础篇第十二式成品</title>
+          <meta name="description" content="基础篇第十二式的成品：一个只用 HTML 手写的语义化个人主页。">
+        </head>
+        <body>
+          <!-- 内容稍后一段段填进来 -->
+        </body>
+        </html>
+      </script>
+
+      <h3>第二步 · 页头与导航</h3>
+      <p>
+        页头放三样东西：<strong>这是什么地方</strong>（<code>h1</code>）、
+        <strong>一句话自白</strong>、<strong>通向各处的导航</strong>。
+        导航用 <code>nav</code> 包一个链接列表，链接指向页内各节的 <code>id</code>：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第二步：header 与 nav">
+        <a href="#main">跳到正文</a>
+
+        <header>
+          <p>修行者档案</p>
+          <h1>墨白</h1>
+          <p>在代码与山水之间行走的初学者 · <time datetime="2026-09-14">2026 年 9 月 14 日</time> 更新</p>
+
+          <nav aria-label="主导航">
+            <ul>
+              <li><a href="#about">关于我</a></li>
+              <li><a href="#works">作品</a></li>
+              <li><a href="#log">修行日志</a></li>
+              <li><a href="#contact">联系我</a></li>
+            </ul>
+          </nav>
+        </header>
+      </script>
+      <p>
+        注意开头那一行：<a href="#main">跳到正文</a> 这样的“跳转链接”是第十一式的规矩，
+        键盘读者第一下 Tab 就能跳过整个导航。
+      </p>
+
+      <h3>第三步 · 正文与「关于我」</h3>
+      <p>
+        正文请进 <code>main</code>（全页唯一的正文地标），里面用
+        <code>section</code> 分区，每区自带一个 <code>h2</code> 标题：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第三步：main 与第一个 section">
+        <main id="main">
+
+          <section id="about" aria-labelledby="about-title">
+            <h2 id="about-title">关于我</h2>
+            <p>
+              我是墨白，一个把“日拱一卒”当口头禅的初学者。
+              三个月前我连标签和属性都分不清，现在能自己搭出一页结构清楚的主页——
+              这一页就是证据。
+            </p>
+
+            <figure>
+              <img src="../../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图：一轮红日与远山" width="320" height="240">
+              <figcaption>我最喜欢的一张示意图：山不让尘，川不辞盈。</figcaption>
+            </figure>
+
+            <h3>我在练什么</h3>
+            <ul>
+              <li>HTML —— 把结构写清楚，让机器与人都不迷路</li>
+              <li>CSS —— 让页面好看，也让人看得住</li>
+              <li>JavaScript —— 让页面会应答</li>
+            </ul>
+
+            <details>
+              <summary>我的学习节奏（点开看）</summary>
+              <p>每天 30 分钟：读一式、抄一个演示；周末把这一周的练功题重做一遍。</p>
+            </details>
+          </section>
+        </main>
+      </script>
+      <p>
+        <code>section</code> 上的 <code>aria-labelledby="about-title"</code> 是在告诉读屏软件：
+        “这一区的名字，就是那个 <code>id="about-title"</code> 的标题”——
+        这样读者在分区之间跳转时，听到的是“关于我，区域”，而不是一串无名的内容。
+      </p>
+
+      <h3>第四步 · 作品区：一篇文章就是一张卡片</h3>
+      <p>
+        “作品”与“日志”里的每一项，都是能独立成立的内容，所以用 <code>article</code> 装。
+        每个 <code>article</code> 有自己的 <code>h3</code> 标题、说明和链接：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第四步：article 作品卡">
+        <section id="works" aria-labelledby="works-title">
+          <h2 id="works-title">作品</h2>
+
+          <article>
+            <h3>第一个网页</h3>
+            <p>八行骨架、一个标题、两段文字。它的价值不在好看，而在于“这是我自己写的”。</p>
+            <p><a href="../../basics/01-html-intro.html">它出自第一式：网页与 HTML</a></p>
+          </article>
+
+          <article>
+            <h3>迷你三页站点</h3>
+            <p>首页、关于、联系三个文件互相链接，练的是相对路径与锚点跳转。</p>
+            <p><a href="../../basics/03-html-lists-links.html">它出自第三式：列表与链接</a></p>
+          </article>
+
+          <article>
+            <h3>报名表单</h3>
+            <p>用 label、单选、复选、日期输入与浏览器校验搭出来的表单；提交之后的事，交给后端同学。</p>
+            <p><a href="../../basics/08-html-forms-2.html">它出自第八式：表单（下）</a></p>
+          </article>
+        </section>
+      </script>
+      <p>
+        日志区的结构完全相同，只是每篇多了一行 <code>&lt;time datetime="…"&gt;</code>——
+        显示的是“9 月 14 日”，机器读到的是 <code>2026-09-14</code>。
+      </p>
+
+      <h3>第五步 · 联系区：address 与表单</h3>
+      <p>
+        联系方式用 <code>address</code> 包住（它只管“作者的联系方式”，别的地址不归它管），
+        留言用第七、八式学的表单：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第五步：address 与留言表单">
+        <section id="contact" aria-labelledby="contact-title">
+          <h2 id="contact-title">联系我</h2>
+
+          <address>
+            <p>写信：<a href="mailto:mo@example.com">mo@example.com</a></p>
+            <p>也可以来<a href="../../playground/index.html">在线练功场</a>一起写两笔。</p>
+          </address>
+
+          <form action="#" method="post">
+            <fieldset>
+              <legend>留一句口信</legend>
+              <p>
+                <label for="msg-name">称谓</label><br>
+                <input type="text" id="msg-name" name="name" required autocomplete="name">
+              </p>
+              <p>
+                <label for="msg-mail">邮箱（方便回信）</label><br>
+                <input type="email" id="msg-mail" name="email" autocomplete="email">
+              </p>
+              <p>
+                <label for="msg-text">口信</label><br>
+                <textarea id="msg-text" name="message" rows="4" cols="40" maxlength="300" required></textarea>
+              </p>
+              <p><button type="submit">递上口信</button></p>
+            </fieldset>
+          </form>
+        </section>
+      </script>
+      <p>
+        表单的 <code>action="#"</code> 是占位写法：真的提交需要后端接口。
+        结构写对了，接上接口只是改一个地址的事。
+      </p>
+
+      <h3>第六步 · 侧栏与页脚</h3>
+      <p>
+        与主内容间接相关的（延伸阅读、前往其它章节的入口）放进 <code>aside</code>；
+        收尾的版权与页脚导航放进 <code>footer</code>。收工：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="第六步：aside 与 footer">
+        <aside aria-labelledby="aside-title">
+          <h2 id="aside-title">顺手一栏</h2>
+          <ul>
+            <li><a href="../../archive/index.html">藏经阁：随查随用的离线资料</a></li>
+            <li><a href="../../bootstrap/index.html">下一站：第二回 Bootstrap 篇</a></li>
+          </ul>
+        </aside>
+
+        <footer>
+          <p>© 2026 墨白 · 纯 HTML 手写（<time datetime="2026-09-14">2026-09-14</time> 更新）</p>
+          <nav aria-label="页脚导航">
+            <ul>
+              <li><a href="#main">回到正文开头</a></li>
+              <li><a href="../../basics/12-html-project.html">这一页的教程</a></li>
+            </ul>
+          </nav>
+        </footer>
+      </script>
+
+      <h2>自检清单</h2>
+      <p>
+        写完别急着满意——拿这张清单逐条过一遍。它比“看起来还能看”可靠得多：
+      </p>
+      <ul>
+        <li><strong>一个 <code>h1</code></strong>，层级从 <code>h1</code> → <code>h2</code> → <code>h3</code> 逐级向下，没有跳级；</li>
+        <li><strong>地标齐全</strong>：<code>header</code>、<code>nav</code>、<code>main</code>、<code>aside</code>、<code>footer</code>，
+          其中 <code>main</code> 只有一个；</li>
+        <li><strong>每个 <code>section</code> 都有标题</strong>，每个 <code>article</code> 都能独立成立；</li>
+        <li><strong>表单</strong>：每个控件都有 <code>label</code>（<code>for</code> 与 <code>id</code> 对得上），必填项写了 <code>required</code>；</li>
+        <li><strong>链接</strong>：文字能独立成句（不写“点这里”），锚点目标真实存在；</li>
+        <li><strong>图片</strong>：有 <code>alt</code>、有宽高，配合 <code>figure</code> / <code>figcaption</code>；</li>
+        <li><strong>键盘</strong>：只用 Tab 与回车能不能走完全页，焦点是否看得见；</li>
+        <li><strong>脱掉样式还讲得通</strong>：把所有 CSS 去掉，页面的阅读顺序依然自然。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>综合修炼的做法：先看成品，再按“骨架 → 页头 → 正文 → 卡片 → 联系 → 侧栏页脚”六步组装；</li>
+        <li>每一步都能单独验收：<code>head</code> 齐不齐、<code>section</code> 有没有标题、<code>label</code> 对不对；</li>
+        <li>结构先行的好处：这一页一行 CSS 都没有，却已经能被读屏、键盘与搜索引擎正常使用；</li>
+        <li>好骨架是后面所有样式与脚本的地基——第二十六式会回来给它打扮。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十二式</div>
+        <ol>
+          <li>照着六步，写出属于你自己的个人主页（内容换成你的真实信息，别照抄墨白）。</li>
+          <li>给页面加一个“本页目录”：在正文开头放一个 <code>nav</code>，
+            列出各节的锚点链接，并确认每一跳都落对地方。</li>
+          <li>思考：如果把 <code>article</code> 全部换成 <code>div</code>，页面看起来毫无变化。
+            对读屏软件的读者来说，损失了什么？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            没有唯一答案，用上面的自检清单逐条核对即可。三个最容易失手的地方：
+            ① 为了好看硬把 <code>h3</code> 当小号 <code>h2</code> 用（层级会乱）；
+            ② 导航里的锚点 <code>#works</code> 拼错一个字母，点了没反应；
+            ③ 表单只写了 <code>placeholder</code> 却没写 <code>label</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="本页目录">
+            <nav aria-label="本页目录">
+              <h2>本页目录</h2>
+              <ul>
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#works">作品</a></li>
+                <li><a href="#log">修行日志</a></li>
+                <li><a href="#contact">联系我</a></li>
+              </ul>
+            </nav>
+          </script>
+          <p>
+            要点：<code>nav</code> 配一个 <code>aria-label</code> 说明这是哪一组导航
+            （页面里有两个以上导航时，这个名字能让读屏软件把它们区分开）；
+            锚点目标就是各 <code>section</code> 的 <code>id</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            损失的是“这是一篇独立内容”的宣告。读屏软件有一组快捷键按<strong>文章</strong>跳转，
+            用户听到“文章，站桩三月记”就知道这里开始是一篇完整内容，
+            可以用快捷键一篇一篇往下跳；换成 <code>div</code> 之后，这些快捷键全部失效，
+            读者只能从头到尾一格一格听——在日志越来越长的页面上，这个差别会越来越大。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          HTML 部分到此收官。想再往深里走，可以按主题翻
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML">MDN 的 HTML 栏目</a>：
+          属性清单、元素参考、无障碍指南都在那里，适合当字典，
+          但不必现在通读——先进入第二回，把 CSS 学起来。
+        </p>
+      </div>
+
+      <blockquote>下一式，进入 CSS：先弄清一条样式是怎么生效的，再回来给这一页裁衣服。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

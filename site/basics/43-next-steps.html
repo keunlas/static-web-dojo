@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四十三式 · 结业：往后的路 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="基础篇结业：43 式回顾、出问题时怎么办、查文档的手艺、复习的方法，以及接下来可以往哪走。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-43">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        四十三式走到头，该把剑收回鞘里，看看这条路把你带到了哪里。
+        最后一式不教新东西：把行囊清点一遍，再交给你三样用得最久的手艺——
+        <strong>排错、查文档、自己往前走</strong>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>把 43 式过一遍，知道自己会了哪些真本事</li>
+          <li>掌握排错三步：看报错 → 缩小范围做最小复现 → 查文档 / 换写法</li>
+          <li>会用“三栏法”读文档，会把中文问题翻译成关键词</li>
+          <li>有一套自己的复习办法（重做练功题比重读正文有用）</li>
+          <li>知道接下来可以往哪三条路走，并写下一份 30 天计划</li>
+        </ul>
+      </div>
+
+      <h2>走过的路：一份清点</h2>
+      <p>
+        第一回一共 43 式：HTML 12 式、CSS 14 式、JavaScript 16 式，加这一式结业。
+        把书合上之前，先看这张总表——左边是学过的，右边是你现在能做的事：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>部分</th>
+            <th>式数</th>
+            <th>你现在能做什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>HTML（01–12）</td>
+            <td>12 式</td>
+            <td>写出一页语义清楚、能过键盘、带表单与图片的静态页面，还会做无障碍自检</td>
+          </tr>
+          <tr>
+            <td>CSS（13–26）</td>
+            <td>14 式</td>
+            <td>用选择器与层叠精确控场，用 Flex / Grid 排版，做响应式、过渡动画与主题变量</td>
+          </tr>
+          <tr>
+            <td>JavaScript（27–42）</td>
+            <td>16 式</td>
+            <td>写脚本操作页面、处理事件、管理异步与本地数据，并把它整理成可维护的结构</td>
+          </tr>
+          <tr>
+            <td>结业（43）</td>
+            <td>1 式</td>
+            <td>会自己排错、查文档、定计划——这一式是给后面所有式子的</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        如果这 43 式里你只完整练过一半，也不用回头补：
+        把没练过的几式记在心里，等用到时回来翻——本教程按“能当字典查”来写，
+        每式的表格与演示都是为“回头查”准备的。
+      </p>
+
+      <h2>出问题的时候：三步走</h2>
+      <p>
+        写代码以后的日常，十有八九是在跟问题打交道。别慌，按顺序走：
+      </p>
+      <ol>
+        <li><strong>先看报错，别看代码</strong>：打开开发者工具的 Console，
+          报错会给出<strong>在哪一行</strong>、<strong>什么错</strong>。
+          红色第一行往往就是答案的钥匙；</li>
+        <li><strong>缩小范围，做最小复现</strong>：把可疑的那几行单独放进一个空页面，
+          或者临时注释掉一半代码。能重复出现的问题，才有资格被修；</li>
+        <li><strong>再查文档、换写法</strong>：确认 API 的用法与返回值，
+          如果这条路不通就换一条（比如 <code>fetch</code> 在 file:// 下走不通，
+          就改成把数据写成 JS）。</li>
+      </ol>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 报错翻译器：点一条看看白话版</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <label for="js43-demo1-pick">挑一条你见过的报错：</label>
+            <select id="js43-demo1-pick">
+              <option value="undef">Cannot read properties of undefined (reading 'x')</option>
+              <option value="notfn">xxx is not a function</option>
+              <option value="token">Uncaught SyntaxError: Unexpected token '}'</option>
+              <option value="blocked">Access to script blocked by CORS policy</option>
+              <option value="404">GET … 404 (Not Found)</option>
+            </select>
+          </p>
+          <p id="js43-demo1-out" style="margin: .3rem 0 0">（选一条，看白话翻译）</p>
+          <script>
+            "use strict";
+            var DICT1 = {
+              undef: {
+                means: '你想读的那个东西根本不存在（是 undefined）',
+                fix: '在取属性之前先确认它拿到了没有：打一行 console.log，或者临时用可选链 ?. 顶一下'
+              },
+              notfn: {
+                means: '这个名字后面跟的不是函数，却被当成函数调用了',
+                fix: '多半是名字拼错、大小写不对，或者把属性当成了方法；查清这个值到底是什么'
+              },
+              token: {
+                means: '语法没写完或多了符号，整段脚本压根没运行',
+                fix: '看报错行号附近的花括号、引号、逗号是不是配对了（第三十六式的三类错误里讲过）'
+              },
+              blocked: {
+                means: '浏览器不让这个页面读那份资源',
+                fix: 'file:// 下用本地服务器打开，或把数据写成 JS 用 script 引进来（第四十式）'
+              },
+              404: {
+                means: '地址写错了，或者文件根本不在那个位置',
+                fix: '在 Network（网络）面板找到那一行，逐段核对路径的大小写与层级'
+              }
+            };
+
+            var pick1 = document.getElementById('js43-demo1-pick');
+            var out1 = document.getElementById('js43-demo1-out');
+
+            function show1() {
+              var item = DICT1[pick1.value];
+              out1.textContent = '它在说什么：' + item.means + '　怎么办：' + item.fix;
+            }
+
+            pick1.addEventListener('change', show1);
+            show1();
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <label for="js43-demo1-pick">挑一条你见过的报错：</label>
+              <select id="js43-demo1-pick">
+                <option value="undef">Cannot read properties of undefined (reading 'x')</option>
+                <option value="notfn">xxx is not a function</option>
+                <option value="token">Uncaught SyntaxError: Unexpected token '}'</option>
+                <option value="blocked">Access to script blocked by CORS policy</option>
+                <option value="404">GET … 404 (Not Found)</option>
+              </select>
+            </p>
+            <p id="js43-demo1-out" style="margin: .3rem 0 0">（选一条，看白话翻译）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var DICT1 = {
+              undef: {
+                means: '你想读的那个东西根本不存在（是 undefined）',
+                fix: '在取属性之前先确认它拿到了没有：打一行 console.log，或者临时用可选链 ?. 顶一下'
+              },
+              notfn: {
+                means: '这个名字后面跟的不是函数，却被当成函数调用了',
+                fix: '多半是名字拼错、大小写不对，或者把属性当成了方法；查清这个值到底是什么'
+              },
+              token: {
+                means: '语法没写完或多了符号，整段脚本压根没运行',
+                fix: '看报错行号附近的花括号、引号、逗号是不是配对了（第三十六式的三类错误里讲过）'
+              },
+              blocked: {
+                means: '浏览器不让这个页面读那份资源',
+                fix: 'file:// 下用本地服务器打开，或把数据写成 JS 用 script 引进来（第四十式）'
+              },
+              404: {
+                means: '地址写错了，或者文件根本不在那个位置',
+                fix: '在 Network（网络）面板找到那一行，逐段核对路径的大小写与层级'
+              }
+            };
+
+            var pick1 = document.getElementById('js43-demo1-pick');
+            var out1 = document.getElementById('js43-demo1-out');
+
+            function show1() {
+              var item = DICT1[pick1.value];
+              out1.textContent = '它在说什么：' + item.means + '　怎么办：' + item.fix;
+            }
+
+            pick1.addEventListener('change', show1);
+            show1();
+          </script>
+        </div>
+      </div>
+
+      <p>
+        最小复现长这样：一个空文件，只留出问题的那几行。
+        能在这里复现，问题就跑不掉；不能复现，就说明还缺点什么（顺序、条件、数据），
+        继续缩小。
+      </p>
+      <script type="text/plain" data-lang="html" data-title="最小复现的样子（这个文件只干一件事）">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head><meta charset="utf-8"><title>最小复现</title></head>
+        <body>
+          <p id="box">原始文字</p>
+          <script>
+            // 只留可疑的那几行，别的全删掉
+            var el = document.getElementById("bx");   // 故意把 id 写错
+            el.textContent = "改过了";
+          <\/script>
+        </body>
+        </html>
+      </script>
+
+      <h2>查文档的手艺</h2>
+      <p>
+        忘掉一个 API 的用法太正常了——真正的本事是“忘得掉，也查得回来”。
+        看一份文档先盯三栏：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>看什么</th>
+            <th>为什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>语法</strong></td><td>参数是必填还是可选、有没有默认值、返回值是什么类型</td></tr>
+          <tr><td><strong>返回值</strong></td><td>决定你能不能接着 <code>.then()</code>、要不要判 <code>null</code></td></tr>
+          <tr><td><strong>浏览器支持</strong></td><td>页脚那一栏决定要不要写降级（第四十一式的特性检测）</td></tr>
+        </tbody>
+      </table>
+      <p>
+        本站的藏经阁里还有两页专门用来“快速扫一眼”的速查
+        （<a href="../archive/reference/index.html">工具类速查</a> 与
+        <a href="../archive/reference-jquery/index.html">jQuery 方法速查</a>），
+        比翻整本离线文档快。
+      </p>
+      <p>
+        中文问题查不到，多半是关键词不对：
+        <strong>把问题翻译成两三个英文关键词</strong>，命中率立刻不一样。
+        下面三个例子可以先试一试手感：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 关键词翻译：中文问题 → 去哪儿查</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js43-demo2-a">“网格里怎么跨两列？”</button>
+            <button type="button" id="js43-demo2-b">“表单提交后页面为什么刷新？”</button>
+            <button type="button" id="js43-demo2-c">“怎么让主题记住我选了什么？”</button>
+          </p>
+          <ul id="js43-demo2-out" style="margin: .3rem 0 0"></ul>
+          <script>
+            "use strict";
+            var out2 = document.getElementById('js43-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out2.appendChild(li);
+            }
+
+            document.getElementById('js43-demo2-a').addEventListener('click', function () {
+              say2('关键词：CSS grid span columns');
+              say2('去哪查：MDN「CSS grid layout」的 grid-column / grid-area；本站第二十二式也有跨格演示');
+            });
+
+            document.getElementById('js43-demo2-b').addEventListener('click', function () {
+              say2('关键词：HTML form submit preventDefault');
+              say2('去哪查：MDN「submit event」；本站第三十八式的例 4 就是这件事的现场');
+            });
+
+            document.getElementById('js43-demo2-c').addEventListener('click', function () {
+              say2('关键词：localStorage persist theme preference');
+              say2('去哪查：MDN「Window.localStorage」；本站第四十式与第四十二式的主题切换都在用');
+            });
+
+            say2('先试一个按钮：每条都会给出「关键词 + 去哪查」两行。');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js43-demo2-a">“网格里怎么跨两列？”</button>
+              <button type="button" id="js43-demo2-b">“表单提交后页面为什么刷新？”</button>
+              <button type="button" id="js43-demo2-c">“怎么让主题记住我选了什么？”</button>
+            </p>
+            <ul id="js43-demo2-out" style="margin: .3rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out2 = document.getElementById('js43-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out2.appendChild(li);
+            }
+
+            document.getElementById('js43-demo2-a').addEventListener('click', function () {
+              say2('关键词：CSS grid span columns');
+              say2('去哪查：MDN「CSS grid layout」的 grid-column / grid-area；本站第二十二式也有跨格演示');
+            });
+
+            document.getElementById('js43-demo2-b').addEventListener('click', function () {
+              say2('关键词：HTML form submit preventDefault');
+              say2('去哪查：MDN「submit event」；本站第三十八式的例 4 就是这件事的现场');
+            });
+
+            document.getElementById('js43-demo2-c').addEventListener('click', function () {
+              say2('关键词：localStorage persist theme preference');
+              say2('去哪查：MDN「Window.localStorage」；本站第四十式与第四十二式的主题切换都在用');
+            });
+
+            say2('先试一个按钮：每条都会给出「关键词 + 去哪查」两行。');
+          </script>
+        </div>
+      </div>
+
+      <h2>复习的办法：抽签，重做，讲一遍</h2>
+      <p>
+        重读正文的收效很小，<strong>重做练功题</strong>的收效很大——
+        因为那是你亲手写过的部分。抽签筒替你决定今天复习哪一式：
+        它从左侧目录里随机挑一条（本站目录只登记在
+        <code>site.js</code> 一处，侧边栏、翻页与搜索都从那里来）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 复习抽签筒：从 43 式里随机抽一式</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js43-demo3-draw">抽一式复习</button>
+          </p>
+          <p id="js43-demo3-out" style="margin: .3rem 0 0">（还没抽）</p>
+          <script>
+            DOJO.ready(function () {
+              var links = [].slice.call(document.querySelectorAll('#sidebar a[data-page-id^="basics-"]'));
+              var out3 = document.getElementById('js43-demo3-out');
+
+              function labelOf(link) {
+                var num = link.querySelector('.chap-num').textContent;
+                return '第 ' + num + ' 式 · ' + link.textContent.replace(num, '').trim();
+              }
+
+              document.getElementById('js43-demo3-draw').addEventListener('click', function () {
+                if (!links.length) { out3.textContent = '目录还没就绪，过一会儿再抽。'; return; }
+                var pick = links[Math.floor(Math.random() * links.length)];
+                out3.textContent = '抽到 ' + labelOf(pick) + '——翻回去，把它的练功题重做一遍。';
+              });
+
+              out3.textContent = '目录里现在有 ' + links.length + ' 条可抽。';
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js43-demo3-draw">抽一式复习</button>
+            </p>
+            <p id="js43-demo3-out" style="margin: .3rem 0 0">（还没抽）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            DOJO.ready(function () {
+              var links = [].slice.call(document.querySelectorAll('#sidebar a[data-page-id^="basics-"]'));
+              var out3 = document.getElementById('js43-demo3-out');
+
+              function labelOf(link) {
+                var num = link.querySelector('.chap-num').textContent;
+                return '第 ' + num + ' 式 · ' + link.textContent.replace(num, '').trim();
+              }
+
+              document.getElementById('js43-demo3-draw').addEventListener('click', function () {
+                if (!links.length) { out3.textContent = '目录还没就绪，过一会儿再抽。'; return; }
+                var pick = links[Math.floor(Math.random() * links.length)];
+                out3.textContent = '抽到 ' + labelOf(pick) + '——翻回去，把它的练功题重做一遍。';
+              });
+
+              out3.textContent = '目录里现在有 ' + links.length + ' 条可抽。';
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        比复习更狠的一招：<strong>讲给别人听</strong>。
+        挑一式，用三句话讲给完全不懂的朋友听——讲不顺的地方，
+        就是你其实没懂的地方。
+      </p>
+
+      <h2>下一步往哪走</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方向</th>
+            <th>具体做什么</th>
+            <th>本站能接着用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>把地基再夯实</td>
+            <td>重做 43 式的练功题；把个人主页改成你自己的真实信息</td>
+            <td>第一回全部</td>
+          </tr>
+          <tr>
+            <td>学现成的兵器</td>
+            <td>用 Bootstrap 快速搭界面，用 jQuery 简化老页面里的操作</td>
+            <td>第二回、第三回</td>
+          </tr>
+          <tr>
+            <td>往工程化走</td>
+            <td>模块与打包、TypeScript、前端框架、版本管理（Git）</td>
+            <td>第四十一式的“学习地图”</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        不管走哪条路，都建议先做一件小事：
+        <strong>给自己定一个 30 天计划</strong>——每天 30 分钟、只做一个能跑起来的小东西。
+        写下来的计划比“有空就练”靠得住得多。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">心法</div>
+        <p style="margin:0">
+          修行没有结业式，只有换地图。你今天会的东西已经足够做出真实可用的页面；
+          剩下的是把它用熟、用顺，再往外扩一圈。慢一点没关系，别停。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>43 式清点：HTML 12、CSS 14、JavaScript 16、结业 1；</li>
+        <li>排错三步：<strong>先看报错 → 缩小到最小复现 → 查文档或换写法</strong>；</li>
+        <li>读文档盯三栏：语法、返回值、浏览器支持；中文查不到就换英文关键词；</li>
+        <li>复习靠重做练功题与讲给别人听，不靠重读正文；</li>
+        <li>向前的三条路：夯实基本功、学现成兵器（Bootstrap / jQuery）、走向工程化；</li>
+        <li>给自己写一份 30 天计划，然后动手做第一个属于你自己的小项目。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四十三式</div>
+        <ol>
+          <li>给自己做一个“小小作品”：不要教程里的题目，自己定一个
+            （例如“我的读书清单”“厨房计时器”“每日一句”），
+            要求：HTML 结构清楚、CSS 好看、至少有一个 JS 行为。</li>
+          <li>把 43 式里最没把握的三式挑出来，重做它们的练功题，
+            并把踩到的坑写在注释里。</li>
+          <li>思考：如果把这一回讲给三个月前的你听，你会先说哪三句话？
+            写下来——那就是你真正学到的部分。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            做法只有一句话：<strong>从小到不能失败开始</strong>。
+            先画一页草图（哪几块、每块放什么），再按第十二式的六步搭结构，
+            按第二十六式的做法配样式，最后挑第四十二式里的一个行为加上去
+            （主题切换最好抄，因为只要写几个变量）。
+            交付前过一遍第十二式的自检清单；如果自己都不愿意再看第二眼，
+            多半是结构或留白出了问题，而不是“配色不够高级”。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <p>
+            重做时盯三样东西：①<strong>当年卡在哪</strong>（现在还会卡吗）；
+            ②<strong>能不能不看答案写出来</strong>；③<strong>能不能换一种写法</strong>
+            （比如把 <code>.then</code> 换成 <code>async/await</code>、
+            把逐个绑定换成事件委托）。
+            做到第三条，这一式才算真的长在你手上。踩到的坑写在注释里，
+            下次它就成了你的速查表。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            没有标准答案，但常见的三句是这样的：
+            “<strong>先想结构，再想样式，最后想行为</strong>——三样混在一起写，一定返工”；
+            “<strong>看不懂就先跑起来再拆</strong>——把演示抄进自己的文件，改一行看效果”；
+            “<strong>报错不是失败，是浏览器在给你指路</strong>——先看 Console 第一行”。
+            如果你写的三句与这三句不同，更好：那说明这份教程在你身上长出了自己的形状。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>
+        第一回到此结束。回<a href="../index.html">卷首</a>看看目录，
+        或者接着走<a href="../bootstrap/index.html">第二回 Bootstrap 篇</a>——
+        山不让尘，川不辞盈，我们下一程见。
+      </blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

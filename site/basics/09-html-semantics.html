@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第九式 · 语义化结构 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="为什么语义化、页面的七个地标元素、标题层级与分节、details/dialog/time/address 等元素，以及 div 与 span 的正确用途。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-09">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前八式学的是零件，这一式开始把它们装成整机。
+        HTML 里有一批元素，默认长得和 <code>div</code> 一模一样，却在向机器宣告“我这一块是什么”——
+        它们就是网页的<strong>地标</strong>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>说清语义化服务的是哪三类读者，明白“div 汤”的代价</li>
+          <li>会用地标元素：<code>header</code>、<code>nav</code>、<code>main</code>、<code>article</code>、<code>section</code>、<code>aside</code>、<code>footer</code></li>
+          <li>掌握标题层级与分节的规矩：一个 <code>h1</code>、不跳级、分节要带标题</li>
+          <li>会用 <code>details</code> / <code>summary</code>、<code>time</code>、<code>address</code>，并知道 <code>div</code> / <code>span</code> 什么时候该出场</li>
+        </ul>
+      </div>
+
+      <h2>为什么要语义化</h2>
+      <p>
+        先把话说透：把所有 <code>div</code> 换成 <code>header</code>、<code>nav</code>、<code>main</code>，
+        页面在<strong>肉眼看来一模一样</strong>。语义化不是给你看的，它服务三类“非视觉读者”：
+      </p>
+      <ul>
+        <li><strong>读屏软件</strong>：它能用快捷键在“地标”之间跳转。有地标，读者可以一句话跳到正文；
+          没有，就只能从头一个元素一个元素地听——那是几百次按键的差别；</li>
+        <li><strong>搜索引擎与聚合工具</strong>：它们靠标签判断哪段是正文、哪段是导航、哪段是页脚；</li>
+        <li><strong>后来的维护者（包括三个月后的你）</strong>：一眼看懂页面骨架，比对着满屏 div 猜结构强得多。</li>
+      </ul>
+      <p>
+        反面例子有个外号叫<strong>“div 汤”</strong>（div soup）：整页都是层层嵌套的 <code>div</code>，
+        类名起得再花，机器也不知道哪里是正文。语义化就是把这锅汤重新分装成几个标着名字的碗。
+      </p>
+
+      <h2>七个地标：页面骨架的零件</h2>
+      <p>
+        一张完整页面通常由这几个元素拼起来。表里的“数量”一栏格外重要——
+        它们是出题人最爱考的细节：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>是什么</th>
+            <th>数量与位置</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>header</code></td>
+            <td>页头或某个区块的开头：站点标题、搜索、作者信息</td>
+            <td>可以有多个：页面级一个，<code>article</code> / <code>section</code> 内部还能各有一个</td>
+          </tr>
+          <tr>
+            <td><code>nav</code></td>
+            <td>主要导航链接的集合</td>
+            <td>可以有多个（如顶部导航 + 页内目录），但别给每一小撮链接都套 <code>nav</code></td>
+          </tr>
+          <tr>
+            <td><code>main</code></td>
+            <td>这一页<strong>独一份</strong>的正文内容</td>
+            <td><strong>整页只能有一个</strong>，且不能放进 <code>header</code> / <code>nav</code> / <code>aside</code> / <code>footer</code> / <code>article</code> 里</td>
+          </tr>
+          <tr>
+            <td><code>article</code></td>
+            <td>能<strong>独立成立</strong>的内容单元：一篇文章、一条评论、一张卡片</td>
+            <td>可以有多个；判断口诀：“把它单独拷到别处，还讲得通吗？”</td>
+          </tr>
+          <tr>
+            <td><code>section</code></td>
+            <td>一个<strong>带主题</strong>的分区</td>
+            <td>可以有多个；<strong>通常要有标题</strong>，没有合适标题就说明该用 <code>div</code></td>
+          </tr>
+          <tr>
+            <td><code>aside</code></td>
+            <td>与主内容间接相关的内容：侧栏、延伸阅读、小贴士</td>
+            <td>可以有多个；它不应该抢正文的位置</td>
+          </tr>
+          <tr>
+            <td><code>footer</code></td>
+            <td>页脚或某个区块的结尾：版权、联系方式、相关链接</td>
+            <td>与 <code>header</code> 同理，可以有多层</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        理论说多了容易虚，不如看看<strong>眼前这一页</strong>的地标长什么样：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 清点本页的地标（点一下按钮）</div>
+        <div class="demo-preview">
+          <p><button type="button" id="html09-demo1-btn">列出本页的地标元素</button></p>
+          <ol id="html09-demo1-out"></ol>
+          <p class="mb-0">这个演示遍历的正是本站页面本身：顶栏、目录、正文、页脚各有各的元素。</p>
+          <script>
+            document.getElementById('html09-demo1-btn').addEventListener('click', function () {
+              var marks = document.querySelectorAll('header, nav, main, aside, footer, search');
+              var out = document.getElementById('html09-demo1-out');
+              out.innerHTML = '';
+              marks.forEach(function (el) {
+                var li = document.createElement('li');
+                li.textContent = el.tagName.toLowerCase()
+                  + (el.id ? '#' + el.id : '')
+                  + (el.getAttribute('aria-label') ? '（aria-label：' + el.getAttribute('aria-label') + '）' : '');
+                out.appendChild(li);
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p><button type="button" id="html09-demo1-btn">列出本页的地标元素</button></p>
+            <ol id="html09-demo1-out"></ol>
+            <p class="mb-0">这个演示遍历的正是本站页面本身：顶栏、目录、正文、页脚各有各的元素。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            document.getElementById('html09-demo1-btn').addEventListener('click', function () {
+              var marks = document.querySelectorAll('header, nav, main, aside, footer, search');
+              var out = document.getElementById('html09-demo1-out');
+              out.innerHTML = '';
+              marks.forEach(function (el) {
+                var li = document.createElement('li');
+                li.textContent = el.tagName.toLowerCase()
+                  + (el.id ? '#' + el.id : '')
+                  + (el.getAttribute('aria-label') ? '（aria-label：' + el.getAttribute('aria-label') + '）' : '');
+                out.appendChild(li);
+              });
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        点完按钮你会看到若干条记录——其中 <code>aside#sidebar</code> 之所以能被读出来，
+        是因为本站给侧边栏写了 <code>aria-label="全站目录"</code>（第十一式会讲这个属性）。
+        顺便认识一个较新的地标：<code>&lt;search&gt;</code> 用来包住搜索表单
+        （2026 年的现代浏览器已支持），它的出现让“搜索区”也算有了正式的名字。
+      </p>
+
+      <h2>标题层级与分节</h2>
+      <p>
+        地标解决“大块怎么分”，标题解决“里面怎么走”。三条规矩请记牢：
+      </p>
+      <ul>
+        <li><strong>一个 <code>h1</code></strong>：说清这一页是什么（本站的 <code>h1</code> 由页头统一注入）；</li>
+        <li><strong>层级不跳级</strong>：<code>h2</code> 下面是 <code>h3</code>，别从 <code>h2</code> 蹦到 <code>h4</code>；</li>
+        <li><strong>分节要带标题</strong>：用了 <code>section</code> / <code>article</code>，里面的第一个标题就是它的名字。</li>
+      </ul>
+      <p>
+        本站每一式右侧的“本式目录”，就是照着正文里的 <code>h2</code> / <code>h3</code> 自动生成的——
+        标题写得好不好，读者一按目录就知道。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 一篇有头有尾的文章：article 包着 header、section、footer</div>
+        <div class="demo-preview">
+          <article>
+            <header>
+              <h2>站桩三月记</h2>
+              <p>作者：墨白 · 写于 <time datetime="2026-09-14">2026 年 9 月 14 日</time></p>
+            </header>
+            <section>
+              <h3>第一周：先找到重心</h3>
+              <p class="mb-2">两脚分开与肩同宽，膝盖微屈，重心落在两脚之间。</p>
+            </section>
+            <section>
+              <h3>第三周：呼吸自己就顺了</h3>
+              <p class="mb-2">不再刻意数呼吸，身体慢慢找到了自己的节奏。</p>
+            </section>
+            <footer>
+              <p class="mb-0"><small>本文参与「<mark>基本功</mark>」专题 · 下次复习：<time datetime="2026-10-01">10 月 1 日</time></small></p>
+            </footer>
+          </article>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <article>
+              <header>
+                <h2>站桩三月记</h2>
+                <p>作者：墨白 · 写于 <time datetime="2026-09-14">2026 年 9 月 14 日</time></p>
+              </header>
+              <section>
+                <h3>第一周：先找到重心</h3>
+                <p class="mb-2">两脚分开与肩同宽，膝盖微屈，重心落在两脚之间。</p>
+              </section>
+              <section>
+                <h3>第三周：呼吸自己就顺了</h3>
+                <p class="mb-2">不再刻意数呼吸，身体慢慢找到了自己的节奏。</p>
+              </section>
+              <footer>
+                <p class="mb-0"><small>本文参与「<mark>基本功</mark>」专题 · 下次复习：<time datetime="2026-10-01">10 月 1 日</time></small></p>
+              </footer>
+            </article>
+          </script>
+        </div>
+      </div>
+      <p>
+        这段结构里藏着一个常被问的问题：<strong><code>article</code> 和 <code>section</code> 怎么选？</strong>
+        口袋里的判断法有三步：能独立成立（像一篇文章、一条评论）用 <code>article</code>；
+        只是文章里的一个主题段落，用 <code>section</code> 加标题；
+        两者都不像（纯粹为了排版方便）就用 <code>div</code>。
+        它们可以互相嵌套——例 2 就是 <code>article</code> 里装了两个 <code>section</code>。
+      </p>
+
+      <h2>值得认识的其它语义元素</h2>
+      <p>
+        还有一批元素能让页面更“会说话”，其中两个自带交互，尤其好用：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>用途</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>details</code> + <code>summary</code></td>
+            <td>原生折叠面板：点标题展开内容</td>
+            <td>零脚本；加 <code>open</code> 属性默认展开。本站的练功答案就用它</td>
+          </tr>
+          <tr>
+            <td><code>dialog</code></td>
+            <td>对话框 / 弹窗</td>
+            <td>需要脚本调用 <code>showModal()</code> 才会以模态形式弹出；<code>&lt;dialog open&gt;</code> 只是普通显示</td>
+          </tr>
+          <tr>
+            <td><code>time</code></td>
+            <td>机器可读的时间</td>
+            <td><code>datetime="2026-09-14"</code> 给出标准格式；显示的文字可以随意</td>
+          </tr>
+          <tr>
+            <td><code>address</code></td>
+            <td><strong>最近一处</strong>内容作者的联系方式</td>
+            <td>不是“任意地址”的意思——普通邮寄地址用 <code>p</code> 写就好</td>
+          </tr>
+          <tr>
+            <td><code>figure</code> + <code>figcaption</code></td>
+            <td>图 / 代码 / 引文 + 说明</td>
+            <td>第四式见过，它同样属于语义化的一环</td>
+          </tr>
+          <tr>
+            <td><code>mark</code> / <code>strong</code> / <code>em</code></td>
+            <td>高亮、重要、强调</td>
+            <td>第二式的语气标签，语义化不只是“大块”的事</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 零脚本的折叠面板（details / summary）</div>
+        <div class="demo-preview">
+          <details>
+            <summary>点开看：为什么 section 一定要有标题？</summary>
+            <p class="mb-0">因为读屏软件会把标题当成分区菜单报给读者。
+              没有标题的分区，就像没有门牌的屋子——读者不知道自己在哪，也不知道怎么跳过。</p>
+          </details>
+          <details open>
+            <summary>这一条默认展开（写了 open）</summary>
+            <p class="mb-0">把 <code>open</code> 删掉，它就默认收起了。</p>
+          </details>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <details>
+              <summary>点开看：为什么 section 一定要有标题？</summary>
+              <p class="mb-0">因为读屏软件会把标题当成分区菜单报给读者。
+                没有标题的分区，就像没有门牌的屋子——读者不知道自己在哪，也不知道怎么跳过。</p>
+            </details>
+            <details open>
+              <summary>这一条默认展开（写了 open）</summary>
+              <p class="mb-0">把 <code>open</code> 删掉，它就默认收起了。</p>
+            </details>
+          </script>
+        </div>
+      </div>
+
+      <h2>div 与 span：无语义的万能容器</h2>
+      <p>
+        讲了半天语义，可别把 <code>div</code> 和 <code>span</code> 当成“错误标签”。
+        它们是<strong>没有语义的容器</strong>，专门留给“只想分组、没有合适语义”的场合：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>显示方式</th>
+            <th>什么时候用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>div</code></td>
+            <td>块级（自占一行）</td>
+            <td>给一组元素打包、配样式或供脚本操作，且找不到更贴切的语义元素时</td>
+          </tr>
+          <tr>
+            <td><code>span</code></td>
+            <td>行内（跟着文字走）</td>
+            <td>只给句子里的几个字加样式或挂 id、data 属性时</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        判断顺序建议倒过来想：<strong>先问“这块到底是什么”，再找对应元素；都对不上，才用 div</strong>。
+        本站页面里就有这样的例子：正文之外那层负责布局的容器是 <code>div class="content"</code>——
+        它只是排版的脚手架，没有语义，用 <code>div</code> 正合适。
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="本站一页的骨架（简化）">
+        <body>
+          <header class="topbar">品牌、全站搜索、明暗切换</header>
+          <div class="layout">
+            <aside id="sidebar" aria-label="全站目录">左侧目录</aside>
+            <div class="content">
+              <main id="main">
+                <article>
+                  <h1>这一页是什么</h1>
+                  <section>
+                    <h2>本节主题</h2>
+                  </section>
+                </article>
+              </main>
+              <footer class="site-footer">页脚与翻页</footer>
+            </div>
+          </div>
+        </body>
+      </script>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>语义化服务读屏软件、搜索引擎与维护者；一堆 div 堆出来的页面叫“div 汤”；</li>
+        <li>地标七件套：<code>header</code> / <code>nav</code> / <code>main</code> / <code>article</code> / <code>section</code> / <code>aside</code> / <code>footer</code>，
+          其中 <code>main</code> 每页只能有一个，且不能嵌在别的地标里；</li>
+        <li>一个 <code>h1</code>、层级不跳级、<code>section</code> 要有标题；</li>
+        <li><code>details</code> + <code>summary</code> 是零脚本折叠面板；<code>dialog</code> 要脚本才能模态弹出；</li>
+        <li><code>time</code> 让时间机器可读；<code>address</code> 只用于作者联系方式；</li>
+        <li><code>div</code> / <code>span</code> 是无语义容器：先找语义，找不到才用它。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第九式</div>
+        <ol>
+          <li>为你的个人主页画骨架：写出 <code>header</code>、<code>nav</code>、<code>main</code>、
+            <code>aside</code>、<code>footer</code> 五个地标，每个里放一两行占位文字。</li>
+          <li>在 <code>main</code> 里写一篇 <code>article</code>：要有 <code>header</code>（标题 + <code>time</code>）、
+            两个带标题的 <code>section</code>、以及一个带 <code>details</code> 的 <code>footer</code>。</li>
+          <li>思考：把 <code>main</code> 换成 <code>div</code>，页面看起来毫无变化。
+            那到底谁会因此受损？请具体说出一种使用场景。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="主页骨架">
+            <body>
+              <header>
+                <h1>墨白的主页</h1>
+              </header>
+              <nav aria-label="主导航">
+                <ul>
+                  <li><a href="#about">关于</a></li>
+                  <li><a href="#works">作品</a></li>
+                </ul>
+              </nav>
+              <main>
+                <p>正文占位</p>
+              </main>
+              <aside>
+                <p>侧栏占位：延伸阅读</p>
+              </aside>
+              <footer>
+                <p>页脚占位：版权与联系方式</p>
+              </footer>
+            </body>
+          </script>
+          <p>
+            检查点：<code>h1</code> 只有一个；<code>nav</code> 里是一个链接列表（用 <code>ul</code>，第三式说过）；
+            <code>main</code> 是 <code>body</code> 的直接子元素，没被塞进别的地标里。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="一篇结构完整的文章">
+            <main>
+              <article>
+                <header>
+                  <h1>第一次拆网页</h1>
+                  <p><time datetime="2026-09-14">2026 年 9 月 14 日</time></p>
+                </header>
+                <section>
+                  <h2>准备工作</h2>
+                  <p>先打开一个喜欢的页面，右键，查看源代码。</p>
+                </section>
+                <section>
+                  <h2>我发现了什么</h2>
+                  <p>原来那些整齐的卡片，是一层层列表包出来的。</p>
+                </section>
+                <footer>
+                  <details>
+                    <summary>拆解笔记（点击展开）</summary>
+                    <p>导航是 nav 包着 ul，卡片是 article，图标用的是 SVG。</p>
+                  </details>
+                </footer>
+              </article>
+            </main>
+          </script>
+          <p>
+            检查点：<code>article</code> 内可以有自己的 <code>header</code> / <code>footer</code>；
+            两个 <code>section</code> 都带标题；<code>details</code> 放在 <code>footer</code> 里也完全合法
+            （它只是“把细节折叠起来”，与位置无关）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            受损的是<strong>靠键盘与读屏软件浏览的人</strong>。具体场景：
+            一位读屏软件用户打开你的页面，只想直接读正文。
+            如果页面有 <code>main</code>，他可以按一下“跳到主内容”的快捷键，一步到正文；
+            如果那里是 <code>div</code>，读屏软件不会把它当地标，他就只能从页头开始，
+            把品牌名、十几个导航链接、搜索框、侧栏……一个一个听过去——
+            每换一个页面都要重听一遍。这就是为什么语义化被称作“网页的无障碍地基”。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，往骨架上添细节：全局属性与 head 里的元数据。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

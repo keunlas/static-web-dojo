@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十三式 · 响应式心法 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="移动优先的思路、viewport 与媒体查询语法、断点怎么选、流式尺寸与容器查询、触控目标尺寸，以及响应式的测试方法。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-23">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        同一个页面，要在六寸的手机和二十七寸的显示器上都好看——
+        这件事没有“一招”，它是一套心法：<strong>从最小的屏幕写起，让布局自己会长</strong>，
+        实在长不好的地方，再用媒体查询扶一把。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>理解“移动优先”：默认样式写给窄屏，用 <code>min-width</code> 逐级增强</li>
+          <li>认准 <code>&lt;meta name="viewport"&gt;</code>，知道少了它手机页面会变成什么样</li>
+          <li>会写媒体查询（含范围语法）、知道断点该按“内容散架处”选</li>
+          <li>会用四件武器：流式尺寸、弹性/网格、媒体查询、容器查询</li>
+          <li>记住两条与无障碍相关的硬规矩：不禁缩放、触控目标别太小</li>
+        </ul>
+      </div>
+
+      <h2>先立规矩：viewport 与移动优先</h2>
+      <p>
+        每个页面 <code>head</code> 里那一行 <code>viewport</code>，是响应式的总开关：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="必须写、且不要乱改的一行">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      </script>
+      <ul>
+        <li>少了它，手机浏览器会假装自己有 980px 宽、再把整页缩小塞进屏幕——
+          你以为的“适配好了”，其实只是被缩放了；</li>
+        <li><code>width=device-width</code> 让布局视口等于设备宽度，媒体查询才有意义；</li>
+        <li><strong>不要写</strong> <code>user-scalable=no</code> 或 <code>maximum-scale=1</code>：
+          那等于禁止低视力读者放大页面，是无障碍上的红线。</li>
+      </ul>
+      <p>
+        接着是写作顺序，也就是“移动优先”：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>移动优先（推荐）</th>
+            <th>桌面优先（老写法）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>默认样式</td>
+            <td>写给最窄的屏幕（单列）</td>
+            <td>写给最宽的屏幕（多列）</td>
+          </tr>
+          <tr>
+            <td>媒体查询</td>
+            <td><code>min-width</code> 从小到大逐级增强</td>
+            <td><code>max-width</code> 从大到小逐级降级</td>
+          </tr>
+          <tr>
+            <td>好处</td>
+            <td>小屏拿到最精简的代码；增强是“加”出来的，容易维护</td>
+            <td>小屏要不断覆盖大屏的样式，越写越乱</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>媒体查询：语法的全部家当</h2>
+      <script type="text/plain" data-lang="css" data-title="最常用的三种写法">
+        /* 1. 达到某个宽度就生效（移动优先的主力） */
+        @media (min-width: 48em) { .card { width: 50%; } }
+
+        /* 2. 区间语法（Media Queries 4，现代浏览器都支持） */
+        @media (40em <= width < 64em) { .card { width: 33%; } }
+
+        /* 3. 组合条件：且 / 或 / 非 */
+        @media screen and (min-width: 48em) and (orientation: landscape) { /* … */ }
+        @media (max-width: 30em), (min-width: 90em) { /* 逗号＝或者 */ }
+        @media not print { /* 除了打印之外 */ }
+      </script>
+      <p>
+        除宽度以外，媒体查询还能问浏览器很多问题，这几类最实用：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>条件</th>
+            <th>含义</th>
+            <th>常见用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>orientation: landscape</code></td><td>横屏 / 竖屏</td><td>横屏时把工具栏变矮</td></tr>
+          <tr><td><code>prefers-color-scheme: dark</code></td><td>系统是深色模式</td><td>整套暗色配色（本站皮肤就用它）</td></tr>
+          <tr><td><code>prefers-reduced-motion: reduce</code></td><td>用户要求减少动效</td><td>关掉大幅动画（第二十四式）</td></tr>
+          <tr><td><code>pointer: coarse</code></td><td>主指针是“粗的”（手指）</td><td>把按钮做大一号</td></tr>
+          <tr><td><code>hover: hover</code></td><td>设备支持悬停</td><td>只在真有鼠标时才做悬停效果</td></tr>
+          <tr><td><code>print</code></td><td>打印时</td><td>去掉导航、展开链接地址</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 媒体查询现场：把浏览器窗口拉窄到 640px 以下再拉回来</div>
+        <div class="demo-preview">
+          <style>
+            #css23-demo1 .wrap { display: grid; gap: .5rem; grid-template-columns: 1fr; }
+            #css23-demo1 .panel {
+              background: #f4edde; border: 1px dashed #d4cab0; padding: .6rem .7rem; font-size: .85rem;
+            }
+            #css23-demo1 .tag { display: inline-block; background: #b03a2e; color: #fff; padding: .1rem .45rem; border-radius: 999px; font-size: .75rem; }
+            #css23-demo1 .wide-only { display: none; }   /* 基础规则写在前面，顺序很重要 */
+            /* 关键就在这一句：达到 640px 就变成两列 */
+            @media (min-width: 640px) {
+              #css23-demo1 .wrap { grid-template-columns: 1fr 1fr; }
+              #css23-demo1 .wide-only { display: inline-block; }
+              #css23-demo1 .narrow-only { display: none; }
+            }
+          </style>
+          <div id="css23-demo1">
+            <p class="panel">
+              当前分支：<span class="tag narrow-only">窄屏样式（单列）</span><span class="tag wide-only">宽屏样式（两列）</span>
+              <span id="css23-demo1-out">正在读视口宽度……</span>
+            </p>
+            <div class="wrap">
+              <div class="panel">面板一：窄屏时我独占一行。</div>
+              <div class="panel">面板二：宽屏时我挪到右边，和面板一并排。</div>
+            </div>
+            <script>
+              function report1() {
+                document.getElementById('css23-demo1-out').textContent =
+                  '（视口宽 ' + window.innerWidth + 'px，' + (window.innerWidth >= 640 ? '已命中 min-width: 640px' : '还没到 640px') + '）';
+              }
+              DOJO.ready(report1);
+              window.addEventListener('resize', report1);
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css23-demo1">
+              <p class="panel">
+                当前分支：<span class="tag narrow-only">窄屏样式（单列）</span><span class="tag wide-only">宽屏样式（两列）</span>
+                <span id="css23-demo1-out">正在读视口宽度……</span>
+              </p>
+              <div class="wrap">
+                <div class="panel">面板一：窄屏时我独占一行。</div>
+                <div class="panel">面板二：宽屏时我挪到右边，和面板一并排。</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css23-demo1 .wrap { display: grid; gap: .5rem; grid-template-columns: 1fr; }
+            #css23-demo1 .panel {
+              background: #f4edde; border: 1px dashed #d4cab0; padding: .6rem .7rem; font-size: .85rem;
+            }
+            #css23-demo1 .tag { display: inline-block; background: #b03a2e; color: #fff; padding: .1rem .45rem; border-radius: 999px; font-size: .75rem; }
+            #css23-demo1 .wide-only { display: none; }   /* 基础规则写在前面，顺序很重要 */
+            /* 关键就在这一句：达到 640px 就变成两列 */
+            @media (min-width: 640px) {
+              #css23-demo1 .wrap { grid-template-columns: 1fr 1fr; }
+              #css23-demo1 .wide-only { display: inline-block; }
+              #css23-demo1 .narrow-only { display: none; }
+            }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（报告视口宽度，演示用）">
+            function report1() {
+              document.getElementById('css23-demo1-out').textContent =
+                '（视口宽 ' + window.innerWidth + 'px，' + (window.innerWidth >= 640 ? '已命中 min-width: 640px' : '还没到 640px') + '）';
+            }
+            DOJO.ready(report1);
+            window.addEventListener('resize', report1);
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里那句 <code>@media</code> 写在样式表中段也没关系——
+        媒体查询只看“条件是否成立”，不看它写在第几行。
+        但条件成立之后，<strong>里面的规则仍要按层叠规则参与竞争</strong>（第十五式）：
+        所以基础规则 <code>.wide-only { display: none }</code> 必须写在媒体查询
+        <strong>之前</strong>，否则同样权重下后写的会赢，标签永远显示不出来。
+        这个坑值得亲手试一次——把两段调换位置，就能看到“宽屏标签”彻底消失。
+      </p>
+
+      <h3>断点怎么选</h3>
+      <p>
+        新手最爱问“该用哪几个断点”。真正的答案是：<strong>先在浏览器里慢慢拉窄窗口，
+        看内容在哪个宽度开始别扭，那个宽度就是你的断点</strong>。
+        设备型号会过时，内容的“散架点”不会。几个常见的参考值：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>参考断点</th>
+            <th>大致对应</th>
+            <th>常见调整</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>36em</code>（576px）</td><td>手机横屏 / 小平板</td><td>卡片从单列变两列</td></tr>
+          <tr><td><code>48em</code>（768px）</td><td>平板竖屏</td><td>导航从折叠变横排、侧栏出现</td></tr>
+          <tr><td><code>62em</code>（992px）</td><td>小笔记本</td><td>三列布局、显示侧边栏</td></tr>
+          <tr><td><code>75em</code>（1200px）</td><td>桌面</td><td>放宽正文最大宽度</td></tr>
+        </tbody>
+      </table>
+      <p>
+        单位建议用 <code>em</code>：在媒体查询里它相对浏览器的<strong>默认字号</strong>，
+        用户把默认字号调大时断点也会跟着变大，页面会提前切换到更宽松的版式；
+        而 <code>px</code> 断点对这类设置无动于衷。（页面缩放对两者都不影响。）
+      </p>
+
+      <h2>四件武器：不要只用媒体查询</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>武器</th>
+            <th>做什么</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>① 流式尺寸</td>
+            <td>让尺寸自己跟着容器/视口伸缩，不用断点</td>
+            <td><code>width: 100%</code>、<code>max-width: 60rem</code>、<code>font-size: clamp(1rem, 2vw, 1.4rem)</code></td>
+          </tr>
+          <tr>
+            <td>② 弹性与网格</td>
+            <td>让布局自己换行、自己增减列</td>
+            <td><code>flex-wrap: wrap</code>、<code>repeat(auto-fit, minmax(220px, 1fr))</code></td>
+          </tr>
+          <tr>
+            <td>③ 媒体查询</td>
+            <td>结构要变（换位置、换顺序、显隐）时出手</td>
+            <td><code>@media (min-width: 62em) { … }</code></td>
+          </tr>
+          <tr>
+            <td>④ 容器查询</td>
+            <td>按<strong>组件自己的宽度</strong>适配（同一组件放进不同宽度的栏里都好看）</td>
+            <td><code>@container (min-width: 30em) { … }</code>（例 5）</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        顺序上有个经验：<strong>能用①和②解决的，就别写③</strong>。
+        媒体查询是重武器，写多了会变成“每个断点一套样式”，维护成本陡增。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 流式字号：一句 clamp 顶三条媒体查询</div>
+        <div class="demo-preview">
+          <style>
+            #css23-demo2 .title {
+              font-size: clamp(1.25rem, 1rem + 2.4vw, 2.2rem);
+              line-height: 1.25; margin: 0 0 .4rem;
+              color: #b03a2e; font-family: Georgia, "Songti SC", serif;
+            }
+            #css23-demo2 .out { font-size: .82rem; color: #6f6a5e; margin: 0; }
+          </style>
+          <div id="css23-demo2">
+            <p class="title">日拱一卒，功不唐捐</p>
+            <p class="out" id="css23-demo2-out">正在读字号……</p>
+            <script>
+              function report2() {
+                var t = document.querySelector('#css23-demo2 .title');
+                document.getElementById('css23-demo2-out').textContent =
+                  '当前字号 ' + getComputedStyle(t).fontSize + '（视口 ' + window.innerWidth
+                  + 'px；上下限是 1.25rem 与 2.2rem）';
+              }
+              DOJO.ready(report2);
+              window.addEventListener('resize', report2);
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css23-demo2">
+              <p class="title">日拱一卒，功不唐捐</p>
+              <p class="out" id="css23-demo2-out">正在读字号……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css23-demo2 .title {
+              font-size: clamp(1.25rem, 1rem + 2.4vw, 2.2rem);
+              line-height: 1.25; margin: 0 0 .4rem;
+              color: #b03a2e; font-family: Georgia, "Songti SC", serif;
+            }
+            #css23-demo2 .out { font-size: .82rem; color: #6f6a5e; margin: 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（报告当前字号，演示用）">
+            function report2() {
+              var t = document.querySelector('#css23-demo2 .title');
+              document.getElementById('css23-demo2-out').textContent =
+                '当前字号 ' + getComputedStyle(t).fontSize + '（视口 ' + window.innerWidth
+                + 'px；上下限是 1.25rem 与 2.2rem）';
+            }
+            DOJO.ready(report2);
+            window.addEventListener('resize', report2);
+          </script>
+        </div>
+      </div>
+
+      <h2>三个具体场景的处理法</h2>
+      <h3>场景一：表格在窄屏撑破页面</h3>
+      <p>
+        手机上没有空间让五列表格舒展开。与其硬塞，不如给它一个<strong>可横向滚动的外壳</strong>：
+        页面不再被撑破，读者想看细节时自己滑一下。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 可横向滚动的表格（外壳限成手机宽度，用鼠标或手指往右滑）</div>
+        <div class="demo-preview">
+          <style>
+            #css23-demo3 .scroller {
+              overflow-x: auto; border: 1px dashed #d4cab0; background: #fffdf7;
+              max-width: 26rem;              /* 模拟手机上的窄屏容器 */
+            }
+            #css23-demo3 table { border-collapse: collapse; min-width: 560px; width: 100%; font-size: .82rem; }
+            #css23-demo3 th, #css23-demo3 td { border: 1px solid #e3dcc8; padding: .35rem .6rem; text-align: left; white-space: nowrap; }
+            #css23-demo3 th { background: #f4edde; }
+            #css23-demo3 .hint { font-size: .8rem; color: #6f6a5e; margin: .4rem 0 0; }
+          </style>
+          <div id="css23-demo3">
+            <div class="scroller">
+              <table>
+                <thead>
+                  <tr><th>招式</th><th>起始式</th><th>要点</th><th>易错处</th><th>建议时长</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>站桩</td><td>第一式</td><td>重心落在两脚之间</td><td>塌腰耸肩</td><td>20 分钟</td></tr>
+                  <tr><td>直拳</td><td>第三式</td><td>回收比打出更快</td><td>只用手臂发力</td><td>15 分钟</td></tr>
+                  <tr><td>扫腿</td><td>第五式</td><td>支撑脚外旋</td><td>转体不足</td><td>15 分钟</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="hint" id="css23-demo3-hint">正在量表格……</p>
+            <script>
+              function report3() {
+                var s = document.querySelector('#css23-demo3 .scroller');
+                document.getElementById('css23-demo3-hint').textContent =
+                  '表格内容宽 ' + s.scrollWidth + 'px、外壳可见宽 ' + s.clientWidth
+                  + 'px（' + (s.scrollWidth > s.clientWidth ? '需要横向滚动' : '当前放得下') + '）。';
+              }
+              DOJO.ready(report3);
+              window.addEventListener('resize', report3);
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css23-demo3">
+              <div class="scroller">
+                <table>
+                  <thead>
+                    <tr><th>招式</th><th>起始式</th><th>要点</th><th>易错处</th><th>建议时长</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>站桩</td><td>第一式</td><td>重心落在两脚之间</td><td>塌腰耸肩</td><td>20 分钟</td></tr>
+                    <tr><td>直拳</td><td>第三式</td><td>回收比打出更快</td><td>只用手臂发力</td><td>15 分钟</td></tr>
+                    <tr><td>扫腿</td><td>第五式</td><td>支撑脚外旋</td><td>转体不足</td><td>15 分钟</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint" id="css23-demo3-hint">正在量表格……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css23-demo3 .scroller {
+              overflow-x: auto; border: 1px dashed #d4cab0; background: #fffdf7;
+              max-width: 26rem;              /* 模拟手机上的窄屏容器 */
+            }
+            #css23-demo3 table { border-collapse: collapse; min-width: 560px; width: 100%; font-size: .82rem; }
+            #css23-demo3 th, #css23-demo3 td { border: 1px solid #e3dcc8; padding: .35rem .6rem; text-align: left; white-space: nowrap; }
+            #css23-demo3 th { background: #f4edde; }
+            #css23-demo3 .hint { font-size: .8rem; color: #6f6a5e; margin: .4rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量表格宽度，演示用）">
+            function report3() {
+              var s = document.querySelector('#css23-demo3 .scroller');
+              document.getElementById('css23-demo3-hint').textContent =
+                '表格内容宽 ' + s.scrollWidth + 'px、外壳可见宽 ' + s.clientWidth
+                + 'px（' + (s.scrollWidth > s.clientWidth ? '需要横向滚动' : '当前放得下') + '）。';
+            }
+            DOJO.ready(report3);
+            window.addEventListener('resize', report3);
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">可滚动区域要给键盘读者留门</div>
+        <p style="margin:0">
+          一个横向滚动区，鼠标用户能拖、触屏用户能滑，但<strong>只用键盘的读者可能进不去</strong>。
+          给它加 <code>tabindex="0"</code> 与 <code>role="region"</code>、
+          <code>aria-label="……（可横向滚动）"</code>，键盘就能聚焦过去、再用方向键滚动
+          （第十一式）。本站的代码块就是这么处理的。
+        </p>
+      </div>
+
+      <h3>场景二：次要内容在窄屏怎么处理</h3>
+      <p>
+        三种做法，按推荐程度排序：<strong>重排 &gt; 折叠 &gt; 隐藏</strong>。
+        能用 Grid 换个位置解决的，就别折叠；能折叠的，就别直接 <code>display: none</code>——
+        一旦隐藏，读屏软件与搜索引擎也一并看不到了。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="三种处理方式">
+        /* ① 重排（首选）：换个位置，信息不丢 */
+        @media (min-width: 62em) {
+          .layout { grid-template-areas: "side main"; }
+        }
+
+        /* ② 折叠（次选）：用 details 或者可展开的组件 */
+        .filters { display: none; }
+        @media (min-width: 48em) { .filters { display: block; } }
+
+        /* ③ 隐藏（慎用）：只藏“锦上添花”的装饰 */
+        .decoration { display: none; }
+        @media (min-width: 48em) { .decoration { display: block; } }
+      </script>
+
+      <h3>场景三：触控目标别太小</h3>
+      <p>
+        手机上点不准，多半不是手抖，而是目标太小。无障碍标准的最低线是
+        <strong>24×24 CSS 像素</strong>（WCAG 2.2 AA），而各家设计规范普遍推荐
+        <strong>44×44 以上</strong>（Apple HIG 的 44pt、Material 的 48dp）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 两种链接大小的点按体验（脚本报告实测高度）</div>
+        <div class="demo-preview">
+          <style>
+            #css23-demo4 .tiny { font-size: .78rem; color: #2f6db3; }
+            #css23-demo4 .comfy {
+              display: inline-flex; align-items: center; min-height: 44px; padding: 0 .9rem;
+              background: #b03a2e; color: #fff; border-radius: 8px; text-decoration: none; font-size: .9rem;
+            }
+            #css23-demo4 .out { font-size: .82rem; color: #6f6a5e; margin: .6rem 0 0; }
+          </style>
+          <div id="css23-demo4">
+            <p style="margin: 0 0 .5rem">小而密：这里是<span class="tiny">一个很小很小的文字链接</span>，手机上很难点准。</p>
+            <p style="margin: 0"><a class="comfy" href="#main">至少 44px 高的按钮式链接</a></p>
+            <p class="out" id="css23-demo4-out">正在量高度……</p>
+            <script>
+              var tiny4 = document.querySelector('#css23-demo4 .tiny');
+              var comfy4 = document.querySelector('#css23-demo4 .comfy');
+              function report4() {
+                document.getElementById('css23-demo4-out').textContent =
+                  '实测高度：小链接 ' + tiny4.getBoundingClientRect().height.toFixed(1)
+                  + 'px，按钮式链接 ' + comfy4.getBoundingClientRect().height.toFixed(1) + 'px。';
+              }
+              DOJO.ready(report4);   /* 等整站样式就位再量一次，数字才准 */
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css23-demo4">
+              <p style="margin: 0 0 .5rem">小而密：这里是<span class="tiny">一个很小很小的文字链接</span>，手机上很难点准。</p>
+              <p style="margin: 0"><a class="comfy" href="#main">至少 44px 高的按钮式链接</a></p>
+              <p class="out" id="css23-demo4-out">正在量高度……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css23-demo4 .tiny { font-size: .78rem; color: #2f6db3; }
+            #css23-demo4 .comfy {
+              display: inline-flex; align-items: center; min-height: 44px; padding: 0 .9rem;
+              background: #b03a2e; color: #fff; border-radius: 8px; text-decoration: none; font-size: .9rem;
+            }
+            #css23-demo4 .out { font-size: .82rem; color: #6f6a5e; margin: .6rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量高度，演示用）">
+            var tiny4 = document.querySelector('#css23-demo4 .tiny');
+            var comfy4 = document.querySelector('#css23-demo4 .comfy');
+            function report4() {
+              document.getElementById('css23-demo4-out').textContent =
+                '实测高度：小链接 ' + tiny4.getBoundingClientRect().height.toFixed(1)
+                + 'px，按钮式链接 ' + comfy4.getBoundingClientRect().height.toFixed(1) + 'px。';
+            }
+            DOJO.ready(report4);   /* 等整站样式就位再量一次，数字才准 */
+          </script>
+        </div>
+      </div>
+
+      <h2>容器查询：组件级的响应式</h2>
+      <p>
+        媒体查询问的是“<strong>整个窗口</strong>多宽”，可组件的烦恼常常是
+        “<strong>我所在的这一栏</strong>多宽”。容器查询正好补上这一环：
+        先给父元素声明“我是可查询的容器”，子元素再按容器宽度适配。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="容器查询的写法">
+        .card-holder {
+          container-type: inline-size;   /* 声明：按我的“行内尺寸”来查询 */
+          container-name: card;          /* 可选：给容器起名字 */
+        }
+
+        @container card (min-width: 30em) {
+          .card { display: grid; grid-template-columns: 120px 1fr; }
+        }
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 拖右下角改变容器宽度，看卡片自己换版式</div>
+        <div class="demo-preview">
+          <style>
+            #css23-demo5 .holder {
+              container-type: inline-size;
+              resize: horizontal;            /* 读者可以直接拖右下角改变宽度 */
+              overflow: auto;
+              min-width: 220px; max-width: 100%;
+              border: 1px dashed #d4cab0; background: #f4edde; padding: .6rem;
+            }
+            #css23-demo5 .d-card {
+              display: grid; gap: .2rem; background: #fffdf7;
+              border: 1px solid #d4cab0; border-radius: 8px; padding: .6rem .7rem; font-size: .85rem;
+            }
+            #css23-demo5 .d-card .meta { color: #6f6a5e; font-size: .8rem; }
+            /* 容器宽了就变成“左边封面、右边文字”的横版 */
+            @container (min-width: 420px) {
+              #css23-demo5 .d-card { grid-template-columns: 96px 1fr; align-items: center; }
+              #css23-demo5 .d-card .cover { grid-row: span 2; }
+            }
+            #css23-demo5 .cover {
+              display: flex; align-items: center; justify-content: center;
+              background: #f3e3dd; border: 1px solid #b03a2e; color: #b03a2e;
+              border-radius: 6px; height: 64px; font-size: .8rem;
+            }
+            #css23-demo5 .hint { font-size: .8rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </style>
+          <div id="css23-demo5">
+            <div class="holder" id="css23-demo5-holder">
+              <div class="d-card">
+                <div class="cover">封面</div>
+                <strong>站桩三月记</strong>
+                <span class="meta">容器宽了就自动变成横版</span>
+              </div>
+            </div>
+            <p class="hint" id="css23-demo5-hint">正在读容器宽度……</p>
+            <script>
+              function report5() {
+                var h = document.getElementById('css23-demo5-holder');
+                var w = Math.round(h.getBoundingClientRect().width);
+                document.getElementById('css23-demo5-hint').textContent =
+                  '容器宽 ' + w + 'px：' + (w >= 420 ? '横版（≥420px 的容器查询生效）' : '竖版（还没到 420px）')
+                  + '。拖右下角试试。';
+              }
+              DOJO.ready(report5);
+              document.getElementById('css23-demo5-holder').addEventListener('pointerup', report5);
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css23-demo5">
+              <div class="holder" id="css23-demo5-holder">
+                <div class="d-card">
+                  <div class="cover">封面</div>
+                  <strong>站桩三月记</strong>
+                  <span class="meta">容器宽了就自动变成横版</span>
+                </div>
+              </div>
+              <p class="hint" id="css23-demo5-hint">正在读容器宽度……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css23-demo5 .holder {
+              container-type: inline-size;
+              resize: horizontal;            /* 读者可以直接拖右下角改变宽度 */
+              overflow: auto;
+              min-width: 220px; max-width: 100%;
+              border: 1px dashed #d4cab0; background: #f4edde; padding: .6rem;
+            }
+            #css23-demo5 .d-card {
+              display: grid; gap: .2rem; background: #fffdf7;
+              border: 1px solid #d4cab0; border-radius: 8px; padding: .6rem .7rem; font-size: .85rem;
+            }
+            #css23-demo5 .d-card .meta { color: #6f6a5e; font-size: .8rem; }
+            /* 容器宽了就变成“左边封面、右边文字”的横版 */
+            @container (min-width: 420px) {
+              #css23-demo5 .d-card { grid-template-columns: 96px 1fr; align-items: center; }
+              #css23-demo5 .d-card .cover { grid-row: span 2; }
+            }
+            #css23-demo5 .cover {
+              display: flex; align-items: center; justify-content: center;
+              background: #f3e3dd; border: 1px solid #b03a2e; color: #b03a2e;
+              border-radius: 6px; height: 64px; font-size: .8rem;
+            }
+            #css23-demo5 .hint { font-size: .8rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（读容器宽度，演示用）">
+            function report5() {
+              var h = document.getElementById('css23-demo5-holder');
+              var w = Math.round(h.getBoundingClientRect().width);
+              document.getElementById('css23-demo5-hint').textContent =
+                '容器宽 ' + w + 'px：' + (w >= 420 ? '横版（≥420px 的容器查询生效）' : '竖版（还没到 420px）')
+                + '。拖右下角试试。';
+            }
+            DOJO.ready(report5);
+            document.getElementById('css23-demo5-holder').addEventListener('pointerup', report5);
+          </script>
+        </div>
+      </div>
+      <p>
+        容器查询的好处很实在：同一个卡片组件，放进侧栏（窄）就是竖版，
+        放进正文（宽）就是横版，<strong>组件自己带适配能力</strong>，
+        不需要页面去为“它将来会被放在哪”操心。
+      </p>
+
+      <h2>怎么测：三步走</h2>
+      <ol>
+        <li><strong>拖窗口</strong>：在浏览器里慢慢拉窄、拉宽，盯着每个断点附近有没有别扭的地方
+          （DevTools 的设备工具栏可以锁定常见手机宽度）；</li>
+        <li><strong>换输入方式</strong>：只用键盘走一遍、只用触屏点一遍，
+          看看有没有“只能鼠标用”的交互；</li>
+        <li><strong>上真机</strong>：模拟器再像也不是真机——尤其是在户外看屏幕、
+          用一只手操作、字号调到最大的时候。</li>
+      </ol>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>响应式的起点是 <code>viewport</code>；<strong>永远不要禁用缩放</strong>；</li>
+        <li>移动优先：默认样式给窄屏，用 <code>min-width</code> 逐级增强；</li>
+        <li>媒体查询除了宽度，还能问方向、深色偏好、减少动效、指针粗细、打印；</li>
+        <li>断点按“内容散架处”选，参考值 36/48/62/75em；单位用 <code>em</code> 更尊重用户的默认字号；</li>
+        <li>四件武器：流式尺寸 → 弹性/网格 → 媒体查询 → 容器查询，能靠前解决就别用后面；</li>
+        <li>窄屏表格用横向滚动外壳（记得给键盘留 <code>tabindex="0"</code>）；
+          次要内容优先重排、其次折叠、最后才隐藏；</li>
+        <li>触控目标至少 24×24、推荐 44×44 以上；测的时候记得换输入方式、上真机。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十三式</div>
+        <ol>
+          <li>给第十二式的主页加一条媒体查询：窄屏单列、宽屏两列
+            （提示：用 Grid 改 <code>grid-template-columns</code> 最省事）。</li>
+          <li>把主页的大标题改成 <code>clamp()</code> 流体字号，
+            然后把窗口从最窄拉到最宽，确认它不超出上下限。</li>
+          <li>思考：为什么“把次要内容在窄屏直接 <code>display: none</code>”要慎用？
+            请从两个不同的读者角度说明。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="窄屏单列、宽屏两列">
+            .cards { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+            @media (min-width: 48em) {
+              .cards { grid-template-columns: 1fr 1fr; }
+            }
+          </script>
+          <p>
+            也可以直接写 <code>repeat(auto-fit, minmax(260px, 1fr))</code>，
+            连媒体查询都省了——<strong>能靠布局自己解决的，就别写断点</strong>。
+            两种做法都值得亲手写一遍，体会差别。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="流体标题">
+            h1 {
+              font-size: clamp(1.6rem, 1.1rem + 2.6vw, 2.8rem);
+              line-height: 1.2;
+            }
+          </script>
+          <p>
+            检查点：在 DevTools 里拖到 320px 宽，字号应当停在 1.6rem 附近不再缩小；
+            拉到 1600px 宽，应当停在 2.8rem 不再变大。
+            中间那段“1.1rem + 2.6vw”决定它跟视口增长的速度。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            第一类读者是<strong>用读屏软件或搜索引擎的人</strong>：<code>display: none</code>
+            的内容对它们同样不存在——你以为“小屏只是先藏起来”，对方却是彻底拿不到；
+            第二类读者是<strong>屏幕小但需求不少的人</strong>：比如用手机放大字号查看价格的用户，
+            被隐藏的运费说明、退换货政策恰恰是他最需要的信息。
+            更稳的做法是：装饰性的东西随便藏，信息性的内容用“重排（挪位置）”
+            或“折叠（<code>&lt;details&gt;</code>，需要时能展开）”来处理。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          媒体查询的条件远不止本式列出的这些，
+          想系统浏览可以翻
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_media_queries/Using_media_queries">MDN 的媒体查询使用指南</a>；
+          容器查询在
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_containment/Container_queries">MDN 的容器查询页面</a>也有完整例子。
+        </p>
+      </div>
+
+      <blockquote>下一式，让页面动起来：过渡、变形与动画。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

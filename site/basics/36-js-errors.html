@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十六式 · 错误处理与调试 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="错误对象与常见错误类型、try/catch/finally 的执行顺序、throw 与自定义错误、异步错误的陷阱，以及 console 家族与断点调试。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-36">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        写代码就是不断和各种错误打交道。这一式教你两件事：
+        <strong>怎么接住错误</strong>（别让它把整个页面拖垮），
+        <strong>怎么找到错误</strong>（控制台、断点、调用栈）。
+        学会之后，报错就从“灾难”变成了“提示”。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>认得错误对象三件套（<code>name</code> / <code>message</code> / <code>stack</code>）与常见错误类型</li>
+          <li>会用 <code>try / catch / finally</code>，并知道它们的执行顺序与“别吞掉错误”</li>
+          <li>会 <code>throw</code>，会写自定义错误类，并用 <code>instanceof</code> 区分处理</li>
+          <li>知道为什么异步回调里的错误抓不到（第三十九式细讲）</li>
+          <li>掌握控制台家族与断点调试的基本套路</li>
+        </ul>
+      </div>
+
+      <h2>错误长什么样</h2>
+      <p>
+        JavaScript 里的错误是一个<strong>对象</strong>，最常用的三个属性是：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>是什么</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>错误“种类”</td><td><code>"TypeError"</code>、<code>"ReferenceError"</code></td></tr>
+          <tr><td><code>message</code></td><td>人话说明</td><td><code>"tital is not defined"</code></td></tr>
+          <tr><td><code>stack</code></td><td>调用栈（谁调的谁）</td><td>第一行是出错位置，往下是调用链</td></tr>
+        </tbody>
+      </table>
+      <p>内置的几种常见错误类型，看一眼就够用一辈子：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>什么时候出现</th>
+            <th>典型例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>SyntaxError</code></td><td>语法写错（括号、引号、中文标点）</td><td><code>JSON.parse("{a:1}")</code></td></tr>
+          <tr><td><code>ReferenceError</code></td><td>用了不存在的名字</td><td><code>tital</code>（把 title 拼错）</td></tr>
+          <tr><td><code>TypeError</code></td><td>把没有的东西当有来用</td><td>对 <code>null</code> 取属性、把非函数当函数调用</td></tr>
+          <tr><td><code>RangeError</code></td><td>数值超出允许范围</td><td>递归太深、<code>new Array(-1)</code></td></tr>
+          <tr><td><code>URIError</code></td><td>URI 编解码参数不对</td><td><code>decodeURIComponent("%")</code></td></tr>
+          <tr><td><code>Error</code></td><td>自己抛出的通用错误</td><td><code>throw new Error("…")</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 把几种错误抓来当面看（类型、说明、是不是 Error、栈的第一行）</div>
+        <div class="demo-preview">
+          <table id="js36-demo1-out" style="width: 100%">
+            <thead><tr><th>触发方式</th><th>name</th><th>message</th><th>是 Error 实例吗</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody1 = document.querySelector('#js36-demo1-out tbody');
+            function probe(label, fn) {
+              var tr = document.createElement('tr');
+              var cells;
+              try {
+                fn();
+                cells = [label, '（没有报错）', '', ''];
+              } catch (err) {
+                cells = [label, err.name, err.message, String(err instanceof Error)];
+              }
+              cells.forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+
+            probe('引用不存在的名字', function () { return tital; });
+            probe('对 null 取属性', function () { var nothing = null; return nothing.textContent; });
+            probe('把数字当函数调用', function () { return (123)(); });
+            probe('解析非法 JSON', function () { return JSON.parse("{a:1}"); });
+            probe('数组长度为负', function () { return new Array(-1); });
+            probe('URI 解码不合法', function () { return decodeURIComponent("%"); });
+            probe('自己 throw 一个 Error', function () { throw new Error("我故意抛的"); });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js36-demo1-out" style="width: 100%">
+              <thead><tr><th>触发方式</th><th>name</th><th>message</th><th>是 Error 实例吗</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody1 = document.querySelector('#js36-demo1-out tbody');
+            function probe(label, fn) {
+              var tr = document.createElement('tr');
+              var cells;
+              try {
+                fn();
+                cells = [label, '（没有报错）', '', ''];
+              } catch (err) {
+                cells = [label, err.name, err.message, String(err instanceof Error)];
+              }
+              cells.forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+
+            probe('引用不存在的名字', function () { return tital; });
+            probe('对 null 取属性', function () { var nothing = null; return nothing.textContent; });
+            probe('把数字当函数调用', function () { return (123)(); });
+            probe('解析非法 JSON', function () { return JSON.parse("{a:1}"); });
+            probe('数组长度为负', function () { return new Array(-1); });
+            probe('URI 解码不合法', function () { return decodeURIComponent("%"); });
+            probe('自己 throw 一个 Error', function () { throw new Error("我故意抛的"); });
+          </script>
+        </div>
+      </div>
+
+      <h2>接住错误：try / catch / finally</h2>
+      <script type="text/plain" data-lang="js" data-title="三个块的分工">
+        try {
+          // 可能出错的代码
+          risky();
+        } catch (err) {
+          // 出错时走这里：err 是错误对象
+          console.error("出错了：", err.message);
+        } finally {
+          // 无论成功还是失败都会走这里（清理现场用）
+          cleanup();
+        }
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>要点</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>只包“可能出错的一小段”</td><td>把整个函数的代码都塞进 <code>try</code> 里，会让你看不出到底哪一步出的错</td></tr>
+          <tr><td><code>finally</code> 一定执行</td><td>哪怕 <code>try</code> 里 <code>return</code> 了、或者 <code>catch</code> 里又抛了，<code>finally</code> 都会走完</td></tr>
+          <tr><td><code>catch</code> 的参数可以省略</td><td><code>catch { … }</code>（ES2019）——当你不关心错误对象时更清爽</td></tr>
+          <tr><td><strong>不要吞掉错误</strong></td><td>空的 <code>catch {}</code> 会让错误悄无声息地消失，比崩溃更难查；
+            接不住就 <code>throw err;</code> 继续往上抛</td></tr>
+          <tr><td>能恢复才接</td><td>“读取配置失败就用默认值”属于可恢复；“数据格式全错”就该让它暴露出来</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 执行顺序现场：finally 到底什么时候走</div>
+        <div class="demo-preview">
+          <ul id="js36-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js36-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var trace = [];
+            function risky(shouldFail) {
+              try {
+                trace.push("try 开始");
+                if (shouldFail) {
+                  throw new Error("故意失败");
+                }
+                trace.push("try 顺利结束");
+                return "成功返回值";
+              } catch (err) {
+                trace.push("catch 捕获：" + err.message);
+                return "失败后给的兜底值";
+              } finally {
+                trace.push("finally 执行（无论成败）");
+              }
+            }
+
+            trace.length = 0;
+            var okResult = risky(false);
+            say2('成功路径：' + trace.join(' → ') + '；函数返回「' + okResult + '」');
+
+            trace.length = 0;
+            var failResult = risky(true);
+            say2('失败路径：' + trace.join(' → ') + '；函数返回「' + failResult + '」');
+
+            var trace2 = [];
+            function withFinallyReturn() {
+              try {
+                trace2.push("try");
+                return "try 的返回值";
+              } finally {
+                trace2.push("finally");
+                // 注意：如果这里也 return，它会覆盖 try 的返回值
+              }
+            }
+            var finallyResult = withFinallyReturn();     // 先执行，再读轨迹（顺序反了就会读到空数组）
+            say2('finally 不影响返回值：' + trace2.join(' → ') + '，函数返回「' + finallyResult + '」');
+
+            function rethrow() {
+              try {
+                try {
+                  throw new Error("内层错误");
+                } catch (err) {
+                  throw new Error("包装后的：" + err.message);   // 重新抛出
+                }
+              } catch (err) {
+                return err.message;
+              }
+            }
+            say2('重新抛出：' + rethrow());
+
+            var emptyCatchNote = (function () {
+              var before = 0;
+              try {
+                before += 1;
+                throw new Error("被吞掉的错误");
+              } catch (err) {
+                // 空的 catch：错误就此消失，外面完全不知道出过事
+              }
+              return '执行到 ' + before + ' 步后，错误被悄悄吃掉了（这就是“吞错误”）';
+            })();
+            say2(emptyCatchNote);
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js36-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js36-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var trace = [];
+            function risky(shouldFail) {
+              try {
+                trace.push("try 开始");
+                if (shouldFail) {
+                  throw new Error("故意失败");
+                }
+                trace.push("try 顺利结束");
+                return "成功返回值";
+              } catch (err) {
+                trace.push("catch 捕获：" + err.message);
+                return "失败后给的兜底值";
+              } finally {
+                trace.push("finally 执行（无论成败）");
+              }
+            }
+
+            trace.length = 0;
+            var okResult = risky(false);
+            say2('成功路径：' + trace.join(' → ') + '；函数返回「' + okResult + '」');
+
+            trace.length = 0;
+            var failResult = risky(true);
+            say2('失败路径：' + trace.join(' → ') + '；函数返回「' + failResult + '」');
+
+            var trace2 = [];
+            function withFinallyReturn() {
+              try {
+                trace2.push("try");
+                return "try 的返回值";
+              } finally {
+                trace2.push("finally");
+                // 注意：如果这里也 return，它会覆盖 try 的返回值
+              }
+            }
+            var finallyResult = withFinallyReturn();     // 先执行，再读轨迹（顺序反了就会读到空数组）
+            say2('finally 不影响返回值：' + trace2.join(' → ') + '，函数返回「' + finallyResult + '」');
+
+            function rethrow() {
+              try {
+                try {
+                  throw new Error("内层错误");
+                } catch (err) {
+                  throw new Error("包装后的：" + err.message);   // 重新抛出
+                }
+              } catch (err) {
+                return err.message;
+              }
+            }
+            say2('重新抛出：' + rethrow());
+
+            var emptyCatchNote = (function () {
+              var before = 0;
+              try {
+                before += 1;
+                throw new Error("被吞掉的错误");
+              } catch (err) {
+                // 空的 catch：错误就此消失，外面完全不知道出过事
+              }
+              return '执行到 ' + before + ' 步后，错误被悄悄吃掉了（这就是“吞错误”）';
+            })();
+            say2(emptyCatchNote);
+          </script>
+        </div>
+      </div>
+
+      <h2>抛出与自定义错误</h2>
+      <script type="text/plain" data-lang="js" data-title="自己定义一种错误">
+        class ValidationError extends Error {
+          constructor(message, field) {
+            super(message);            // 先让 Error 打好底子
+            this.name = "ValidationError";
+            this.field = field;        // 额外信息：哪个字段出的问题
+          }
+        }
+
+        function checkAge(age) {
+          if (typeof age !== "number") {
+            throw new ValidationError("年龄必须是数字", "age");
+          }
+          if (age < 0 || age > 150) {
+            throw new ValidationError("年龄超出合理范围", "age");
+          }
+          return true;
+        }
+
+        try {
+          checkAge("十八");
+        } catch (err) {
+          if (err instanceof ValidationError) {
+            // 这是我们自己抛的：可以按字段给用户友好提示
+          } else {
+            throw err;                 // 不是预期的错误：继续往上抛
+          }
+        }
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 自定义错误 + 分类处理（校验失败 vs 意外错误）</div>
+        <div class="demo-preview">
+          <ul id="js36-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js36-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            class ValidationError extends Error {
+              constructor(message, field) {
+                super(message);
+                this.name = "ValidationError";
+                this.field = field;
+              }
+            }
+
+            function checkAge(age) {
+              if (typeof age !== "number") {
+                throw new ValidationError("年龄必须是数字", "age");
+              }
+              if (age < 0 || age > 150) {
+                throw new ValidationError("年龄超出合理范围", "age");
+              }
+              return '年龄 ' + age + '：通过';
+            }
+
+            function report(label, fn) {
+              try {
+                say3(label + ' → ' + fn());
+              } catch (err) {
+                if (err instanceof ValidationError) {
+                  say3(label + ' → 校验失败（字段：' + err.field + '）：' + err.message
+                    + '；name = ' + err.name + '，instanceof Error = ' + (err instanceof Error));
+                } else {
+                  say3(label + ' → 意外错误，继续往上抛：' + err.name + '：' + err.message);
+                }
+              }
+            }
+
+            report('checkAge(21)', function () { return checkAge(21); });
+            report('checkAge("十八")', function () { return checkAge("十八"); });
+            report('checkAge(200)', function () { return checkAge(200); });
+            report('checkAge(null)', function () { return checkAge(null); });
+
+            say3('自定义错误的要点：extends Error、记得设 name、用 instanceof 判断“是不是我们这一种的”');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js36-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js36-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            class ValidationError extends Error {
+              constructor(message, field) {
+                super(message);
+                this.name = "ValidationError";
+                this.field = field;
+              }
+            }
+
+            function checkAge(age) {
+              if (typeof age !== "number") {
+                throw new ValidationError("年龄必须是数字", "age");
+              }
+              if (age < 0 || age > 150) {
+                throw new ValidationError("年龄超出合理范围", "age");
+              }
+              return '年龄 ' + age + '：通过';
+            }
+
+            function report(label, fn) {
+              try {
+                say3(label + ' → ' + fn());
+              } catch (err) {
+                if (err instanceof ValidationError) {
+                  say3(label + ' → 校验失败（字段：' + err.field + '）：' + err.message
+                    + '；name = ' + err.name + '，instanceof Error = ' + (err instanceof Error));
+                } else {
+                  say3(label + ' → 意外错误，继续往上抛：' + err.name + '：' + err.message);
+                }
+              }
+            }
+
+            report('checkAge(21)', function () { return checkAge(21); });
+            report('checkAge("十八")', function () { return checkAge("十八"); });
+            report('checkAge(200)', function () { return checkAge(200); });
+            report('checkAge(null)', function () { return checkAge(null); });
+
+            say3('自定义错误的要点：extends Error、记得设 name、用 instanceof 判断“是不是我们这一种的”');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">异步的错误，try/catch 抓不到</div>
+        <p style="margin:0">
+          <code>try</code> 只能接住“在它执行期间抛出的错误”。
+          定时器与事件回调里的错误发生在<strong>很久以后</strong>，那时 <code>try</code> 早就执行完了：
+        </p>
+      </div>
+      <script type="text/plain" data-lang="js" data-title="两个抓不到的例子">
+        try {
+          setTimeout(function () {
+            throw new Error("这个错误抓不到");
+          }, 0);
+        } catch (err) {
+          // 永远走不到这里
+        }
+
+        // Promise 的拒绝也不会被外层 try/catch 接住
+        try {
+          Promise.reject(new Error("这个也抓不到"));
+        } catch (err) {
+          // 同样走不到
+        }
+
+        // 正确的做法：
+        promise.catch(err => console.error(err));       // 用 .catch
+        async function run() {
+          try {
+            await promise;                              // 或者 await + try/catch
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      </script>
+      <p>
+        这背后的原因是“事件循环”：回调会被排到队列里，等当前这段代码跑完再执行。
+        第三十九式会把这件事讲透，现在先记住结论：
+        <strong>异步代码要各自处理自己的错误</strong>。
+        真要兜底，可以监听全局的 <code>window.onerror</code> 与 <code>window.onunhandledrejection</code>，
+        但那属于“最后一道网”，不该拿来代替正常的错误处理。
+      </p>
+
+      <h2>调试：控制台家族与断点</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>工具</th>
+            <th>用途</th>
+            <th>提示</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>console.log</code></td><td>打印任意值</td><td>最常用；多个参数用逗号分开，比字符串拼接更清楚</td></tr>
+          <tr><td><code>console.warn</code> / <code>error</code></td><td>黄条 / 红条输出</td><td>方便在控制台里一眼分辨严重程度</td></tr>
+          <tr><td><code>console.table(arr)</code></td><td>把数组 / 对象打成表格</td><td>看一批结构相同的对象时最好用</td></tr>
+          <tr><td><code>console.group</code> / <code>groupEnd</code></td><td>把输出分组折叠</td><td>循环里打日志时尤其清爽</td></tr>
+          <tr><td><code>console.count(label)</code></td><td>数一数这段代码执行了几次</td><td>排查“为什么它跑了三遍”</td></tr>
+          <tr><td><code>console.time</code> / <code>timeEnd</code></td><td>量一段代码耗时</td><td>配合性能排查使用</td></tr>
+          <tr><td><code>console.assert(condition, msg)</code></td><td>条件为假时才输出</td><td>写“自检”很方便</td></tr>
+          <tr><td><code>console.trace()</code></td><td>打印调用栈</td><td>想知道“谁把我叫起来的”时用</td></tr>
+          <tr><td><code>debugger;</code> 语句</td><td>执行到这里暂停</td><td>开发者工具打开时才生效，等于自动断点</td></tr>
+          <tr><td>Sources 面板</td><td>点行号下断点、逐行执行</td><td>单步按钮：跨过 / 进入 / 跳出；还能查看作用域里的变量</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 给控制台发送一批日志（下面只显示“发了什么”，真正的输出在控制台里）</div>
+        <div class="demo-preview">
+          <ul id="js36-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js36-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var demoRows = [
+              { 招式: "站桩", 天数: 21 },
+              { 招式: "直拳", 天数: 12 },
+              { 招式: "扫腿", 天数: 5 }
+            ];
+
+            console.group("【第三十六式 · 控制台家族演示】");
+            console.log("console.log：普通输出，可以传多个参数 →", demoRows.length, "条记录");
+            console.warn("console.warn：警告级别的输出（黄条）");
+            console.error("console.error：错误级别的输出（红条）");
+            console.table(demoRows);
+            console.count("这行被数了几次");
+            console.count("这行被数了几次");
+            console.assert(demoRows.length === 3, "记录条数应当是 3");
+            console.assert(demoRows.length === 4, "这条断言不成立，所以它会输出");
+            console.time("示例计时");
+            var warm = 0;
+            for (var i = 0; i < 100000; i++) { warm += i; }
+            console.timeEnd("示例计时");
+            console.groupEnd();
+
+            say4('已向控制台发送：log、warn、error、table、count ×2、assert ×2、time/timeEnd');
+            say4('按 F12 打开 Console 就能看到它们，其中那条“记录条数应当是 4”的断言会以红色输出');
+            say4('提醒：console 是给开发者看的，不要把 console.log 当成给用户看的界面输出');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js36-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js36-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var demoRows = [
+              { 招式: "站桩", 天数: 21 },
+              { 招式: "直拳", 天数: 12 },
+              { 招式: "扫腿", 天数: 5 }
+            ];
+
+            console.group("【第三十六式 · 控制台家族演示】");
+            console.log("console.log：普通输出，可以传多个参数 →", demoRows.length, "条记录");
+            console.warn("console.warn：警告级别的输出（黄条）");
+            console.error("console.error：错误级别的输出（红条）");
+            console.table(demoRows);
+            console.count("这行被数了几次");
+            console.count("这行被数了几次");
+            console.assert(demoRows.length === 3, "记录条数应当是 3");
+            console.assert(demoRows.length === 4, "这条断言不成立，所以它会输出");
+            console.time("示例计时");
+            var warm = 0;
+            for (var i = 0; i < 100000; i++) { warm += i; }
+            console.timeEnd("示例计时");
+            console.groupEnd();
+
+            say4('已向控制台发送：log、warn、error、table、count ×2、assert ×2、time/timeEnd');
+            say4('按 F12 打开 Console 就能看到它们，其中那条“记录条数应当是 4”的断言会以红色输出');
+            say4('提醒：console 是给开发者看的，不要把 console.log 当成给用户看的界面输出');
+          </script>
+        </div>
+      </div>
+
+      <h2>常见错误速查（新手高频）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>报错 / 现象</th>
+            <th>多半是这件事</th>
+            <th>怎么改</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Cannot read properties of null</code></td>
+            <td>元素还没解析出来就去操作它，或选择器写错了</td>
+            <td>脚本放 <code>&lt;/body&gt;</code> 前 / 加 <code>defer</code>；检查 <code>id</code> 拼写</td>
+          </tr>
+          <tr>
+            <td><code>xxx is not defined</code></td>
+            <td>名字拼错、忘了声明，或引用的脚本没加载</td>
+            <td>看 <code>name</code> 与拼写；确认依赖顺序</td>
+          </tr>
+          <tr>
+            <td><code>xxx is not a function</code></td>
+            <td>方法名拼错、对象类型不对（比如把字符串当数组用）</td>
+            <td>用 <code>typeof</code> / <code>Array.isArray</code> 打印一下真身</td>
+          </tr>
+          <tr>
+            <td>函数返回 <code>undefined</code></td>
+            <td>忘了写 <code>return</code>，或者 <code>return</code> 后面换行了</td>
+            <td>检查分支是否都有返回；别在 <code>return</code> 后换行</td>
+          </tr>
+          <tr>
+            <td>循环里的函数都返回同一个值</td>
+            <td><code>var</code> 的函数作用域 + 闭包（第三十一式）</td>
+            <td>把循环变量换成 <code>let</code>，或用 <code>forEach</code></td>
+          </tr>
+          <tr>
+            <td>回调里 <code>this</code> 不是想要的对象</td>
+            <td><code>this</code> 由调用方式决定（第三十三、三十五式）</td>
+            <td><code>bind(this)</code>，或用箭头函数包一层</td>
+          </tr>
+          <tr>
+            <td><code>0.1 + 0.2 !== 0.3</code> 引起的判断失败</td>
+            <td>浮点精度（第三十四式）</td>
+            <td>比差值，或改用整数运算</td>
+          </tr>
+          <tr>
+            <td>拿到的数据是 <code>undefined</code></td>
+            <td>键名写错、异步还没回来、接口字段改了</td>
+            <td>先 <code>console.log</code> 整个对象看看结构；用可选链兜底</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="callout-title">读调用栈的三步</div>
+        <ol style="margin:0">
+          <li>看<strong>第一行</strong>：错误类型与说明；</li>
+          <li>看<strong>第一条带文件名与行号的记录</strong>：那里通常就是出错位置，点一下直接跳过去；</li>
+          <li>往下看<strong>调用链</strong>：谁调用了谁——顺着读，能还原出“事情是怎么走到这一步的”。</li>
+        </ol>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>错误对象的三件套：<code>name</code>（类型）、<code>message</code>（说明）、<code>stack</code>（调用栈）；</li>
+        <li>常见类型：<code>SyntaxError</code> 语法错、<code>ReferenceError</code> 名字不存在、
+          <code>TypeError</code> 用法不对、<code>RangeError</code> 超范围；</li>
+        <li><code>try</code> 包住可能出错的一小段，<code>catch</code> 处理，<code>finally</code> 收尾且一定会执行；</li>
+        <li><strong>别吞错误</strong>：空 <code>catch</code> 比崩溃更难查；处理不了就 <code>throw</code> 继续往上；</li>
+        <li>自定义错误：<code>class X extends Error</code>，设好 <code>name</code>，配合
+          <code>instanceof</code> 分类处理；</li>
+        <li>异步错误抓不到：定时器与 Promise 的失败要在各自的回调 / <code>.catch</code> /
+          <code>await</code> 的 <code>try</code> 里处理（第三十九式细讲）；</li>
+        <li>调试套路：<code>console</code> 家族打印状态、<code>console.table</code> 看表格、
+          <code>debugger</code> 与 Sources 断点单步、顺着调用栈找源头。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十六式</div>
+        <ol>
+          <li>故意写三段会报错的代码（引用不存在的变量、对 <code>null</code> 取属性、
+            把数字当函数调用），用 <code>try…catch</code> 分别打印出
+            <code>name</code> 与 <code>message</code>。</li>
+          <li>写一个 <code>parseScore(input)</code>：输入不是数字或超出 0–100 时，
+            抛出自定义的 <code>ScoreError</code>（带 <code>field</code> 信息）；
+            调用处用 <code>instanceof</code> 区分“格式错误”与“其他意外错误”。</li>
+          <li>思考：为什么 <code>try { setTimeout(() =&gt; { throw new Error("x") }) } catch {}</code>
+            抓不到那个错误？请用“事件循环”说明，并写出两种正确的处理方式。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="三种错误的捕获">
+            "use strict";
+
+            const cases = [
+              ["引用不存在的变量", () => tital],
+              ["对 null 取属性", () => { const n = null; return n.textContent; }],
+              ["把数字当函数调用", () => (123)()]
+            ];
+
+            for (const [label, fn] of cases) {
+              try {
+                fn();
+              } catch (err) {
+                console.log(label, "→", err.name, "：", err.message);
+              }
+            }
+          </script>
+          <p>
+            输出大致是：<code>ReferenceError：tital is not defined</code>、
+            <code>TypeError：Cannot read properties of null (reading 'textContent')</code>、
+            <code>TypeError：123 is not a function</code>。
+            注意第三种的类型是 <code>TypeError</code>——名字没错，用法错了。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="ScoreError 与分类处理">
+            "use strict";
+
+            class ScoreError extends Error {
+              constructor(message, field) {
+                super(message);
+                this.name = "ScoreError";
+                this.field = field;
+              }
+            }
+
+            function parseScore(input) {
+              if (typeof input !== "number" || Number.isNaN(input)) {
+                throw new ScoreError("分数必须是数字", "score");
+              }
+              if (input < 0 || input > 100) {
+                throw new ScoreError("分数应在 0–100 之间", "score");
+              }
+              return input;
+            }
+
+            function show(input) {
+              try {
+                console.log(`${input} → ${parseScore(input)} 分`);
+              } catch (err) {
+                if (err instanceof ScoreError) {
+                  console.warn(`提示用户：${err.field} 有问题 —— ${err.message}`);
+                } else {
+                  throw err;      // 不是我们认识的错误，别吞，继续往上抛
+                }
+              }
+            }
+
+            show(88);
+            show("八十八");   // 格式问题 → 提示用户
+            show(120);        // 超出范围 → 提示用户
+          </script>
+          <p>
+            要点：<strong>能预期的问题用自定义错误并提示用户；不能预期的错误继续往上抛</strong>，
+            让它出现在控制台里——那才是你应该去修的 bug。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>setTimeout</code> 只是<strong>登记了一个任务</strong>，然后立刻返回；
+            <code>try</code> 里那一瞬间并没有任何错误发生，所以它执行完就结束了。
+            过一会儿（下一轮事件循环）浏览器才去执行那个回调，
+            此时 <code>try</code> 早已不在现场——错误当然抓不到。
+            两种正确做法：
+            ①<strong>在回调内部自己处理</strong>：
+            <code>setTimeout(() =&gt; { try { … } catch (err) { … } }, 0)</code>；
+            ②如果是 Promise，就<strong>用 <code>.catch()</code> 或
+            <code>async/await</code> + <code>try</code></strong> 来接：
+            <code>doWork().catch(err =&gt; …)</code>。
+            想要全局兜底，还可以监听 <code>window.onerror</code> 与
+            <code>window.onunhandledrejection</code>，但那是最后一道网。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，终于能真正“改页面”了：DOM 操作。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

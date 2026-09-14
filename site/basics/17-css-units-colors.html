@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十七式 · 单位、数值与颜色 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="px/em/rem/%/vw/ch 等长度单位怎么选、calc/min/max/clamp 函数、颜色写法大全、currentColor 与透明度，以及数值类型的常识。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-17">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        写样式时最常做的两个动作是“量尺寸”与“挑颜色”。
+        尺子有十几种，颜色写法有七八种——这一式把它们排成一张速查表，
+        以后不确定用哪个单位、颜色怎么写，回来查一眼就好。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>认识常用长度单位：<code>px</code>、<code>em</code>、<code>rem</code>、<code>%</code>、<code>vw</code>、<code>ch</code>，
+            并知道它们各自“相对谁”</li>
+          <li>会用 <code>calc()</code>、<code>min()</code>、<code>max()</code>、<code>clamp()</code> 写会自适应的尺寸</li>
+          <li>掌握颜色的几种写法（关键字、hex、<code>rgb()</code>、<code>hsl()</code>、<code>oklch()</code>）与 <code>currentColor</code></li>
+          <li>分清 <code>opacity</code> 与带透明度的颜色，知道数值里哪些能带单位、哪些不能</li>
+        </ul>
+      </div>
+
+      <h2>长度单位：相对谁很重要</h2>
+      <p>
+        每个长度单位都有“参照物”。选单位，其实是在选“跟谁一起伸缩”：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>单位</th>
+            <th>相对谁</th>
+            <th>典型用途</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>px</code></td>
+            <td>CSS 像素（与设备物理像素无关）</td>
+            <td>边框、细线、图标尺寸</td>
+            <td>不随用户字号设置缩放，所以正文别全用 px</td>
+          </tr>
+          <tr>
+            <td><code>rem</code></td>
+            <td>根元素（<code>html</code>）的 <code>font-size</code></td>
+            <td>字号、间距、整体缩放</td>
+            <td>用户改浏览器默认字号时，整站跟着变——无障碍友好</td>
+          </tr>
+          <tr>
+            <td><code>em</code></td>
+            <td><strong>当前元素</strong>的 <code>font-size</code></td>
+            <td>按钮内边距、与字号成比例的间距</td>
+            <td>会逐层累积：嵌套里 <code>1.2em</code> 会越乘越大；<strong>写在 <code>font-size</code> 上时相对父元素</strong></td>
+          </tr>
+          <tr>
+            <td><code>%</code></td>
+            <td>包含块（父容器）的对应尺寸</td>
+            <td>宽度、栅格、比例</td>
+            <td>宽高相对父容器；<code>padding</code> / <code>margin</code> 的百分比<strong>只看宽度</strong>（第十六式）</td>
+          </tr>
+          <tr>
+            <td><code>vw</code> / <code>vh</code></td>
+            <td>视口宽 / 高的 1%</td>
+            <td>整屏区块、流体字号</td>
+            <td>手机上会出现/隐藏地址栏，<code>vh</code> 会跳；可用 <code>dvh</code> 等新单位</td>
+          </tr>
+          <tr>
+            <td><code>ch</code></td>
+            <td>字体里“0”这个字符的宽度</td>
+            <td>限制正文行长（行读起来舒服）</td>
+            <td>中文正文常用 30–40 个汉字宽；<code>ch</code> 更贴近西文</td>
+          </tr>
+          <tr>
+            <td><code>vmin</code> / <code>vmax</code></td>
+            <td>视口宽高中较小 / 较大的那个</td>
+            <td>方形元素、整屏封面</td>
+            <td>做“永远不超出屏幕”的方框时很省事</td>
+          </tr>
+          <tr>
+            <td><code>lh</code> / <code>ex</code></td>
+            <td>当前行高 / 小写字母 x 的高度</td>
+            <td>与行高、字形对齐的微调</td>
+            <td>用得少，知道有它们就行</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · em 会一层层乘，rem 永远看根字号</div>
+        <div class="demo-preview">
+          <style>
+            #css17-demo1 { font-size: 20px; }
+            #css17-demo1 .box { background: #f4edde; padding: .4rem .6rem; margin-bottom: .4rem; }
+            #css17-demo1 .outer { font-size: 1.5em; }   /* 20 × 1.5 = 30px */
+            #css17-demo1 .inner { font-size: 1.5em; }   /* 30 × 1.5 = 45px，继续放大 */
+            #css17-demo1 .rem { font-size: 1.5rem; }    /* 只看根字号（本站 16px）→ 24px */
+          </style>
+          <div id="css17-demo1">
+            <p class="box">基准段落：font-size 20px（本演示的容器设的）。</p>
+            <p class="box outer" id="css17-demo1-outer">用 1.5em：变成 30px。
+              <span class="inner" id="css17-demo1-inner">里面再用 1.5em：变成 45px，越套越大。</span>
+            </p>
+            <p class="box rem" id="css17-demo1-rem" style="margin-bottom: 0">用 1.5rem：不管套多深，都是 24px。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css17-demo1">
+              <p class="box">基准段落：font-size 20px（本演示的容器设的）。</p>
+              <p class="box outer" id="css17-demo1-outer">用 1.5em：变成 30px。
+                <span class="inner" id="css17-demo1-inner">里面再用 1.5em：变成 45px，越套越大。</span>
+              </p>
+              <p class="box rem" id="css17-demo1-rem" style="margin-bottom: 0">用 1.5rem：不管套多深，都是 24px。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css17-demo1 { font-size: 20px; }
+            #css17-demo1 .box { background: #f4edde; padding: .4rem .6rem; margin-bottom: .4rem; }
+            #css17-demo1 .outer { font-size: 1.5em; }   /* 20 × 1.5 = 30px */
+            #css17-demo1 .inner { font-size: 1.5em; }   /* 30 × 1.5 = 45px，继续放大 */
+            #css17-demo1 .rem { font-size: 1.5rem; }    /* 只看根字号（本站 16px）→ 24px */
+          </script>
+        </div>
+      </div>
+      <p>
+        选择建议：<strong>字号、行高、间距用 <code>rem</code>（或 <code>em</code> 让它跟字号成比例），
+        边框与细线用 <code>px</code>，布局宽度用 <code>%</code> 或 flex/grid，字体度量用 <code>ch</code></strong>。
+        这样用户调大浏览器字号时，页面整体跟着放大，而不是“文字大了、间距没动”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 一条“读得舒服”的正文宽度（max-width: 24ch）</div>
+        <div class="demo-preview">
+          <style>
+            #css17-demo2 .wide { background: #f4edde; padding: .5rem .7rem; margin-bottom: .5rem; }
+            #css17-demo2 .measure { max-width: 24ch; background: #e9f0e4; padding: .5rem .7rem; }
+          </style>
+          <div id="css17-demo2">
+            <p class="wide">不限制宽度：这一行会一直排到容器最右边，眼睛扫回来的时候容易串行，长段落尤其明显。</p>
+            <p class="measure" style="margin-bottom: 0">限制成 24ch：每行大约 24 个字符宽，读起来轻松很多。注意它是“最大宽度”，屏幕变窄时照样会跟着收缩。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css17-demo2">
+              <p class="wide">不限制宽度：这一行会一直排到容器最右边，眼睛扫回来的时候容易串行，长段落尤其明显。</p>
+              <p class="measure" style="margin-bottom: 0">限制成 24ch：每行大约 24 个字符宽，读起来轻松很多。注意它是“最大宽度”，屏幕变窄时照样会跟着收缩。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css17-demo2 .wide { background: #f4edde; padding: .5rem .7rem; margin-bottom: .5rem; }
+            #css17-demo2 .measure { max-width: 24ch; background: #e9f0e4; padding: .5rem .7rem; }
+          </script>
+        </div>
+      </div>
+
+      <h2>数值与函数：会自己算的尺寸</h2>
+      <p>
+        除了长度，CSS 里还会用到这些数值类型：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>例子</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>无单位数字</td><td><code>line-height: 1.6</code>、<code>opacity: .5</code>、<code>flex-grow: 2</code></td><td>行高写数字最灵活：等于“字号 × 数字”，子元素会按自己的字号重算</td></tr>
+          <tr><td>整数</td><td><code>z-index: 10</code>、<code>column-count: 3</code></td><td>不能写小数点</td></tr>
+          <tr><td>角度</td><td><code>90deg</code>、<code>0.25turn</code></td><td>旋转与渐变方向用（第二十四式）</td></tr>
+          <tr><td>时间</td><td><code>.3s</code>、<code>300ms</code></td><td>过渡与动画用</td></tr>
+          <tr><td>百分比</td><td><code>width: 50%</code></td><td>相对谁取决于属性（见上一节）</td></tr>
+        </tbody>
+      </table>
+      <p>四个“会算数”的函数，从简单到好用依次是：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>函数</th>
+            <th>作用</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>calc()</code></td>
+            <td>四则运算，可混用不同单位</td>
+            <td><code>width: calc(100% - 2rem)</code>（做“满宽减去内边距”）</td>
+          </tr>
+          <tr>
+            <td><code>min()</code> / <code>max()</code></td>
+            <td>取更小 / 更大的那个值</td>
+            <td><code>width: min(90%, 60rem)</code>：窄屏用 90%，宽屏最多 60rem</td>
+          </tr>
+          <tr>
+            <td><code>clamp(最小, 首选, 最大)</code></td>
+            <td>限定在一个区间里，最常用于流体字号</td>
+            <td><code>font-size: clamp(1rem, 2.5vw, 1.5rem)</code></td>
+          </tr>
+          <tr>
+            <td><code>var()</code></td>
+            <td>取 CSS 变量的值</td>
+            <td><code>color: var(--cinnabar)</code>（第二十五式专讲）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · calc、clamp 与 min 各显其能（把窗口拉窄再拉宽试试）</div>
+        <div class="demo-preview">
+          <style>
+            #css17-demo3 .calc {
+              width: calc(100% - 4rem); background: #f4edde; padding: .4rem .6rem;
+            }
+            #css17-demo3 .clamp {
+              font-size: clamp(1rem, 4vw, 2rem); background: #e9f0e4; padding: .4rem .6rem;
+            }
+            #css17-demo3 .minbox {
+              width: min(100%, 18rem); background: #e8edf5; padding: .4rem .6rem;
+            }
+          </style>
+          <div id="css17-demo3">
+            <p class="calc">calc(100% - 4rem)：两边自然留出空隙。</p>
+            <p class="clamp">clamp(1rem, 4vw, 2rem)：这行字会随屏幕宽度伸缩，但有上下限。</p>
+            <p class="minbox" style="margin-bottom: 0">min(100%, 18rem)：小屏铺满，宽屏最多 18rem。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css17-demo3">
+              <p class="calc">calc(100% - 4rem)：两边自然留出空隙。</p>
+              <p class="clamp">clamp(1rem, 4vw, 2rem)：这行字会随屏幕宽度伸缩，但有上下限。</p>
+              <p class="minbox" style="margin-bottom: 0">min(100%, 18rem)：小屏铺满，宽屏最多 18rem。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css17-demo3 .calc {
+              width: calc(100% - 4rem); background: #f4edde; padding: .4rem .6rem;
+            }
+            #css17-demo3 .clamp {
+              font-size: clamp(1rem, 4vw, 2rem); background: #e9f0e4; padding: .4rem .6rem;
+            }
+            #css17-demo3 .minbox {
+              width: min(100%, 18rem); background: #e8edf5; padding: .4rem .6rem;
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        小提醒：<code>calc()</code> 里的 <code>+</code> 与 <code>-</code> <strong>两侧必须有空格</strong>
+        （<code>calc(100%-4rem)</code> 会被当成无效值）；乘除的 <code>*</code>、<code>/</code> 可以挨着写，
+        但除法右边必须是数字，不能是带单位的量。
+      </p>
+
+      <h2>颜色的写法</h2>
+      <p>同一个红色，至少有五种写法。它们完全等价，挑顺手的用：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>例子</th>
+            <th>特点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>颜色关键字</td><td><code>red</code>、<code>tomato</code>、<code>rebeccapurple</code></td><td>好记，但可选颜色少、不够精确</td></tr>
+          <tr><td>十六进制</td><td><code>#b03a2e</code>、<code>#fff</code>、<code>#b03a2e80</code></td><td>设计稿里最常见；末尾两位是透明度（<code>00</code> 全透明、<code>ff</code> 不透明）</td></tr>
+          <tr><td><code>rgb()</code></td><td><code>rgb(176 58 46)</code>、<code>rgb(176 58 46 / 50%)</code></td><td>现代写法用空格分隔，斜杠后写透明度</td></tr>
+          <tr><td><code>hsl()</code></td><td><code>hsl(6 56% 44%)</code></td><td>按“色相 / 饱和度 / 明度”调色，做深浅同色系最方便</td></tr>
+          <tr><td><code>oklch()</code> 等新写法</td><td><code>oklch(0.5 0.14 30)</code></td><td>感知更均匀的新色彩空间，现代浏览器已支持；旧写法不必换</td></tr>
+          <tr><td><code>transparent</code></td><td><code>background: transparent</code></td><td>完全透明的颜色（不是“没有颜色”，它依然会被计算）</td></tr>
+          <tr><td><code>currentColor</code></td><td><code>border: 1px solid currentColor</code></td><td><strong>取当前文字颜色</strong>：图标、边框跟着文字变色时极好用</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 五种颜色写法（第 2、3、4 个色块是同一种红的三种写法）；以及 currentColor 的妙用</div>
+        <div class="demo-preview">
+          <style>
+            #css17-demo4 .swatch { display: inline-block; width: 84px; height: 46px; margin: 0 .4rem .4rem 0;
+              color: #fff; font-size: .78rem; text-align: center; line-height: 46px; }
+            #css17-demo4 .k1 { background: tomato; }
+            #css17-demo4 .k2 { background: #b03a2e; }
+            #css17-demo4 .k3 { background: rgb(176 58 46); }
+            #css17-demo4 .k4 { background: hsl(6 56% 44%); }
+            #css17-demo4 .k5 { background: oklch(0.5 0.14 30); }
+            #css17-demo4 .cc { color: #2f6db3; border: 3px solid currentColor; padding: .4rem .6rem; }
+            #css17-demo4 .cc:hover { color: #b03a2e; }
+          </style>
+          <div id="css17-demo4">
+            <div>
+              <span class="swatch k1">tomato</span><span class="swatch k2">#b03a2e</span><span class="swatch k3">rgb()</span><span class="swatch k4">hsl()</span><span class="swatch k5">oklch()</span>
+            </div>
+            <p class="cc" style="margin-bottom: 0">我的边框用了 currentColor：把鼠标移上来，文字和边框会一起变红。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css17-demo4">
+              <div>
+                <span class="swatch k1">tomato</span><span class="swatch k2">#b03a2e</span><span class="swatch k3">rgb()</span><span class="swatch k4">hsl()</span><span class="swatch k5">oklch()</span>
+              </div>
+              <p class="cc" style="margin-bottom: 0">我的边框用了 currentColor：把鼠标移上来，文字和边框会一起变红。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css17-demo4 .swatch { display: inline-block; width: 84px; height: 46px; margin: 0 .4rem .4rem 0;
+              color: #fff; font-size: .78rem; text-align: center; line-height: 46px; }
+            #css17-demo4 .k1 { background: tomato; }
+            #css17-demo4 .k2 { background: #b03a2e; }
+            #css17-demo4 .k3 { background: rgb(176 58 46); }
+            #css17-demo4 .k4 { background: hsl(6 56% 44%); }
+            #css17-demo4 .k5 { background: oklch(0.5 0.14 30); }
+            #css17-demo4 .cc { color: #2f6db3; border: 3px solid currentColor; padding: .4rem .6rem; }
+            #css17-demo4 .cc:hover { color: #b03a2e; }
+          </script>
+        </div>
+      </div>
+      <p>
+        对照着看：第 2 个色块 <code>#b03a2e</code>、第 3 个 <code>rgb(176 58 46)</code>、
+        第 4 个 <code>hsl(6 56% 44%)</code> 其实是同一种红（<code>hsl()</code> 换算取整后略有差异，肉眼几乎分辨不出）；
+        第 1 个 <code>tomato</code> 与第 5 个 <code>oklch()</code> 演示另外两种表达方式。
+        同一个颜色，用哪种写法都行——团队里统一风格就好。
+      </p>
+      <p>
+        <code>currentColor</code> 特别值得记住：只要写一次 <code>color</code>，
+        边框、图标（用 <code>fill="currentColor"</code> 的 SVG）、下划线就能跟着一起变。
+        按钮悬停时“文字、边框、图标一起换色”，用的就是这个套路。
+      </p>
+
+      <h2>透明度：opacity 与带透明度的颜色</h2>
+      <p>
+        两者都能“变淡”，但作用范围完全不同：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>影响范围</th>
+            <th>常见用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>opacity: .5</code></td>
+            <td><strong>整个元素（含所有子元素）</strong>一起变淡</td>
+            <td>整体禁用态、淡入淡出动画</td>
+          </tr>
+          <tr>
+            <td><code>background: rgb(0 0 0 / 40%)</code></td>
+            <td>只影响这一处的颜色</td>
+            <td>半透明遮罩、叠加色块、阴影</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 同样“半透明”，孩子遭的罪不一样</div>
+        <div class="demo-preview">
+          <style>
+            #css17-demo5 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css17-demo5 .pane {
+              width: 210px; padding: .6rem .8rem; border: 1px solid #d4cab0;
+              background: repeating-linear-gradient(45deg, #faf6ec 0 10px, #f1e9d8 10px 20px);
+            }
+            #css17-demo5 .by-opacity { opacity: .5; background: #b03a2e; color: #fff; }
+            #css17-demo5 .by-alpha { background: rgb(176 58 46 / 50%); }
+          </style>
+          <div id="css17-demo5">
+            <div class="pane by-opacity">
+              用了 opacity: .5 —— 我这块文字<b>和背景一起</b>变淡了。
+            </div>
+            <div class="pane by-alpha">
+              用了 rgb(176 58 46 / 50%) —— 只有底色半透明，<b>文字依然清楚</b>。
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css17-demo5">
+              <div class="pane by-opacity">
+                用了 opacity: .5 —— 我这块文字<b>和背景一起</b>变淡了。
+              </div>
+              <div class="pane by-alpha">
+                用了 rgb(176 58 46 / 50%) —— 只有底色半透明，<b>文字依然清楚</b>。
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css17-demo5 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css17-demo5 .pane {
+              width: 210px; padding: .6rem .8rem; border: 1px solid #d4cab0;
+              background: repeating-linear-gradient(45deg, #faf6ec 0 10px, #f1e9d8 10px 20px);
+            }
+            #css17-demo5 .by-opacity { opacity: .5; background: #b03a2e; color: #fff; }
+            #css17-demo5 .by-alpha { background: rgb(176 58 46 / 50%); }
+          </script>
+        </div>
+      </div>
+      <p>
+        还有一个无障碍细节：<strong>半透明会让文字与背景的对比度下降</strong>。
+        做遮罩、做淡出效果时，别忘了检查最终呈现的对比度是否还够读（第十一式的 4.5:1）。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>选单位就是选参照物：字号与间距用 <code>rem</code>，边框用 <code>px</code>，
+          布局用 <code>%</code> / flex，行长用 <code>ch</code>，整屏用 <code>vw</code>/<code>vh</code>（注意移动端地址栏）；</li>
+        <li><code>em</code> 相对当前元素字号（在 <code>font-size</code> 上则相对父元素），会逐层累积；<code>rem</code> 永远看根字号；</li>
+        <li><code>calc()</code> 的加减号两侧要有空格；<code>min()</code>/<code>max()</code>/<code>clamp()</code> 用来写自适应尺寸；</li>
+        <li>颜色五种写法等价；<code>currentColor</code> 让边框与图标跟着文字色走；</li>
+        <li><code>opacity</code> 连子元素一起变淡，颜色的 alpha 只影响那一处；</li>
+        <li>带单位的量不能乱乘除，数值类型要对上号（无单位数字、角度、时间）。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十七式</div>
+        <ol>
+          <li>把第十二式主页的字号与间距改成 <code>rem</code>：
+            标题、正文、卡片内边距各调一次，然后在浏览器设置里把默认字号调大，
+            看页面是否整体跟着缩放。</li>
+          <li>做一个“流体标题”：用 <code>clamp()</code> 写一条规则，
+            让小屏时字号约 1.2rem、宽屏时约 2rem，中间平滑过渡。</li>
+          <li>思考：为什么正文用 <code>ch</code> 限制宽度，比写死 <code>max-width: 700px</code> 更耐用？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="把尺寸换成 rem">
+            h1 { font-size: 2rem; }
+            p { font-size: 1rem; line-height: 1.8; }
+            .card { padding: 1rem 1.25rem; }
+          </script>
+          <p>
+            验证方法：在浏览器设置里把“默认字号”从 16px 调到 20px，
+            用 <code>rem</code> 的尺寸会一起变大，用 <code>px</code> 的纹丝不动。
+            这也是为什么“全站字号都用 px”会被无障碍审计挑出来。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="流体标题">
+            h2.fluid {
+              font-size: clamp(1.2rem, 1rem + 2vw, 2rem);
+            }
+          </script>
+          <p>
+            三个参数的意思：不小于 1.2rem、不大于 2rem，中间用“1rem + 2vw”跟着视口走。
+            中间值写成 <code>1rem + 2vw</code> 这种“固定值 + 视口值”的形式，
+            比纯 <code>vw</code> 稳——小屏不会缩得太狠，大屏也不会涨得失控。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 “一行多少字” 才是阅读舒适度的关键，而 <code>ch</code> 恰好是“字符宽度”这把尺子：
+            字号变大时，<code>24ch</code> 会跟着变宽，每行依然是 24 个字左右；
+            而写死 700px 的话，字号一变，每行的字数就跟着变——
+            小字号时一行能塞下 60 个字，眼睛忙不过来。
+            <strong>用相对度量表达“意图”（希望一行读得舒服），比用绝对数字表达“结果”更耐用。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把字排好看：字体、字号、行高与文本属性。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

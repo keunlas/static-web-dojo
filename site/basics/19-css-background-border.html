@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十九式 · 背景、边框与阴影 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="背景全家桶（位置、尺寸、重复、裁切与多重背景）、三种渐变、边框三要素与圆角、box-shadow 与 text-shadow 的用法与克制原则。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-19">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        骨架、间距、文字都齐了，该给盒子“上漆”了。
+        这一式把背景、渐变、边框、圆角与阴影一次讲完——
+        它们是最容易做出“精致感”的一组属性，也最容易做过头。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>掌握背景全家桶：颜色、图片、位置、尺寸、重复、裁切与多重背景</li>
+          <li>会用三种渐变（线性、径向、锥形）当背景，知道“渐变是图不是颜色”</li>
+          <li>会写边框三要素与单边边框，理解 <code>border-style</code> 缺了就不显示</li>
+          <li>会用 <code>border-radius</code> 做圆角、正圆与胶囊，用 <code>box-shadow</code> 做层次</li>
+        </ul>
+      </div>
+
+      <h2>背景全家桶</h2>
+      <p>
+        背景可以拆成六件事分别控制，也可以写在一行简写里：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>管什么</th>
+            <th>常用取值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>background-color</code></td>
+            <td>底色</td>
+            <td>任何颜色；<code>transparent</code> 是默认值</td>
+          </tr>
+          <tr>
+            <td><code>background-image</code></td>
+            <td>背景图（也可以放渐变）</td>
+            <td><code>url("…")</code>、<code>linear-gradient(…)</code>，多个用逗号分隔</td>
+          </tr>
+          <tr>
+            <td><code>background-repeat</code></td>
+            <td>要不要平铺</td>
+            <td><code>repeat</code>（默认）、<code>no-repeat</code>、<code>repeat-x</code> / <code>repeat-y</code></td>
+          </tr>
+          <tr>
+            <td><code>background-position</code></td>
+            <td>放在哪</td>
+            <td><code>center</code>、<code>left top</code>、<code>50% 100%</code>、<code>1rem 2rem</code></td>
+          </tr>
+          <tr>
+            <td><code>background-size</code></td>
+            <td>画多大</td>
+            <td><code>auto</code>（原始尺寸）、<code>cover</code>、<code>contain</code>、<code>100% 100%</code></td>
+          </tr>
+          <tr>
+            <td><code>background-clip</code></td>
+            <td>画的边界</td>
+            <td><code>border-box</code>（默认）、<code>padding-box</code>、<code>content-box</code>、<code>text</code></td>
+          </tr>
+          <tr>
+            <td><code>background-attachment</code></td>
+            <td>跟不跟着页面滚</td>
+            <td><code>scroll</code>（默认）、<code>fixed</code>（移动端表现不稳，慎用）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · cover、contain 与拉伸的区别（同一张图，三个盒子）</div>
+        <div class="demo-preview">
+          <style>
+            #css19-demo1 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css19-demo1 .box {
+              width: 170px; height: 110px; border: 2px solid #d4cab0;
+              background-image: url("../assets/img/demo-wide.svg");
+              background-repeat: no-repeat; background-position: center;
+              display: flex; align-items: flex-end; font-size: .78rem; color: #2b2a26;
+            }
+            #css19-demo1 .cover { background-size: cover; }
+            #css19-demo1 .contain { background-size: contain; }
+            #css19-demo1 .stretch { background-size: 100% 100%; }
+            #css19-demo1 span { background: rgb(255 253 247 / 85%); padding: .1rem .3rem; }
+          </style>
+          <div id="css19-demo1">
+            <div class="box cover"><span>cover：铺满，可能裁边</span></div>
+            <div class="box contain"><span>contain：完整，会留白</span></div>
+            <div class="box stretch"><span>100% 100%：拉伸变形</span></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css19-demo1">
+              <div class="box cover"><span>cover：铺满，可能裁边</span></div>
+              <div class="box contain"><span>contain：完整，会留白</span></div>
+              <div class="box stretch"><span>100% 100%：拉伸变形</span></div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css19-demo1 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css19-demo1 .box {
+              width: 170px; height: 110px; border: 2px solid #d4cab0;
+              background-image: url("../assets/img/demo-wide.svg");
+              background-repeat: no-repeat; background-position: center;
+              display: flex; align-items: flex-end; font-size: .78rem; color: #2b2a26;
+            }
+            #css19-demo1 .cover { background-size: cover; }
+            #css19-demo1 .contain { background-size: contain; }
+            #css19-demo1 .stretch { background-size: 100% 100%; }
+            #css19-demo1 span { background: rgb(255 253 247 / 85%); padding: .1rem .3rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        三个取舍记住就行：<strong><code>cover</code> 保证铺满（会裁）、
+        <code>contain</code> 保证看全（会留白）、百分比拉伸会变形</strong>。
+        做整屏大图用 <code>cover</code> 配 <code>background-position: center</code>；
+        做图标、图案用 <code>contain</code> 或不设 <code>size</code>。
+      </p>
+      <p>
+        背景图的另一个小本事是<strong>多重背景</strong>：用逗号分隔，写在前面的画在上层。
+        一条常见套路是“上一层渐变、下一层图片”：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="多重背景：渐变罩在图片上">
+        .hero {
+          background-image: linear-gradient(rgb(32 36 46 / 55%), rgb(32 36 46 / 15%)),
+                            url("../assets/img/demo-landscape.svg");
+          background-size: cover;
+          background-position: center;
+        }
+      </script>
+
+      <h2>渐变：当背景用的图</h2>
+      <p>
+        渐变在 CSS 里属于“图”（&lt;image&gt;），不是颜色——所以它写在
+        <code>background-image</code> 上，而且可以和高低层叠、和底色叠加。三种最常用：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>函数</th>
+            <th>形状</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>linear-gradient()</code></td>
+            <td>线性（一条直线上的过渡）</td>
+            <td><code>linear-gradient(135deg, #f4edde, #e9f0e4)</code>；也常用来做<strong>硬边条纹</strong></td>
+          </tr>
+          <tr>
+            <td><code>radial-gradient()</code></td>
+            <td>径向（从中心向外扩散）</td>
+            <td><code>radial-gradient(circle at 30% 30%, #f3e3dd, transparent 70%)</code>：做光晕</td>
+          </tr>
+          <tr>
+            <td><code>conic-gradient()</code></td>
+            <td>锥形（绕中心扫一圈）</td>
+            <td><code>conic-gradient(#b03a2e 0 25%, #f4edde 0 50%, #b03a2e 0)</code>：做色轮、进度环</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 三种渐变，以及渐变叠图案的用法</div>
+        <div class="demo-preview">
+          <style>
+            #css19-demo2 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css19-demo2 .chip {
+              width: 150px; height: 100px; border-radius: 10px; border: 1px solid #d4cab0;
+              color: #2b2a26; font-size: .78rem; display: flex; align-items: flex-end;
+              padding: .3rem .4rem;
+            }
+            #css19-demo2 .lin { background-image: linear-gradient(135deg, #f4edde, #e9f0e4); }
+            #css19-demo2 .rad { background-image: radial-gradient(circle at 30% 30%, #f3e3dd, transparent 70%); background-color: #fffdf7; }
+            #css19-demo2 .con { background-image: conic-gradient(#b03a2e 0 25%, #f4edde 0 50%, #2f6db3 0 75%, #e9f0e4 0); }
+            #css19-demo2 .stripe {
+              background-image: repeating-linear-gradient(45deg, #f4edde 0 8px, #efe6d2 8px 16px);
+            }
+          </style>
+          <div id="css19-demo2">
+            <div class="chip lin">linear 线性</div>
+            <div class="chip rad">radial 径向</div>
+            <div class="chip con">conic 锥形</div>
+            <div class="chip stripe">repeating 条纹</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css19-demo2">
+              <div class="chip lin">linear 线性</div>
+              <div class="chip rad">radial 径向</div>
+              <div class="chip con">conic 锥形</div>
+              <div class="chip stripe">repeating 条纹</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css19-demo2 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css19-demo2 .chip {
+              width: 150px; height: 100px; border-radius: 10px; border: 1px solid #d4cab0;
+              color: #2b2a26; font-size: .78rem; display: flex; align-items: flex-end;
+              padding: .3rem .4rem;
+            }
+            #css19-demo2 .lin { background-image: linear-gradient(135deg, #f4edde, #e9f0e4); }
+            #css19-demo2 .rad { background-image: radial-gradient(circle at 30% 30%, #f3e3dd, transparent 70%); background-color: #fffdf7; }
+            #css19-demo2 .con { background-image: conic-gradient(#b03a2e 0 25%, #f4edde 0 50%, #2f6db3 0 75%, #e9f0e4 0); }
+            #css19-demo2 .stripe {
+              background-image: repeating-linear-gradient(45deg, #f4edde 0 8px, #efe6d2 8px 16px);
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        两个实用细节：其一，径向渐变里的 <code>transparent</code> 在部分浏览器会带出灰边，
+        更稳的写法是让它过渡到与底色相同的颜色（如 <code>rgb(255 253 247 / 0)</code>）；
+        其二，色标可以写<strong>两个位置</strong>做硬边：
+        <code>linear-gradient(90deg, #b03a2e 0 40%, #f4edde 40% 100%)</code>
+        会在 40% 处直接断开，而不是渐变过去。
+      </p>
+
+      <h2>边框与圆角</h2>
+      <p>
+        边框有<strong>三要素</strong>：宽度、样式、颜色。三个都必须“有值”才能显示——
+        最常见的坑就是只写了宽度忘了样式（默认是 <code>none</code>，等于不画）：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>border: 1px solid #d4cab0</code></td><td>最常用：细实线</td></tr>
+          <tr><td><code>border-top: 2px dashed #b03a2e</code></td><td>只给某一边加边框（上/右/下/左都行）</td></tr>
+          <tr><td><code>border-width: 2px</code>（没写 style）</td><td><strong>不会显示</strong>——这是新手第一个坑</td></tr>
+          <tr><td><code>border-style</code></td><td><code>solid</code>、<code>dashed</code>、<code>dotted</code>、<code>double</code>、<code>none</code> 等</td></tr>
+          <tr><td><code>border-image</code></td><td>用图片当边框（做花边），用法较复杂，日常少用</td></tr>
+          <tr><td><code>outline</code></td><td>轮廓：<strong>不占布局空间</strong>，常用于焦点提示（<code>:focus-visible</code>），现代浏览器里也会跟随圆角</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <code>border-radius</code> 负责圆角，写法与 <code>padding</code> 一样按顺时针；
+        斜杠前后可以分别写水平与垂直半径，做椭圆角：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="圆角的三档用法">
+        .rounded { border-radius: 10px; }                      /* 小圆角卡片 */
+        .pill { border-radius: 999px; }                        /* 胶囊：左右两端全圆 */
+        .circle { border-radius: 50%; }                        /* 正圆：宽高相等时用 */
+        .egg { border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; }  /* 椭圆角（斜杠前横、斜杠后竖） */
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 边框样式与圆角对照</div>
+        <div class="demo-preview">
+          <style>
+            #css19-demo3 { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+            #css19-demo3 .b { width: 120px; height: 66px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
+            #css19-demo3 .solid { border: 3px solid #b03a2e; }
+            #css19-demo3 .dashed { border: 3px dashed #2f6db3; }
+            #css19-demo3 .dotted { border: 3px dotted #2e7d32; }
+            #css19-demo3 .none-width { border-width: 3px; border-color: #b03a2e; }
+            #css19-demo3 .pill { width: auto; padding: .45rem 1.1rem; border: 2px solid #b03a2e; border-radius: 999px; }
+            #css19-demo3 .circle { width: 66px; border-radius: 50%; border: 3px solid #b03a2e; }
+          </style>
+          <div id="css19-demo3">
+            <div class="b solid">solid</div>
+            <div class="b dashed">dashed</div>
+            <div class="b dotted">dotted</div>
+            <div class="b none-width">只写了 width</div>
+            <div class="b pill">胶囊按钮</div>
+            <div class="b circle">正圆</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css19-demo3">
+              <div class="b solid">solid</div>
+              <div class="b dashed">dashed</div>
+              <div class="b dotted">dotted</div>
+              <div class="b none-width">只写了 width</div>
+              <div class="b pill">胶囊按钮</div>
+              <div class="b circle">正圆</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css19-demo3 { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+            #css19-demo3 .b { width: 120px; height: 66px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
+            #css19-demo3 .solid { border: 3px solid #b03a2e; }
+            #css19-demo3 .dashed { border: 3px dashed #2f6db3; }
+            #css19-demo3 .dotted { border: 3px dotted #2e7d32; }
+            #css19-demo3 .none-width { border-width: 3px; border-color: #b03a2e; }
+            #css19-demo3 .pill { width: auto; padding: .45rem 1.1rem; border: 2px solid #b03a2e; border-radius: 999px; }
+            #css19-demo3 .circle { width: 66px; border-radius: 50%; border: 3px solid #b03a2e; }
+          </script>
+        </div>
+      </div>
+      <p>
+        看第四个方块就明白了：它写了宽度与颜色，却没写样式，所以<strong>什么都没有</strong>；
+        而后面两个圆角框分别是“胶囊”与“正圆”的标准做法。
+      </p>
+
+      <h2>阴影：让层次浮起来</h2>
+      <p>
+        <code>box-shadow</code> 的五个参数依次是：
+        <strong>横向偏移、纵向偏移、模糊半径、扩散半径、颜色</strong>，
+        前面加 <code>inset</code> 关键字就变成内阴影；多个阴影用逗号分隔（先写的在上层）。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>box-shadow: 0 2px 6px rgb(0 0 0 / 12%)</code></td><td>最常见：卡片轻轻浮起来</td></tr>
+          <tr><td><code>box-shadow: inset 0 1px 3px rgb(0 0 0 / 18%)</code></td><td>内阴影：凹槽感（输入框、按压态）</td></tr>
+          <tr><td><code>box-shadow: 0 1px 2px rgb(0 0 0 / 10%), 0 8px 20px rgb(0 0 0 / 12%)</code></td><td>两三层叠加：更自然（近处实、远处虚）</td></tr>
+          <tr><td><code>box-shadow: 0 6px 18px rgb(176 58 46 / 25%)</code></td><td>带颜色的阴影：呼应主色，适合强调按钮</td></tr>
+          <tr><td><code>box-shadow: none</code></td><td>去掉阴影（很多类库会统一给卡片加阴影）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 四种阴影对照（含多层与内阴影）</div>
+        <div class="demo-preview">
+          <style>
+            #css19-demo4 { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+            #css19-demo4 .d-card {
+              width: 160px; padding: .8rem .9rem; background: #fffdf7;
+              border-radius: 10px; font-size: .82rem; color: #2b2a26;
+            }
+            #css19-demo4 .soft { box-shadow: 0 2px 6px rgb(0 0 0 / 12%); }
+            #css19-demo4 .layered { box-shadow: 0 1px 2px rgb(0 0 0 / 10%), 0 8px 20px rgb(0 0 0 / 12%); }
+            #css19-demo4 .tinted { box-shadow: 0 6px 18px rgb(176 58 46 / 25%); }
+            #css19-demo4 .inner { box-shadow: inset 0 2px 6px rgb(0 0 0 / 20%); background: #f4edde; }
+          </style>
+          <div id="css19-demo4">
+            <div class="d-card soft">一层轻阴影</div>
+            <div class="d-card layered">两层更自然</div>
+            <div class="d-card tinted">带主色的阴影</div>
+            <div class="d-card inner">内阴影（凹槽感）</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css19-demo4">
+              <div class="d-card soft">一层轻阴影</div>
+              <div class="d-card layered">两层更自然</div>
+              <div class="d-card tinted">带主色的阴影</div>
+              <div class="d-card inner">内阴影（凹槽感）</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css19-demo4 { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+            #css19-demo4 .d-card {
+              width: 160px; padding: .8rem .9rem; background: #fffdf7;
+              border-radius: 10px; font-size: .82rem; color: #2b2a26;
+            }
+            #css19-demo4 .soft { box-shadow: 0 2px 6px rgb(0 0 0 / 12%); }
+            #css19-demo4 .layered { box-shadow: 0 1px 2px rgb(0 0 0 / 10%), 0 8px 20px rgb(0 0 0 / 12%); }
+            #css19-demo4 .tinted { box-shadow: 0 6px 18px rgb(176 58 46 / 25%); }
+            #css19-demo4 .inner { box-shadow: inset 0 2px 6px rgb(0 0 0 / 20%); background: #f4edde; }
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">心法：阴影要克制，也要有方向</div>
+        <ul style="margin:0">
+          <li><strong>别给页面上每个盒子都加阴影</strong>：全场都是浮起来的卡片，反而谁都不突出；</li>
+          <li><strong>方向要一致</strong>：全站阴影都朝下（如 <code>0 Npx Npx</code>），
+            看起来才像同一个光源照下来的；</li>
+          <li><strong>别用纯黑</strong>：<code>rgb(0 0 0 / 12%)</code> 这类低透明度更自然，
+            也可以带一点主色；</li>
+          <li><strong>动画阴影要小心</strong>：阴影重绘成本不低，做悬停放大时，
+            动画 <code>transform</code> 比动画 <code>box-shadow</code> 流畅得多（第二十四式）。</li>
+        </ul>
+      </div>
+
+      <h2>背景裁切：把文字“镀上”图案</h2>
+      <p>
+        <code>background-clip: text</code> 是一个很好玩的效果：把背景裁进文字里，
+        于是文字成了图案的窗口。它能和渐变、图片配合：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 渐变文字与胶囊标签（把本式的零件拼起来）</div>
+        <div class="demo-preview">
+          <style>
+            #css19-demo5 .grad-text {
+              font-size: 2.1rem; font-weight: 700; letter-spacing: .04em;
+              background-image: linear-gradient(100deg, #b03a2e, #2f6db3);
+              -webkit-background-clip: text; background-clip: text;
+              color: transparent;                 /* 让文字本身透明，才露出背景 */
+            }
+            #css19-demo5 .d-badge {
+              display: inline-block; margin-top: .6rem; padding: .3rem .8rem;
+              border-radius: 999px; border: 1px solid #b03a2e;
+              color: #b03a2e; background: rgb(176 58 46 / 8%); font-size: .85rem;
+            }
+          </style>
+          <div id="css19-demo5">
+            <p class="grad-text" style="margin: 0">日拱一卒</p>
+            <span class="d-badge">渐变文字 + 胶囊标签</span>
+            <p class="mt-2 mb-0" style="font-size: .85rem">背景裁切要用 <code>color: transparent</code> 把字“掏空”，图案才透出来；
+              记得同时写 <code>-webkit-background-clip: text</code>，兼容性更稳。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css19-demo5">
+              <p class="grad-text" style="margin: 0">日拱一卒</p>
+              <span class="d-badge">渐变文字 + 胶囊标签</span>
+              <p class="mt-2 mb-0" style="font-size: .85rem">背景裁切要用 <code>color: transparent</code> 把字“掏空”，图案才透出来；
+                记得同时写 <code>-webkit-background-clip: text</code>，兼容性更稳。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css19-demo5 .grad-text {
+              font-size: 2.1rem; font-weight: 700; letter-spacing: .04em;
+              background-image: linear-gradient(100deg, #b03a2e, #2f6db3);
+              -webkit-background-clip: text; background-clip: text;
+              color: transparent;                 /* 让文字本身透明，才露出背景 */
+            }
+            #css19-demo5 .d-badge {
+              display: inline-block; margin-top: .6rem; padding: .3rem .8rem;
+              border-radius: 999px; border: 1px solid #b03a2e;
+              color: #b03a2e; background: rgb(176 58 46 / 8%); font-size: .85rem;
+            }
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">可访问性提醒</div>
+        <p style="margin:0">
+          渐变文字与低对比度的“淡色小字”是两处高发的对比度陷阱：
+          <strong>文字被裁成图案后，对比度取决于图案本身</strong>。
+          用之前想一想：如果图案正好是浅色，这行字还看得清吗？
+          拿不准就用纯色文字，把渐变留给装饰（第十一式的 4.5:1 是底线）。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>背景六件事：颜色、图、重复、位置、尺寸、裁切；多重背景用逗号，先写的在上层；</li>
+        <li><code>cover</code> 铺满会裁边、<code>contain</code> 看全会留白、百分比拉伸会变形；</li>
+        <li>渐变是“图”不是颜色，写进 <code>background-image</code>，可以与底色、图片叠着用；</li>
+        <li>边框三要素缺一不可，<strong>只写 width 不写 style 等于没边框</strong>；
+          <code>outline</code> 不占空间，适合做焦点提示；</li>
+        <li>圆角三档：<code>10px</code> 卡片、<code>999px</code> 胶囊、<code>50%</code> 正圆；斜杠可写椭圆角；</li>
+        <li><code>box-shadow</code> 顺序是“横 纵 模糊 扩散 颜色”，<code>inset</code> 做内阴影，多层叠加更自然；</li>
+        <li>阴影克制、方向一致、别用纯黑；<code>background-clip: text</code> 能做出渐变文字，但要注意对比度。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十九式</div>
+        <ol>
+          <li>做一张“封面卡片”：用 <code>cover</code> 铺一张背景图，叠一层深色渐变，
+            再放一个标题；把卡片四角做成 12px 圆角。</li>
+          <li>给第十二式主页的按钮加悬停反馈：默认一层轻阴影，
+            悬停时阴影加深并上移 1px（提示：用 <code>translateY</code> 或 <code>margin</code> 都可以，想想哪个更合适）。</li>
+          <li>思考：为什么“只写 <code>border-width</code>”看不到边框，而“只写 <code>box-shadow</code>”
+            却能看到阴影？这两个属性的设计思路有什么不同？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="封面卡片">
+            <div class="cover-card">
+              <h2>山不让尘</h2>
+              <p>川不辞盈</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="背景 + 渐变叠加">
+            .cover-card {
+              padding: 2rem 1.5rem; border-radius: 12px; color: #fffdf7;
+              background-image: linear-gradient(rgb(32 36 46 / 60%), rgb(32 36 46 / 20%)),
+                                url("images/cover.jpg");
+              background-size: cover, cover;
+              background-position: center, center;
+            }
+          </script>
+          <p>
+            要点：渐变写在前面（上层）、图片写在后面（下层）；
+            渐变里用半透明黑，才能既压暗图片又保留细节；文字用浅色保证对比度。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="按钮悬停">
+            .btn {
+              background: #b03a2e; color: #fff; border-radius: 8px;
+              padding: .5rem 1rem; border: 0;
+              box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
+              transition: box-shadow .2s, transform .2s;
+            }
+            .btn:hover { box-shadow: 0 6px 16px rgb(0 0 0 / 22%); transform: translateY(-1px); }
+          </script>
+          <p>
+            用 <code>transform</code> 更合适：它不会让元素在布局里“真的挪位”，
+            周围元素不会跟着抖动，而且动画通常由合成线程处理，比改 <code>margin</code> 流畅。
+            （过渡与变形是第二十四式的主题。）
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为两者的“默认值”完全不同：<code>border-style</code> 的初始值是 <code>none</code>，
+            没有样式就谈不上画线，宽度自然无效——这是“先有形态，再谈尺寸”的思路；
+            而 <code>box-shadow</code> 的默认值是 <code>none</code>（不画），
+            可一旦你给出偏移与颜色，它就有了完整信息，于是直接画出来。
+            换句话说：<strong>边框必须先选“用什么线”，阴影只需要“往哪画”</strong>。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把元素摆到该去的位置：display、定位与层叠次序。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一式 · 网页与 HTML | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="HTML 是什么、页面骨架长什么样、元素与属性的关系，以及如何写下并打开你的第一个网页。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-01">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        修行要有个开始。Bootstrap 与 jQuery 再方便，它们画出的也是 HTML 这张皮。
+        所以第一式回到最朴素的地方：一个标签、一段文字、一个能双击打开的网页。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 HTML 是什么，浏览器又是如何把一份文本变成网页的</li>
+          <li>认得页面骨架：<code>&lt;!doctype html&gt;</code>、<code>html</code>、<code>head</code>、<code>body</code></li>
+          <li>分得清“元素、标签、属性、内容”四个词各指什么</li>
+          <li>会新建 <code>index.html</code>，写下并打开自己的第一个网页</li>
+        </ul>
+      </div>
+
+      <h2>网页是怎么来的</h2>
+      <p>
+        <strong>HTML</strong>（HyperText Markup Language，超文本标记语言）不是编程语言，
+        它是一门<strong>标记语言</strong>：用一套约定的标签，把“这是标题”“这是段落”“这里插一张图”
+        说给浏览器听。浏览器读完这些标记，再把它们画成你看到的页面。
+      </p>
+      <p>
+        一个网页通常由三样东西组成，记住这个分工，整个基础篇都不会迷路：
+      </p>
+      <ul>
+        <li><strong>HTML 是骨架</strong>——内容与结构：标题、段落、图片、链接、表单；</li>
+        <li><strong>CSS 是外衣</strong>——颜色、字号、间距、布局（第十三式起讲）；</li>
+        <li><strong>JavaScript 是灵魂</strong>——点击、输入、计算等一切“会动”的部分（第二十七式起讲）。</li>
+      </ul>
+      <p>
+        还有一件让人安心的事：HTML 文件就是<strong>纯文本文件</strong>。
+        用记事本、VS Code 或本站的<a href="../playground/index.html">练功场</a>写都行，
+        写错了也不会爆炸——最坏的结果只是页面上少显示一样东西。
+      </p>
+
+      <h2>一个页面的骨架</h2>
+      <p>
+        每个 HTML 文件都从同一个骨架开始。下面这份骨架值得抄一遍——它一共只有八行，
+        却交代了页面的一切来历：
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="页面骨架：index.html">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <title>我的第一个页面</title>
+        </head>
+        <body>
+          <h1>你好，江湖！</h1>
+          <p>这是我亲手写下的第一个网页。</p>
+        </body>
+        </html>
+      </script>
+
+      <p>逐行读一遍，其实每一行都在说一件必要的事：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>它在说什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>&lt;!doctype html&gt;</code></td>
+            <td>声明“这是一份 HTML 文档，按最新标准解析”。它必须写在第一行。</td>
+          </tr>
+          <tr>
+            <td><code>&lt;html lang="zh-CN"&gt;</code></td>
+            <td>整个文档的根元素。<code>lang</code> 说明页面主要用简体中文，屏幕阅读器与搜索引擎都靠它判断读音与语种。</td>
+          </tr>
+          <tr>
+            <td><code>&lt;head&gt;</code></td>
+            <td>写“给浏览器看”的信息：编码、标题、样式表、脚本。它里面的内容不会直接显示在页面上。</td>
+          </tr>
+          <tr>
+            <td><code>&lt;meta charset="utf-8"&gt;</code></td>
+            <td>声明文本编码。少了它，中文可能变成乱码——新手第一个月最常见的坑。</td>
+          </tr>
+          <tr>
+            <td><code>&lt;title&gt;</code></td>
+            <td>标签页标题与收藏夹里的名字。<strong>每个页面都要有</strong>，且写清是什么页面。</td>
+          </tr>
+          <tr>
+            <td><code>&lt;body&gt;</code></td>
+            <td>写“给人看”的内容：页面上一切可见的东西都住在它里面。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：head 与 body 的分工</div>
+        <p style="margin:0">
+          记一句话就够：<strong>head 是档案，body 是门面</strong>。
+          以后遇到“为什么这行字没显示”的问题，先看看它是不是写错进了 <code>head</code>。
+        </p>
+      </div>
+
+      <h2>元素、标签、属性</h2>
+      <p>
+        接下来的三个词，是本篇里出现频率最高的行话，一次说清：
+      </p>
+      <ul>
+        <li><strong>标签</strong>（tag）：尖括号包起来的那一段，如 <code>&lt;h1&gt;</code> 与 <code>&lt;/h1&gt;</code>，后者多一条斜杠表示“结束”；</li>
+        <li><strong>元素</strong>（element）：开始标签 + 内容 + 结束标签的<strong>整体</strong>，如 <code>&lt;h1&gt;你好&lt;/h1&gt;</code>；</li>
+        <li><strong>属性</strong>（attribute）：写在开始标签里、给元素补充说明的键值对，如 <code>href="…"</code>、<code>title="…"</code>。</li>
+      </ul>
+      <p>
+        还需要知道哪些元素有“结束标签”：绝大多数元素成对出现，但少数元素<strong>没有内容</strong>，
+        所以不需要结束标签，例如 <code>&lt;meta&gt;</code>、<code>&lt;img&gt;</code>、<code>&lt;br&gt;</code>、<code>&lt;input&gt;</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 标题与段落：最小的“内容组合”</div>
+        <div class="demo-preview">
+          <h1>你好，江湖！</h1>
+          <p>这是我亲手写下的第一个网页。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <h1>你好，江湖！</h1>
+            <p>这是我亲手写下的第一个网页。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>h1</code> 表示“一级标题”，一个页面通常只用一两次；<code>p</code> 表示段落
+        （paragraph）。浏览器自带一套默认样式：标题更大更粗、段落上下留白——
+        这也是你还没学 CSS，页面就已经能看的原因。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 元素可以嵌套，属性给元素补充说明</div>
+        <div class="demo-preview">
+          <p>外层是段落，<strong>里面的 <code>strong</code> 是强调</strong>，还能再嵌一层 <code>em</code> 表示语气加重。</p>
+          <p title="把鼠标停在我身上，就看到了 title 属性的效果">试试把鼠标停在这段文字上。</p>
+          <img src="../assets/img/demo-landscape.svg" width="180" alt="一幅修行主题的示例图">
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>外层是段落，<strong>里面的 <code>strong</code> 是强调</strong>，还能再嵌一层 <code>em</code> 表示语气加重。</p>
+            <p title="把鼠标停在我身上，就看到了 title 属性的效果">试试把鼠标停在这段文字上。</p>
+            <img src="../assets/img/demo-landscape.svg" width="180" alt="一幅修行主题的示例图">
+          </script>
+        </div>
+      </div>
+      <p>
+        这段演示里有三件事值得看一眼：元素可以<strong>层层嵌套</strong>（段落里放强调）；
+        <code>title</code> 属性给出了悬停提示；<code>img</code> 用 <code>src</code> 属性指出图片在哪、
+        用 <code>alt</code> 属性写下图片的替代文字（图片加载失败或读者用读屏软件时，就靠它了）。
+      </p>
+
+      <h2>注释：写给未来的自己</h2>
+      <p>
+        <code>&lt;!-- 和 --&gt;</code> 之间的一切都是<strong>注释</strong>：浏览器解析时会直接忽略，
+        页面上看不见，但查看源代码时能看到。它是留给同伴（以及三个月后的自己）的备忘。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 注释不会显示在页面上</div>
+        <div class="demo-preview">
+          <!-- 这一行注释不会显示在页面上 -->
+          <p>我的上下各藏了一行注释，但页面上只看得到这两段文字。</p>
+          <!-- 注释是写给“看源码的人”的备忘：比如标注这一段是谁负责的 -->
+          <p class="mb-0">在页面上右键 →“查看网页源代码”，就能看到它们。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!-- 这一行注释不会显示在页面上 -->
+            <p>我的上下各藏了一行注释，但页面上只看得到这两段文字。</p>
+            <!-- 注释是写给“看源码的人”的备忘：比如标注这一段是谁负责的 -->
+            <p class="mb-0">在页面上右键 →“查看网页源代码”，就能看到它们。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        注释还有一个实用场景：调试时把暂时不要的一整段内容<strong>注释掉</strong>，
+        改完再放开。注意不要用注释藏密码或隐私——查看源代码的人一眼就能看到。
+      </p>
+
+      <h2>文件与文件夹：网页的第一课</h2>
+      <p>
+        网页是一个个文件，所以“怎么给文件起名、怎么放”从一开始就要养成习惯：
+      </p>
+      <ul>
+        <li><strong>首页固定叫 <code>index.html</code></strong>：访问一个文件夹时，服务器会自动送出这个名字的文件——本站的每一回都是从 <code>index.html</code> 开始的；</li>
+        <li><strong>文件名用小写字母、数字与连字符</strong>：<code>about-me.html</code> 是稳妥的写法，避免空格、中文与大小写混用（有些服务器区分大小写，本地能打开、上传就 404）；</li>
+        <li><strong>后缀是 <code>.html</code></strong>：写成 <code>.htm</code> 也能用，但别写成 <code>.txt</code>（那会变成“下载一段文本”而不是“打开网页”）；</li>
+        <li><strong>文件按用途分文件夹</strong>：本站就是 <code>basics/</code>、<code>bootstrap/</code>、<code>assets/</code> 这样分开放的。</li>
+      </ul>
+      <p>
+        文件之间的互相引用叫<strong>路径</strong>：<code>images/cat.jpg</code> 是“当前文件夹下的 images 文件夹里”，
+        <code>../assets/logo.svg</code> 里的两个点表示“回到上一层”。
+        路径写错是新手第二大坑，好在第三式讲链接时会专门练它。
+      </p>
+
+      <h2>动手第一课：你的第一个页面</h2>
+      <p>十分钟，不用装任何东西：</p>
+      <ol>
+        <li>在桌面或任意位置新建一个文件夹，取名 <code>my-first-page</code>；</li>
+        <li>在文件夹里新建一个文本文件，<strong>重命名为 <code>index.html</code></strong>（注意后缀必须是 <code>.html</code>）；</li>
+        <li>用编辑器打开它，把上面那份“页面骨架”原样抄进去、保存（UTF-8 编码）；</li>
+        <li>回到文件夹，<strong>双击 <code>index.html</code></strong>——浏览器里就出现了你的第一个网页；</li>
+        <li>把标题里那句话改掉，保存，再回浏览器按 <code>F5</code> 刷新——页面跟着变了。</li>
+      </ol>
+      <p>
+        再教你两个好习惯：其一，遇到好看的网页，右键选“查看网页源代码”，看看别人怎么写——
+        这是最好的免费教材；其二，嫌新建文件麻烦时，先来本站的
+        <a href="../playground/index.html">练功场</a>——三栏编辑器，随手写、随手看效果，代码还会存在你自己的浏览器里。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">新手常踩的三个小坑</div>
+        <ul style="margin:0">
+          <li>改了代码浏览器没变化——先确认<strong>已保存</strong>，再按 <code>F5</code> 刷新；</li>
+          <li>页面出现乱码——在 <code>&lt;head&gt;</code> 里补上 <code>&lt;meta charset="utf-8"&gt;</code>，并在编辑器里把文件存为 UTF-8；</li>
+          <li>双击打开后满屏是代码——多半是后缀写成了 <code>.txt</code>，把文件名改回 <code>.html</code> 即可。</li>
+        </ul>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>HTML 用标签描述内容的结构；浏览器负责把标记画成人能看的网页；</li>
+        <li>页面骨架八行起步：<code>doctype</code> → <code>html</code> → <code>head</code> → <code>body</code>；</li>
+        <li>元素 = 标签 + 内容 + 结束标签；属性写在开始标签里；<code>img</code>、<code>meta</code> 这类元素没有结束标签；</li>
+        <li>注释写给自己人看，页面上不显示；</li>
+        <li>页面是文件：首页叫 <code>index.html</code>，文件名用小写与连字符，路径要写对。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第一式</div>
+        <ol>
+          <li>不看教程，手写出那份八行骨架，并让它显示一个标题、两个段落。</li>
+          <li>给你的页面加上注释：用注释写清“这一段是自我介绍”，并在页面上查看源代码确认注释在那里。</li>
+          <li>思考：既然浏览器能自动忽略注释与多余空格，为什么还要讲究缩进和分层？
+            （提示：写给谁看？）</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="八行骨架 + 两段文字">
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+              <meta charset="utf-8">
+              <title>我的第一个页面</title>
+            </head>
+            <body>
+              <h1>你好，江湖！</h1>
+              <p>我是墨白，正在学写网页。</p>
+              <p>今天学会了：一个页面的骨架长什么样。</p>
+            </body>
+            </html>
+          </script>
+          <p>
+            两段文字各写一个 <code>&lt;p&gt;</code>，不要用换行去“凑”段落——
+            HTML 会把连续换行合并成一个空格，第二式讲空白折叠时会细说。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="加上注释的骨架">
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+              <meta charset="utf-8">
+              <title>我的第一个页面</title>
+            </head>
+            <body>
+              <!-- 这一段是自我介绍，改文案时只动这里 -->
+              <h1>你好，江湖！</h1>
+              <p>我是墨白，正在学写网页。</p>
+            </body>
+            </html>
+          </script>
+          <p>
+            保存后刷新页面，再右键 →“查看网页源代码”，搜一搜“自我介绍”，
+            能搜到就说明注释写得没错；页面上看不到它，说明注释确实只写给看源码的人。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为浏览器不在乎缩进，但<strong>人</strong>在乎。代码是写给未来的自己的：
+            缩进能让嵌套关系一眼可见，分层能把“结构”“样式”“脚本”分开。
+            你省下的那点空格，会在某天排查问题时加倍还回来。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          学有余力时，可以翻翻
+          <a href="https://developer.mozilla.org/zh-CN/docs/Learn/HTML">MDN 的 HTML 学习区</a>——
+          本站负责把知识讲成一条线，MDN 负责把每个细节讲到穷尽，两者配合着用最好。
+        </p>
+      </div>
+
+      <blockquote>下一式，我们把文字本身练熟：标题、段落、强调、引用与代码。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

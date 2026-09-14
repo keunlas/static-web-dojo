@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十式 · 全局属性与 head | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="id、class、data-*、tabindex 等全局属性的用途与坑，以及 head 里的 charset、viewport、description、og 与脚本的 defer/async。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-10">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        标签各有各的本事，但有一批属性<strong>哪个标签都能写</strong>——它们叫全局属性。
+        这一式把它们串一遍，再翻到页面最上头那块从不露面的地方：<code>head</code>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>id</code>（唯一）与 <code>class</code>（可复用）给元素挂上钩子</li>
+          <li>会用 <code>data-*</code> 存自定义数据，并知道脚本怎么读它</li>
+          <li>认得 <code>hidden</code>、<code>tabindex</code>、<code>contenteditable</code>、<code>title</code>、<code>lang</code> 等属性的用途与坑</li>
+          <li>能写出一份像样的 <code>head</code>：编码、视口、标题、描述、图标，以及脚本的 <code>defer</code> / <code>async</code></li>
+        </ul>
+      </div>
+
+      <h2>全局属性一览</h2>
+      <p>
+        全局属性就是“写在任何开始标签里都合法、含义固定”的属性。常用的有这些：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>给这一个元素起<strong>全页唯一</strong>的名字</td>
+            <td>锚点跳转、<code>label for</code>、脚本查找都靠它；<strong>同一页不许重名</strong></td>
+          </tr>
+          <tr>
+            <td><code>class</code></td>
+            <td>给元素贴分类标签，可以被很多元素共用</td>
+            <td>一个元素可以写多个类名，用空格分隔</td>
+          </tr>
+          <tr>
+            <td><code>data-*</code></td>
+            <td>存放自定义数据（<code>data-author="墨白"</code>）</td>
+            <td>标准属性不够用时用它，不要随手造新属性</td>
+          </tr>
+          <tr>
+            <td><code>style</code></td>
+            <td>行内样式</td>
+            <td>应急可以，正式样式请写进 CSS；行内样式很难被统一维护</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>补充说明，鼠标悬停时显示提示</td>
+            <td>触屏看不到、键盘用户也难触发；<strong>关键信息不要只放在这里</strong></td>
+          </tr>
+          <tr>
+            <td><code>lang</code></td>
+            <td>声明内容的语言</td>
+            <td><code>&lt;html lang="zh-CN"&gt;</code> 是整体声明，某段外文可单独写 <code>lang="en"</code></td>
+          </tr>
+          <tr>
+            <td><code>dir</code></td>
+            <td>文字方向：<code>ltr</code> / <code>rtl</code></td>
+            <td>阿拉伯语、希伯来语等从右往左书写的语言才需要</td>
+          </tr>
+          <tr>
+            <td><code>hidden</code></td>
+            <td>隐藏这个元素</td>
+            <td>布尔属性；与 CSS 的 <code>display: none</code> 视觉相同、语义不同</td>
+          </tr>
+          <tr>
+            <td><code>tabindex</code></td>
+            <td>控制键盘 Tab 顺序</td>
+            <td><code>0</code> 加入自然顺序；负值可聚焦但不进 Tab 序列；<strong>尽量别用正数</strong>（会打乱全站顺序）</td>
+          </tr>
+          <tr>
+            <td><code>contenteditable</code></td>
+            <td>让元素内容可以直接编辑</td>
+            <td>真·就地编辑，适合做草稿板之类的工具</td>
+          </tr>
+          <tr>
+            <td><code>spellcheck</code></td>
+            <td>是否做拼写检查（<code>"true"</code> / <code>"false"</code>）</td>
+            <td>代码、专名多的输入框建议关掉</td>
+          </tr>
+          <tr>
+            <td><code>translate</code></td>
+            <td>是否允许浏览器翻译</td>
+            <td><code>translate="no"</code> 保护品牌名与代码不被“译”得面目全非</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>三个钩子：id、class、data-*</h2>
+      <p>
+        这三者最常被混用，其实分工很清楚：
+        <code>id</code> 是<strong>身份证</strong>（全页唯一，用来精确指向一个元素）；
+        <code>class</code> 是<strong>标签纸</strong>（可以贴很多张，一批元素共用同一张）；
+        <code>data-*</code> 是<strong>随身便签</strong>（存这条数据自己的信息，供脚本读取）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 脚本怎么读 id、class 与 data-*（点按钮试试）</div>
+        <div class="demo-preview">
+          <p id="html10-demo1-note" class="demo-note" data-author="墨白" data-level="3">
+            我身上挂着：一个 id、一个 class、两个 data-*。
+          </p>
+          <p><button type="button" id="html10-demo1-btn">读出这段的属性</button></p>
+          <p class="mb-0" id="html10-demo1-out">读出的结果会显示在这里。</p>
+          <script>
+            document.getElementById('html10-demo1-btn').addEventListener('click', function () {
+              var el = document.getElementById('html10-demo1-note');
+              document.getElementById('html10-demo1-out').textContent =
+                'id = ' + el.id
+                + '，class = ' + el.className
+                + '，data-author = ' + el.dataset.author
+                + '，data-level = ' + el.dataset.level;
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p id="html10-demo1-note" class="demo-note" data-author="墨白" data-level="3">
+              我身上挂着：一个 id、一个 class、两个 data-*。
+            </p>
+            <p><button type="button" id="html10-demo1-btn">读出这段的属性</button></p>
+            <p class="mb-0" id="html10-demo1-out">读出的结果会显示在这里。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            document.getElementById('html10-demo1-btn').addEventListener('click', function () {
+              var el = document.getElementById('html10-demo1-note');
+              document.getElementById('html10-demo1-out').textContent =
+                'id = ' + el.id
+                + '，class = ' + el.className
+                + '，data-author = ' + el.dataset.author
+                + '，data-level = ' + el.dataset.level;
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        注意 <code>data-author</code> 被脚本读成了 <code>dataset.author</code>：
+        连字符命名会自动转成驼峰拼写（<code>data-post-id</code> → <code>dataset.postId</code>）。
+        所以自定义数据的命名习惯是<strong>全小写 + 连字符</strong>，与 CSS 类名同一套规矩。
+      </p>
+
+      <h2>隐藏、可编辑、可聚焦</h2>
+      <p>
+        三个能让页面“性格”大变的属性，值得亲手试一试：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 就地编辑（contenteditable）与看不见的元素（hidden）</div>
+        <div class="demo-preview">
+          <p contenteditable="true" spellcheck="false">这一段可以直接编辑：点进来改两个字试试（刷新页面即还原）。</p>
+          <p hidden>你看不到我——因为我带着 hidden 属性，但我在源码里老老实实待着。</p>
+          <p class="mb-0" title="把鼠标停在这段上会看到提示">把鼠标停在这段文字上。即使看到了提示，也别忘了：触屏设备看不到它。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p contenteditable="true" spellcheck="false">这一段可以直接编辑：点进来改两个字试试（刷新页面即还原）。</p>
+            <p hidden>你看不到我——因为我带着 hidden 属性，但我在源码里老老实实待着。</p>
+            <p class="mb-0" title="把鼠标停在这段上会看到提示">把鼠标停在这段文字上。即使看到了提示，也别忘了：触屏设备看不到它。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>contenteditable</code> 常被拿来做“富文本编辑器”的起点；
+        <code>hidden</code> 则是“这个元素暂时不显示”的标准写法——
+        它和 <code>style="display: none"</code> 看起来一样，
+        也一样会把内容从读屏软件里拿走；
+        真正的差别在语义：<code>hidden</code> 说的是“这段内容此刻与页面主题无关”这件事实，
+        而不只是“没画出来”，脚本也能用 <code>el.hidden = true</code> 一行开关它。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 让本来不能聚焦的元素进入键盘序列（按 Tab 键试试）</div>
+        <div class="demo-preview">
+          <style>
+            #html10-demo3-box { border: 1px dashed var(--line-strong); padding: .6rem .9rem; }
+            #html10-demo3-box:focus { outline: 2px solid var(--cinnabar); }
+          </style>
+          <div id="html10-demo3-box" tabindex="0">我是 div，本来不能聚焦。现在按 Tab（或点我）就能聚焦，边框会亮起来。</div>
+          <p class="mt-2 mb-0" id="html10-demo3-out">聚焦状态：尚未聚焦。</p>
+          <script>
+            var box3 = document.getElementById('html10-demo3-box');
+            var out3 = document.getElementById('html10-demo3-out');
+            box3.addEventListener('focus', function () { out3.textContent = '聚焦状态：已聚焦（键盘读者现在知道自己在这里了）'; });
+            box3.addEventListener('blur', function () { out3.textContent = '聚焦状态：已离开。'; });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="html10-demo3-box" tabindex="0">我是 div，本来不能聚焦。现在按 Tab（或点我）就能聚焦，边框会亮起来。</div>
+            <p class="mt-2 mb-0" id="html10-demo3-out">聚焦状态：尚未聚焦。</p>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则（让聚焦看得见）">
+            #html10-demo3-box { border: 1px dashed var(--line-strong); padding: .6rem .9rem; }
+            #html10-demo3-box:focus { outline: 2px solid var(--cinnabar); }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var box3 = document.getElementById('html10-demo3-box');
+            var out3 = document.getElementById('html10-demo3-out');
+            box3.addEventListener('focus', function () { out3.textContent = '聚焦状态：已聚焦（键盘读者现在知道自己在这里了）'; });
+            box3.addEventListener('blur', function () { out3.textContent = '聚焦状态：已离开。'; });
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>tabindex="0"</code> 的用处是让“本来不可聚焦”的东西（<code>div</code>、<code>span</code>）
+        也能被键盘走到。但请把它当成例外而不是习惯：
+        <strong>能用 <code>button</code>、<code>a</code> 这类天生可聚焦的元素，就不要用 div 加 tabindex</strong>——
+        换标签能免掉一整套键盘处理（第十一式会把这个话题讲透）。
+      </p>
+
+      <h2>head：页面从不露面的那一半</h2>
+      <p>
+        <code>head</code> 里的东西读者看不见，但它们决定浏览器与搜索引擎“怎么看这一页”。
+        一份体面的 <code>head</code> 长这样：
+      </p>
+
+      <script type="text/plain" data-lang="html" data-title="一份完整的 head（本站页面就是这么写的）">
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>第十式 · 全局属性与 head | 纯静态网页的修行</title>
+          <meta name="description" content="id、class、data-*、tabindex 等全局属性，以及 head 里的元数据与脚本引入。">
+          <link rel="icon" href="assets/img/favicon.svg">
+          <link rel="stylesheet" href="assets/css/style.css">
+          <script src="assets/js/app.js" defer><\/script>
+        </head>
+        <body>
+          ……
+        </body>
+        </html>
+      </script>
+
+      <p>逐项拆开看：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>作用</th>
+            <th>要点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>&lt;meta charset="utf-8"&gt;</code></td>
+            <td>声明文字编码</td>
+            <td>必须放在 <code>head</code> 最前面（前 1024 字节内），否则中文可能乱码</td>
+          </tr>
+          <tr>
+            <td><code>meta viewport</code></td>
+            <td>告诉手机按真实宽度渲染</td>
+            <td>响应式的第一块地基；本站每一页都有它</td>
+          </tr>
+          <tr>
+            <td><code>&lt;title&gt;</code></td>
+            <td>标签页标题、收藏夹名、搜索结果标题</td>
+            <td>每页都要有且各不相同；格式建议“本页主题 | 站点名”</td>
+          </tr>
+          <tr>
+            <td><code>meta name="description"</code></td>
+            <td>页面摘要</td>
+            <td>可能被搜索引擎用作结果下方的两行字；一页一句，写清“这页有什么”</td>
+          </tr>
+          <tr>
+            <td><code>meta name="robots"</code></td>
+            <td>给爬虫的指令</td>
+            <td><code>noindex</code> 表示“别收录我”（工具页、临时页适合写它）</td>
+          </tr>
+          <tr>
+            <td><code>link rel="icon"</code></td>
+            <td>标签页小图标（favicon）</td>
+            <td>本站用内嵌 SVG，不产生额外请求</td>
+          </tr>
+          <tr>
+            <td><code>link rel="stylesheet"</code></td>
+            <td>引入样式表</td>
+            <td>放 <code>head</code> 里，页面不会“先素颜后上妆”（第十三式）</td>
+          </tr>
+          <tr>
+            <td><code>link rel="canonical"</code></td>
+            <td>声明这一页的规范网址</td>
+            <td>有多条路径指向同一内容时用；部署后填真实域名</td>
+          </tr>
+          <tr>
+            <td><code>script</code> + <code>defer</code> / <code>async</code></td>
+            <td>引入脚本，并控制执行时机</td>
+            <td>见下方解释</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>脚本的三种放法</h3>
+      <p>
+        脚本放哪里、加什么属性，决定了它什么时候执行：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>行为</th>
+            <th>适用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>放在 <code>&lt;/body&gt;</code> 之前</td>
+            <td>页面解析完才下载执行，最直观</td>
+            <td>新手首选；本站的 jQuery 篇演示就是这么放的</td>
+          </tr>
+          <tr>
+            <td><code>&lt;script defer src="…"&gt;</code></td>
+            <td>边解析边下载，<strong>解析完成后再按顺序执行</strong></td>
+            <td>需要 DOM 就绪又不想拖慢页面的脚本；能保持先后顺序</td>
+          </tr>
+          <tr>
+            <td><code>&lt;script async src="…"&gt;</code></td>
+            <td>下载完立刻执行，<strong>不保证顺序</strong></td>
+            <td>互不依赖的独立脚本（如统计代码）</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        还有一个新手常见疑问：为什么脚本放在 <code>head</code> 里却拿不到页面元素？
+        因为那一刻 DOM 还没解析出来。<code>defer</code> 就是为这件事准备的开关；
+        本站则干脆用一行 loader 脚本 + 队列来解决（你查看本页源码就能看到）。
+      </p>
+
+      <h3>分享卡片：og 系列</h3>
+      <p>
+        把链接粘进聊天软件时，它常常自动展开成一张卡片——标题、描述、缩略图。
+        这些信息来自 <code>og:*</code>（Open Graph）元数据：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="分享卡片元数据">
+        <meta property="og:title" content="纯静态网页的修行">
+        <meta property="og:description" content="一份完全离线的纯静态网页教程。">
+        <meta property="og:image" content="https://你的域名/assets/img/cover.png">
+        <meta property="og:url" content="https://你的域名/">
+      </script>
+      <p>
+        注意 <code>og:image</code> 必须是<strong>完整网址</strong>——抓取卡片的是对方的服务器，
+        它不知道你的相对路径从哪算起。静态站也可以把这些写死，只是换域名时要记得改。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：head 里的三条小纪律</div>
+        <ul style="margin:0">
+          <li><code>charset</code> 一定要靠前，别让浏览器猜编码；</li>
+          <li>每页的 <code>title</code> 与 <code>description</code> 要各写各的，别复制粘贴；</li>
+          <li>能被搜索到的页面再配 <code>canonical</code> 与 <code>og:*</code>，
+            工具页、临时页没必要。</li>
+        </ul>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>全局属性哪个标签都能写；<code>id</code> 唯一、<code>class</code> 可复用、<code>data-*</code> 存自定义数据；</li>
+        <li><code>data-author</code> 在脚本里读作 <code>dataset.author</code>；命名用全小写加连字符；</li>
+        <li><code>hidden</code> 是语义上的“与内容无关”；<code>contenteditable</code> 让内容可编辑；</li>
+        <li><code>tabindex="0"</code> 能让普通元素进入键盘序列，但优先选天生可聚焦的元素；</li>
+        <li><code>head</code> 里必备：<code>charset</code>、<code>viewport</code>、<code>title</code>、<code>description</code>，
+          再加上图标与样式表；</li>
+        <li>脚本三选一：<code>body</code> 末尾、<code>defer</code>（保序）、<code>async</code>（不保序）；</li>
+        <li><code>og:*</code> 决定分享卡片，图片地址要写完整网址。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十式</div>
+        <ol>
+          <li>给你的个人主页写一份完整的 <code>head</code>：编码、视口、标题、描述、图标、
+            样式表，再加一行 <code>defer</code> 的脚本。</li>
+          <li>做一个“工具箱卡片”：用 <code>data-*</code> 存下工具名与熟练度，
+            写一段脚本把两个值读出来显示在页面上。</li>
+          <li>思考：为什么网页里到处用 <code>class</code>，而 <code>id</code> 只在少数地方出现？
+            如果全用 <code>id</code> 会有什么麻烦？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="一份完整的 head">
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>墨白的主页 | 一个初学者的修行记录</title>
+              <meta name="description" content="墨白的个人主页：记录从零学写网页的过程，含作品与练功笔记。">
+              <link rel="icon" href="favicon.svg">
+              <link rel="stylesheet" href="style.css">
+              <script src="app.js" defer><\/script>
+            </head>
+            <body>
+              <h1>你好，我是墨白</h1>
+            </body>
+            </html>
+          </script>
+          <p>
+            检查点：<code>charset</code> 在最前；<code>title</code> 与 <code>description</code> 写的是这一页的内容；
+            样式表在 <code>head</code> 里；脚本带 <code>defer</code> 或放在 <code>body</code> 末尾。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="工具箱卡片">
+            <p id="tool" class="card" data-name="练功场" data-skill="入门">正在加载工具信息……</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="读取 data-*">
+            var tool = document.getElementById('tool');
+            tool.textContent = '工具：' + tool.dataset.name + ' · 熟练度：' + tool.dataset.skill;
+          </script>
+          <p>
+            要点：<code>data-*</code> 里的值都是字符串；如果存的是数字，
+            参与计算前要自己转换（<code>Number(tool.dataset.skill)</code> 之类，JS 篇会讲）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为两者的“唯一性”要求不同：<code>id</code> 必须全页唯一，
+            所以它只适合给“只此一个”的元素用（页头、页脚、主要区域）；
+            而按钮、卡片、列表项这类会重复出现的元素天生是“一批”，
+            只能靠 <code>class</code> 批量挂钩子。
+            全用 <code>id</code> 的第一个麻烦就是重名：一旦重复，
+            <code>label</code> 会指向错误的输入框、锚点跳转失灵、脚本只拿到第一个匹配的元素——
+            而且这类错误没有报错信息，只是“偶尔不对劲”，最难排查。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          <code>head</code> 里的元数据条目比这里多得多，
+          想逐个认识可以翻
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/meta">MDN 的 meta 元素词条</a>；
+          基础阶段只需记住本式表格里的那几项就够了。
+        </p>
+      </div>
+
+      <blockquote>下一式，把“对所有人都好用”这件事讲成一门手艺：无障碍。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

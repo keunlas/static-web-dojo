@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨白的主页 · 穿上衣服版 | 基础篇第二十六式成品</title>
+<meta name="description" content="基础篇第二十六式的成品：把第十二式那页纯 HTML 的个人主页用 CSS 重新打扮一遍——主题变量、网格骨架、卡片、表单与响应式。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='18'%20fill='%23b03a2e'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20text-anchor='middle'%20fill='%23faf6ec'%20font-family='serif'%3E%E9%9D%99%3C/text%3E%3C/svg%3E">
+<style>
+  /* ========== 一、设计令牌（CSS 变量） ========== */
+  :root {
+    --paper: #faf6ec;        /* 页面底 */
+    --card: #fffdf7;         /* 卡片底 */
+    --ink: #2b2a26;          /* 正文 */
+    --soft: #6f6a5e;         /* 次要文字 */
+    --line: #e3dcc8;         /* 分隔线 */
+    --accent: #b03a2e;       /* 强调色 */
+    --accent-soft: #f3e3dd;  /* 强调色的淡底 */
+    --radius: 12px;          /* 通用圆角 */
+    --measure: 64rem;        /* 内容最大宽度 */
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+            "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --serif: "Songti SC", "Noto Serif CJK SC", "STSong", "SimSun", serif;
+  }
+
+  /* ========== 二、基础与排版 ========== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--paper); }
+  body {
+    /* 直接把 body 当整页容器：不改结构，也能限宽居中 */
+    max-width: var(--measure); margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.4rem);
+    color: var(--ink); font-family: var(--sans); font-size: 1rem; line-height: 1.8;
+  }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.3; margin: 0 0 .6rem; }
+  h1 { font-size: clamp(1.8rem, 1.2rem + 2.4vw, 2.6rem); letter-spacing: .04em; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.08rem; }
+  p { margin: 0 0 .9rem; }
+  a { color: var(--accent); }
+  a:hover { color: #8f2f24; }
+  img { max-width: 100%; height: auto; }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--accent); color: #fff; padding: .5rem .9rem; border-radius: 0 0 8px 0;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ========== 三、整页骨架：body 直接做网格，不用额外包一层 ========== */
+  body {
+    display: grid; gap: 1.6rem;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "main"
+      "side"
+      "foot";
+  }
+  .site-head { grid-area: head; }
+  main { grid-area: main; min-width: 0; }
+  .side { grid-area: side; }
+  .site-foot { grid-area: foot; }
+  @media (min-width: 56em) {
+    body {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      grid-template-areas:
+        "head head"
+        "main side"
+        "foot foot";
+    }
+  }
+
+  /* ========== 四、页头与页脚 ========== */
+  .site-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1.4rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--line);
+  }
+  .site-head .kicker { margin: 0; color: var(--soft); font-size: .85rem; letter-spacing: .18em; }
+  .site-head .byline { margin: 0; color: var(--soft); font-size: .9rem; }
+  .site-nav ul { display: flex; flex-wrap: wrap; gap: .2rem .9rem; margin: 0; padding: 0; list-style: none; }
+  .site-nav a { display: inline-block; padding: .25rem .1rem; text-decoration: none; border-bottom: 2px solid transparent; }
+  .site-nav a:hover, .site-nav a:focus-visible { border-bottom-color: var(--accent); }
+  .site-foot { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--soft); font-size: .88rem; }
+  .site-foot p { margin-bottom: .3rem; }
+  .site-foot nav ul { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+
+  /* ========== 五、卡片、标签与折叠块 ========== */
+  section { margin-bottom: 2rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1rem 1.1rem; margin-bottom: .9rem;
+    transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+  }
+  .card:hover, .card:focus-within {
+    transform: translateY(-3px); box-shadow: 0 10px 20px rgb(0 0 0 / 12%);
+    border-color: var(--accent);
+  }
+  #log article p:first-of-type { color: var(--soft); font-size: .85rem; }
+  mark {
+    background: var(--accent-soft); color: #8f2f24;
+    border-radius: 999px; padding: .05rem .6rem; font-size: .85em;
+  }
+  .card > :last-child { margin-bottom: 0; }
+  figure { margin: 0 0 1.2rem; }
+  figcaption { color: var(--soft); font-size: .85rem; margin-top: .4rem; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: .6rem .8rem; margin-top: .8rem; }
+  details summary { cursor: pointer; }
+  details > :last-child { margin-bottom: 0; }
+
+  /* ========== 六、侧栏、表单与按钮 ========== */
+  .side { background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius); padding: .9rem 1rem; font-size: .9rem; align-self: start; }
+  .side h2 { font-size: 1.05rem; }
+  .side ul { margin: 0; padding-left: 1.1rem; }
+  .side li { margin-bottom: .3rem; }
+  .side > :last-child { margin-bottom: 0; }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { font-family: var(--serif); font-size: 1.05rem; padding: 0; margin-bottom: .6rem; }
+  .field { margin-bottom: .8rem; }
+  label { font-size: .9rem; font-weight: 600; }
+  input, textarea {
+    width: 100%; font: inherit; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-radius: 8px; padding: .5rem .7rem;
+  }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit; cursor: pointer; background: var(--accent); color: #fff;
+    border: 1px solid var(--accent); border-radius: 8px; padding: .5rem 1.1rem;
+    transition: background .2s ease-out, transform .2s ease-out;
+  }
+  button:hover { background: #8f2f24; border-color: #8f2f24; transform: translateY(-1px); }
+  address { font-style: normal; }
+
+  /* ========== 七、照顾“减少动态效果”的读者 ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .card, button { transition: none; }
+    .card:hover, .card:focus-within, button:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+<!-- 这是基础篇第二十六式的成品：结构就是第十二式那页，样式是这一式新加的（page 上没有任何行内样式）。 -->
+
+<a class="skip-link" href="#main">跳到正文</a>
+
+<header class="site-head">
+  <p class="kicker">修行者档案</p>
+  <h1>墨白</h1>
+  <p class="byline">在代码与山水之间行走的初学者 · <time datetime="2026-09-14">2026 年 9 月 14 日</time> 更新</p>
+
+  <nav class="site-nav" aria-label="主导航">
+    <ul>
+      <li><a href="#about">关于我</a></li>
+      <li><a href="#works">作品</a></li>
+      <li><a href="#log">修行日志</a></li>
+      <li><a href="#contact">联系我</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section id="about" aria-labelledby="about-title">
+    <h2 id="about-title">关于我</h2>
+    <p>
+      我是墨白，一个把“日拱一卒”当口头禅的初学者。
+      三个月前我连标签和属性都分不清，现在能自己搭出一页结构清楚的主页——
+      这一页就是证据。
+    </p>
+
+    <figure>
+      <img src="../../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图：一轮红日与远山" width="320" height="240">
+      <figcaption>我最喜欢的一张示意图：山不让尘，川不辞盈。</figcaption>
+    </figure>
+
+    <h3>我在练什么</h3>
+    <ul>
+      <li>HTML —— 把结构写清楚，让机器与人都不迷路</li>
+      <li>CSS —— 让页面好看，也让人看得住</li>
+      <li>JavaScript —— 让页面会应答</li>
+    </ul>
+
+    <details>
+      <summary>我的学习节奏（点开看）</summary>
+      <p>每天 30 分钟：读一式、抄一个演示；周末把这一周的练功题重做一遍。</p>
+    </details>
+  </section>
+
+  <section id="works" aria-labelledby="works-title">
+    <h2 id="works-title">作品</h2>
+
+    <article class="card">
+      <h3>第一个网页</h3>
+      <p>八行骨架、一个标题、两段文字。它的价值不在好看，而在于“这是我自己写的”。</p>
+      <p><a href="../../basics/01-html-intro.html">它出自第一式：网页与 HTML</a></p>
+    </article>
+
+    <article class="card">
+      <h3>迷你三页站点</h3>
+      <p>首页、关于、联系三个文件互相链接，练的是相对路径与锚点跳转。</p>
+      <p><a href="../../basics/03-html-lists-links.html">它出自第三式：列表与链接</a></p>
+    </article>
+
+    <article class="card">
+      <h3>报名表单</h3>
+      <p>用 label、单选、复选、日期输入与浏览器校验搭出来的表单；提交之后的事，交给后端同学。</p>
+      <p><a href="../../basics/08-html-forms-2.html">它出自第八式：表单（下）</a></p>
+    </article>
+  </section>
+
+  <section id="log" aria-labelledby="log-title">
+    <h2 id="log-title">修行日志</h2>
+
+    <article class="card">
+      <h3>站桩三月记</h3>
+      <p><time datetime="2026-09-14">9 月 14 日</time> · 标签：<mark>基本功</mark></p>
+      <p>不再刻意数呼吸，身体慢慢找到了自己的节奏。</p>
+    </article>
+
+    <article class="card">
+      <h3>第一次拆网页</h3>
+      <p><time datetime="2026-09-07">9 月 7 日</time> · 标签：<mark>拆解</mark></p>
+      <p>原来那些整齐的卡片，是一层层列表包出来的。</p>
+    </article>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">联系我</h2>
+
+    <address>
+      <p>写信：<a href="mailto:mo@example.com">mo@example.com</a></p>
+      <p>也可以来<a href="../../playground/index.html">在线练功场</a>一起写两笔。</p>
+    </address>
+
+    <form action="#" method="post">
+      <fieldset>
+        <legend>留一句口信</legend>
+        <p class="field">
+          <label for="msg-name">称谓</label><br>
+          <input type="text" id="msg-name" name="name" required autocomplete="name">
+        </p>
+        <p class="field">
+          <label for="msg-mail">邮箱（方便回信）</label><br>
+          <input type="email" id="msg-mail" name="email" autocomplete="email">
+        </p>
+        <p class="field">
+          <label for="msg-text">口信</label><br>
+          <textarea id="msg-text" name="message" rows="4" maxlength="300" required></textarea>
+        </p>
+        <p><button type="submit">递上口信</button></p>
+      </fieldset>
+    </form>
+  </section>
+
+</main>
+
+<aside class="side" aria-labelledby="aside-title">
+  <h2 id="aside-title">顺手一栏</h2>
+  <ul>
+    <li><a href="../../archive/index.html">藏经阁：随查随用的离线资料</a></li>
+    <li><a href="../../bootstrap/index.html">下一站：第二回 Bootstrap 篇</a></li>
+  </ul>
+</aside>
+
+<footer class="site-foot">
+  <p>© 2026 墨白 · 手写 HTML 与 CSS（<time datetime="2026-09-14">2026-09-14</time> 更新）</p>
+  <nav aria-label="页脚导航">
+    <ul>
+      <li><a href="#main">回到正文开头</a></li>
+      <li><a href="../../basics/26-css-project.html">这一页的教程</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</body>
+</html>

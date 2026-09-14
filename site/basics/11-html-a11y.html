@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十一式 · 无障碍 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="无障碍服务哪些人、语义优先原则、给图标按钮起名字、键盘可达性与焦点可见、ARIA 入门与对比度自测清单。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-11">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        写页面的终极标准只有一条：<strong>谁来都能用</strong>。
+        用键盘的人、用读屏软件的人、在刺眼阳光下看手机的人、手腕打着石膏的人——
+        这一式讲的不是“给别人做的慈善”，而是把你自己将来也会遇到的处境提前照顾好。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道无障碍服务哪些人，理解“语义优先”为什么是第一条规矩</li>
+          <li>会给图标按钮、图片这类“没有文字的东西”起名字（<code>alt</code> / <code>aria-label</code>）</li>
+          <li>能让页面被键盘完整走通：Tab 顺序、可见焦点、跳转链接</li>
+          <li>会用 <code>aria-describedby</code>、<code>role="status"</code> 这类工具做友好的表单提示，并知道 ARIA 的三条戒律</li>
+          <li>掌握一份能自己动手跑的自测清单（键盘、缩放、对比度、动画）</li>
+        </ul>
+      </div>
+
+      <h2>无障碍是给谁做的</h2>
+      <p>
+        很多人以为无障碍（accessibility，常缩写为 a11y）是为“少数人”做的额外工作。
+        把清单摊开看，你会发现它照顾的是<strong>所有人一生中都会路过的状态</strong>：
+      </p>
+      <ul>
+        <li>暂时受伤：手腕骨折、刚做完眼科手术、抱着一岁孩子只能用一只手；</li>
+        <li>环境限制：地铁上没信号、工地旁边太吵、正午阳光直射屏幕；</li>
+        <li>设备限制：老人机屏幕小、用了八年的旧电脑、鼠标滚轮坏了；</li>
+        <li>长期状态：低视力、色觉异常、全盲、听障、阅读障碍、手部震颤。</li>
+      </ul>
+      <p>
+        马路上的“缘石坡道”本来是给轮椅修的，结果推婴儿车的人、拉行李箱的人、
+        骑滑板的人都受益——这种效应被称为<strong>“坡道效应”</strong>。
+        网页无障碍是同一种东西：你为少数人做的改善，最后惠及所有人。
+      </p>
+
+      <h2>第一条规矩：语义优先</h2>
+      <p>
+        第九式讲了语义化让机器看懂结构，这里说它的实战价值：
+        <strong>用对元素，键盘行为、读屏语义、焦点管理都是免费送的</strong>；
+        用 <code>div</code> 假装按钮，就得自己补齐这一整套，而且极容易漏。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 假按钮与真按钮（试试用 Tab 键分别走到它们，再按回车）</div>
+        <div class="demo-preview">
+          <style>
+            #html11-demo1 .fake-btn, #html11-demo1 .real-btn {
+              display: inline-block; padding: .35rem .9rem; border-radius: .4rem;
+              border: 1px solid var(--cinnabar); background: var(--cinnabar); color: #fff; cursor: pointer;
+            }
+            #html11-demo1 .fake-btn { background: var(--ink-soft); border-color: var(--ink-soft); }
+            #html11-demo1 .real-btn:focus-visible { outline: 2px solid var(--cinnabar-deep); outline-offset: 2px; }
+            #html11-demo1 .hit { background: var(--cinnabar-deep); border-color: var(--cinnabar-deep); }
+          </style>
+          <div id="html11-demo1">
+            <p>假按钮（用 span 装的）：
+              <span class="fake-btn" id="html11-demo1-fake">装成按钮的 span</span>
+              ——Tab 走不到它，回车也按不动。</p>
+            <p>真按钮：
+              <button type="button" class="real-btn" id="html11-demo1-real">真正的 button</button>
+              ——Tab 能聚焦，回车、空格都能触发。</p>
+            <p class="mb-0" id="html11-demo1-out">触发记录：假按钮 0 次（只能鼠标点），真按钮 0 次。</p>
+          </div>
+          <script>
+            var fake1 = document.getElementById('html11-demo1-fake');
+            var real1 = document.getElementById('html11-demo1-real');
+            var out1 = document.getElementById('html11-demo1-out');
+            var fakeCount = 0;
+            var realCount = 0;
+            function report1() {
+              out1.textContent = '触发记录：假按钮 ' + fakeCount + ' 次（只能鼠标点），真按钮 ' + realCount + ' 次。';
+            }
+            fake1.addEventListener('click', function () {
+              fakeCount++;
+              fake1.classList.add('hit');
+              report1();
+            });
+            real1.addEventListener('click', function () {
+              realCount++;
+              real1.classList.add('hit');
+              report1();
+            });
+            real1.addEventListener('blur', function () { real1.classList.remove('hit'); });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="html11-demo1">
+              <p>假按钮（用 span 装的）：
+                <span class="fake-btn" id="html11-demo1-fake">装成按钮的 span</span>
+                ——Tab 走不到它，回车也按不动。</p>
+              <p>真按钮：
+                <button type="button" class="real-btn" id="html11-demo1-real">真正的 button</button>
+                ——Tab 能聚焦，回车、空格都能触发。</p>
+              <p class="mb-0" id="html11-demo1-out">触发记录：假按钮 0 次（只能鼠标点），真按钮 0 次。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #html11-demo1 .fake-btn, #html11-demo1 .real-btn {
+              display: inline-block; padding: .35rem .9rem; border-radius: .4rem;
+              border: 1px solid var(--cinnabar); background: var(--cinnabar); color: #fff; cursor: pointer;
+            }
+            #html11-demo1 .fake-btn { background: var(--ink-soft); border-color: var(--ink-soft); }
+            #html11-demo1 .real-btn:focus-visible { outline: 2px solid var(--cinnabar-deep); outline-offset: 2px; }
+            #html11-demo1 .hit { background: var(--cinnabar-deep); border-color: var(--cinnabar-deep); }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var fake1 = document.getElementById('html11-demo1-fake');
+            var real1 = document.getElementById('html11-demo1-real');
+            var out1 = document.getElementById('html11-demo1-out');
+            var fakeCount = 0;
+            var realCount = 0;
+            function report1() {
+              out1.textContent = '触发记录：假按钮 ' + fakeCount + ' 次（只能鼠标点），真按钮 ' + realCount + ' 次。';
+            }
+            fake1.addEventListener('click', function () {
+              fakeCount++;
+              fake1.classList.add('hit');
+              report1();
+            });
+            real1.addEventListener('click', function () {
+              realCount++;
+              real1.classList.add('hit');
+              report1();
+            });
+            real1.addEventListener('blur', function () { real1.classList.remove('hit'); });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        想让那个 <code>span</code> 也支持键盘，你得补上 <code>tabindex="0"</code>、
+        <code>role="button"</code>、<code>keydown</code> 里判断回车与空格、再自己画一个焦点样式——
+        写了三十行，还未必比浏览器原生行为更稳。
+        所以第一句话永远是：<strong>能用原生元素，就别自己造</strong>。
+      </p>
+
+      <h2>给“没有文字的东西”起名字</h2>
+      <p>
+        屏幕上的东西，视觉读者一眼就懂；但一个只有放大镜图标的按钮，
+        读屏软件念出来可能只是一句“按钮”。这时要用属性补上<strong>可访问名称</strong>：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th>写法</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>图片</td>
+            <td><code>alt="…"</code></td>
+            <td>第四式讲过：内容图写描述、装饰图写 <code>alt=""</code></td>
+          </tr>
+          <tr>
+            <td>图标按钮</td>
+            <td><code>&lt;button aria-label="搜索"&gt;</code></td>
+            <td>按钮里没有文字，就用 <code>aria-label</code> 给它一个名字</td>
+          </tr>
+          <tr>
+            <td>装饰性图标</td>
+            <td><code>&lt;i class="bi bi-star" aria-hidden="true"&gt;</code></td>
+            <td>让它从朗读里消失，别念出一串图标名</td>
+          </tr>
+          <tr>
+            <td>图标后本来就有文字</td>
+            <td><code>&lt;a href="…"&gt;&lt;i aria-hidden="true"&gt;&lt;/i&gt;回到首页&lt;/a&gt;</code></td>
+            <td>文字已经说明了用途，图标只需要闭嘴</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 三个图标按钮：一个没名字，两个有好名字</div>
+        <div class="demo-preview">
+          <p>
+            <button type="button" id="html11-demo2-bad"><i class="bi bi-search"></i></button>
+            <button type="button" id="html11-demo2-good" aria-label="搜索"><i class="bi bi-search" aria-hidden="true"></i></button>
+            <button type="button" id="html11-demo2-text"><i class="bi bi-book" aria-hidden="true"></i> 去藏经阁</button>
+          </p>
+          <p class="mb-0" id="html11-demo2-out">点上面的按钮，看看脚本能读出什么名字。</p>
+          <script>
+            var ids2 = ['html11-demo2-bad', 'html11-demo2-good', 'html11-demo2-text'];
+            ids2.forEach(function (id) {
+              document.getElementById(id).addEventListener('click', function () {
+                var el = document.getElementById(id);
+                var name = el.getAttribute('aria-label') || el.textContent.trim() || '（没有名字）';
+                document.getElementById('html11-demo2-out').textContent =
+                  id + ' 的可访问名称：' + name;
+              });
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>
+              <button type="button" id="html11-demo2-bad"><i class="bi bi-search"></i></button>
+              <button type="button" id="html11-demo2-good" aria-label="搜索"><i class="bi bi-search" aria-hidden="true"></i></button>
+              <button type="button" id="html11-demo2-text"><i class="bi bi-book" aria-hidden="true"></i> 去藏经阁</button>
+            </p>
+            <p class="mb-0" id="html11-demo2-out">点上面的按钮，看看脚本能读出什么名字。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var ids2 = ['html11-demo2-bad', 'html11-demo2-good', 'html11-demo2-text'];
+            ids2.forEach(function (id) {
+              document.getElementById(id).addEventListener('click', function () {
+                var el = document.getElementById(id);
+                var name = el.getAttribute('aria-label') || el.textContent.trim() || '（没有名字）';
+                document.getElementById('html11-demo2-out').textContent =
+                  id + ' 的可访问名称：' + name;
+              });
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        第一个按钮在视觉上“有图标”，在朗读里却是一片空白；第二个按钮多了一个
+        <code>aria-label</code>，读屏软件会念“搜索，按钮”；第三个按钮用可见文字说明用途，
+        图标设成 <code>aria-hidden="true"</code>，读出来是“去藏经阁，链接（按钮）”。
+        <strong>能写可见文字就别用 aria-label</strong>——文字对所有人都可见，标签只对机器可见。
+      </p>
+
+      <h2>让键盘走遍全站</h2>
+      <p>
+        键盘用户浏览页面的方式和你用鼠标很像：<code>Tab</code> 前进、<code>Shift + Tab</code> 后退、
+        <code>Enter</code> 确认、<code>Space</code> 勾选、<code>Esc</code> 关闭浮层。要做到三件事：
+      </p>
+      <ul>
+        <li><strong>能走到</strong>：所有可操作元素都在 Tab 序列里（原生元素天生就在，别用正数
+          <code>tabindex</code> 打乱顺序）；</li>
+        <li><strong>看得见</strong>：焦点在哪要一目了然。<strong>永远不要写 <code>outline: none</code>
+          却不给替代样式</strong>——那是把键盘用户的眼睛蒙上；</li>
+        <li><strong>跳得过去</strong>：页面开头放一个“跳到正文”的链接，让人跳过几十个导航项。
+          本站每个章节页都有，平时看不见，按第一下 Tab 就会现身——现在就可以试试。</li>
+      </ul>
+
+      <script type="text/plain" data-lang="html" data-title="跳到正文链接（本站每个章节页都有）">
+        <a class="skip-link" href="#main">跳到正文</a>
+        …
+        <main id="main">
+          …正文…
+        </main>
+      </script>
+
+      <p>
+        另外两条与键盘相关的小规矩：用 <code>:focus-visible</code> 而不是 <code>:focus</code>
+        给“键盘聚焦”单独设样式（鼠标点击时不闪一圈）；弹层打开后把焦点移进去、关闭后还给触发它的按钮
+        （jQuery 篇与 Bootstrap 篇的组件会替你处理大部分）。
+      </p>
+
+      <h2>表单提示与动态消息</h2>
+      <p>
+        表单是无障碍最容易失守的地方。三条基本功：
+        <strong>每个控件都有 <code>label</code></strong>（第七式）；
+        <strong>相关的说明用 <code>aria-describedby</code> 挂上去</strong>，
+        让读屏软件念完名字接着念说明；
+        <strong>动态消息交给 <code>role="status"</code> / <code>aria-live="polite"</code></strong>，
+        这样“订阅成功”这类提示会被自动播报，而不必让人重新找一遍。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 带说明的输入框与会自动播报的提示区</div>
+        <div class="demo-preview">
+          <form id="html11-demo3">
+            <p>
+              <label for="html11-demo3-mail">邮箱</label><br>
+              <input type="email" id="html11-demo3-mail" name="mail" required
+                     aria-describedby="html11-demo3-hint" placeholder="you@example.com">
+              <span id="html11-demo3-hint">只用来给你回信，不会外传。</span>
+            </p>
+            <p><button type="submit">订阅</button></p>
+            <p id="html11-demo3-status" role="status" aria-live="polite" class="mb-0"></p>
+          </form>
+          <script>
+            var f3 = document.getElementById('html11-demo3');
+            var st3 = document.getElementById('html11-demo3-status');
+            f3.addEventListener('submit', function (event) {
+              event.preventDefault();
+              st3.textContent = '收到 ' + f3.elements.mail.value + '：订阅请求已记下（演示不会真的提交）。';
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="html11-demo3">
+              <p>
+                <label for="html11-demo3-mail">邮箱</label><br>
+                <input type="email" id="html11-demo3-mail" name="mail" required
+                       aria-describedby="html11-demo3-hint" placeholder="you@example.com">
+                <span id="html11-demo3-hint">只用来给你回信，不会外传。</span>
+              </p>
+              <p><button type="submit">订阅</button></p>
+              <p id="html11-demo3-status" role="status" aria-live="polite" class="mb-0"></p>
+            </form>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var f3 = document.getElementById('html11-demo3');
+            var st3 = document.getElementById('html11-demo3-status');
+            f3.addEventListener('submit', function (event) {
+              event.preventDefault();
+              st3.textContent = '收到 ' + f3.elements.mail.value + '：订阅请求已记下（演示不会真的提交）。';
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        校验失败时的提示也要说清“哪一格、错在哪、怎么改”，并且别只用颜色：
+        红色边框之外，再给一句文字说明——色觉异常的读者看不见“只是变红了”。
+      </p>
+
+      <h2>ARIA 入门与三条戒律</h2>
+      <p>
+        ARIA（Accessible Rich Internet Applications）是一组补充属性，
+        用来描述那些原生 HTML 表达不了的状态与角色。常用的先认这几个：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>role</code></td>
+            <td>声明“这是个什么东西”</td>
+            <td><code>role="status"</code>、<code>role="dialog"</code>、<code>role="navigation"</code></td>
+          </tr>
+          <tr>
+            <td><code>aria-label</code></td>
+            <td>给元素起一个朗读用的名字</td>
+            <td>图标按钮、只有图形的链接</td>
+          </tr>
+          <tr>
+            <td><code>aria-labelledby</code></td>
+            <td>用页面上某段已有文字当名字</td>
+            <td>对话框标题：<code>aria-labelledby="dialog-title"</code></td>
+          </tr>
+          <tr>
+            <td><code>aria-describedby</code></td>
+            <td>补充说明（比名字更细）</td>
+            <td>输入框后面的提示文字（例 3）</td>
+          </tr>
+          <tr>
+            <td><code>aria-hidden="true"</code></td>
+            <td>让装饰性内容从朗读里消失</td>
+            <td>纯装饰图标；<strong>绝不能盖住可聚焦元素</strong></td>
+          </tr>
+          <tr>
+            <td><code>aria-expanded</code></td>
+            <td>说明“展开 / 收起”状态</td>
+            <td>手风琴按钮：<code>aria-expanded="false"</code></td>
+          </tr>
+          <tr>
+            <td><code>aria-live</code> / <code>role="status"</code></td>
+            <td>内容变化时自动播报</td>
+            <td>提交结果、搜索命中数量</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>三条戒律，记住能少踩坑：</p>
+      <ol>
+        <li><strong>能用原生就别用 ARIA</strong>：<code>&lt;button&gt;</code> 好过
+          <code>&lt;div role="button"&gt;</code>——后者不会白得键盘行为；</li>
+        <li><strong>不要用 ARIA 撒谎</strong>：给 <code>div</code> 写 <code>role="button"</code>
+          却不处理键盘，等于给读屏用户画了一张假地图；</li>
+        <li><strong><code>aria-hidden="true"</code> 不能盖住可聚焦的东西</strong>：
+          键盘能走到、读屏却念不出，是最让人困惑的状态。</li>
+      </ol>
+
+      <h2>颜色、动画与自测清单</h2>
+      <p>
+        还有两类问题不在“结构”里，却同样挡住人：
+      </p>
+      <ul>
+        <li><strong>对比度</strong>：正文与背景的对比度至少要 4.5:1，大字号与图标至少 3:1。
+          常见的失败是把浅灰字放在白底上——“设计感”有了，眼睛却读不动；</li>
+        <li><strong>动画</strong>：有前庭反应的人会被大幅动画晃晕。
+          用 CSS 动画时要照顾 <code>prefers-reduced-motion</code>，让系统里选择“减少动态效果”的人
+          看到静态版本（第二十四式会实际写出来）。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：无障碍五问自测清单</div>
+        <ol style="margin:0">
+          <li><strong>只用键盘</strong>能不能做完全部操作（Tab 走一遍，看焦点是否可见）；</li>
+          <li>把页面<strong>放大到 200%</strong>，内容有没有被切掉、有没有横向滚动；</li>
+          <li>关掉图片（或用开发者工具看），<code>alt</code> 写对了吗；</li>
+          <li>把屏幕调成<strong>灰度</strong>，还看得出哪些是错误、哪些是重点吗；</li>
+          <li>检查所有按钮与链接的名字：读出来是一句人话，还是“按钮”“链接”？</li>
+        </ol>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>无障碍服务所有人：语义优先、原生优先，能少写代码还更稳；</li>
+        <li>给“没有文字的东西”起名字：图片用 <code>alt</code>、图标按钮用 <code>aria-label</code>、
+          装饰图标用 <code>aria-hidden="true"</code>；</li>
+        <li>键盘三件事：走得到、看得见焦点、能跳过导航（<code>.skip-link</code>）；</li>
+        <li>表单三件套：<code>label</code>、<code>aria-describedby</code>、<code>role="status"</code>；</li>
+        <li>ARIA 三条戒律：能用原生就别 ARIA、别撒谎、<code>aria-hidden</code> 别盖住可聚焦元素；</li>
+        <li>对比度 4.5:1（大字号 3:1），动画要照顾 <code>prefers-reduced-motion</code>；</li>
+        <li>收尾前过一遍「五问自测清单」——它比任何工具都快。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十一式</div>
+        <ol>
+          <li>找一页你自己写的页面，只用键盘走一遍：把走不通的地方列出来，逐个修好。</li>
+          <li>做一张“工具条”：三个图标按钮（搜索、收藏、分享），每个都要有正确的名字，
+            并在页面上写一句注释说明为什么这样写。</li>
+          <li>思考：为什么“给 div 加 role="button"”不如直接换成 <code>&lt;button&gt;</code>？
+            用键盘与读屏软件两种视角各说一条理由。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            常见的三处失守与改法：
+            ① 用 <code>div</code> 当按钮 → 换成 <code>button</code>；
+            ② 给 <code>*:focus { outline: none }</code> 却没补替代样式 → 改用
+            <code>:focus-visible</code> 画一个看得见的轮廓；
+            ③ 页面开头没有跳转链接 → 加 <code>&lt;a class="skip-link" href="#main"&gt;跳到正文&lt;/a&gt;</code>，
+            并给 <code>main</code> 写上对应的 <code>id</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="图标工具条">
+            <p>
+              <button type="button" aria-label="搜索"><i class="bi bi-search" aria-hidden="true"></i></button>
+              <button type="button" aria-label="收藏"><i class="bi bi-bookmark" aria-hidden="true"></i></button>
+              <button type="button" aria-label="分享"><i class="bi bi-share" aria-hidden="true"></i></button>
+            </p>
+            <!-- 三个按钮里都没有可见文字，所以用 aria-label 起名；图标本身是装饰，设 aria-hidden 免得念出图标名 -->
+          </script>
+          <p>
+            检查点：每个按钮都能被 Tab 走到（<code>button</code> 天生可聚焦）；
+            <code>aria-label</code> 说明用途；图标都写了 <code>aria-hidden="true"</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            键盘视角：<code>button</code> 自带“可聚焦 + 回车/空格触发”的完整行为，
+            而 <code>div role="button"</code> 只是对读屏软件“声称”自己是按钮，
+            键盘仍然走不到它，必须自己补 <code>tabindex</code> 与键盘事件，还容易漏掉空格键。
+            读屏视角：原生按钮会连同禁用、按下、展开等状态一起播报，
+            这些都是浏览器与辅助技术约定好的“通用语”；手写的 role 一旦状态没同步，
+            读屏用户听到的就是过时甚至错误的信息。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，综合修炼：用纯 HTML 手写一个语义清晰的个人主页。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

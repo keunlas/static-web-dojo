@@ -1,11 +1,12 @@
 ---
 name: write-chapter
-description: 从章节大纲产出一章合格教程页（site/bootstrap 与 site/jquery），含完整流程、验收清单与常见错误。适用于编写任何教程章节。
+description: 从章节大纲产出一章合格教程页（site/basics、site/bootstrap 与 site/jquery），含完整流程、验收清单与常见错误。适用于编写任何教程章节。
 ---
 
 # 技能：write-chapter（编写一章教程）
 
-> 用途：从章节大纲产出一章合格教程页。适用于 `site/bootstrap/` 与 `site/jquery/` 下的章节。
+> 用途：从章节大纲产出一章合格教程页。适用于 `site/basics/`、`site/bootstrap/` 与
+> `site/jquery/` 下的章节。
 
 ## 前置阅读
 
@@ -13,6 +14,11 @@ description: 从章节大纲产出一章合格教程页（site/bootstrap 与 sit
 2. `.agents/notes/style-guide.md`（文风与术语）
 3. 打样基准：`site/bootstrap/01-intro.html`（Bootstrap 章）、`site/jquery/01-intro.html`（jQuery 章）
 4. `tools/page-template.html`（可复制的骨架）
+
+> 写**基础篇**（`site/basics/`）时另读 `conventions.md` §3.1：
+> 那一回要教 HTML / CSS / JS 本体，演示分三种写法（HTML 渲染、CSS 的 `<style>` + css 源码块、
+> JS 的裸 `<script>` 跟在元素之后），预览不了的骨架 / head 元数据用非 .demo 的结构块呈现。
+> 每式的知识点清单与编号，见 `.agents/notes/progress.md` 的「基础篇编写计划」。
 
 ## 输入
 

@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十七式 · DOM 操作 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="查找元素的各种方式、textContent 与 innerHTML、属性与 dataset、classList 与 style、增删改元素与批量插入，以及 innerHTML 的安全陷阱。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-37">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前面三十六式，程序算完了、判断完了，页面上却什么都没变——因为还差最后一步：
+        <strong>把结果写回页面</strong>。这一式讲 DOM：JavaScript 伸进页面的那只手。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>querySelector</code> 家族查找元素，知道 <code>NodeList</code> 与数组的差别</li>
+          <li>分得清 <code>textContent</code> 与 <code>innerHTML</code>，并知道后者的安全风险</li>
+          <li>会读写属性、<code>data-*</code>、类名与样式</li>
+          <li>会创建、插入、删除、替换元素，并知道批量插入要用 <code>DocumentFragment</code></li>
+          <li>会读表单控件的“当前状态”（<code>value</code> / <code>checked</code>）</li>
+        </ul>
+      </div>
+
+      <h2>DOM 是什么</h2>
+      <p>
+        浏览器解析 HTML 之后，会在内存里建一棵<strong>节点树</strong>：每个标签是一个元素节点，
+        文字是文本节点，属性、注释也都是节点。这棵树就叫
+        <strong>DOM</strong>（Document Object Model，文档对象模型）。
+        JavaScript 通过 <code>document</code> 这个入口去访问它。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="树长什么样（示意）">
+        document
+          └─ html
+              ├─ head
+              │   └─ title → "我的页面"
+              └─ body
+                  ├─ h1 → "你好"
+                  └─ p → "第一段"（文本节点）
+      </script>
+      <p>
+        所以“改页面”就是这么回事：<strong>找到节点 → 改它的内容、属性、类名或位置</strong>。
+        下面四件事按顺序过一遍：查、读改、造型、增删。
+      </p>
+
+      <h2>第一件事：找到元素</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>按什么找</th>
+            <th>返回</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>document.getElementById("x")</code></td><td>id（全页唯一）</td><td>一个元素或 <code>null</code>——最快</td></tr>
+          <tr><td><code>document.querySelector(选择器)</code></td><td>任意 CSS 选择器</td><td>第一个匹配的元素或 <code>null</code></td></tr>
+          <tr><td><code>document.querySelectorAll(选择器)</code></td><td>任意 CSS 选择器</td><td><strong>NodeList</strong>（静态快照，不会随后续改动更新）</td></tr>
+          <tr><td><code>getElementsByClassName</code> / <code>getElementsByTagName</code></td><td>类名 / 标签名</td><td><strong>HTMLCollection</strong>（“活的”，DOM 一变它就变）</td></tr>
+          <tr><td><code>el.closest(选择器)</code></td><td>从自己往上找祖先</td><td>最近的那个祖先（含自己）或 <code>null</code></td></tr>
+          <tr><td><code>el.matches(选择器)</code></td><td>问“我符合这个选择器吗”</td><td><code>true</code> / <code>false</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        两个实用的补充：<code>querySelectorAll</code> 返回的不是真数组，
+        <strong>想用 <code>map</code>/<code>filter</code> 就先转</strong>：
+        <code>[...list]</code> 或 <code>Array.from(list)</code>；
+        在某个元素内部查找时，把 <code>document</code> 换成那个元素即可
+        （<code>box.querySelector("li")</code>）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 五种找法（都在这个演示框里查）</div>
+        <div class="demo-preview">
+          <div id="js37-demo1-box">
+            <p class="item" data-kind="first">第一项（class="item"）</p>
+            <p class="item" data-kind="second">第二项（class="item"）</p>
+            <p class="note" data-kind="third">第三项（class="note"）</p>
+          </div>
+          <ul id="js37-demo1-out" style="margin: .6rem 0 0"></ul>
+          <script>
+            "use strict";
+            var box1 = document.getElementById('js37-demo1-box');
+            var list1 = document.getElementById('js37-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            say1('getElementById("js37-demo1-box") → ' + (document.getElementById('js37-demo1-box') ? '找到了容器' : '没找到'));
+            say1('querySelector(".item") → 第一个匹配的：' + box1.querySelector(".item").textContent);
+            say1('querySelectorAll(".item").length → ' + box1.querySelectorAll(".item").length + '（NodeList）');
+            say1('getElementsByClassName("item").length → ' + box1.getElementsByClassName("item").length + '（HTMLCollection）');
+
+            var nodeList1 = box1.querySelectorAll(".item");
+            var live1 = box1.getElementsByClassName("item");
+            var extra1 = document.createElement("p");
+            extra1.className = "item";
+            extra1.textContent = "第四项（后来加的）";
+            box1.appendChild(extra1);
+            say1('往框里加一项之后：querySelectorAll 还是 ' + nodeList1.length
+              + ' 条（静态快照），getElementsByClassName 变成 ' + live1.length + ' 条（活的）');
+
+            var texts1 = [...box1.querySelectorAll(".item")].map(function (el) { return el.textContent; });
+            say1('转成真数组后就能用 map：' + texts1.join('｜'));
+            say1('在框内查找 vs 全文档查找：document.querySelectorAll(".item").length → '
+              + document.querySelectorAll(".item").length);
+
+            var note1 = box1.querySelector(".note");
+            say1('note 的父元素是：' + note1.parentElement.id
+              + '；note1.closest("#js37-demo1-box") === box1 → ' + (note1.closest("#js37-demo1-box") === box1));
+            say1('note1.matches(".note") → ' + note1.matches(".note") + '，note1.matches(".item") → ' + note1.matches(".item"));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="js37-demo1-box">
+              <p class="item" data-kind="first">第一项（class="item"）</p>
+              <p class="item" data-kind="second">第二项（class="item"）</p>
+              <p class="note" data-kind="third">第三项（class="note"）</p>
+            </div>
+            <ul id="js37-demo1-out" style="margin: .6rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var box1 = document.getElementById('js37-demo1-box');
+            var list1 = document.getElementById('js37-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            say1('getElementById("js37-demo1-box") → ' + (document.getElementById('js37-demo1-box') ? '找到了容器' : '没找到'));
+            say1('querySelector(".item") → 第一个匹配的：' + box1.querySelector(".item").textContent);
+            say1('querySelectorAll(".item").length → ' + box1.querySelectorAll(".item").length + '（NodeList）');
+            say1('getElementsByClassName("item").length → ' + box1.getElementsByClassName("item").length + '（HTMLCollection）');
+
+            var nodeList1 = box1.querySelectorAll(".item");
+            var live1 = box1.getElementsByClassName("item");
+            var extra1 = document.createElement("p");
+            extra1.className = "item";
+            extra1.textContent = "第四项（后来加的）";
+            box1.appendChild(extra1);
+            say1('往框里加一项之后：querySelectorAll 还是 ' + nodeList1.length
+              + ' 条（静态快照），getElementsByClassName 变成 ' + live1.length + ' 条（活的）');
+
+            var texts1 = [...box1.querySelectorAll(".item")].map(function (el) { return el.textContent; });
+            say1('转成真数组后就能用 map：' + texts1.join('｜'));
+            say1('在框内查找 vs 全文档查找：document.querySelectorAll(".item").length → '
+              + document.querySelectorAll(".item").length);
+
+            var note1 = box1.querySelector(".note");
+            say1('note 的父元素是：' + note1.parentElement.id
+              + '；note1.closest("#js37-demo1-box") === box1 → ' + (note1.closest("#js37-demo1-box") === box1));
+            say1('note1.matches(".note") → ' + note1.matches(".note") + '，note1.matches(".item") → ' + note1.matches(".item"));
+          </script>
+        </div>
+      </div>
+
+      <h2>第二件事：读与改内容、属性</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>el.textContent</code></td><td>取 / 设纯文本</td><td><strong>用户输入一律用它</strong>；标签会被当文字显示，不会执行</td></tr>
+          <tr><td><code>el.innerHTML</code></td><td>取 / 设 HTML 源码</td><td>能插入标签，但会解析并执行其中的内容——<strong>不要用来放用户输入</strong></td></tr>
+          <tr><td><code>el.innerText</code></td><td>取“看得见的文字”</td><td>会受 CSS 影响（隐藏文字不返回），性能也差；读取时用 <code>textContent</code> 更好</td></tr>
+          <tr><td><code>el.getAttribute("data-x")</code> 等</td><td>读写<strong>属性</strong></td><td>操作的是 HTML 上的字符串</td></tr>
+          <tr><td><code>el.dataset.x</code></td><td>读写 <code>data-x</code></td><td><code>data-post-id</code> → <code>dataset.postId</code>（第十式）</td></tr>
+          <tr><td><code>el.id</code> / <code>el.className</code> / <code>el.value</code> …</td><td>读写<strong>属性对象</strong></td><td>更好用；但要注意“属性”与“当前状态”的区别（见下）</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">属性（attribute）与状态（property）不是一回事</div>
+        <p style="margin:0">
+          输入框的 <code>value</code> 最能说明这点：HTML 上写的 <code>value="默认"</code> 是<strong>初始值</strong>，
+          用户在框里改了之后，<code>input.value</code>（当前值）跟着变，
+          但 <code>input.getAttribute("value")</code> 仍然是那个初始值。
+          <strong>读写表单时坚持用 property（<code>input.value</code>）</strong>，别用 <code>getAttribute</code>。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 内容、属性与 dataset（试着先把输入框里的文字改掉，再点按钮）</div>
+        <div class="demo-preview">
+          <p id="js37-demo2-target" data-author="墨白" data-post-id="1024" title="我是 title 属性">
+            我是被操纵的目标元素。
+          </p>
+          <p><input id="js37-demo2-input" type="text" value="默认值" size="20"></p>
+          <p>
+            <button type="button" id="js37-demo2-btn">读一读它的状态</button>
+          </p>
+          <ul id="js37-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var target2 = document.getElementById('js37-demo2-target');
+            var input2 = document.getElementById('js37-demo2-input');
+            var list2 = document.getElementById('js37-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            say2('textContent 读出来：' + target2.textContent.trim());
+            say2('dataset.author = ' + target2.dataset.author
+              + '，dataset.postId = ' + target2.dataset.postId + '（连字符自动变驼峰）');
+            say2('getAttribute("title") = ' + target2.getAttribute("title")
+              + '；直接属性 target2.title = ' + target2.title);
+
+            target2.dataset.author = "路人甲";
+            target2.setAttribute("title", "换过了");
+            say2('改完之后：dataset.author = ' + target2.dataset.author
+              + '，title = ' + target2.title);
+            say2('（元素的 class 是：' + (target2.className || "（没有类名）") + '）');
+
+            document.getElementById('js37-demo2-btn').addEventListener('click', function () {
+              say2('此刻输入框：value（当前状态）= ' + input2.value
+                + '，getAttribute("value")（初始值）= ' + input2.getAttribute("value"));
+            });
+            say2('请先把输入框改成别的内容再点按钮，就能看到“当前值”与“初始值”的差别');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p id="js37-demo2-target" data-author="墨白" data-post-id="1024" title="我是 title 属性">
+              我是被操纵的目标元素。
+            </p>
+            <p><input id="js37-demo2-input" type="text" value="默认值" size="20"></p>
+            <p>
+              <button type="button" id="js37-demo2-btn">读一读它的状态</button>
+            </p>
+            <ul id="js37-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var target2 = document.getElementById('js37-demo2-target');
+            var input2 = document.getElementById('js37-demo2-input');
+            var list2 = document.getElementById('js37-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            say2('textContent 读出来：' + target2.textContent.trim());
+            say2('dataset.author = ' + target2.dataset.author
+              + '，dataset.postId = ' + target2.dataset.postId + '（连字符自动变驼峰）');
+            say2('getAttribute("title") = ' + target2.getAttribute("title")
+              + '；直接属性 target2.title = ' + target2.title);
+
+            target2.dataset.author = "路人甲";
+            target2.setAttribute("title", "换过了");
+            say2('改完之后：dataset.author = ' + target2.dataset.author
+              + '，title = ' + target2.title);
+            say2('（元素的 class 是：' + (target2.className || "（没有类名）") + '）');
+
+            document.getElementById('js37-demo2-btn').addEventListener('click', function () {
+              say2('此刻输入框：value（当前状态）= ' + input2.value
+                + '，getAttribute("value")（初始值）= ' + input2.getAttribute("value"));
+            });
+            say2('请先把输入框改成别的内容再点按钮，就能看到“当前值”与“初始值”的差别');
+          </script>
+        </div>
+      </div>
+
+      <h2>第三件事：类名与样式</h2>
+      <p>
+        <strong>能用类名切换的样式，就别用 JS 一条条写 style</strong>——
+        样式留在 CSS 里（第十二式的分工），JS 只负责加减类名。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="classList 与 style 的常见用法">
+        el.classList.add("active");          // 加
+        el.classList.remove("active");       // 去
+        el.classList.toggle("active");       // 有就删、没有就加（返回当前是否有）
+        el.classList.contains("active");     // 问有没有
+        el.classList.replace("old", "new");  // 换一个
+
+        el.style.color = "#b03a2e";          // 改行内样式：CSS 属性名要转成驼峰
+        el.style.setProperty("--scale", 1.5);// 连 CSS 变量也能改（第二十五式）
+        getComputedStyle(el).color;          // 读取“最终生效”的样式（只读）
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 点按钮切类名与变量，样式由 CSS 负责</div>
+        <div class="demo-preview">
+          <style>
+            #js37-demo3-card {
+              --scale: 1;
+              border: 1px solid #d4cab0; border-radius: 10px; padding: .7rem .9rem;
+              background: #fffdf7; font-size: calc(.9rem * var(--scale));
+              transition: transform .2s ease-out;
+            }
+            #js37-demo3-card.is-active {
+              background: #f3e3dd; border-color: #b03a2e; transform: translateY(-3px);
+            }
+            #js37-demo3-card.is-active strong { color: #b03a2e; }
+          </style>
+          <div id="js37-demo3-card">
+            <strong>我是卡片</strong>
+            <p style="margin: .3rem 0 0" id="js37-demo3-text">点下面的按钮，我会换一身打扮。</p>
+          </div>
+          <p style="margin: .6rem 0 0">
+            <button type="button" id="js37-demo3-toggle">切换 is-active 类</button>
+            <button type="button" id="js37-demo3-scale">把文字放大一点</button>
+          </p>
+          <ul id="js37-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var card3 = document.getElementById('js37-demo3-card');
+            var list3 = document.getElementById('js37-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            document.getElementById('js37-demo3-toggle').addEventListener('click', function () {
+              var now = card3.classList.toggle("is-active");
+              say3('classList.toggle("is-active") 返回 ' + now + '；当前类名：' + card3.className);
+              say3('计算后的背景色：' + getComputedStyle(card3).backgroundColor);
+            });
+
+            document.getElementById('js37-demo3-scale').addEventListener('click', function () {
+              var scale = Number(getComputedStyle(card3).getPropertyValue("--scale")) || 1;
+              var next = Math.min(2, Math.round((scale + 0.2) * 10) / 10);
+              card3.style.setProperty("--scale", next);
+              say3('用 setProperty 改 CSS 变量：--scale = ' + next
+                + '；字号变成 ' + getComputedStyle(card3).fontSize);
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="js37-demo3-card">
+              <strong>我是卡片</strong>
+              <p style="margin: .3rem 0 0" id="js37-demo3-text">点下面的按钮，我会换一身打扮。</p>
+            </div>
+            <p style="margin: .6rem 0 0">
+              <button type="button" id="js37-demo3-toggle">切换 is-active 类</button>
+              <button type="button" id="js37-demo3-scale">把文字放大一点</button>
+            </p>
+            <ul id="js37-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则（内部样式）">
+            #js37-demo3-card {
+              --scale: 1;
+              border: 1px solid #d4cab0; border-radius: 10px; padding: .7rem .9rem;
+              background: #fffdf7; font-size: calc(.9rem * var(--scale));
+              transition: transform .2s ease-out;
+            }
+            #js37-demo3-card.is-active {
+              background: #f3e3dd; border-color: #b03a2e; transform: translateY(-3px);
+            }
+            #js37-demo3-card.is-active strong { color: #b03a2e; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var card3 = document.getElementById('js37-demo3-card');
+            var list3 = document.getElementById('js37-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            document.getElementById('js37-demo3-toggle').addEventListener('click', function () {
+              var now = card3.classList.toggle("is-active");
+              say3('classList.toggle("is-active") 返回 ' + now + '；当前类名：' + card3.className);
+              say3('计算后的背景色：' + getComputedStyle(card3).backgroundColor);
+            });
+
+            document.getElementById('js37-demo3-scale').addEventListener('click', function () {
+              var scale = Number(getComputedStyle(card3).getPropertyValue("--scale")) || 1;
+              var next = Math.min(2, Math.round((scale + 0.2) * 10) / 10);
+              card3.style.setProperty("--scale", next);
+              say3('用 setProperty 改 CSS 变量：--scale = ' + next
+                + '；字号变成 ' + getComputedStyle(card3).fontSize);
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>第四件事：增、删、换</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>想做的事</th>
+            <th>写法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>造一个新元素</td><td><code>const li = document.createElement("li")</code>（还没进页面）</td></tr>
+          <tr><td>塞到末尾 / 开头</td><td><code>parent.append(li)</code> / <code>parent.prepend(li)</code>（可一次传多个）</td></tr>
+          <tr><td>插到某个元素前后</td><td><code>ref.before(li)</code> / <code>ref.after(li)</code></td></tr>
+          <tr><td>替换 / 删除</td><td><code>ref.replaceWith(li)</code> / <code>el.remove()</code></td></tr>
+          <tr><td>复制一份</td><td><code>el.cloneNode(true)</code>（true 表示连子孙一起复制）</td></tr>
+          <tr><td>插入纯文本</td><td><code>el.insertAdjacentText("beforeend", "文字")</code>（不会解析标签，最安全）</td></tr>
+          <tr><td><strong>批量插入</strong></td><td>先都塞进 <code>document.createDocumentFragment()</code>，最后一次性 <code>append(frag)</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 增删改与批量插入（含两种插入方式的耗时对比）</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js37-demo4-add">加一项</button>
+            <button type="button" id="js37-demo4-remove">删最后一项</button>
+            <button type="button" id="js37-demo4-clone">复制第一项</button>
+            <button type="button" id="js37-demo4-batch">批量插入 500 项并计时</button>
+          </p>
+          <ul id="js37-demo4-list" style="margin: 0; max-height: 120px; overflow: auto"></ul>
+          <ul id="js37-demo4-out" style="margin: .5rem 0 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js37-demo4-list');
+            var out4 = document.getElementById('js37-demo4-out');
+            var seq4 = 0;
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out4.appendChild(li);
+            }
+            function makeItem4() {
+              seq4 += 1;
+              var li = document.createElement('li');
+              li.textContent = '第 ' + seq4 + ' 项';
+              li.dataset.seq = seq4;
+              return li;
+            }
+
+            list4.append(makeItem4(), makeItem4(), makeItem4());
+            say4('初始三项：' + [...list4.children].map(function (li) { return li.textContent; }).join('、'));
+
+            document.getElementById('js37-demo4-add').addEventListener('click', function () {
+              var item = makeItem4();
+              list4.prepend(item);              // 这次插到开头，好观察
+              say4('prepend 之后共 ' + list4.children.length + ' 项，第一项是「' + list4.firstElementChild.textContent + '」');
+            });
+
+            document.getElementById('js37-demo4-remove').addEventListener('click', function () {
+              var last = list4.lastElementChild;
+              if (!last) { say4('已经没有可删的了'); return; }
+              var text = last.textContent;
+              last.remove();
+              say4('remove() 删掉了「' + text + '」，还剩 ' + list4.children.length + ' 项');
+            });
+
+            document.getElementById('js37-demo4-clone').addEventListener('click', function () {
+              var first = list4.firstElementChild;
+              if (!first) { say4('没有可复制的项'); return; }
+              var copy = first.cloneNode(true);
+              copy.dataset.seq = (Number(first.dataset.seq) || 0) + "-copy";
+              first.after(copy);
+              say4('cloneNode(true) 复制了一份插到原项后面，data-seq = ' + copy.dataset.seq);
+            });
+
+            document.getElementById('js37-demo4-batch').addEventListener('click', function () {
+              list4.textContent = "";
+              var t0 = performance.now();
+              for (var i = 0; i < 500; i++) {
+                var f = document.createElement("li");
+                f.textContent = '批量 ' + (i + 1);
+                list4.append(f);                 // 每次都插
+                list4.offsetHeight;              // 顺手读一次尺寸，逼浏览器立刻结算布局（现实里“边写边读”就是这么把页面拖慢的）
+              }
+              var t1 = performance.now();
+
+              list4.textContent = "";
+              var t2 = performance.now();
+              var frag = document.createDocumentFragment();
+              for (var j = 0; j < 500; j++) {
+                var g = document.createElement("li");
+                g.textContent = '批量 ' + (j + 1);
+                frag.append(g);                  // 先攒在片段里，不碰页面
+              }
+              list4.append(frag);                // 一次插入
+              var t3 = performance.now();
+
+              say4('逐个插入 500 项：' + (t1 - t0).toFixed(1) + ' ms；'
+                + '先攒进 DocumentFragment 再一次性插入：' + (t3 - t2).toFixed(1) + ' ms');
+              say4('页面里现在有 ' + list4.children.length + ' 项（两种写法结果一样，差别只在布局被反复结算了多少次）');
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js37-demo4-add">加一项</button>
+              <button type="button" id="js37-demo4-remove">删最后一项</button>
+              <button type="button" id="js37-demo4-clone">复制第一项</button>
+              <button type="button" id="js37-demo4-batch">批量插入 500 项并计时</button>
+            </p>
+            <ul id="js37-demo4-list" style="margin: 0; max-height: 120px; overflow: auto"></ul>
+            <ul id="js37-demo4-out" style="margin: .5rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js37-demo4-list');
+            var out4 = document.getElementById('js37-demo4-out');
+            var seq4 = 0;
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out4.appendChild(li);
+            }
+            function makeItem4() {
+              seq4 += 1;
+              var li = document.createElement('li');
+              li.textContent = '第 ' + seq4 + ' 项';
+              li.dataset.seq = seq4;
+              return li;
+            }
+
+            list4.append(makeItem4(), makeItem4(), makeItem4());
+            say4('初始三项：' + [...list4.children].map(function (li) { return li.textContent; }).join('、'));
+
+            document.getElementById('js37-demo4-add').addEventListener('click', function () {
+              var item = makeItem4();
+              list4.prepend(item);              // 这次插到开头，好观察
+              say4('prepend 之后共 ' + list4.children.length + ' 项，第一项是「' + list4.firstElementChild.textContent + '」');
+            });
+
+            document.getElementById('js37-demo4-remove').addEventListener('click', function () {
+              var last = list4.lastElementChild;
+              if (!last) { say4('已经没有可删的了'); return; }
+              var text = last.textContent;
+              last.remove();
+              say4('remove() 删掉了「' + text + '」，还剩 ' + list4.children.length + ' 项');
+            });
+
+            document.getElementById('js37-demo4-clone').addEventListener('click', function () {
+              var first = list4.firstElementChild;
+              if (!first) { say4('没有可复制的项'); return; }
+              var copy = first.cloneNode(true);
+              copy.dataset.seq = (Number(first.dataset.seq) || 0) + "-copy";
+              first.after(copy);
+              say4('cloneNode(true) 复制了一份插到原项后面，data-seq = ' + copy.dataset.seq);
+            });
+
+            document.getElementById('js37-demo4-batch').addEventListener('click', function () {
+              list4.textContent = "";
+              var t0 = performance.now();
+              for (var i = 0; i < 500; i++) {
+                var f = document.createElement("li");
+                f.textContent = '批量 ' + (i + 1);
+                list4.append(f);                 // 每次都插
+                list4.offsetHeight;              // 顺手读一次尺寸，逼浏览器立刻结算布局（现实里“边写边读”就是这么把页面拖慢的）
+              }
+              var t1 = performance.now();
+
+              list4.textContent = "";
+              var t2 = performance.now();
+              var frag = document.createDocumentFragment();
+              for (var j = 0; j < 500; j++) {
+                var g = document.createElement("li");
+                g.textContent = '批量 ' + (j + 1);
+                frag.append(g);                  // 先攒在片段里，不碰页面
+              }
+              list4.append(frag);                // 一次插入
+              var t3 = performance.now();
+
+              say4('逐个插入 500 项：' + (t1 - t0).toFixed(1) + ' ms；'
+                + '先攒进 DocumentFragment 再一次性插入：' + (t3 - t2).toFixed(1) + ' ms');
+              say4('页面里现在有 ' + list4.children.length + ' 项（两种写法结果一样，差别只在布局被反复结算了多少次）');
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>安全：innerHTML 是“代码执行入口”</h2>
+      <p>
+        <code>innerHTML</code> 会把字符串当 HTML 解析：写进去的标签会真的变成元素、
+        属性里的脚本可能被执行。如果那段字符串来自用户（评论、昵称、搜索词），
+        就等于把页面交给了别人。看一个无害的对照实验：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 同一段字符串，两种写法两种命运</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .3rem"><strong>用 innerHTML 写入：</strong></p>
+          <div id="js37-demo5-html" style="border: 1px dashed #d4cab0; padding: .4rem .6rem; background: #fffdf7"></div>
+          <p style="margin: .6rem 0 .3rem"><strong>用 textContent 写入：</strong></p>
+          <div id="js37-demo5-text" style="border: 1px dashed #d4cab0; padding: .4rem .6rem; background: #fffdf7"></div>
+          <ul id="js37-demo5-out" style="margin: .5rem 0 0"></ul>
+          <script>
+            "use strict";
+            var out5 = document.getElementById('js37-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out5.appendChild(li);
+            }
+
+            var fromUser = '<strong>我是粗体</strong>，而 <span>标签</span> 会被解析成元素。';
+
+            var htmlBox = document.getElementById('js37-demo5-html');
+            htmlBox.innerHTML = fromUser;
+            say5('innerHTML 之后：盒子里有 ' + htmlBox.children.length
+              + ' 个子元素（strong、span 真的变成了元素）');
+
+            var textBox = document.getElementById('js37-demo5-text');
+            textBox.textContent = fromUser;
+            say5('textContent 之后：盒子里有 ' + textBox.children.length
+              + ' 个子元素，整段字符串原样显示为文字');
+
+            say5('结论：用户输入一律用 textContent（或 createElement + textContent 拼结构）；'
+              + 'innerHTML 只用来放“你自己写死的、信得过的 HTML 片段”');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .3rem"><strong>用 innerHTML 写入：</strong></p>
+            <div id="js37-demo5-html" style="border: 1px dashed #d4cab0; padding: .4rem .6rem; background: #fffdf7"></div>
+            <p style="margin: .6rem 0 .3rem"><strong>用 textContent 写入：</strong></p>
+            <div id="js37-demo5-text" style="border: 1px dashed #d4cab0; padding: .4rem .6rem; background: #fffdf7"></div>
+            <ul id="js37-demo5-out" style="margin: .5rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out5 = document.getElementById('js37-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out5.appendChild(li);
+            }
+
+            var fromUser = '<strong>我是粗体</strong>，而 <span>标签</span> 会被解析成元素。';
+
+            var htmlBox = document.getElementById('js37-demo5-html');
+            htmlBox.innerHTML = fromUser;
+            say5('innerHTML 之后：盒子里有 ' + htmlBox.children.length
+              + ' 个子元素（strong、span 真的变成了元素）');
+
+            var textBox = document.getElementById('js37-demo5-text');
+            textBox.textContent = fromUser;
+            say5('textContent 之后：盒子里有 ' + textBox.children.length
+              + ' 个子元素，整段字符串原样显示为文字');
+
+            say5('结论：用户输入一律用 textContent（或 createElement + textContent 拼结构）；'
+              + 'innerHTML 只用来放“你自己写死的、信得过的 HTML 片段”');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">给动态内容的三个习惯</div>
+        <ul style="margin:0">
+          <li><strong>文本用 <code>textContent</code></strong>；需要结构就 <code>createElement</code>
+            逐个拼（或用 <code>&lt;template&gt;</code> 克隆）；</li>
+          <li><strong>属性用 <code>setAttribute</code> 或直接赋值</strong>，
+            别把用户输入拼进 HTML 字符串里；<code>href</code> 这类要额外小心
+            （<code>javascript:</code> 开头的地址点击即执行）；</li>
+          <li><strong>要插的元素很多时，先攒进 <code>DocumentFragment</code></strong>
+            再一次性插入；也尽量别在循环里<strong>边写边读</strong>——<code>offsetHeight</code>
+            这类读操作会逼浏览器立刻结算布局，例 4 的两种计时就是这件事的直观证据。</li>
+        </ul>
+      </div>
+
+      <h2>表单控件的值</h2>
+      <p>
+        表单是 DOM 操作的高频场景，记住每个控件“值放在哪”：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>控件</th>
+            <th>读值</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>文本框 / 密码框 / 多行文本</td><td><code>input.value</code> / <code>textarea.value</code></td><td>总是取<strong>当前</strong>输入</td></tr>
+          <tr><td>复选框</td><td><code>input.checked</code></td><td>布尔值；<code>value</code> 是它提交时的值</td></tr>
+          <tr><td>单选框组</td><td><code>document.querySelector('input[name="x"]:checked')</code></td><td>或配合 <code>form.elements</code> 遍历</td></tr>
+          <tr><td>下拉框</td><td><code>select.value</code>（多选时 <code>selectedOptions</code>）</td><td>取的是被选中项的值</td></tr>
+          <tr><td>整个表单</td><td><code>form.elements</code></td><td>按 <code>name</code> 取用，如 <code>form.elements.email.value</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        还有一个好用的组合：<code>new FormData(form)</code> 能把整张表单的键值一次抓出来，
+        配合 <code>Object.fromEntries(formData)</code> 直接变成对象
+        （第四十式讲数据时还会遇到它）。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>DOM 是内存里的节点树，<code>document</code> 是入口；改页面＝找到节点再改它；</li>
+        <li>查找：<code>getElementById</code> 最快、<code>querySelector(All)</code> 最通用、
+          <code>getElementsByClassName</code> 是“活的”；<code>NodeList</code> 要用
+          <code>[...]</code> 转成数组；</li>
+        <li>文本用 <code>textContent</code>、信任的 HTML 片段才用 <code>innerHTML</code>；
+          表单控件用 property（<code>value</code> / <code>checked</code>）而不是 attribute；</li>
+        <li><code>classList</code> 切类名、<code>style.setProperty</code> 改变量、
+          <code>getComputedStyle</code> 读最终样式；</li>
+        <li>增删改：<code>createElement</code>、<code>append/prepend/before/after</code>、
+          <code>replaceWith</code>、<code>remove</code>、<code>cloneNode(true)</code>；
+          批量插入用 <code>DocumentFragment</code>；</li>
+        <li>安全：用户输入永远当<strong>文字</strong>处理，绝不拼进 HTML 字符串。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十七式</div>
+        <ol>
+          <li>做一个“留言板”：一个输入框 + 一个按钮，点击后把输入内容作为新条目加到列表里
+            （要求：用 <code>textContent</code>，空输入不添加，新条目插在最前面）。</li>
+          <li>给每个留言条目加一个“删除”按钮：点击后把这一条从列表里移除
+            （提示：在回调里用 <code>event.target.closest("li")</code> 找到所属条目，
+            事件委托第三十八式会正式讲）。</li>
+          <li>思考：为什么 <code>innerHTML</code> 能够执行内容里的标签与脚本，
+            而 <code>textContent</code> 不能？这两种“信任级别”分别适合什么场景？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <input id="msg-input" type="text" placeholder="写点什么">
+            <button type="button" id="msg-add">发布</button>
+            <ul id="msg-list"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+
+            const input = document.getElementById("msg-input");
+            const addBtn = document.getElementById("msg-add");
+            const list = document.getElementById("msg-list");
+
+            addBtn.addEventListener("click", () => {
+              const text = input.value.trim();     // 先去掉两头空白
+              if (!text) return;                   // 空输入不添加
+
+              const li = document.createElement("li");
+              li.textContent = text;               // 用 textContent：用户输入只当文字
+              list.prepend(li);                    // 新条目插到最前面
+              input.value = "";                    // 清空输入框，方便连着发
+              input.focus();
+            });
+          </script>
+          <p>
+            四个细节都值得保留：<code>trim()</code> 挡掉纯空格、<code>textContent</code>
+            保证安全、<code>prepend</code> 让最新的在最上面、发完清空并聚焦输入框。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="给条目加删除按钮">
+            "use strict";
+
+            // 在创建条目时一并造出删除按钮
+            function createItem(text) {
+              const li = document.createElement("li");
+              const span = document.createElement("span");
+              span.textContent = text;
+
+              const del = document.createElement("button");
+              del.type = "button";
+              del.className = "del";
+              del.textContent = "删除";
+
+              li.append(span, del);
+              return li;
+            }
+
+            // 事件委托：绑在列表上，动态添加的条目也能响应
+            list.addEventListener("click", (event) => {
+              if (!event.target.classList.contains("del")) return;  // 只处理删除按钮
+              const li = event.target.closest("li");
+              if (li) li.remove();
+            });
+          </script>
+          <p>
+            两个关键点：①先判断 <code>event.target</code> 是不是删除按钮，
+            避免点条目本体也触发删除；②用 <code>closest("li")</code>
+            从按钮往上找所属条目——把事件绑在父容器上（事件委托），
+            后来新增的条目就不用再单独绑定了。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>innerHTML</code> 的语义就是“把这段字符串<strong>当 HTML 解析</strong>”：
+            浏览器会按解析 HTML 的规则建出元素、设置属性，
+            而某些属性（如内联事件处理器、<code>javascript:</code> 地址）本就带有执行能力，
+            所以它能“执行内容里的脚本”。<code>textContent</code> 的语义是“这段字符串就是文字”，
+            标签只会原样显示，绝不会变成元素。
+            两种信任级别的使用场景很明确：
+            <strong>自己写死的、可信的 HTML 片段</strong>（比如从本地模板文件里取来的骨架）
+            可以用 <code>innerHTML</code> 省事；
+            <strong>任何来自用户、地址栏、接口的数据</strong>都必须走
+            <code>textContent</code> 或 <code>createElement</code> + <code>textContent</code>。
+            一句话：<strong>信任级别决定写法，而不是顺手决定写法。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，让页面听得见动作：事件与事件委托。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

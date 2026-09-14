@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十四式 · 过渡、变形与动画 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="transition 四件套与缓动函数、transform 家族与变形原点、@keyframes 动画、性能与无障碍注意事项（prefers-reduced-motion）。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-24">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前面二十三式，页面都是“静”的。这一式给它加一点“呼吸”：
+        鼠标移上去轻轻浮起、按钮按下去有回应、加载时转个小圈。
+        <strong>动效是调味料——放对了提鲜，放多了齁人</strong>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>掌握 <code>transition</code> 四件套与常用缓动函数，知道哪些属性可以过渡</li>
+          <li>会用 <code>transform</code> 做位移、缩放、旋转、倾斜，理解“多个变换的顺序”</li>
+          <li>会用 <code>@keyframes</code> 写关键帧动画，掌握 <code>animation</code> 简写里各个值的含义</li>
+          <li>记住两条底线：<strong>优先动画 <code>transform</code> 与 <code>opacity</code></strong>、
+            <strong>必须照顾 <code>prefers-reduced-motion</code></strong></li>
+        </ul>
+      </div>
+
+      <h2>过渡 transition：从 A 到 B 的补间</h2>
+      <p>
+        过渡不创造新动作，它只做一件事：<strong>当某个属性变化时，别瞬间跳过去，而是用一段时间滑过去</strong>。
+        四个子属性拼成一套：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>子属性</th>
+            <th>含义</th>
+            <th>常用值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>transition-property</code></td><td>对哪些属性做过渡</td><td>具体的属性名，或 <code>all</code>（慎用）</td></tr>
+          <tr><td><code>transition-duration</code></td><td>持续多久</td><td><code>.2s</code>、<code>300ms</code></td></tr>
+          <tr><td><code>transition-timing-function</code></td><td>用哪种节奏</td><td><code>ease</code>（默认）、<code>linear</code>、<code>ease-out</code>、<code>cubic-bezier(…)</code>、<code>steps(…)</code></td></tr>
+          <tr><td><code>transition-delay</code></td><td>延迟多久开始</td><td><code>0s</code>、<code>.1s</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        简写 <code>transition</code> 的顺序是“<strong>属性 时长 缓动 延迟</strong>”——
+        两个时间值里<strong>第一个是时长、第二个是延迟</strong>，这是最容易记混的地方：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="过渡的写法">
+        .btn {
+          transition: background-color .2s ease, transform .2s ease;  /* 推荐：写清楚哪些属性 */
+          /* transition: all .2s;  ← 能用，但什么属性变都会动，容易出意外，也费性能 */
+        }
+      </script>
+      <p>
+        还有一条常被忽略：<strong>不是所有属性都能过渡</strong>。
+        能过渡的是那些“值可以插值”的属性——颜色、长度、透明度、<code>transform</code> 等；
+        而 <code>display</code>、<code>position</code> 这类“开关式”的属性默认没有中间状态。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 时长决定手感（三个按钮，只有时长不同）</div>
+        <div class="demo-preview">
+          <style>
+            #css24-demo1 .d-btn {
+              display: inline-block; margin: 0 .6rem .6rem 0; padding: .45rem .9rem;
+              background: #b03a2e; color: #fff; border-radius: 8px; font-size: .85rem;
+              cursor: pointer; border: 0;
+              transition: transform .2s ease, box-shadow .2s ease;
+            }
+            #css24-demo1 .fast { transition-duration: .08s, .08s; }
+            #css24-demo1 .normal { transition-duration: .25s, .25s; }
+            #css24-demo1 .slow { transition-duration: .9s, .9s; }
+            #css24-demo1 .d-btn:hover, #css24-demo1 .d-btn:focus-visible {
+              transform: translateY(-4px); box-shadow: 0 8px 16px rgb(0 0 0 / 22%);
+            }
+          </style>
+          <div id="css24-demo1">
+            <button type="button" class="d-btn fast">0.08 秒（几乎瞬变）</button>
+            <button type="button" class="d-btn normal">0.25 秒（常用）</button>
+            <button type="button" class="d-btn slow">0.9 秒（慢得发飘）</button>
+            <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+              把鼠标移到按钮上（或用 Tab 聚焦），体验三种手感——悬停不生效时，请用键盘聚焦试试。
+            </p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css24-demo1">
+              <button type="button" class="d-btn fast">0.08 秒（几乎瞬变）</button>
+              <button type="button" class="d-btn normal">0.25 秒（常用）</button>
+              <button type="button" class="d-btn slow">0.9 秒（慢得发飘）</button>
+              <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+                把鼠标移到按钮上（或用 Tab 聚焦），体验三种手感——悬停不生效时，请用键盘聚焦试试。
+              </p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css24-demo1 .d-btn {
+              display: inline-block; margin: 0 .6rem .6rem 0; padding: .45rem .9rem;
+              background: #b03a2e; color: #fff; border-radius: 8px; font-size: .85rem;
+              cursor: pointer; border: 0;
+              transition: transform .2s ease, box-shadow .2s ease;
+            }
+            #css24-demo1 .fast { transition-duration: .08s, .08s; }
+            #css24-demo1 .normal { transition-duration: .25s, .25s; }
+            #css24-demo1 .slow { transition-duration: .9s, .9s; }
+            #css24-demo1 .d-btn:hover, #css24-demo1 .d-btn:focus-visible {
+              transform: translateY(-4px); box-shadow: 0 8px 16px rgb(0 0 0 / 22%);
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        时长没有绝对标准，但有几条经验：<strong>按钮反馈 0.1–0.2s、面板展开 0.2–0.3s、
+        大幅位移 0.3–0.5s</strong>；超过 0.6s 的动作会让人等得烦躁，
+        除非它本来就是“缓慢”的表达（比如淡入的封面图）。
+      </p>
+
+      <h2>缓动函数：动作的“性格”</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>取值</th>
+            <th>手感</th>
+            <th>适合</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>linear</code></td><td>匀速，机械感</td><td>进度条、旋转的加载圈</td></tr>
+          <tr><td><code>ease</code>（默认）</td><td>两头稍慢，综合平衡</td><td>不确定用什么时的安全选择</td></tr>
+          <tr><td><code>ease-out</code></td><td>开头快、结尾慢</td><td><strong>元素进场</strong>（浮出、滑入）</td></tr>
+          <tr><td><code>ease-in</code></td><td>开头慢、结尾快</td><td>元素离场（飞走、收回）</td></tr>
+          <tr><td><code>ease-in-out</code></td><td>两头慢、中间快</td><td>来回移动（抽屉、轮播）</td></tr>
+          <tr><td><code>cubic-bezier(x1,y1,x2,y2)</code></td><td>自定义曲线</td><td>“回弹”“超冲”这类个性动作</td></tr>
+          <tr><td><code>steps(4)</code></td><td>一步一步跳</td><td>逐帧动画、打字机效果</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 五种节奏同时起跑（把鼠标移进虚线框，五块同时出发）</div>
+        <div class="demo-preview">
+          <style>
+            #css24-demo2 .track {
+              position: relative; height: 30px; border-bottom: 1px dashed #d4cab0; margin-bottom: .3rem;
+              overflow: hidden;
+            }
+            #css24-demo2 .chip {
+              position: absolute; left: 0; top: 3px; width: 68px; padding: .15rem 0;
+              background: #b03a2e; color: #fff; border-radius: 6px;
+              font-size: .72rem; text-align: center;
+              transition: transform 1.1s;
+            }
+            #css24-demo2 .label { font-size: .72rem; color: #6f6a5e; position: absolute; right: 0; top: 8px; }
+            #css24-demo2 .linear .chip { transition-timing-function: linear; }
+            #css24-demo2 .easein .chip { transition-timing-function: ease-in; }
+            #css24-demo2 .easeout .chip { transition-timing-function: ease-out; }
+            #css24-demo2 .easeinout .chip { transition-timing-function: ease-in-out; }
+            #css24-demo2 .step .chip { transition-timing-function: steps(5); }
+            #css24-demo2 .stage:hover .chip, #css24-demo2 .stage:focus-within .chip { transform: translateX(calc(100% + 240px)); }
+          </style>
+          <div id="css24-demo2">
+            <div class="stage" tabindex="0">
+              <div class="track linear"><span class="chip">linear</span><span class="label">匀速</span></div>
+              <div class="track easein"><span class="chip">ease-in</span><span class="label">慢起快落</span></div>
+              <div class="track easeout"><span class="chip">ease-out</span><span class="label">快起慢停</span></div>
+              <div class="track easeinout"><span class="chip">ease-in-out</span><span class="label">两头慢中间快</span></div>
+              <div class="track step"><span class="chip">steps(5)</span><span class="label">五步一跳</span></div>
+            </div>
+            <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+              移进来再移出去，看五种节奏的差别；移出鼠标它们会按同样的规律回到起点。
+            </p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css24-demo2">
+              <div class="stage" tabindex="0">
+                <div class="track linear"><span class="chip">linear</span><span class="label">匀速</span></div>
+                <div class="track easein"><span class="chip">ease-in</span><span class="label">慢起快落</span></div>
+                <div class="track easeout"><span class="chip">ease-out</span><span class="label">快起慢停</span></div>
+                <div class="track easeinout"><span class="chip">ease-in-out</span><span class="label">两头慢中间快</span></div>
+                <div class="track step"><span class="chip">steps(5)</span><span class="label">五步一跳</span></div>
+              </div>
+              <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+                移进来再移出去，看五种节奏的差别；移出鼠标它们会按同样的规律回到起点。
+              </p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css24-demo2 .track {
+              position: relative; height: 30px; border-bottom: 1px dashed #d4cab0; margin-bottom: .3rem;
+              overflow: hidden;
+            }
+            #css24-demo2 .chip {
+              position: absolute; left: 0; top: 3px; width: 68px; padding: .15rem 0;
+              background: #b03a2e; color: #fff; border-radius: 6px;
+              font-size: .72rem; text-align: center;
+              transition: transform 1.1s;
+            }
+            #css24-demo2 .label { font-size: .72rem; color: #6f6a5e; position: absolute; right: 0; top: 8px; }
+            #css24-demo2 .linear .chip { transition-timing-function: linear; }
+            #css24-demo2 .easein .chip { transition-timing-function: ease-in; }
+            #css24-demo2 .easeout .chip { transition-timing-function: ease-out; }
+            #css24-demo2 .easeinout .chip { transition-timing-function: ease-in-out; }
+            #css24-demo2 .step .chip { transition-timing-function: steps(5); }
+            #css24-demo2 .stage:hover .chip, #css24-demo2 .stage:focus-within .chip { transform: translateX(calc(100% + 240px)); }
+          </script>
+        </div>
+      </div>
+
+      <h2>变形 transform：不动布局的“整形”</h2>
+      <p>
+        <code>transform</code> 是动画的最佳拍档，因为它<strong>不影响其他元素的排版</strong>——
+        元素在文档流里的位置不变，只是“看起来”被挪动、放大、旋转了。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>函数</th>
+            <th>作用</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>translate(x, y)</code></td><td>平移（可以写百分比：相对自身尺寸）</td><td><code>translate(-50%, -50%)</code> 配合 <code>top/left: 50%</code> 做居中</td></tr>
+          <tr><td><code>translateX / translateY</code></td><td>只在一个方向平移</td><td>悬停上浮：<code>translateY(-4px)</code></td></tr>
+          <tr><td><code>scale(s)</code></td><td>缩放，1 是原始大小</td><td>图片悬停放大：<code>scale(1.06)</code></td></tr>
+          <tr><td><code>rotate(deg / turn)</code></td><td>旋转</td><td><code>rotate(45deg)</code>、<code>rotate(.5turn)</code></td></tr>
+          <tr><td><code>skew(deg)</code></td><td>倾斜</td><td>做“速度感”的斜切文字</td></tr>
+          <tr><td><code>transform-origin</code></td><td>变形围绕哪个点（默认正中心）</td><td><code>transform-origin: left center</code>：从左边开始放大</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · transform 四兄弟（鼠标悬停或 Tab 聚焦）</div>
+        <div class="demo-preview">
+          <style>
+            #css24-demo3 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css24-demo3 .tile {
+              width: 104px; height: 76px; display: flex; align-items: center; justify-content: center;
+              background: #fffdf7; border: 1px solid #d4cab0; border-radius: 8px;
+              font-size: .78rem; color: #b03a2e; cursor: pointer;
+              transition: transform .3s ease-out;
+            }
+            #css24-demo3 .move:hover, #css24-demo3 .move:focus-visible { transform: translateY(-8px); }
+            #css24-demo3 .grow:hover, #css24-demo3 .grow:focus-visible { transform: scale(1.15); }
+            #css24-demo3 .turn:hover, #css24-demo3 .turn:focus-visible { transform: rotate(-8deg); }
+            #css24-demo3 .tilt:hover, #css24-demo3 .tilt:focus-visible { transform: skewX(-10deg); }
+            #css24-demo3 .combo:hover, #css24-demo3 .combo:focus-visible { transform: translateY(-6px) scale(1.08) rotate(3deg); }
+          </style>
+          <div id="css24-demo3">
+            <div class="tile move" tabindex="0">上浮 translateY</div>
+            <div class="tile grow" tabindex="0">放大 scale</div>
+            <div class="tile turn" tabindex="0">旋转 rotate</div>
+            <div class="tile tilt" tabindex="0">倾斜 skewX</div>
+            <div class="tile combo" tabindex="0">组合动作</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css24-demo3">
+              <div class="tile move" tabindex="0">上浮 translateY</div>
+              <div class="tile grow" tabindex="0">放大 scale</div>
+              <div class="tile turn" tabindex="0">旋转 rotate</div>
+              <div class="tile tilt" tabindex="0">倾斜 skewX</div>
+              <div class="tile combo" tabindex="0">组合动作</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css24-demo3 { display: flex; gap: .8rem; flex-wrap: wrap; }
+            #css24-demo3 .tile {
+              width: 104px; height: 76px; display: flex; align-items: center; justify-content: center;
+              background: #fffdf7; border: 1px solid #d4cab0; border-radius: 8px;
+              font-size: .78rem; color: #b03a2e; cursor: pointer;
+              transition: transform .3s ease-out;
+            }
+            #css24-demo3 .move:hover, #css24-demo3 .move:focus-visible { transform: translateY(-8px); }
+            #css24-demo3 .grow:hover, #css24-demo3 .grow:focus-visible { transform: scale(1.15); }
+            #css24-demo3 .turn:hover, #css24-demo3 .turn:focus-visible { transform: rotate(-8deg); }
+            #css24-demo3 .tilt:hover, #css24-demo3 .tilt:focus-visible { transform: skewX(-10deg); }
+            #css24-demo3 .combo:hover, #css24-demo3 .combo:focus-visible { transform: translateY(-6px) scale(1.08) rotate(3deg); }
+          </script>
+        </div>
+      </div>
+      <p>
+        组合写法里有个容易困惑的点：<strong>多个变换按从左到右的顺序生效</strong>。
+        <code>translateY(-6px) scale(1.08)</code> 是“先上浮再放大”，
+        而 <code>scale(1.08) translateY(-6px)</code> 是“先放大、再在被放大后的坐标系里往上挪”——
+        后者的位移看起来会更远。顺序不同，结果不同。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">提醒：<code>transform</code> 会创建新的层叠上下文</div>
+        <p style="margin:0">
+          第二十式说过：<code>transform</code> 不是 <code>none</code> 的元素会自成一层。
+          所以给某个元素加了变形之后，它内部用 <code>z-index</code> 排的层级只会和“同层”的兄弟比较，
+          盖不住外面更靠上的元素——别再用 <code>z-index: 9999</code> 硬顶，先看看层叠上下文。
+        </p>
+      </div>
+
+      <h2>实战：卡片悬停浮起</h2>
+      <div class="demo">
+        <div class="demo-caption">例 4 · 最常见的动效套路：上浮 + 阴影加深 + 图片缓放大</div>
+        <div class="demo-preview">
+          <style>
+            #css24-demo4 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css24-demo4 .d-card {
+              width: 210px; background: #fffdf7; border: 1px solid #d4cab0; border-radius: 10px;
+              overflow: hidden; cursor: pointer;
+              transition: transform .25s ease-out, box-shadow .25s ease-out, border-color .25s ease-out;
+            }
+            #css24-demo4 .d-card:hover, #css24-demo4 .d-card:focus-visible {
+              transform: translateY(-6px);
+              box-shadow: 0 12px 24px rgb(0 0 0 / 18%);
+              border-color: #b03a2e;
+            }
+            #css24-demo4 .thumb { height: 84px; background: #f3e3dd; display: flex; align-items: center; justify-content: center;
+              color: #b03a2e; font-size: .8rem; transition: transform .35s ease-out; }
+            #css24-demo4 .d-card:hover .thumb, #css24-demo4 .d-card:focus-visible .thumb { transform: scale(1.06); }
+            #css24-demo4 .body { padding: .6rem .7rem .7rem; font-size: .84rem; }
+            #css24-demo4 .body strong { display: block; margin-bottom: .2rem; }
+          </style>
+          <div id="css24-demo4">
+            <div class="d-card" tabindex="0">
+              <div class="thumb">封面图</div>
+              <div class="body">
+                <strong>站桩三月记</strong>
+                <span style="color: #6f6a5e; font-size: .8rem">悬停看效果（键盘聚焦也行）</span>
+              </div>
+            </div>
+            <div class="d-card" tabindex="0">
+              <div class="thumb">封面图</div>
+              <div class="body">
+                <strong>第一次拆网页</strong>
+                <span style="color: #6f6a5e; font-size: .8rem">同一套动效，写一次就够了</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css24-demo4">
+              <div class="d-card" tabindex="0">
+                <div class="thumb">封面图</div>
+                <div class="body">
+                  <strong>站桩三月记</strong>
+                  <span style="color: #6f6a5e; font-size: .8rem">悬停看效果（键盘聚焦也行）</span>
+                </div>
+              </div>
+              <div class="d-card" tabindex="0">
+                <div class="thumb">封面图</div>
+                <div class="body">
+                  <strong>第一次拆网页</strong>
+                  <span style="color: #6f6a5e; font-size: .8rem">同一套动效，写一次就够了</span>
+                </div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css24-demo4 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css24-demo4 .d-card {
+              width: 210px; background: #fffdf7; border: 1px solid #d4cab0; border-radius: 10px;
+              overflow: hidden; cursor: pointer;
+              transition: transform .25s ease-out, box-shadow .25s ease-out, border-color .25s ease-out;
+            }
+            #css24-demo4 .d-card:hover, #css24-demo4 .d-card:focus-visible {
+              transform: translateY(-6px);
+              box-shadow: 0 12px 24px rgb(0 0 0 / 18%);
+              border-color: #b03a2e;
+            }
+            #css24-demo4 .thumb { height: 84px; background: #f3e3dd; display: flex; align-items: center; justify-content: center;
+              color: #b03a2e; font-size: .8rem; transition: transform .35s ease-out; }
+            #css24-demo4 .d-card:hover .thumb, #css24-demo4 .d-card:focus-visible .thumb { transform: scale(1.06); }
+            #css24-demo4 .body { padding: .6rem .7rem .7rem; font-size: .84rem; }
+            #css24-demo4 .body strong { display: block; margin-bottom: .2rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        这套动效由三个小动作叠成：卡片整体上浮、阴影加深（显得离读者更近）、
+        封面图轻微放大（显得有生命）。<strong>全部只动 <code>transform</code> 与颜色/阴影</strong>，
+        没有改宽度、高度或位置——这是最省性能的一类动效。
+      </p>
+
+      <h2>关键帧动画 @keyframes</h2>
+      <p>
+        过渡只能做“两点之间”的补间；要做“转一圈”“闪三下”这种多段动作，
+        就得用 <code>@keyframes</code> 定义关键帧，再用 <code>animation</code> 播放：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="关键帧与播放">
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+
+        .spinner {
+          animation: spin .9s linear infinite;   /* 名字 时长 缓动 次数 */
+        }
+
+        @keyframes breathe {
+          0%   { transform: scale(1);    opacity: .85; }
+          50%  { transform: scale(1.06); opacity: 1; }
+          100% { transform: scale(1);    opacity: .85; }
+        }
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>动画子属性</th>
+            <th>含义</th>
+            <th>常用值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>animation-name</code></td><td>用哪套关键帧</td><td>自己起的名字</td></tr>
+          <tr><td><code>animation-duration</code></td><td>一次播放多久</td><td><code>.9s</code></td></tr>
+          <tr><td><code>animation-iteration-count</code></td><td>播放几次</td><td>数字，或 <code>infinite</code></td></tr>
+          <tr><td><code>animation-direction</code></td><td>方向</td><td><code>normal</code>、<code>reverse</code>、<code>alternate</code>（往返）</td></tr>
+          <tr><td><code>animation-fill-mode</code></td><td>开始前/结束后停在哪个状态</td><td><code>forwards</code>（停在最后一帧，最常用）</td></tr>
+          <tr><td><code>animation-play-state</code></td><td>暂停 / 继续</td><td><code>paused</code>（悬停时暂停很实用）</td></tr>
+          <tr><td><code>animation-delay</code></td><td>延迟多久开始</td><td><code>.2s</code>（还能做“逐个出现”的错位效果）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 两个小动画：转圈的加载指示 + 会呼吸的徽章</div>
+        <div class="demo-preview">
+          <style>
+            #css24-demo5 { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+            #css24-demo5 .spinner {
+              width: 34px; height: 34px; border-radius: 50%;
+              border: 4px solid #f3e3dd; border-top-color: #b03a2e;
+              animation: css24-spin .9s linear infinite;
+            }
+            #css24-demo5 .pulse {
+              display: inline-block; padding: .3rem .8rem; border-radius: 999px;
+              background: #b03a2e; color: #fff; font-size: .82rem;
+              animation: css24-breathe 2s ease-in-out infinite;
+            }
+            #css24-demo5 .note { font-size: .8rem; color: #6f6a5e; }
+            @keyframes css24-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes css24-breathe {
+              0%   { transform: scale(1);    opacity: .85; }
+              50%  { transform: scale(1.07); opacity: 1; }
+              100% { transform: scale(1);    opacity: .85; }
+            }
+            /* 关键：系统里开了“减少动态效果”的读者，看到的是静态版本 */
+            @media (prefers-reduced-motion: reduce) {
+              #css24-demo5 .spinner { animation: none; border-top-color: #b03a2e; }
+              #css24-demo5 .pulse { animation: none; }
+            }
+          </style>
+          <div id="css24-demo5">
+            <div class="spinner" role="status" aria-label="正在加载"></div>
+            <span class="pulse">新</span>
+            <span class="note">左：<code>animation: … linear infinite</code>；右：关键帧写了 0% / 50% / 100%。</span>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css24-demo5">
+              <div class="spinner" role="status" aria-label="正在加载"></div>
+              <span class="pulse">新</span>
+              <span class="note">左：<code>animation: … linear infinite</code>；右：关键帧写了 0% / 50% / 100%。</span>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css24-demo5 { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+            #css24-demo5 .spinner {
+              width: 34px; height: 34px; border-radius: 50%;
+              border: 4px solid #f3e3dd; border-top-color: #b03a2e;
+              animation: css24-spin .9s linear infinite;
+            }
+            #css24-demo5 .pulse {
+              display: inline-block; padding: .3rem .8rem; border-radius: 999px;
+              background: #b03a2e; color: #fff; font-size: .82rem;
+              animation: css24-breathe 2s ease-in-out infinite;
+            }
+            #css24-demo5 .note { font-size: .8rem; color: #6f6a5e; }
+            @keyframes css24-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes css24-breathe {
+              0%   { transform: scale(1);    opacity: .85; }
+              50%  { transform: scale(1.07); opacity: 1; }
+              100% { transform: scale(1);    opacity: .85; }
+            }
+            /* 关键：系统里开了“减少动态效果”的读者，看到的是静态版本 */
+            @media (prefers-reduced-motion: reduce) {
+              #css24-demo5 .spinner { animation: none; border-top-color: #b03a2e; }
+              #css24-demo5 .pulse { animation: none; }
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        转圈用的 <code>linear</code> 是正确选择：旋转如果加上缓动，会一顿一顿的。
+        另外注意那个 <code>role="status"</code> 与 <code>aria-label</code>：
+        <strong>视觉上的“正在加载”，对读屏读者必须是文字上的说明</strong>——
+        动效不能是唯一的信息渠道。
+      </p>
+
+      <h2>性能与体验的三条底线</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>底线</th>
+            <th>为什么</th>
+            <th>怎么做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>优先动画 <code>transform</code> 与 <code>opacity</code></td>
+            <td>这两个属性可以交给合成线程处理，通常不触发重新排版与重绘；
+              而动画 <code>width</code>/<code>height</code>/<code>top</code>/<code>margin</code>
+              每一帧都要重新算布局，长列表里会明显掉帧</td>
+            <td>“移动”用 <code>translate</code> 而不是改 <code>left</code>；
+              “变大”用 <code>scale</code> 而不是改 <code>width</code></td>
+          </tr>
+          <tr>
+            <td>照顾 <code>prefers-reduced-motion</code></td>
+            <td>有前庭功能敏感的读者会被大幅动画晃得头晕；系统里那句设置是他们的求助信号</td>
+            <td>用媒体查询把动画关掉或缩短（例 5 的写法），至少保证不出现大幅位移</td>
+          </tr>
+          <tr>
+            <td>别让动效成为“唯一的信息”</td>
+            <td>色彩闪烁、图标抖动如果没配文字，色觉异常或读屏读者拿不到信息</td>
+            <td>配文字说明；闪烁类动画每秒不超过 3 次（避免诱发光敏性癫痫）</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="callout-title">小技巧：用开发者工具看动画</div>
+        <p style="margin:0">
+          打开 DevTools 的 <strong>Animations（动画）</strong>面板，触发一次动效，
+          就能看到时间轴、逐帧慢放、还可以把速度调成 10% 慢动作。
+          排查“为什么它动得怪”时，这个面板比反复刷新高效得多。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>transition</code> 简写顺序是“属性 时长 缓动 延迟”，两个时间值里第一个是时长；</li>
+        <li>能过渡的属性必须“值可插值”；<code>display</code> 这类开关式属性默认没有中间态；</li>
+        <li>缓动决定性格：进场用 <code>ease-out</code>、离场用 <code>ease-in</code>、旋转用 <code>linear</code>、
+          逐帧用 <code>steps()</code>；</li>
+        <li><code>transform</code> 不动布局，是动画的最佳拍档；多个变换按从左到右生效，顺序会影响结果；</li>
+        <li><code>transform</code> 会创建层叠上下文（第二十式的坑在这里重逢）；</li>
+        <li><code>@keyframes</code> 用百分比写多段动作，<code>animation</code> 简写里别忘了
+          <code>duration</code> 与 <code>iteration-count</code>；<code>fill-mode: forwards</code> 能停在最后一帧；</li>
+        <li>三条底线：优先动 <code>transform</code>/<code>opacity</code>、照顾
+          <code>prefers-reduced-motion</code>、动效不承担唯一信息。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十四式</div>
+        <ol>
+          <li>给第十二式主页的“作品卡片”加悬停动效：上浮 4px、阴影加深，
+            时长 0.25 秒、缓动用 <code>ease-out</code>。</li>
+          <li>写一个“加载中”的小动画（转圈或三个点跳动），
+            并配上 <code>role="status"</code> 与文字说明；再加媒体查询，
+            让“减少动态效果”的读者看到静止版本。</li>
+          <li>思考：同样是把一个盒子从左边移到右边，为什么推荐
+            <code>transform: translateX()</code>，而不是动画 <code>left</code>？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="卡片悬停">
+            .works-card {
+              transition: transform .25s ease-out, box-shadow .25s ease-out;
+            }
+            .works-card:hover, .works-card:focus-visible {
+              transform: translateY(-4px);
+              box-shadow: 0 10px 22px rgb(0 0 0 / 16%);
+            }
+          </script>
+          <p>
+            三个要点：只写要动的属性（别用 <code>all</code>）、
+            把 <code>:focus-visible</code> 一起写上（键盘读者也要有反馈）、
+            上浮距离控制在 4–8px（再多就像在飘）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="加载指示">
+            <p role="status">
+              <span class="dot-spin" aria-hidden="true"></span>
+              正在加载，请稍候……
+            </p>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="动画与降级">
+            .dot-spin {
+              display: inline-block; width: 12px; height: 12px; margin-right: .4rem;
+              border-radius: 50%; border: 2px solid #f3e3dd; border-top-color: #b03a2e;
+              animation: dot-spin .8s linear infinite;
+            }
+            @keyframes dot-spin { to { transform: rotate(360deg); } }
+
+            @media (prefers-reduced-motion: reduce) {
+              .dot-spin { animation: none; }
+            }
+          </script>
+          <p>
+            注意 <code>role="status"</code> 放在包住文字的容器上、
+            动画元素本身设 <code>aria-hidden="true"</code>：
+            这样读屏读者听到的是“正在加载，请稍候……”，而不是一个无意义的装饰。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>left</code> 属于“布局属性”：它的每一帧变化都要让浏览器
+            <strong>重新计算布局</strong>（这个盒子动了，旁边的元素要不要跟着挪？），
+            然后还要重新绘制，几十帧下来就很吃力；
+            而 <code>transform</code> 只是给这个元素换一个“绘制变换”，
+            <strong>不参与布局计算</strong>，很多情况下连重绘都能省掉，直接交给合成线程。
+            肉眼效果几乎一样，代价却差一个数量级——这就是“动画只动 transform 与 opacity”的由来。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把颜色、字号这些“会重复出现的值”收进变量：CSS 自定义属性。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

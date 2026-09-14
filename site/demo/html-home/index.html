@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨白的主页 | 基础篇第十二式成品</title>
+<meta name="description" content="基础篇第十二式的成品：一个只用 HTML 手写的语义化个人主页，故意不加任何样式，方便看清骨架。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='18'%20fill='%23b03a2e'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20text-anchor='middle'%20fill='%23faf6ec'%20font-family='serif'%3E%E9%9D%99%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<!-- 这是基础篇第十二式的成品：HTML 篇只搭骨架，所以这里一行 CSS 都没有——第二十六式再回来打扮它。 -->
+
+<a href="#main">跳到正文</a>
+
+<header>
+  <p>修行者档案</p>
+  <h1>墨白</h1>
+  <p>在代码与山水之间行走的初学者 · <time datetime="2026-09-14">2026 年 9 月 14 日</time> 更新</p>
+
+  <nav aria-label="主导航">
+    <ul>
+      <li><a href="#about">关于我</a></li>
+      <li><a href="#works">作品</a></li>
+      <li><a href="#log">修行日志</a></li>
+      <li><a href="#contact">联系我</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section id="about" aria-labelledby="about-title">
+    <h2 id="about-title">关于我</h2>
+    <p>
+      我是墨白，一个把“日拱一卒”当口头禅的初学者。
+      三个月前我连标签和属性都分不清，现在能自己搭出一页结构清楚的主页——
+      这一页就是证据。
+    </p>
+
+    <figure>
+      <img src="../../assets/img/demo-landscape.svg" alt="纸墨风格的山水示意图：一轮红日与远山" width="320" height="240">
+      <figcaption>我最喜欢的一张示意图：山不让尘，川不辞盈。</figcaption>
+    </figure>
+
+    <h3>我在练什么</h3>
+    <ul>
+      <li>HTML —— 把结构写清楚，让机器与人都不迷路</li>
+      <li>CSS —— 让页面好看，也让人看得住</li>
+      <li>JavaScript —— 让页面会应答</li>
+    </ul>
+
+    <details>
+      <summary>我的学习节奏（点开看）</summary>
+      <p>每天 30 分钟：读一式、抄一个演示；周末把这一周的练功题重做一遍。</p>
+    </details>
+  </section>
+
+  <section id="works" aria-labelledby="works-title">
+    <h2 id="works-title">作品</h2>
+
+    <article>
+      <h3>第一个网页</h3>
+      <p>八行骨架、一个标题、两段文字。它的价值不在好看，而在于“这是我自己写的”。</p>
+      <p><a href="../../basics/01-html-intro.html">它出自第一式：网页与 HTML</a></p>
+    </article>
+
+    <article>
+      <h3>迷你三页站点</h3>
+      <p>首页、关于、联系三个文件互相链接，练的是相对路径与锚点跳转。</p>
+      <p><a href="../../basics/03-html-lists-links.html">它出自第三式：列表与链接</a></p>
+    </article>
+
+    <article>
+      <h3>报名表单</h3>
+      <p>用 label、单选、复选、日期输入与浏览器校验搭出来的表单；提交之后的事，交给后端同学。</p>
+      <p><a href="../../basics/08-html-forms-2.html">它出自第八式：表单（下）</a></p>
+    </article>
+  </section>
+
+  <section id="log" aria-labelledby="log-title">
+    <h2 id="log-title">修行日志</h2>
+
+    <article>
+      <h3>站桩三月记</h3>
+      <p><time datetime="2026-09-14">9 月 14 日</time> · 标签：<mark>基本功</mark></p>
+      <p>不再刻意数呼吸，身体慢慢找到了自己的节奏。</p>
+    </article>
+
+    <article>
+      <h3>第一次拆网页</h3>
+      <p><time datetime="2026-09-07">9 月 7 日</time> · 标签：<mark>拆解</mark></p>
+      <p>原来那些整齐的卡片，是一层层列表包出来的。</p>
+    </article>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">联系我</h2>
+
+    <address>
+      <p>写信：<a href="mailto:mo@example.com">mo@example.com</a></p>
+      <p>也可以来<a href="../../playground/index.html">在线练功场</a>一起写两笔。</p>
+    </address>
+
+    <form action="#" method="post">
+      <fieldset>
+        <legend>留一句口信</legend>
+        <p>
+          <label for="msg-name">称谓</label><br>
+          <input type="text" id="msg-name" name="name" required autocomplete="name">
+        </p>
+        <p>
+          <label for="msg-mail">邮箱（方便回信）</label><br>
+          <input type="email" id="msg-mail" name="email" autocomplete="email">
+        </p>
+        <p>
+          <label for="msg-text">口信</label><br>
+          <textarea id="msg-text" name="message" rows="4" cols="40" maxlength="300" required></textarea>
+        </p>
+        <p><button type="submit">递上口信</button></p>
+      </fieldset>
+    </form>
+  </section>
+
+</main>
+
+<aside aria-labelledby="aside-title">
+  <h2 id="aside-title">顺手一栏</h2>
+  <ul>
+    <li><a href="../../archive/index.html">藏经阁：随查随用的离线资料</a></li>
+    <li><a href="../../bootstrap/index.html">下一站：第二回 Bootstrap 篇</a></li>
+  </ul>
+</aside>
+
+<footer>
+  <p>© 2026 墨白 · 纯 HTML 手写（<time datetime="2026-09-14">2026-09-14</time> 更新）</p>
+  <nav aria-label="页脚导航">
+    <ul>
+      <li><a href="#main">回到正文开头</a></li>
+      <li><a href="../../basics/12-html-project.html">这一页的教程</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</body>
+</html>

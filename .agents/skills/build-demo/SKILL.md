@@ -40,6 +40,10 @@ description: 在章节里制作“现场演示”区块——上为可运行效�
 ### 2. 预览区（demo-preview）
 
 - 放真实可运行的 HTML/CSS/JS，读者直接在页面里看到并操作结果。
+- **基础篇专用三种形态**（`site/basics/`，详见 `conventions.md` §3.1）：
+  ① HTML 演示＝预览就是渲染结果；② CSS 演示＝预览里放 `<style>`（选择器用演示专属 id 作用域），
+  源码块配 `data-lang="css"`（HTML 源码块里**不要**再抄 `<style>`）；
+  ③ JS 演示＝裸 `<script>` 紧跟在被操作的元素之后，源码块配 `data-lang="js"`。
 - 交互脚本的包裹规则（关键）：
   - 用 jQuery：一律 `$(function(){ … })` —— loader 的排队桩会等 jQuery 就绪后放行；
   - 需要 `bootstrap` 全局（`new bootstrap.Tooltip/…`）：一律 `DOJO.ready(function(){ … })`；
@@ -70,6 +74,10 @@ description: 在章节里制作“现场演示”区块——上为可运行效�
   `.form-control`（border-color .15s）都带过渡——凡用 `css()` 读值参与计算（如进度步进），
   快速连点会读到过渡中间值导致错乱；这类演示给元素加内联 `transition: none`
   （或改用计数器），并在正文说明原因；
+- **演示自己会读出来打印的属性，就别给它加过渡**（2026-09-14 第三十七式踩到）：
+  给 `background` 加了 `.2s` 过渡后，点按钮瞬间打印的
+  `getComputedStyle(el).backgroundColor` 是**过渡中的旧色**，与“切换成功”的文案自相矛盾。
+  过渡只留给位移/形变（如 `transition: transform .2s ease-out`），要读的属性让它立即生效；
 - 教学效果好的演示模式：**跨栏对比**（如“直接绑定 vs 事件委托”并排两栏，点同一按钮看两边行为差异），
   对比类知识点优先采用。
 
@@ -90,6 +98,7 @@ description: 在章节里制作“现场演示”区块——上为可运行效�
 | 节选源码与预览不一致引发困惑 | 读者对不上 | 节选块在 data-title 里标“（节选）/（只列与例 N 不同的部分）”，正文说明对应关系 |
 | 滚动监听（scrollspy）的 id 挂在小标题上 | 滚到底时高亮全灭（标题已滑出观察区） | id 挂**整节容器**（div），容器 `position-relative overflow-auto tabindex="0"`，演示后跑 CDP 断言 |
 | 写完演示没做机器核对 | “源码能还原预览”这条红线靠肉眼记不住 | 收尾必跑 `python3 tools/check-demo-parity.py`（本轮靠它查出 4 处历史遗漏） |
+| 演示用了 Bootstrap 已有的类名（`.row`/`.card`/`.navbar`…） | 预览被 Bootstrap 栅格/组件悄悄改写，效果与源码对不上且不报错 | 基础篇演示自定义类名一律加 `d-` 前缀；收尾跑 `python3 tools/check-demo-classes.py`（坑档案见 `bug-fix/demo-class-name-collision-with-bootstrap.md`） |
 
 **版本事实备忘（5.3.8）**：组合进度条推荐 `.progress-stacked` 包裹多条 `.progress`；
 collapse 多目标共享触发用共享 class（data API 走 `getMultipleElementsFromSelector`）。

@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十八式 · 事件 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="事件驱动与 addEventListener、事件对象的常用成员、冒泡与捕获、事件委托、preventDefault 与 stopPropagation，以及防抖与节流。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-38">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        上一式学会了改页面，可 page 凭什么知道该在什么时候动手？
+        靠<strong>事件</strong>：用户的每一次点击、每一行输入、页面的每一次加载，
+        都是浏览器递过来的一声“到你了”。这一式就把“听得见动作、记得住谁点的”这件事讲透。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>addEventListener</code> 绑事件、用 <code>removeEventListener</code> 解绑，
+            知道“同一函数不会重复绑”</li>
+          <li>会读事件对象：<code>type</code> / <code>target</code> / <code>currentTarget</code> /
+            <code>key</code> / <code>clientX</code> / <code>preventDefault()</code></li>
+          <li>讲得清冒泡与捕获，会看 <code>eventPhase</code>，会用 <code>stopPropagation</code> 与
+            <code>once</code> / <code>capture</code> 选项</li>
+          <li>会把事件绑在父元素上做<strong>委托</strong>，并知道它为什么能照顾后来新增的元素</li>
+          <li>会写防抖与节流，知道它们各自适合什么场景</li>
+        </ul>
+      </div>
+
+      <h2>事件驱动的思路</h2>
+      <p>
+        到目前为止，我们写的脚本大多是“页面一加载就把活干完”。真实的页面不是这样：
+        它大部分时间在<strong>等</strong>——等用户点、等用户敲、等数据回来。
+        所谓事件驱动，就是换一种写法：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="事件驱动的三步">
+        // ① 找到会“发生什么事”的元素
+        const btn = document.getElementById("save");
+
+        // ② 给它绑一个监听函数（回调）：事情发生时，浏览器来调用它
+        btn.addEventListener("click", function (event) {
+          console.log("有人点了我", event.type);
+        });
+
+        // ③ 剩下的交给浏览器：你不点，它就不跑；你点一次，它就跑一次
+      </script>
+      <p>
+        这三行值得反复看，因为它是之后所有交互的地基：<strong>“什么时候做”交给浏览器，
+        “做什么”由你写在回调里</strong>。回调这种“先写好、以后被叫”的函数，
+        第三十一式已经打过照面（如 <code>setTimeout</code> 的第一个参数就是回调）；
+        事件监听是它最重要的用武之地。
+      </p>
+      <p>
+        事件本身也是一个对象，带着“细节”一起送到回调里。下面是这个对象常用的成员：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>成员</th>
+            <th>是什么</th>
+            <th>常见用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>type</code></td><td>事件类型名（如 <code>"click"</code>）</td><td>同一个函数挂多种事件时区分</td></tr>
+          <tr><td><code>target</code></td><td><strong>真正被点的那个元素</strong>（事件源头）</td><td>委托时认“点到了谁”</td></tr>
+          <tr><td><code>currentTarget</code></td><td><strong>当前正在执行监听函数的元素</strong></td><td>回调里永远指向“绑事件的那个元素”</td></tr>
+          <tr><td><code>clientX</code> / <code>clientY</code></td><td>鼠标在视口里的坐标（像素）</td><td>跟随光标、拖动</td></tr>
+          <tr><td><code>key</code> / <code>code</code></td><td>按下的键的“字符名” / “物理位置名”</td><td>回车提交、Esc 关闭</td></tr>
+          <tr><td><code>timeStamp</code></td><td>事件发生的时间戳（毫秒）</td><td>节流、性能测量</td></tr>
+          <tr><td><code>eventPhase</code></td><td>当前所处阶段（捕获 1 / 目标 2 / 冒泡 3）</td><td>理解事件流、排查“为什么它也响了”</td></tr>
+          <tr><td><code>preventDefault()</code></td><td>取消浏览器的默认动作</td><td>拦表单提交、拦链接跳转</td></tr>
+          <tr><td><code>stopPropagation()</code></td><td>阻止事件继续向外传播</td><td>内层已经处理完，不想惊动外层</td></tr>
+        </tbody>
+      </table>
+      <p>
+        先别急着记全。<strong>先把点击、输入、键盘这三类事件用熟</strong>，其余用到时回来查即可。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">this、currentTarget 与箭头函数的坑（第三十一式的回访）</div>
+        <p style="margin:0">
+          用普通函数写监听器时，浏览器会把 <code>this</code> 设成当前元素，所以
+          <code>this.value</code> 能用；但<strong>箭头函数没有自己的 <code>this</code></strong>，
+          它会顺着外层作用域往外找——在监听器里经常就找成了 <code>window</code>。
+          要稳，一律用 <code>event.currentTarget</code> 或提前存好变量，
+          别在箭头函数里依赖 <code>this</code>。例 2 会把这件事现场演一遍。
+        </p>
+      </div>
+
+      <h2>绑事件与解绑事件</h2>
+      <p>
+        把监听器挂上去的标准做法是 <code>addEventListener(类型, 回调, 选项)</code>。
+        第三种参数是<strong>选项对象</strong>，两个最常用的：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="两个常用选项">
+        // once：触发一次之后自动解绑，不用自己收拾
+        button.addEventListener("click", onFirstClick, { once: true });
+
+        // capture：让这个监听器改在“捕获阶段”执行（后面讲事件流时细说）
+        card.addEventListener("click", onCapture, { capture: true });
+      </script>
+      <p>
+        有些场景要主动解绑，用 <code>removeEventListener(类型, 回调)</code>。
+        它有一条容易被忽略的规矩：<strong>要解绑的函数，必须是当初绑上去的同一个函数</strong>。
+        所以监听器要解绑就先存进变量；写成匿名的字面量函数就没法再摘下来了。
+      </p>
+      <p>
+        另外，历史上有两种“老写法的马甲”：
+        <code>element.onclick = fn</code> 和 HTML 里的 <code>onclick="..."</code> 属性。
+        它们的毛病是<strong>只能挂一个</strong>——后写的会把先写的顶掉。
+        本教程统一用 <code>addEventListener</code>，只在需要“整个替换掉原来的处理”时才会考虑
+        <code>onclick</code>（旧代码里则处处能看到它，读得懂就行）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 绑上、解绑、重复绑（看看计数器每次加几）</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .5rem">
+            <button type="button" id="js38-demo1-add">绑一个新监听器</button>
+            <button type="button" id="js38-demo1-remove">解绑一个监听器</button>
+            <button type="button" id="js38-demo1-fire">让计数器 +1（数一数加了几）</button>
+            <button type="button" id="js38-demo1-once">once：只响应一次</button>
+          </p>
+          <p style="margin: 0">已注册的监听器：<strong id="js38-demo1-count">0</strong> 个</p>
+          <ul id="js38-demo1-out" style="margin: .5rem 0 0; max-height: 140px; overflow: auto"></ul>
+          <script>
+            "use strict";
+            var d1Out = document.getElementById('js38-demo1-out');
+            var d1Count = document.getElementById('js38-demo1-count');
+            var d1Handlers = [];
+            var d1Value = 0;
+
+            function d1Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d1Out.appendChild(li);
+            }
+
+            // 所有监听器共用这同一个函数（关键：绑上去的是它，解绑时也认得出它）
+            function d1Tick() {
+              d1Value += 1;
+              d1Say('第 ' + d1Handlers.length + ' 个监听器响应：计数器变成 ' + d1Value);
+            }
+
+            function d1Render() {
+              d1Count.textContent = d1Handlers.length;
+            }
+
+            document.getElementById('js38-demo1-add').addEventListener('click', function () {
+              var btn = document.getElementById('js38-demo1-fire');
+              btn.addEventListener('click', d1Tick);
+              d1Handlers.push(d1Tick);
+              d1Render();
+              d1Say('已注册 ' + d1Handlers.length + ' 个监听器（绑上的是同一个函数 d1Tick）');
+            });
+
+            document.getElementById('js38-demo1-remove').addEventListener('click', function () {
+              if (d1Handlers.length === 0) { d1Say('没有可解绑的监听器了'); return; }
+              document.getElementById('js38-demo1-fire').removeEventListener('click', d1Tick);
+              d1Handlers.pop();
+              d1Render();
+              d1Say('解绑一个：还剩 ' + d1Handlers.length + ' 个');
+            });
+
+            document.getElementById('js38-demo1-once').addEventListener('click', function (event) {
+              var once = event.currentTarget;
+              once.disabled = true;
+              d1Say('once 监听器响应了一次，随后自动解绑——按钮已禁用，再点也不会加行');
+            }, { once: true });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .5rem">
+              <button type="button" id="js38-demo1-add">绑一个新监听器</button>
+              <button type="button" id="js38-demo1-remove">解绑一个监听器</button>
+              <button type="button" id="js38-demo1-fire">让计数器 +1（数一数加了几）</button>
+              <button type="button" id="js38-demo1-once">once：只响应一次</button>
+            </p>
+            <p style="margin: 0">已注册的监听器：<strong id="js38-demo1-count">0</strong> 个</p>
+            <ul id="js38-demo1-out" style="margin: .5rem 0 0; max-height: 140px; overflow: auto"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d1Out = document.getElementById('js38-demo1-out');
+            var d1Count = document.getElementById('js38-demo1-count');
+            var d1Handlers = [];
+            var d1Value = 0;
+
+            function d1Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d1Out.appendChild(li);
+            }
+
+            // 所有监听器共用这同一个函数（关键：绑上去的是它，解绑时也认得出它）
+            function d1Tick() {
+              d1Value += 1;
+              d1Say('第 ' + d1Handlers.length + ' 个监听器响应：计数器变成 ' + d1Value);
+            }
+
+            function d1Render() {
+              d1Count.textContent = d1Handlers.length;
+            }
+
+            document.getElementById('js38-demo1-add').addEventListener('click', function () {
+              var btn = document.getElementById('js38-demo1-fire');
+              btn.addEventListener('click', d1Tick);
+              d1Handlers.push(d1Tick);
+              d1Render();
+              d1Say('已注册 ' + d1Handlers.length + ' 个监听器（绑上的是同一个函数 d1Tick）');
+            });
+
+            document.getElementById('js38-demo1-remove').addEventListener('click', function () {
+              if (d1Handlers.length === 0) { d1Say('没有可解绑的监听器了'); return; }
+              document.getElementById('js38-demo1-fire').removeEventListener('click', d1Tick);
+              d1Handlers.pop();
+              d1Render();
+              d1Say('解绑一个：还剩 ' + d1Handlers.length + ' 个');
+            });
+
+            document.getElementById('js38-demo1-once').addEventListener('click', function (event) {
+              var once = event.currentTarget;
+              once.disabled = true;
+              d1Say('once 监听器响应了一次，随后自动解绑——按钮已禁用，再点也不会加行');
+            }, { once: true });
+          </script>
+        </div>
+      </div>
+
+      <h2>事件对象：谁点的、按了什么键</h2>
+      <p>
+        回调收到的那个参数就是事件对象。它最常被问到的两个身份是：
+        <strong><code>target</code>（事情发生在谁身上）</strong>与
+        <strong><code>currentTarget</code>（我现在替谁在听）</strong>。
+        在这个演示里，外层容器、内层文字、按钮各有各的监听器，
+        同一次点击在它们眼里就是“三个不同身份的自己”。
+      </p>
+      <p>
+        键盘事件也顺便看一眼：在同一张卡片里<strong>按方向键</strong>，
+        回调会把 <code>event.key</code> 读出来。焦点在卡片上时按键才会被它听到——
+        这也是给交互区域加 <code>tabindex="0"</code> 的原因（第十式讲过）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · target 与 currentTarget：同一次点击，三种视角</div>
+        <div class="demo-preview">
+          <div id="js38-demo2-card" tabindex="0" style="border: 1px solid #d4cab0; border-radius: 10px; padding: .6rem .8rem; background: #fffdf7; outline-offset: 2px">
+            <p style="margin: 0 0 .4rem" id="js38-demo2-outer">我是外层容器（先点我试试，再点下面的按钮）。</p>
+            <p style="margin: 0">
+              <button type="button" id="js38-demo2-btn">点这个按钮</button>
+            </p>
+            <p style="margin: .4rem 0 0; font-size: .85rem">（也可以先点一下卡片、然后按方向键或别的键）</p>
+          </div>
+          <ul id="js38-demo2-out" style="margin: .5rem 0 0; max-height: 160px; overflow: auto"></ul>
+          <script>
+            "use strict";
+            var d2Card = document.getElementById('js38-demo2-card');
+            var d2Out = document.getElementById('js38-demo2-out');
+            var d2Hits = 0;
+
+            function d2Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d2Out.appendChild(li);
+            }
+
+            function d2Name(node) {
+              return node.id ? node.tagName.toLowerCase() + '#' + node.id
+                             : node.tagName.toLowerCase();
+            }
+
+            // 每次点击都记一行：真正被点的、正在听的，分别是哪个元素
+            function d2Report(event) {
+              d2Hits += 1;
+              d2Say('第 ' + d2Hits + ' 行 | target（被点的）= ' + d2Name(event.target)
+                + ' ／ currentTarget（绑监听器的）= ' + d2Name(event.currentTarget)
+                + ' ／ this = ' + (event.currentTarget === window ? 'window' : d2Name(event.currentTarget)));
+            }
+
+            // ① 卡片上的普通函数监听器：this 就是绑它的那个元素（卡片）
+            d2Card.addEventListener('click', function (event) {
+              d2Say('（卡片上的普通函数：this === currentTarget → '
+                + (this === event.currentTarget) + '）');
+              d2Report(event);
+            });
+
+            // ② 按钮上的箭头函数监听器：没有自己的 this，别指望它
+            document.getElementById('js38-demo2-btn').addEventListener('click', (event) => {
+              d2Say('（按钮上的箭头函数：this === currentTarget → '
+                + (this === event.currentTarget) + '）');
+              d2Report(event);
+            });
+
+            // ③ 键盘：按一下卡片里的键，看看 key 与 code 有什么区别
+            d2Card.addEventListener('keydown', function (event) {
+              if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].indexOf(event.key) !== -1) { return; }
+              d2Say('keydown：你按的是 key = "' + event.key + '"，物理键位 code = ' + event.code);
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="js38-demo2-card" tabindex="0" style="border: 1px solid #d4cab0; border-radius: 10px; padding: .6rem .8rem; background: #fffdf7; outline-offset: 2px">
+              <p style="margin: 0 0 .4rem" id="js38-demo2-outer">我是外层容器（先点我试试，再点下面的按钮）。</p>
+              <p style="margin: 0">
+                <button type="button" id="js38-demo2-btn">点这个按钮</button>
+              </p>
+              <p style="margin: .4rem 0 0; font-size: .85rem">（也可以先点一下卡片、然后按方向键或别的键）</p>
+            </div>
+            <ul id="js38-demo2-out" style="margin: .5rem 0 0; max-height: 160px; overflow: auto"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d2Card = document.getElementById('js38-demo2-card');
+            var d2Out = document.getElementById('js38-demo2-out');
+            var d2Hits = 0;
+
+            function d2Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d2Out.appendChild(li);
+            }
+
+            function d2Name(node) {
+              return node.id ? node.tagName.toLowerCase() + '#' + node.id
+                             : node.tagName.toLowerCase();
+            }
+
+            // 每次点击都记一行：真正被点的、正在听的，分别是哪个元素
+            function d2Report(event) {
+              d2Hits += 1;
+              d2Say('第 ' + d2Hits + ' 行 | target（被点的）= ' + d2Name(event.target)
+                + ' ／ currentTarget（绑监听器的）= ' + d2Name(event.currentTarget)
+                + ' ／ this = ' + (event.currentTarget === window ? 'window' : d2Name(event.currentTarget)));
+            }
+
+            // ① 卡片上的普通函数监听器：this 就是绑它的那个元素（卡片）
+            d2Card.addEventListener('click', function (event) {
+              d2Say('（卡片上的普通函数：this === currentTarget → '
+                + (this === event.currentTarget) + '）');
+              d2Report(event);
+            });
+
+            // ② 按钮上的箭头函数监听器：没有自己的 this，别指望它
+            document.getElementById('js38-demo2-btn').addEventListener('click', (event) => {
+              d2Say('（按钮上的箭头函数：this === currentTarget → '
+                + (this === event.currentTarget) + '）');
+              d2Report(event);
+            });
+
+            // ③ 键盘：按一下卡片里的键，看看 key 与 code 有什么区别
+            d2Card.addEventListener('keydown', function (event) {
+              if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].indexOf(event.key) !== -1) { return; }
+              d2Say('keydown：你按的是 key = "' + event.key + '"，物理键位 code = ' + event.code);
+            });
+          </script>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="callout-title">例 2 的两条结论</div>
+        <ul style="margin:0">
+          <li>点按钮时，<code>target</code> 是<strong>按钮</strong>（真正被点的），
+            而卡片那个监听器的 <code>currentTarget</code> 是<strong>卡片</strong>——
+            同一次点击，两个监听器看到的“自己”不一样；</li>
+          <li>卡片用普通函数写，<code>this === currentTarget</code> 是 <code>true</code>；
+            按钮用箭头函数写就是 <code>false</code>（它压根没有自己的 <code>this</code>）。
+            所以监听器里要拿元素，一律用 <code>event.currentTarget</code> 或提前存好的变量。</li>
+        </ul>
+      </div>
+      <p>
+        除了鼠标与键盘，还有几类事件几乎每次交互都会遇到，先把名字认下来：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>事件</th>
+            <th>什么时候触发</th>
+            <th>典型用法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>click</code></td><td>点击（鼠标、触摸、键盘回车都会产生）</td><td>按钮、链接</td></tr>
+          <tr><td><code>input</code></td><td>输入框内容一变就触发</td><td>实时统计字数、实时搜索</td></tr>
+          <tr><td><code>change</code></td><td>值改完并<strong>失去焦点</strong>（或回车）才触发</td><td>下拉框、复选框</td></tr>
+          <tr><td><code>keydown</code> / <code>keyup</code></td><td>按下 / 松开某个键</td><td>快捷键、回车提交</td></tr>
+          <tr><td><code>submit</code></td><td>表单提交时（在 <code>&lt;form&gt;</code> 上监听）</td><td>拦住默认提交、自己处理</td></tr>
+          <tr><td><code>focus</code> / <code>blur</code></td><td>元素获得 / 失去焦点</td><td>输入提示、失焦校验</td></tr>
+          <tr><td><code>mouseenter</code> / <code>mouseleave</code></td><td>鼠标移入 / 移出（<strong>不冒泡</strong>）</td><td>悬浮提示、悬停高亮</td></tr>
+          <tr><td><code>mouseover</code> / <code>mouseout</code></td><td>鼠标移入 / 移出（<strong>会冒泡</strong>）</td><td>需要在父元素上感知经过时用</td></tr>
+          <tr><td><code>scroll</code></td><td>页面或元素滚动时（高频）</td><td>回到顶部按钮、懒加载</td></tr>
+          <tr><td><code>DOMContentLoaded</code></td><td>HTML 解析完成（等图片、样式还没好）</td><td>尽早执行初始化脚本</td></tr>
+          <tr><td><code>load</code></td><td>页面及其资源全部就绪</td><td>需要图片尺寸的初始化</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <code>input</code> 与 <code>change</code> 的差别值得单独记一笔：前者“每敲一个字都响”，
+        后者“改完、离开才算”。同一个输入框，两种事件会给出完全不同的节奏——
+        例 6 的防抖节流正好建立在这个差别上。
+      </p>
+
+      <h2>事件流：冒泡、捕获与事件委托</h2>
+      <p>
+        一次点击并不是只“发生在按钮上”。看图（这张图不是可运行的演示，是一张路线图）：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="事件的三段旅程">
+        document → html → body → 外层 div → 内层 button → 内层 button → 外层 div → body → html → document
+        └──────────────────── 捕获阶段 ────────────────────┘ └ 目标 ┘ └─────────── 冒泡阶段 ───────────┘
+      </script>
+      <p>
+        事件从最外层一路<strong>捕获</strong>下来，抵达<strong>目标</strong>（真正被点的那个元素），
+        再从目标一路<strong>冒泡</strong>回最外层；一路上的每个元素，只要挂了监听器都会被依次调用。
+        默认挂上去的监听器在<strong>冒泡阶段</strong>执行，所以“点按钮，卡片也听见了”——
+        这不是 bug，是设计。每个监听器收到的 <code>event.eventPhase</code> 会如实告诉它此刻在哪一段。
+      </p>
+      <p>
+        这条设计带来一个极其有用的技巧：<strong>把监听器挂在外层，让所有内层元素的事件冒泡上来处理</strong>，
+        这叫<strong>事件委托</strong>（event delegation）。好处有两个：
+        内层元素是几十个还是几万个，都只挂一个监听器；<strong>后来才新增的元素也不用再单独绑</strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三栏同步对比：捕获、冒泡与冒泡到哪一层为止</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .5rem">
+            <button type="button" id="js38-demo3-go">点按钮（三个模式都会演一遍）</button>
+            <label style="margin-left: .6rem"><input type="checkbox" id="js38-demo3-behind"> 内层拦住：stopPropagation</label>
+          </p>
+          <p style="margin: 0; font: .85rem ui-monospace, Consolas, monospace">document → <span id="js38-demo3-doc">（待命）</span></p>
+          <div id="js38-demo3-outer" style="border: 1px dashed #b03a2e; border-radius: 8px; padding: .5rem; margin-top: .4rem; background: #fffdf7">
+            <p style="margin: 0 0 .3rem; font-size: .85rem">外层（普通监听见下面，捕获监听见下面）</p>
+            <div id="js38-demo3-inner">
+              <button type="button" id="js38-demo3-target">我是目标元素</button>
+            </div>
+          </div>
+          <ul id="js38-demo3-out" style="margin: .5rem 0 0; border-left: 3px solid #d4cab0; padding-left: .8rem; list-style: none"></ul>
+          <script>
+            "use strict";
+            var d3Run = 0;
+            var d3Out = document.getElementById('js38-demo3-out');
+            var d3Doc = document.getElementById('js38-demo3-doc');
+            var d3Outer = document.getElementById('js38-demo3-outer');
+            var d3Inner = document.getElementById('js38-demo3-inner');
+            var d3Target = document.getElementById('js38-demo3-target');
+            var d3Behind = document.getElementById('js38-demo3-behind');
+
+            function d3Clear() {
+              d3Run += 1;
+              d3Out.innerHTML = "";
+              d3Doc.textContent = "（待命）";
+              d3Say('第 ' + d3Run + ' 轮：' + (d3Behind.checked ? '内层已开启 stopPropagation' : '内层不拦，看它冒泡到哪'));
+            }
+
+            function d3Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d3Out.appendChild(li);
+            }
+
+            // 把「绑在哪个元素、在哪个阶段」完整地记下来：不传第三个参数就是冒泡阶段
+            function d3Trace(place, phase) {
+              return function (event) {
+                d3Say('· ' + place + '：' + event.type + ' @ ' + phase
+                  + '（eventPhase = ' + event.eventPhase + '，目标 = ' + event.target.textContent + '）');
+              };
+            }
+
+            d3Outer.addEventListener('click', d3Trace('外层', '冒泡'));
+            d3Outer.addEventListener('click', d3Trace('外层', '捕获'), { capture: true });
+            d3Inner.addEventListener('click', d3Trace('内层', '冒泡'));
+            d3Inner.addEventListener('click', d3Trace('内层', '捕获'), { capture: true });
+            d3Target.addEventListener('click', d3Trace('目标', '冒泡'));
+            d3Target.addEventListener('click', d3Trace('目标', '捕获'));
+            document.addEventListener('click', function (event) {
+              if (event.target === d3Target) { d3Trace('document', '冒泡')(event); }
+            });
+
+            document.getElementById('js38-demo3-go').addEventListener('click', function () {
+              d3Clear();
+              d3Target.click();          // 用代码“点”一下目标，效果与用户点击一致
+            });
+
+            d3Behind.addEventListener('change', function (event) {
+              d3Say('（内层拦住已' + (event.target.checked ? '打开' : '关闭') + '，影响的是下一次点击）');
+            });
+
+            d3Inner.addEventListener('click', function (event) {
+              if (!d3Behind.checked) { return; }
+              event.stopPropagation();
+              d3Say('· 内层的“拦住”监听器：stopPropagation() —— 冒泡到此为止，外层的两个监听器都收不到');
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .5rem">
+              <button type="button" id="js38-demo3-go">点按钮（三个模式都会演一遍）</button>
+              <label style="margin-left: .6rem"><input type="checkbox" id="js38-demo3-behind"> 内层拦住：stopPropagation</label>
+            </p>
+            <p style="margin: 0; font: .85rem ui-monospace, Consolas, monospace">document → <span id="js38-demo3-doc">（待命）</span></p>
+            <div id="js38-demo3-outer" style="border: 1px dashed #b03a2e; border-radius: 8px; padding: .5rem; margin-top: .4rem; background: #fffdf7">
+              <p style="margin: 0 0 .3rem; font-size: .85rem">外层（普通监听见下面，捕获监听见下面）</p>
+              <div id="js38-demo3-inner">
+                <button type="button" id="js38-demo3-target">我是目标元素</button>
+              </div>
+            </div>
+            <ul id="js38-demo3-out" style="margin: .5rem 0 0; border-left: 3px solid #d4cab0; padding-left: .8rem; list-style: none"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d3Run = 0;
+            var d3Out = document.getElementById('js38-demo3-out');
+            var d3Doc = document.getElementById('js38-demo3-doc');
+            var d3Outer = document.getElementById('js38-demo3-outer');
+            var d3Inner = document.getElementById('js38-demo3-inner');
+            var d3Target = document.getElementById('js38-demo3-target');
+            var d3Behind = document.getElementById('js38-demo3-behind');
+
+            function d3Clear() {
+              d3Run += 1;
+              d3Out.innerHTML = "";
+              d3Doc.textContent = "（待命）";
+              d3Say('第 ' + d3Run + ' 轮：' + (d3Behind.checked ? '内层已开启 stopPropagation' : '内层不拦，看它冒泡到哪'));
+            }
+
+            function d3Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d3Out.appendChild(li);
+            }
+
+            // 把「绑在哪个元素、在哪个阶段」完整地记下来：不传第三个参数就是冒泡阶段
+            function d3Trace(place, phase) {
+              return function (event) {
+                d3Say('· ' + place + '：' + event.type + ' @ ' + phase
+                  + '（eventPhase = ' + event.eventPhase + '，目标 = ' + event.target.textContent + '）');
+              };
+            }
+
+            d3Outer.addEventListener('click', d3Trace('外层', '冒泡'));
+            d3Outer.addEventListener('click', d3Trace('外层', '捕获'), { capture: true });
+            d3Inner.addEventListener('click', d3Trace('内层', '冒泡'));
+            d3Inner.addEventListener('click', d3Trace('内层', '捕获'), { capture: true });
+            d3Target.addEventListener('click', d3Trace('目标', '冒泡'));
+            d3Target.addEventListener('click', d3Trace('目标', '捕获'));
+            document.addEventListener('click', function (event) {
+              if (event.target === d3Target) { d3Trace('document', '冒泡')(event); }
+            });
+
+            document.getElementById('js38-demo3-go').addEventListener('click', function () {
+              d3Clear();
+              d3Target.click();          // 用代码“点”一下目标，效果与用户点击一致
+            });
+
+            d3Behind.addEventListener('change', function (event) {
+              d3Say('（内层拦住已' + (event.target.checked ? '打开' : '关闭') + '，影响的是下一次点击）');
+            });
+
+            d3Inner.addEventListener('click', function (event) {
+              if (!d3Behind.checked) { return; }
+              event.stopPropagation();
+              d3Say('· 内层的“拦住”监听器：stopPropagation() —— 冒泡到此为止，外层的两个监听器都收不到');
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        结果里有两个细节值得停下来看：<strong>①外层为什么先听见？</strong>
+        因为挂在外层的那个 <code>{ capture: true }</code> 监听器走的是捕获阶段，比一切冒泡都早；
+        <strong>②<code>document</code> 上那句“冒泡”什么时候轮到？</strong>
+        在最末——它是冒泡路线的最后一站。例 3 里那句 <code>document → （待命）</code>
+        只是提示文字，并没有跟着一起写值（真要在整页级别记录，做法与它完全相同）。
+      </p>
+      <p>
+        <code>stopPropagation()</code> 是“这件事别再往外传了”，它<strong>不阻止同层其他监听器</strong>；
+        想让同一元素上后面的监听器也别跑，用更狠的
+        <code>event.stopImmediatePropagation()</code>（日常少用，用错会很难查）。
+        还有一个常被混淆的家伙：<code>stopPropagation</code> 管“传播”，
+        <code>preventDefault</code> 管“浏览器默认动作”，两者互不相干——
+        下一节就见它出场。
+      </p>
+
+      <h2>默认行为与取消</h2>
+      <p>
+        浏览器给很多元素配了“不用写 JS 就有的动作”：点链接就跳走、提交表单就刷新页面、
+        输入框里按键就出现字符……这些叫<strong>默认行为</strong>。
+        当你想自己接管时，就在事件回调里调用 <code>event.preventDefault()</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 把默认动作关掉：链接的跳转、输入框的字符、按钮的提交</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .5rem">
+            <label><input type="checkbox" id="js38-demo4-off"> 拦下默认动作（preventDefault）</label>
+          </p>
+          <p style="margin: 0"><a href="#js38-demo4-out" id="js38-demo4-link">我本来会跳到下面那行（点我试试）</a></p>
+          <p style="margin: .4rem 0 0"><input type="text" id="js38-demo4-input" placeholder="在框里敲两个字" size="24"></p>
+          <p style="margin: .4rem 0 0">
+            <form id="js38-demo4-form">
+              <button type="submit" id="js38-demo4-submit">提交（默认会让表单走自己的流程）</button>
+            </form>
+          </p>
+          <ul id="js38-demo4-out" style="margin: .5rem 0 0"></ul>
+          <script>
+            "use strict";
+            var d4Off = document.getElementById('js38-demo4-off');
+            var d4Out = document.getElementById('js38-demo4-out');
+            var d4Form = document.getElementById('js38-demo4-form');
+
+            function d4Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d4Out.appendChild(li);
+            }
+
+            // ① 链接：默认动作是跳转
+            document.getElementById('js38-demo4-link').addEventListener('click', function (event) {
+              if (!d4Off.checked) {
+                d4Say('链接跑了自己的默认动作：跳到 #js38-demo4-out（地址栏尾巴上多了一截）');
+                return;
+              }
+              event.preventDefault();
+              d4Say('链接：preventDefault() 生效，没有跳转');
+            });
+
+            // ② 输入框：默认动作是把字符写进框里
+            document.getElementById('js38-demo4-input').addEventListener('keydown', function (event) {
+              if (!d4Off.checked) { return; }
+              if (event.key.length > 1) { return; }   // 只拦“单个字符”的键，方向键/回车放行
+              event.preventDefault();
+              d4Say('输入框：preventDefault() 拦下了 "' + event.key + '"，框里不会有它');
+            });
+
+            // ③ 表单：提交的默认动作是“带着数据走 action 并刷新页面”
+            d4Form.addEventListener('submit', function (event) {
+              event.preventDefault();       // 这个演示无论如何都不让它真的提交
+              if (d4Off.checked) {
+                d4Say('表单 submit：preventDefault() 生效，页面没有刷新，数据也没被送走');
+              } else {
+                d4Say('表单 submit：这次本可以交给浏览器——它会带着数据去 action 并刷新页面；'
+                  + '演示为了不刷新，仍然拦下了它（真要接管提交，就该像这里一样写 preventDefault()）');
+              }
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .5rem">
+              <label><input type="checkbox" id="js38-demo4-off"> 拦下默认动作（preventDefault）</label>
+            </p>
+            <p style="margin: 0"><a href="#js38-demo4-out" id="js38-demo4-link">我本来会跳到下面那行（点我试试）</a></p>
+            <p style="margin: .4rem 0 0"><input type="text" id="js38-demo4-input" placeholder="在框里敲两个字" size="24"></p>
+            <p style="margin: .4rem 0 0">
+              <form id="js38-demo4-form">
+                <button type="submit" id="js38-demo4-submit">提交（默认会让表单走自己的流程）</button>
+              </form>
+            </p>
+            <ul id="js38-demo4-out" style="margin: .5rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d4Off = document.getElementById('js38-demo4-off');
+            var d4Out = document.getElementById('js38-demo4-out');
+            var d4Form = document.getElementById('js38-demo4-form');
+
+            function d4Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d4Out.appendChild(li);
+            }
+
+            // ① 链接：默认动作是跳转
+            document.getElementById('js38-demo4-link').addEventListener('click', function (event) {
+              if (!d4Off.checked) {
+                d4Say('链接跑了自己的默认动作：跳到 #js38-demo4-out（地址栏尾巴上多了一截）');
+                return;
+              }
+              event.preventDefault();
+              d4Say('链接：preventDefault() 生效，没有跳转');
+            });
+
+            // ② 输入框：默认动作是把字符写进框里
+            document.getElementById('js38-demo4-input').addEventListener('keydown', function (event) {
+              if (!d4Off.checked) { return; }
+              if (event.key.length > 1) { return; }   // 只拦“单个字符”的键，方向键/回车放行
+              event.preventDefault();
+              d4Say('输入框：preventDefault() 拦下了 "' + event.key + '"，框里不会有它');
+            });
+
+            // ③ 表单：提交的默认动作是“带着数据走 action 并刷新页面”
+            d4Form.addEventListener('submit', function (event) {
+              event.preventDefault();       // 这个演示无论如何都不让它真的提交
+              if (d4Off.checked) {
+                d4Say('表单 submit：preventDefault() 生效，页面没有刷新，数据也没被送走');
+              } else {
+                d4Say('表单 submit：这次本可以交给浏览器——它会带着数据去 action 并刷新页面；'
+                  + '演示为了不刷新，仍然拦下了它（真要接管提交，就该像这里一样写 preventDefault()）');
+              }
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        顺带把拦截的“正确位置”记住：<strong>想接管表单提交，要拦 <code>&lt;form&gt;</code> 上的
+        <code>submit</code> 事件</strong>；拦按钮的 <code>click</code> 管不了回车提交、
+        也管不了“直接点提交按钮以外的路径”。另外，<code>preventDefault()</code> 只对
+        可取消的事件有效，判断方法是看 <code>event.cancelable</code> 是不是 <code>true</code>。
+      </p>
+      <p>
+        默认行为还有一处常被忽略的地方：<strong><code>submit</code> 事件在表单上触发，而不是在按钮上</strong>，
+        所以监听器要挂给 <code>form</code> 元素：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="接管提交（骨架）">
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();      // 不刷新页面，改成自己处理
+
+          var data = new FormData(form);                 // 把整张表单一次收齐
+          console.log(Object.fromEntries(data));
+        });
+      </script>
+
+      <h2>事件委托：一个监听器照顾一大片</h2>
+      <p>
+        例 5 把委托用在最容易翻车的地方：<strong>列表里加条目、条目里带删除按钮</strong>。
+        如果给每个删除按钮都单独绑监听器，每新增一条就得再绑一次，删掉的还占着内存；
+        委托只挂一个，交给 <code>event.target</code> 与 <code>closest()</code> 去找“这一枪该记在谁头上”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 事件委托：动态新增的条目也能删</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <input type="text" id="js38-demo5-input" placeholder="写一项待办" size="20">
+            <button type="button" id="js38-demo5-add">新增一条</button>
+            <button type="button" id="js38-demo5-rebind">旧办法：给每个按钮逐个绑（试试）</button>
+          </p>
+          <ul id="js38-demo5-list" style="margin: 0; padding-left: 1.1rem">
+            <li>读第三十八式 <button type="button" class="d-todo-del" style="margin-left:.4rem">删除</button></li>
+            <li>写练功第一题 <button type="button" class="d-todo-del" style="margin-left:.4rem">删除</button></li>
+          </ul>
+          <ul id="js38-demo5-out" style="margin: .5rem 0 0"></ul>
+          <script>
+            "use strict";
+            var d5List = document.getElementById('js38-demo5-list');
+            var d5Out = document.getElementById('js38-demo5-out');
+            var d5Input = document.getElementById('js38-demo5-input');
+
+            function d5Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d5Out.appendChild(li);
+            }
+
+            // ① 委托：一个监听器挂在列表上，所有（包括以后新增的）删除按钮都归它管
+            d5List.addEventListener('click', function (event) {
+              var btn = event.target.closest(".d-todo-del");
+              if (!btn) { return; }                    // 点的不是删除按钮，直接忽略
+              var item = btn.closest("li");
+              var text = item.textContent.replace("删除", "").trim();
+              item.remove();
+              d5Say('委托处理：target = ' + event.target.tagName.toLowerCase()
+                + '，closest("li") 找到「' + text + '」并删除；列表还剩 '
+                + d5List.children.length + ' 条');
+            });
+
+            document.getElementById('js38-demo5-add').addEventListener('click', function () {
+              var text = d5Input.value.trim() || '（未命名任务 ' + (d5List.children.length + 1) + '）';
+              var li = document.createElement('li');
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'd-todo-del';
+              btn.textContent = '删除';
+              btn.style.marginLeft = '.4rem';
+              li.append(text + ' ', btn);
+              d5List.appendChild(li);
+              d5Input.value = "";
+              d5Say('新增了「' + text + '」——它的删除按钮没绑任何监听器，照样能删（靠委托）');
+            });
+
+            // ② 对照：老办法里每来一条新条目都得补绑一次，忘了就失灵
+            document.getElementById('js38-demo5-rebind').addEventListener('click', function () {
+              var buttons = d5List.querySelectorAll(".d-todo-del");
+              for (var i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener('click', function () {});
+              }
+              d5Say('这一轮又给 ' + buttons.length + ' 个按钮各加了一次监听器——'
+                + '注意：同一个函数重复绑只会生效一次，所以写出“绑了很多遍”的程序也不会重复执行，'
+                + '但每条新增的条目都得记得补绑一遍，漏了就失灵；这就是委托要解决的问题');
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <input type="text" id="js38-demo5-input" placeholder="写一项待办" size="20">
+              <button type="button" id="js38-demo5-add">新增一条</button>
+              <button type="button" id="js38-demo5-rebind">旧办法：给每个按钮逐个绑（试试）</button>
+            </p>
+            <ul id="js38-demo5-list" style="margin: 0; padding-left: 1.1rem">
+              <li>读第三十八式 <button type="button" class="d-todo-del" style="margin-left:.4rem">删除</button></li>
+              <li>写练功第一题 <button type="button" class="d-todo-del" style="margin-left:.4rem">删除</button></li>
+            </ul>
+            <ul id="js38-demo5-out" style="margin: .5rem 0 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d5List = document.getElementById('js38-demo5-list');
+            var d5Out = document.getElementById('js38-demo5-out');
+            var d5Input = document.getElementById('js38-demo5-input');
+
+            function d5Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d5Out.appendChild(li);
+            }
+
+            // ① 委托：一个监听器挂在列表上，所有（包括以后新增的）删除按钮都归它管
+            d5List.addEventListener('click', function (event) {
+              var btn = event.target.closest(".d-todo-del");
+              if (!btn) { return; }                    // 点的不是删除按钮，直接忽略
+              var item = btn.closest("li");
+              var text = item.textContent.replace("删除", "").trim();
+              item.remove();
+              d5Say('委托处理：target = ' + event.target.tagName.toLowerCase()
+                + '，closest("li") 找到「' + text + '」并删除；列表还剩 '
+                + d5List.children.length + ' 条');
+            });
+
+            document.getElementById('js38-demo5-add').addEventListener('click', function () {
+              var text = d5Input.value.trim() || '（未命名任务 ' + (d5List.children.length + 1) + '）';
+              var li = document.createElement('li');
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'd-todo-del';
+              btn.textContent = '删除';
+              btn.style.marginLeft = '.4rem';
+              li.append(text + ' ', btn);
+              d5List.appendChild(li);
+              d5Input.value = "";
+              d5Say('新增了「' + text + '」——它的删除按钮没绑任何监听器，照样能删（靠委托）');
+            });
+
+            // ② 对照：老办法得对每个按钮单独绑，结果就是同一个按钮被绑了很多次
+            document.getElementById('js38-demo5-rebind').addEventListener('click', function () {
+              var buttons = d5List.querySelectorAll(".d-todo-del");
+              for (var i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener('click', function () {});
+              }
+              d5Say('这一轮又给 ' + buttons.length + ' 个按钮各加了一次监听器——'
+                + '注意：同一个函数重复绑只会生效一次，所以写出“绑了很多遍”的程序也不会重复执行，'
+                + '但每条新增的条目都得记得补绑一遍，漏了就失灵；这就是委托要解决的问题');
+            });
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">委托的三个注意点</div>
+        <ul style="margin:0">
+          <li><strong>必须会冒泡的事件才能委托</strong>。<code>focus</code> / <code>blur</code> /
+            <code>mouseenter</code> / <code>mouseleave</code> 不冒泡，委托它们要用各自的
+            <code>focusin</code> / <code>focusout</code> / <code>mouseover</code> / <code>mouseout</code>；</li>
+          <li><strong>认“点的到底是谁”，别直接拿 <code>event.target</code> 当条目</strong>：
+            按钮里可能还套着图标或 <code>&lt;span&gt;</code>，标准做法是
+            <code>event.target.closest(选择器)</code>；</li>
+          <li><strong>回调开头先守卫</strong>：拿不到目标就 <code>return</code>，
+            免得点列表空白处也被当成一次“删除”。</li>
+        </ul>
+      </div>
+
+      <h2>高频事件：防抖与节流</h2>
+      <p>
+        有些事件触发得太勤了：<code>input</code> 每敲一个字一次、<code>scroll</code> 和
+        <code>mousemove</code> 每秒能来上百次。如果回调里要做正经事（搜接口、算布局、存数据），
+        就得给它降速。两种最常用的策略：
+      </p>
+      <ul>
+        <li><strong>防抖（debounce）</strong>：先等一等，如果等待期间又响了，就重新计时；
+          <strong>事件停下来之后只跑一次</strong>。适合“输入完再搜”“窗口调完再重排”。</li>
+        <li><strong>节流（throttle）</strong>：不管响多少次，<strong>每段固定时间内最多跑一次</strong>。
+          适合“滚动时更新进度”“拖动时跟手”。</li>
+      </ul>
+      <script type="text/plain" data-lang="js" data-title="两个函数的骨架（可直接抄走）">
+        // 防抖：等你停手 delay 毫秒，再执行一次
+        function debounce(fn, delay) {
+          let timer = null;
+          return function (...args) {
+            clearTimeout(timer);                       // 又来新动作了：把上一次的预约取消
+            timer = setTimeout(() => {
+              fn.apply(this, args);                    // 用 apply 把 this 与参数原样带给 fn
+            }, delay);
+          };
+        }
+
+        // 节流：每 wait 毫秒最多执行一次
+        function throttle(fn, wait) {
+          let last = 0;
+          return function (...args) {
+            const now = Date.now();
+            if (now - last >= wait) {
+              last = now;
+              fn.apply(this, args);
+            }
+          };
+        }
+      </script>
+      <p>
+        两个函数都返回一个<strong>新函数</strong>——这正是第三十一式的<strong>闭包</strong>：
+        <code>timer</code> 与 <code>last</code> 被关在各自的小盒子里，
+        外部看不见，却能在每次调用之间“记得住上次”。这也是为什么闭包必须学扎实：
+        它不只是面试题，是这类工具的骨架。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · 原样、防抖、节流三栏对照（动手敲、动手点）</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .3rem">
+            <input type="text" id="js38-demo6-input" placeholder="在这里快速敲几个字" size="26">
+          </p>
+          <p style="margin: 0 0 .5rem">
+            <button type="button" id="js38-demo6-go">连点我 5 次</button>
+            <button type="button" id="js38-demo6-reset" style="margin-left:.4rem">清零重来</button>
+          </p>
+          <table>
+            <tbody>
+              <tr><td>原样响应</td><td><strong id="js38-demo6-raw">0</strong> 次</td><td style="font-size:.85rem">每一下都跑（多热闹也多费劲）</td></tr>
+              <tr><td>防抖（停手后再跑）</td><td><strong id="js38-demo6-deb">0</strong> 次</td><td style="font-size:.85rem">连敲 5 个字，只跑 1 次</td></tr>
+              <tr><td>节流（400ms 最多一次）</td><td><strong id="js38-demo6-thr">0</strong> 次</td><td style="font-size:.85rem">连点 5 次，只跑 1 次</td></tr>
+            </tbody>
+          </table>
+          <ul id="js38-demo6-out" style="margin: .5rem 0 0; max-height: 150px; overflow: auto"></ul>
+          <script>
+            "use strict";
+            var d6Out = document.getElementById('js38-demo6-out');
+            var d6Input = document.getElementById('js38-demo6-input');
+            var d6Counts = { raw: 0, deb: 0, thr: 0 };
+
+            function d6Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d6Out.appendChild(li);
+            }
+
+            function d6Render() {
+              document.getElementById('js38-demo6-raw').textContent = d6Counts.raw;
+              document.getElementById('js38-demo6-deb').textContent = d6Counts.deb;
+              document.getElementById('js38-demo6-thr').textContent = d6Counts.thr;
+            }
+
+            // 造一个只负责“记一次数 + 写一行日志”的朴素函数
+            function d6Make(which, label) {
+              return function (text) {
+                d6Counts[which] += 1;
+                d6Render();
+                d6Say(label + '（第 ' + d6Counts[which] + ' 次）：' + text);
+              };
+            }
+
+            function d6Debounce(fn, delay) {
+              var timer = null;
+              return function () {
+                var args = arguments;
+                clearTimeout(timer);                                  // 又来动作了：取消上一次预约
+                timer = setTimeout(function () {
+                  fn.apply(this, args);                               // 停手之后只跑这一次
+                }, delay);
+              };
+            }
+
+            function d6Throttle(fn, wait) {
+              var last = 0;
+              return function () {
+                var now = Date.now();
+                if (now - last >= wait) {                             // 距离上次够久了才放行
+                  last = now;
+                  fn.apply(this, arguments);
+                }
+              };
+            }
+
+            var d6Raw = d6Make('raw', '原样');
+            var d6Deb = d6Debounce(d6Make('deb', '防抖'), 400);
+            var d6Thr = d6Throttle(d6Make('thr', '节流'), 400);
+
+            d6Input.addEventListener('input', function (event) {
+              var v = event.target.value;
+              d6Raw('input：' + v);
+              d6Deb('input：' + v);
+              d6Thr('input：' + v);
+            });
+
+            document.getElementById('js38-demo6-go').addEventListener('click', function () {
+              var i;
+              for (i = 0; i < 5; i++) {
+                d6Raw('click 第 ' + (i + 1) + ' 下');
+                d6Deb('click 第 ' + (i + 1) + ' 下');
+                d6Thr('click 第 ' + (i + 1) + ' 下');
+              }
+            });
+
+            document.getElementById('js38-demo6-reset').addEventListener('click', function () {
+              d6Counts = { raw: 0, deb: 0, thr: 0 };
+              d6Render();
+              d6Out.innerHTML = "";
+              d6Say('已清零（防抖那个还没到点的预约依然会跑——它记在闭包里，不归按钮管）');
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .3rem">
+              <input type="text" id="js38-demo6-input" placeholder="在这里快速敲几个字" size="26">
+            </p>
+            <p style="margin: 0 0 .5rem">
+              <button type="button" id="js38-demo6-go">连点我 5 次</button>
+              <button type="button" id="js38-demo6-reset" style="margin-left:.4rem">清零重来</button>
+            </p>
+            <table>
+              <tbody>
+                <tr><td>原样响应</td><td><strong id="js38-demo6-raw">0</strong> 次</td><td style="font-size:.85rem">每一下都跑（多热闹也多费劲）</td></tr>
+                <tr><td>防抖（停手后再跑）</td><td><strong id="js38-demo6-deb">0</strong> 次</td><td style="font-size:.85rem">连敲 5 个字，只跑 1 次</td></tr>
+                <tr><td>节流（400ms 最多一次）</td><td><strong id="js38-demo6-thr">0</strong> 次</td><td style="font-size:.85rem">连点 5 次，只跑 1 次</td></tr>
+              </tbody>
+            </table>
+            <ul id="js38-demo6-out" style="margin: .5rem 0 0; max-height: 150px; overflow: auto"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var d6Out = document.getElementById('js38-demo6-out');
+            var d6Input = document.getElementById('js38-demo6-input');
+            var d6Counts = { raw: 0, deb: 0, thr: 0 };
+
+            function d6Say(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              d6Out.appendChild(li);
+            }
+
+            function d6Render() {
+              document.getElementById('js38-demo6-raw').textContent = d6Counts.raw;
+              document.getElementById('js38-demo6-deb').textContent = d6Counts.deb;
+              document.getElementById('js38-demo6-thr').textContent = d6Counts.thr;
+            }
+
+            // 造一个只负责“记一次数 + 写一行日志”的朴素函数
+            function d6Make(which, label) {
+              return function (text) {
+                d6Counts[which] += 1;
+                d6Render();
+                d6Say(label + '（第 ' + d6Counts[which] + ' 次）：' + text);
+              };
+            }
+
+            function d6Debounce(fn, delay) {
+              var timer = null;
+              return function () {
+                var args = arguments;
+                clearTimeout(timer);                                  // 又来动作了：取消上一次预约
+                timer = setTimeout(function () {
+                  fn.apply(this, args);                               // 停手之后只跑这一次
+                }, delay);
+              };
+            }
+
+            function d6Throttle(fn, wait) {
+              var last = 0;
+              return function () {
+                var now = Date.now();
+                if (now - last >= wait) {                             // 距离上次够久了才放行
+                  last = now;
+                  fn.apply(this, arguments);
+                }
+              };
+            }
+
+            var d6Raw = d6Make('raw', '原样');
+            var d6Deb = d6Debounce(d6Make('deb', '防抖'), 400);
+            var d6Thr = d6Throttle(d6Make('thr', '节流'), 400);
+
+            d6Input.addEventListener('input', function (event) {
+              var v = event.target.value;
+              d6Raw('input：' + v);
+              d6Deb('input：' + v);
+              d6Thr('input：' + v);
+            });
+
+            document.getElementById('js38-demo6-go').addEventListener('click', function () {
+              var i;
+              for (i = 0; i < 5; i++) {
+                d6Raw('click 第 ' + (i + 1) + ' 下');
+                d6Deb('click 第 ' + (i + 1) + ' 下');
+                d6Thr('click 第 ' + (i + 1) + ' 下');
+              }
+            });
+
+            document.getElementById('js38-demo6-reset').addEventListener('click', function () {
+              d6Counts = { raw: 0, deb: 0, thr: 0 };
+              d6Render();
+              d6Out.innerHTML = "";
+              d6Say('已清零（防抖那个还没到点的预约依然会跑——它记在闭包里，不归按钮管）');
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        怎么读这张表：连敲几个字，<strong>原样</strong>一栏会跟着字数往上跳，<strong>防抖</strong>一栏
+        要等你停手约 400 毫秒才 +1，<strong>节流</strong>一栏在连续输入里隔一段加一次。
+        这也是为什么“实时搜索”要防抖（只在停手后请求一次），
+        “滚动进度条”要节流（跟随手感，又不至于每像素都算）。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">撤销与清理：别让监听器变成漏水的龙头</div>
+        <p style="margin:0">
+          元素被删掉时，它身上的监听器通常也会被垃圾回收带走，一般不用手动清；
+          但<strong>长期存在的对象</strong>（<code>window</code>、<code>document</code>、定时器、
+          以及你自己写的发布订阅）如果绑了监听器又不解，就会一直占着内存、甚至重复触发。
+          规矩：<strong>给“临时出现的界面”绑的监听器，界面消失时记得解绑</strong>，
+          或者在绑定时就用 <code>{ once: true }</code> 说清“只管一次”。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>事件驱动＝“先写好回调，等浏览器来叫”；绑定用
+          <code>addEventListener(类型, 回调, 选项)</code>，解绑必须传<strong>同一个函数</strong>；</li>
+        <li>事件对象先记 <code>target</code> 与 <code>currentTarget</code>：前者是“被点的”，
+          后者是“正在听的”；<code>key</code> 读按键、<code>clientX/Y</code> 读坐标；</li>
+        <li>事件流是“捕获 → 目标 → 冒泡”，默认监听器在冒泡阶段跑；
+          <code>{ capture: true }</code> 改到捕获阶段，<code>eventPhase</code> 能看出在哪一段；</li>
+        <li><strong>事件委托</strong>＝把监听器挂在父元素上，用
+          <code>event.target.closest(选择器)</code> 找目标；动态元素因此不用重新绑；</li>
+        <li><code>preventDefault()</code> 拦默认动作（表单提交要拦 <code>submit</code>），
+          <code>stopPropagation()</code> 断传播，两件事互不相干；</li>
+        <li>高频事件用<strong>防抖</strong>（停手后跑一次）或<strong>节流</strong>（每段时间最多一次），
+          两者都靠闭包记住上次的时间或定时器。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十八式</div>
+        <ol>
+          <li>做一个“待办清单”：输入框回车或点按钮都能新增（提示：表单的 <code>submit</code>
+            事件自带回车提交），列表用<strong>事件委托</strong>处理删除与勾选完成。</li>
+          <li>给搜索框加防抖：停手 300 毫秒后才在结果区显示“正在搜索：某某”——
+            要求自己写那个 <code>debounce</code>，别复制例 6 的。</li>
+          <li>思考：为什么 <code>stopPropagation()</code> 不能让例 3 里的
+            <strong>捕获阶段</strong>监听器不执行？如果你真的想让外层在捕获阶段也收不到，
+            该怎么办？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="todo-form">
+              <input id="todo-input" type="text" placeholder="写点要做的事" required>
+              <button type="submit">添加</button>
+            </form>
+            <ul id="todo-list"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+
+            const form = document.getElementById("todo-form");
+            const input = document.getElementById("todo-input");
+            const list = document.getElementById("todo-list");
+
+            // 有 <form> 就能白拿两样东西：回车提交、以及 required 校验
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();               // 拦掉刷新页面的默认动作
+              const text = input.value.trim();
+              if (!text) return;
+
+              const li = document.createElement("li");
+              const label = document.createElement("label");
+              const box = document.createElement("input");
+              const del = document.createElement("button");
+
+              box.type = "checkbox";
+              label.append(box, document.createTextNode(" " + text));
+              del.type = "button";
+              del.className = "d-del";
+              del.textContent = "删除";
+              li.append(label, del);
+
+              list.append(li);
+              input.value = "";
+              input.focus();
+            });
+
+            // 委托：勾选与删除都在这一个监听器里分流
+            list.addEventListener("change", (event) => {
+              if (event.target.type === "checkbox") {
+                const li = event.target.closest("li");
+                li.style.textDecoration = event.target.checked ? "line-through" : "";
+              }
+            });
+
+            list.addEventListener("click", (event) => {
+              const btn = event.target.closest(".d-todo-del");
+              if (btn) btn.closest("li").remove();
+            });
+          </script>
+          <p>
+            三个细节：①用 <code>&lt;form&gt;</code> 白拿回车提交与 <code>required</code> 校验；
+            ②勾选用 <code>change</code>（勾选/取消都会响），删除用 <code>click</code>，
+            两个事件各管一摊、都靠委托；③回调开头用 <code>closest</code> 判断“这是不是我要管的”，
+            不是就直接返回。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <input id="search" type="search" placeholder="搜点什么">
+            <p id="search-result">（还没开始搜）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+
+            function debounce(fn, delay) {
+              let timer = null;
+              return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+              };
+            }
+
+            const input = document.getElementById("search");
+            const result = document.getElementById("search-result");
+
+            const search = debounce((keyword) => {
+              result.textContent = keyword ? "正在搜索：" + keyword : "（还没开始搜）";
+            }, 300);
+
+            input.addEventListener("input", (event) => {
+              search(event.target.value.trim());
+            });
+          </script>
+          <p>
+            注意箭头函数版本的 <code>fn.apply(this, args)</code>：箭头函数自己没有
+            <code>this</code>，这里的 <code>this</code> 取自外层——如果包装的是普通函数、又需要
+            <code>this</code> 指向元素，就用普通函数写包装器（像例 6 那样）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为捕获阶段比冒泡<strong>更早发生</strong>：事件从 <code>document</code> 往下走，
+            先经过外层元素的捕获监听器，才会抵达目标；等目标上的监听器调用
+            <code>stopPropagation()</code> 时，外层的捕获监听器早就执行完了。
+            这也说明了一件事：<strong>“阻止传播”只对还没走到的后续阶段有效</strong>。
+            真想让外层的捕获监听器也别响，得在<strong>更外层</strong>（更早的阶段）就拦住，
+            或者在 <code>document</code> 的捕获阶段统一处理。
+            这正是“先看清楚谁早谁晚，再决定在哪里拦”的实际意义。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，让页面学会等待：定时器、Promise 与 async / await。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

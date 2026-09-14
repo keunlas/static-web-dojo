@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十一式 · Flexbox 弹性布局 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="主轴与交叉轴、容器的六个属性与项目的四个属性、flex 简写、gap，以及居中、导航栏、等高卡片、两栏、页脚吸底等常见布局套路。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-21">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        到了这一式，才算真正摸到现代布局的门槛。
+        Flexbox 用一句话说清它的野心：<strong>让“一排东西怎么摆”这件事，变成几个开关</strong>——
+        居中不用猜、等高不用凑、间距不用算。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>理解主轴与交叉轴，知道轴的方向由 <code>flex-direction</code> 决定</li>
+          <li>掌握容器六件事：<code>flex-direction</code>、<code>flex-wrap</code>、
+            <code>justify-content</code>、<code>align-items</code>、<code>align-content</code>、<code>gap</code></li>
+          <li>掌握项目四件事：<code>flex-grow/shrink/basis</code>（含 <code>flex</code> 简写）、
+            <code>order</code>、<code>align-self</code>、<code>min-width</code> 陷阱</li>
+          <li>能凭手感写出居中、导航栏、等高卡片、固定 + 自适应两栏、页脚吸底</li>
+        </ul>
+      </div>
+
+      <h2>心智模型：容器、项目、两条轴</h2>
+      <p>
+        用了 <code>display: flex</code> 的元素叫<strong>弹性容器</strong>，
+        它的<strong>直接子元素</strong>自动变成<strong>弹性项目</strong>。
+        容器里会出现两条轴：
+      </p>
+      <ul>
+        <li><strong>主轴</strong>：项目默认排列的方向。默认是“横着、从左到右”；</li>
+        <li><strong>交叉轴</strong>：与主轴垂直的那条。默认是“竖着、从上到下”。</li>
+      </ul>
+      <p>
+        所有对齐属性都是按这两条轴命名的，所以第一件要记住的事是：
+        <strong><code>flex-direction</code> 一改，主轴和交叉轴就跟着换</strong>——
+        <code>justify-content</code> 与 <code>align-items</code> 的作用方向也随之对调。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 主轴与交叉轴（左：row；右：column）</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo1 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css21-demo1 .stage { width: 220px; height: 150px; background: #f4edde; border: 1px dashed #d4cab0; }
+            #css21-demo1 .d-row { display: flex; gap: .4rem; padding: .4rem; }
+            #css21-demo1 .d-col { display: flex; flex-direction: column; gap: .4rem; padding: .4rem; }
+            #css21-demo1 .cell {
+              background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3;
+              padding: .4rem .6rem; font-size: .82rem;
+            }
+            #css21-demo1 .note { font-size: .8rem; color: #6f6a5e; margin: .2rem 0 0; }
+          </style>
+          <div id="css21-demo1">
+            <div>
+              <div class="stage d-row"><span class="cell">甲</span><span class="cell">乙</span><span class="cell">丙</span></div>
+              <p class="note">flex-direction: row —— 主轴横向</p>
+            </div>
+            <div>
+              <div class="stage d-col"><span class="cell">甲</span><span class="cell">乙</span><span class="cell">丙</span></div>
+              <p class="note">flex-direction: column —— 主轴纵向</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo1">
+              <div>
+                <div class="stage d-row"><span class="cell">甲</span><span class="cell">乙</span><span class="cell">丙</span></div>
+                <p class="note">flex-direction: row —— 主轴横向</p>
+              </div>
+              <div>
+                <div class="stage d-col"><span class="cell">甲</span><span class="cell">乙</span><span class="cell">丙</span></div>
+                <p class="note">flex-direction: column —— 主轴纵向</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo1 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css21-demo1 .stage { width: 220px; height: 150px; background: #f4edde; border: 1px dashed #d4cab0; }
+            #css21-demo1 .d-row { display: flex; gap: .4rem; padding: .4rem; }
+            #css21-demo1 .d-col { display: flex; flex-direction: column; gap: .4rem; padding: .4rem; }
+            #css21-demo1 .cell {
+              background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3;
+              padding: .4rem .6rem; font-size: .82rem;
+            }
+            #css21-demo1 .note { font-size: .8rem; color: #6f6a5e; margin: .2rem 0 0; }
+          </script>
+        </div>
+      </div>
+
+      <h2>容器属性：六个开关</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>管什么</th>
+            <th>常用取值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>display</code></td>
+            <td>成为弹性容器</td>
+            <td><code>flex</code>、<code>inline-flex</code>（像行内元素一样参与外部排版）</td>
+          </tr>
+          <tr>
+            <td><code>flex-direction</code></td>
+            <td>主轴朝哪</td>
+            <td><code>row</code>（默认）、<code>row-reverse</code>、<code>column</code>、<code>column-reverse</code></td>
+          </tr>
+          <tr>
+            <td><code>flex-wrap</code></td>
+            <td>一行放不下时怎么办</td>
+            <td><code>nowrap</code>（默认，硬挤在一行）、<code>wrap</code>（换行）、<code>wrap-reverse</code></td>
+          </tr>
+          <tr>
+            <td><code>justify-content</code></td>
+            <td><strong>主轴</strong>上怎么分配剩余空间</td>
+            <td><code>flex-start</code>、<code>center</code>、<code>flex-end</code>、<code>space-between</code>、<code>space-around</code>、<code>space-evenly</code></td>
+          </tr>
+          <tr>
+            <td><code>align-items</code></td>
+            <td><strong>交叉轴</strong>上单个项目怎么对齐</td>
+            <td><code>stretch</code>（默认，拉伸填满）、<code>flex-start</code>、<code>center</code>、<code>flex-end</code>、<code>baseline</code></td>
+          </tr>
+          <tr>
+            <td><code>align-content</code></td>
+            <td><strong>多行之间</strong>怎么分布（只在换行后生效）</td>
+            <td>与 <code>justify-content</code> 同一套取值</td>
+          </tr>
+          <tr>
+            <td><code>gap</code></td>
+            <td>项目之间的间距</td>
+            <td><code>gap: 1rem</code>、<code>gap: .5rem 1rem</code>（行距 列距）、<code>row-gap</code> / <code>column-gap</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · justify-content 六种（主轴上的六种分法）</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo2 .strip {
+              display: flex; gap: .4rem; margin-bottom: .5rem;
+              background: #f4edde; border: 1px dashed #d4cab0; padding: .3rem;
+            }
+            #css21-demo2 .chip {
+              background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e;
+              padding: .25rem .5rem; font-size: .78rem;
+            }
+            #css21-demo2 .label { font-size: .75rem; color: #6f6a5e; margin: 0 0 .15rem; }
+            #css21-demo2 .a { justify-content: flex-start; }
+            #css21-demo2 .b { justify-content: center; }
+            #css21-demo2 .c { justify-content: flex-end; }
+            #css21-demo2 .d { justify-content: space-between; }
+            #css21-demo2 .e { justify-content: space-around; }
+            #css21-demo2 .f { justify-content: space-evenly; margin-bottom: 0; }
+          </style>
+          <div id="css21-demo2">
+            <p class="label">flex-start（默认）</p>
+            <div class="strip a"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            <p class="label">center</p>
+            <div class="strip b"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            <p class="label">flex-end</p>
+            <div class="strip c"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            <p class="label">space-between（两端贴边，中间均分）</p>
+            <div class="strip d"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            <p class="label">space-around（每个项目左右留同样空隙）</p>
+            <div class="strip e"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            <p class="label">space-evenly（所有空隙完全相等）</p>
+            <div class="strip f"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo2">
+              <p class="label">flex-start（默认）</p>
+              <div class="strip a"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+              <p class="label">center</p>
+              <div class="strip b"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+              <p class="label">flex-end</p>
+              <div class="strip c"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+              <p class="label">space-between（两端贴边，中间均分）</p>
+              <div class="strip d"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+              <p class="label">space-around（每个项目左右留同样空隙）</p>
+              <div class="strip e"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+              <p class="label">space-evenly（所有空隙完全相等）</p>
+              <div class="strip f"><span class="chip">甲</span><span class="chip">乙</span><span class="chip">丙</span></div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo2 .strip {
+              display: flex; gap: .4rem; margin-bottom: .5rem;
+              background: #f4edde; border: 1px dashed #d4cab0; padding: .3rem;
+            }
+            #css21-demo2 .chip {
+              background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e;
+              padding: .25rem .5rem; font-size: .78rem;
+            }
+            #css21-demo2 .label { font-size: .75rem; color: #6f6a5e; margin: 0 0 .15rem; }
+            #css21-demo2 .a { justify-content: flex-start; }
+            #css21-demo2 .b { justify-content: center; }
+            #css21-demo2 .c { justify-content: flex-end; }
+            #css21-demo2 .d { justify-content: space-between; }
+            #css21-demo2 .e { justify-content: space-around; }
+            #css21-demo2 .f { justify-content: space-evenly; margin-bottom: 0; }
+          </script>
+        </div>
+      </div>
+      <p>
+        三个 <code>space-</code> 的区别常被问起，用一句话记：
+        <strong><code>between</code> 只管项目之间（两端贴边）</strong>，
+        <strong><code>around</code> 每个项目两侧留同样的空（所以两端是半份）</strong>，
+        <strong><code>evenly</code> 把两端与中间的空隙拉成一模一样</strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 交叉轴对齐：容器 align-items 与单个项目 align-self</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo3 .stage {
+              display: flex; gap: .6rem; height: 110px; padding: .3rem;
+              background: #f4edde; border: 1px dashed #d4cab0; margin-bottom: .6rem;
+            }
+            #css21-demo3 .item { background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3; padding: .3rem .5rem; font-size: .8rem; }
+            #css21-demo3 .stretch { align-items: stretch; }
+            #css21-demo3 .center { align-items: center; }
+            #css21-demo3 .end { align-items: flex-end; }
+            #css21-demo3 .self .middle { align-self: center; }
+            #css21-demo3 .self .last { align-self: flex-end; }
+            #css21-demo3 .label { font-size: .78rem; color: #6f6a5e; margin: 0 0 .15rem; }
+          </style>
+          <div id="css21-demo3">
+            <p class="label">align-items: stretch（默认，拉满高度）</p>
+            <div class="stage stretch"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+            <p class="label">align-items: center</p>
+            <div class="stage center"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+            <p class="label">align-items: flex-end</p>
+            <div class="stage end"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+            <p class="label">容器 flex-start + 个别项目用 align-self（乙居中、丙贴底）</p>
+            <div class="stage self" style="margin-bottom: 0">
+              <span class="item first">甲</span><span class="item middle">乙</span><span class="item last">丙</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo3">
+              <p class="label">align-items: stretch（默认，拉满高度）</p>
+              <div class="stage stretch"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+              <p class="label">align-items: center</p>
+              <div class="stage center"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+              <p class="label">align-items: flex-end</p>
+              <div class="stage end"><span class="item">甲</span><span class="item">乙</span><span class="item">丙</span></div>
+              <p class="label">容器 flex-start + 个别项目用 align-self（乙居中、丙贴底）</p>
+              <div class="stage self" style="margin-bottom: 0">
+                <span class="item first">甲</span><span class="item middle">乙</span><span class="item last">丙</span>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo3 .stage {
+              display: flex; gap: .6rem; height: 110px; padding: .3rem;
+              background: #f4edde; border: 1px dashed #d4cab0; margin-bottom: .6rem;
+            }
+            #css21-demo3 .item { background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3; padding: .3rem .5rem; font-size: .8rem; }
+            #css21-demo3 .stretch { align-items: stretch; }
+            #css21-demo3 .center { align-items: center; }
+            #css21-demo3 .end { align-items: flex-end; }
+            #css21-demo3 .self .middle { align-self: center; }
+            #css21-demo3 .self .last { align-self: flex-end; }
+            #css21-demo3 .label { font-size: .78rem; color: #6f6a5e; margin: 0 0 .15rem; }
+          </script>
+        </div>
+      </div>
+
+      <h2>项目属性：谁分得多、谁排前面</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>含义</th>
+            <th>要点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>flex-grow</code></td>
+            <td>有剩余空间时，按比例分</td>
+            <td>默认 <code>0</code>（不参与分配）；写 2 就比写 1 的多分一倍</td>
+          </tr>
+          <tr>
+            <td><code>flex-shrink</code></td>
+            <td>空间不够时，按比例缩</td>
+            <td>默认 <code>1</code>；写 <code>0</code> 表示“别缩我”（固定宽度栏常用）</td>
+          </tr>
+          <tr>
+            <td><code>flex-basis</code></td>
+            <td>分配之前的“基准尺寸”</td>
+            <td>默认 <code>auto</code>（看宽高）；<code>0</code> 表示“从零开始分”</td>
+          </tr>
+          <tr>
+            <td><code>flex</code>（简写）</td>
+            <td>一次写完上面三个</td>
+            <td><code>flex: 1</code> ＝ <code>1 1 0%</code>；<code>flex: auto</code> ＝ <code>1 1 auto</code>；
+              <code>flex: none</code> ＝ <code>0 0 auto</code>（不伸不缩，按内容）</td>
+          </tr>
+          <tr>
+            <td><code>order</code></td>
+            <td>视觉顺序，默认 0，可负</td>
+            <td>只改视觉，<strong>不改 HTML 与键盘顺序</strong>——无障碍上要谨慎</td>
+          </tr>
+          <tr>
+            <td><code>align-self</code></td>
+            <td>单独覆盖容器的 <code>align-items</code></td>
+            <td>例 3 最后一格演示过</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · flex 简写的三兄弟（脚本量出实际宽度）</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo4 .strip { display: flex; gap: .5rem; background: #f4edde; border: 1px dashed #d4cab0; padding: .4rem; }
+            #css21-demo4 .item { background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e; padding: .35rem .5rem; font-size: .82rem; text-align: center; }
+            #css21-demo4 .g1 { flex: 1; }
+            #css21-demo4 .g2 { flex: 2; }
+            #css21-demo4 .gn { flex: none; }
+            #css21-demo4 .out { font-size: .82rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </style>
+          <div id="css21-demo4">
+            <div class="strip">
+              <div class="item g1" id="css21-demo4-a">flex: 1</div>
+              <div class="item g2" id="css21-demo4-b">flex: 2</div>
+              <div class="item gn" id="css21-demo4-c">flex: none（按内容宽）</div>
+            </div>
+            <p class="out" id="css21-demo4-out">正在量宽度……</p>
+            <script>
+              var a4 = document.getElementById('css21-demo4-a');
+              var b4 = document.getElementById('css21-demo4-b');
+              var c4 = document.getElementById('css21-demo4-c');
+              document.getElementById('css21-demo4-out').textContent =
+                '实际宽度：flex:1 → ' + a4.offsetWidth + 'px，flex:2 → ' + b4.offsetWidth
+                + 'px（约两倍），flex:none → ' + c4.offsetWidth + 'px（只够放文字）。';
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo4">
+              <div class="strip">
+                <div class="item g1" id="css21-demo4-a">flex: 1</div>
+                <div class="item g2" id="css21-demo4-b">flex: 2</div>
+                <div class="item gn" id="css21-demo4-c">flex: none（按内容宽）</div>
+              </div>
+              <p class="out" id="css21-demo4-out">正在量宽度……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo4 .strip { display: flex; gap: .5rem; background: #f4edde; border: 1px dashed #d4cab0; padding: .4rem; }
+            #css21-demo4 .item { background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e; padding: .35rem .5rem; font-size: .82rem; text-align: center; }
+            #css21-demo4 .g1 { flex: 1; }
+            #css21-demo4 .g2 { flex: 2; }
+            #css21-demo4 .gn { flex: none; }
+            #css21-demo4 .out { font-size: .82rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量宽度，演示用）">
+            var a4 = document.getElementById('css21-demo4-a');
+            var b4 = document.getElementById('css21-demo4-b');
+            var c4 = document.getElementById('css21-demo4-c');
+            document.getElementById('css21-demo4-out').textContent =
+              '实际宽度：flex:1 → ' + a4.offsetWidth + 'px，flex:2 → ' + b4.offsetWidth
+              + 'px（约两倍），flex:none → ' + c4.offsetWidth + 'px（只够放文字）。';
+          </script>
+        </div>
+      </div>
+
+      <h2>常见套路：五个能直接抄的组合</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>想要的效果</th>
+            <th>写法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>水平垂直居中</td>
+            <td><code>display: flex; align-items: center; justify-content: center;</code></td>
+          </tr>
+          <tr>
+            <td>导航栏（左边品牌、右边菜单）</td>
+            <td><code>display: flex; align-items: center; gap: 1rem;</code>
+              + 菜单上加 <code>margin-left: auto</code>（或容器 <code>justify-content: space-between</code>）</td>
+          </tr>
+          <tr>
+            <td>一行等高卡片</td>
+            <td><code>display: flex; gap: 1rem;</code> + 每张卡片 <code>flex: 1;</code>
+              （默认 <code>align-items: stretch</code> 让它们自动等高）</td>
+          </tr>
+          <tr>
+            <td>固定侧栏 + 自适应主栏</td>
+            <td>侧栏 <code>flex: 0 0 220px;</code>，主栏 <code>flex: 1; min-width: 0;</code></td>
+          </tr>
+          <tr>
+            <td>页脚永远在底部</td>
+            <td>最外层 <code>min-height: 100vh; display: flex; flex-direction: column;</code>
+              + 中间内容 <code>flex: 1;</code></td>
+          </tr>
+          <tr>
+            <td>卡片自动换行</td>
+            <td><code>flex-wrap: wrap; gap: 1rem;</code> + 每张卡片 <code>flex: 1 1 220px;</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 套路实战：导航栏 + 等高卡片</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo5 .d-navbar {
+              display: flex; align-items: center; gap: 1rem;
+              background: #f4edde; border: 1px solid #d4cab0; border-radius: 8px;
+              padding: .5rem .8rem; margin-bottom: .8rem;
+            }
+            #css21-demo5 .brand { font-weight: 700; }
+            #css21-demo5 .menu { display: flex; gap: .8rem; margin-left: auto; font-size: .88rem; }
+            #css21-demo5 .d-cards { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css21-demo5 .d-card {
+              flex: 1 1 200px; background: #fffdf7; border: 1px solid #d4cab0;
+              border-radius: 8px; padding: .7rem .8rem; font-size: .88rem;
+              display: flex; flex-direction: column; gap: .4rem;
+            }
+            #css21-demo5 .d-card .more { margin-top: auto; color: #b03a2e; font-size: .82rem; }
+          </style>
+          <div id="css21-demo5">
+            <div class="d-navbar">
+              <span class="brand">静 · 主页</span>
+              <span class="menu"><span>关于</span><span>作品</span><span>联系</span></span>
+            </div>
+            <div class="d-cards">
+              <div class="d-card">
+                <strong>短卡片</strong>
+                <span>内容少一点。</span>
+                <span class="more">了解更多 →</span>
+              </div>
+              <div class="d-card">
+                <strong>长卡片</strong>
+                <span>这张卡片的文字多一些，用来示范“等高”的效果：同一行里的卡片会被拉伸到一样高。</span>
+                <span class="more">了解更多 →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo5">
+              <div class="d-navbar">
+                <span class="brand">静 · 主页</span>
+                <span class="menu"><span>关于</span><span>作品</span><span>联系</span></span>
+              </div>
+              <div class="d-cards">
+                <div class="d-card">
+                  <strong>短卡片</strong>
+                  <span>内容少一点。</span>
+                  <span class="more">了解更多 →</span>
+                </div>
+                <div class="d-card">
+                  <strong>长卡片</strong>
+                  <span>这张卡片的文字多一些，用来示范“等高”的效果：同一行里的卡片会被拉伸到一样高。</span>
+                  <span class="more">了解更多 →</span>
+                </div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo5 .d-navbar {
+              display: flex; align-items: center; gap: 1rem;
+              background: #f4edde; border: 1px solid #d4cab0; border-radius: 8px;
+              padding: .5rem .8rem; margin-bottom: .8rem;
+            }
+            #css21-demo5 .brand { font-weight: 700; }
+            #css21-demo5 .menu { display: flex; gap: .8rem; margin-left: auto; font-size: .88rem; }
+            #css21-demo5 .d-cards { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css21-demo5 .d-card {
+              flex: 1 1 200px; background: #fffdf7; border: 1px solid #d4cab0;
+              border-radius: 8px; padding: .7rem .8rem; font-size: .88rem;
+              display: flex; flex-direction: column; gap: .4rem;
+            }
+            #css21-demo5 .d-card .more { margin-top: auto; color: #b03a2e; font-size: .82rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        留意卡片里那一句 <code>margin-top: auto</code>：在弹性容器里，
+        它会把“了解更多”推到卡片底部——这招常用来固定卡片的按钮位置，
+        比硬算高度省事得多（这是我们第三次遇到 <code>auto</code> 的妙用：
+        居中的 <code>margin: 0 auto</code>、推开邻居的 <code>margin-left: auto</code>，现在是它）。
+      </p>
+
+      <h2>一个必须知道的坑：flex 项目不肯缩</h2>
+      <p>
+        弹性项目的 <code>min-width</code> 默认是 <code>auto</code>，意思是
+        “不许缩到比内容还窄”。平时这是保护，遇到一长串<strong>不可断开</strong>的内容
+        （长校验码、长单词、连成一串的代码）就变成麻烦——它宁可顶破容器也不肯缩。
+        <strong>解决办法是显式写 <code>min-width: 0</code></strong>，再配省略号收尾。
+        这里还有个反直觉的细节：普通网址里带斜杠与连字符，浏览器可以在这类位置断开，
+        所以它常常<em>不</em>触发这个坑；真正撑破布局的，多半是那些“没有任何断点”的字符串。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 6 · 那个经典溢出：加一句 min-width: 0 就治好了</div>
+        <div class="demo-preview">
+          <style>
+            #css21-demo6 .d-row { display: flex; gap: .5rem; max-width: 320px; background: #f4edde; border: 1px dashed #d4cab0; padding: .4rem; margin-bottom: .6rem; }
+            #css21-demo6 .tag { flex: none; background: #b03a2e; color: #fff; padding: .2rem .5rem; font-size: .78rem; border-radius: 4px; }
+            #css21-demo6 .text { background: #fffdf7; padding: .2rem .5rem; font-size: .82rem; }
+            #css21-demo6 .broken { white-space: nowrap; }   /* 没写 min-width: 0，也不裁切 */
+            #css21-demo6 .fixed { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+            #css21-demo6 .label { font-size: .78rem; color: #6f6a5e; margin: 0 0 .15rem; }
+          </style>
+          <div id="css21-demo6">
+            <p class="label">没写 min-width: 0 —— 长校验码直接撑破容器</p>
+            <div class="d-row">
+              <span class="tag">链接</span>
+              <span class="text broken" id="css21-demo6-a">5f4dcc3b5aa765d61d8327deb882cf997b8e4f3a2c1d6e9b0a4f7c2e5d8b1a3f</span>
+            </div>
+            <p class="label">写了 min-width: 0 + 省略号 —— 收在容器里</p>
+            <div class="d-row" style="margin-bottom: 0">
+              <span class="tag">链接</span>
+              <span class="text fixed" id="css21-demo6-b">5f4dcc3b5aa765d61d8327deb882cf997b8e4f3a2c1d6e9b0a4f7c2e5d8b1a3f</span>
+            </div>
+            <p class="mt-2 mb-0" id="css21-demo6-out">正在量……</p>
+            <script>
+              var a6 = document.getElementById('css21-demo6-a');
+              var b6 = document.getElementById('css21-demo6-b');
+              var rowA6 = a6.closest('.d-row').getBoundingClientRect();
+              var rowB6 = b6.closest('.d-row').getBoundingClientRect();
+              document.getElementById('css21-demo6-out').textContent =
+                '第一行宽 ' + a6.offsetWidth + 'px，比容器还宽 '
+                + Math.round(a6.getBoundingClientRect().right - rowA6.right)
+                + 'px（真的撑出去了）；第二行宽 ' + b6.offsetWidth + 'px，正好收在容器里。';
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css21-demo6">
+                <p class="label">没写 min-width: 0 —— 长校验码直接撑破容器</p>
+              <div class="d-row">
+                <span class="tag">链接</span>
+                  <span class="text broken" id="css21-demo6-a">5f4dcc3b5aa765d61d8327deb882cf997b8e4f3a2c1d6e9b0a4f7c2e5d8b1a3f</span>
+              </div>
+                <p class="label">写了 min-width: 0 + 省略号 —— 收在容器里</p>
+              <div class="d-row" style="margin-bottom: 0">
+                <span class="tag">链接</span>
+                  <span class="text fixed" id="css21-demo6-b">5f4dcc3b5aa765d61d8327deb882cf997b8e4f3a2c1d6e9b0a4f7c2e5d8b1a3f</span>
+              </div>
+              <p class="mt-2 mb-0" id="css21-demo6-out">正在量……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css21-demo6 .d-row { display: flex; gap: .5rem; max-width: 320px; background: #f4edde; border: 1px dashed #d4cab0; padding: .4rem; margin-bottom: .6rem; }
+            #css21-demo6 .tag { flex: none; background: #b03a2e; color: #fff; padding: .2rem .5rem; font-size: .78rem; border-radius: 4px; }
+            #css21-demo6 .text { background: #fffdf7; padding: .2rem .5rem; font-size: .82rem; }
+            #css21-demo6 .broken { white-space: nowrap; }   /* 没写 min-width: 0，也不裁切 */
+            #css21-demo6 .fixed { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+            #css21-demo6 .label { font-size: .78rem; color: #6f6a5e; margin: 0 0 .15rem; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量宽度，演示用）">
+            var a6 = document.getElementById('css21-demo6-a');
+            var b6 = document.getElementById('css21-demo6-b');
+            var rowA6 = a6.closest('.d-row').getBoundingClientRect();
+            var rowB6 = b6.closest('.d-row').getBoundingClientRect();
+            document.getElementById('css21-demo6-out').textContent =
+              '第一行宽 ' + a6.offsetWidth + 'px，比容器还宽 '
+              + Math.round(a6.getBoundingClientRect().right - rowA6.right)
+              + 'px（真的撑出去了）；第二行宽 ' + b6.offsetWidth + 'px，正好收在容器里。';
+          </script>
+        </div>
+      </div>
+      <p>
+        对照着看就明白了：第一行那句网址<strong>直接撑破了虚线框</strong>（宽度比容器还大），
+        第二行被老老实实收在框内并显示了省略号。
+        还要留意一个容易忽略的细节：<strong>给项目加了 <code>overflow: hidden</code> 之后，
+        它的 <code>min-width: auto</code> 保护就自动失效了</strong>——
+        也就是说，“裁切类”的样式本身就会解除这条保护。
+        所以口诀可以记成：<strong>弹性项目 + 省略号 = <code>overflow: hidden</code> + <code>min-width: 0</code></strong>，
+        两者一起写，任何浏览器都不会给你惊喜。
+      </p>
+
+      <h2>什么时候用 Flex，什么时候用 Grid</h2>
+      <ul>
+        <li><strong>一维（一行或一列）</strong>用 Flex：导航栏、按钮组、卡片行、居中；</li>
+        <li><strong>二维（行列同时要控制）</strong>用 Grid：整页骨架、相册、仪表盘；</li>
+        <li>两者可以嵌套：Grid 排大区块，每个区块内部用 Flex 排细节；</li>
+        <li>还有一条经验：<strong>“内容决定布局”用 Flex，“布局决定内容位置”用 Grid</strong>。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>display: flex</code> 让直接子元素成为弹性项目；主轴由 <code>flex-direction</code> 决定；</li>
+        <li>主轴用 <code>justify-content</code>，交叉轴用 <code>align-items</code>，多行之间用 <code>align-content</code>；</li>
+        <li><code>gap</code> 管间距，比算 <code>margin</code> 省心；</li>
+        <li>项目四件事：<code>flex</code> 系列管伸缩（<code>flex: 1</code> ＝ <code>1 1 0%</code>）、
+          <code>order</code> 管视觉顺序（慎用）、<code>align-self</code> 单独对齐、<code>min-width: 0</code> 解溢出；</li>
+        <li>五套常用组合：居中、导航栏、等高卡片、固定 + 自适应两栏、页脚吸底；</li>
+        <li>一维用 Flex、二维用 Grid，两者嵌套使用最常见。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十一式</div>
+        <ol>
+          <li>用 flex 做一条导航栏：左边品牌、右边三个链接，竖直居中；
+            再把窗口拉窄，看看它是怎么“挤”的。</li>
+          <li>做一行三张卡片：自动换行、间距 1rem、每张最小 200px，
+            并让每张卡片底部的“了解更多”永远贴在卡片底部。</li>
+          <li>思考：为什么弹性项目默认不肯缩到比内容还窄？这条默认值在什么场景下是好事，
+            什么场景下反而是麻烦？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="导航栏">
+            <nav class="nav">
+              <span class="brand">静 · 主页</span>
+              <ul class="links">
+                <li><a href="#about">关于</a></li>
+                <li><a href="#works">作品</a></li>
+                <li><a href="#contact">联系</a></li>
+              </ul>
+            </nav>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="两边分开">
+            .nav { display: flex; align-items: center; gap: 1rem; }
+            .links { display: flex; gap: 1rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
+          </script>
+          <p>
+            <code>margin-left: auto</code> 把右侧那一组“推”到最右边，
+            比 <code>justify-content: space-between</code> 更灵活——中间还能再插东西。
+            窗口变窄时，因为默认 <code>flex-wrap: nowrap</code>，它会先挤压、再溢出；
+            想让它换行就加 <code>flex-wrap: wrap</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="一行卡片 + 底部对齐">
+            .cards { display: flex; flex-wrap: wrap; gap: 1rem; }
+            .card {
+              flex: 1 1 200px; display: flex; flex-direction: column; gap: .4rem;
+            }
+            .card .more { margin-top: auto; }   /* 关键：把按钮推到卡片底部 */
+          </script>
+          <p>
+            两处 <code>flex</code> 各司其职：外层让卡片自动换行并平分宽度，
+            内层（每张卡片自己也是容器）用 <code>flex-direction: column</code> +
+            <code>margin-top: auto</code> 把“了解更多”压到底部。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为“内容不该被切掉”是更安全的默认：比如按钮、标签、图标这类元素，
+            一旦缩得比内容还窄，文字会被裁掉或变形，用户看不懂也点不准。
+            所以规范让弹性项目默认按内容设一个最小宽度
+            （<code>min-width: auto</code>）。
+            <strong>好处</strong>：写卡片、按钮组时不必担心文字被压扁；
+            <strong>麻烦</strong>：遇到长网址、长单词、代码这类“不可断”的内容，
+            它宁可撑破容器也不肯缩，于是就得手动写 <code>min-width: 0</code>
+            来解除这个保护，再配合 <code>overflow</code> 与省略号收尾。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，从一维走向二维：Grid 网格布局。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -57,3 +57,7 @@ node --check site/assets/js/site.js
 
 - `PAGES` 由 `SECTIONS` 自动生成，**不要**手动维护其中的章节条目；
 - 改动后若在已打开页面看不到变化，刷新浏览器（无缓存问题则 Ctrl+F5）。
+- **漏登记的典型症状**：页面渲染出来但**没有页头**（`injectHeader` 查 `BY_ID` 查不到就退出）、
+  翻页只剩一个“回到首页”链接（`findPageIndex` 返回 -1）——看到这两个信号，
+  先检查 `data-page` 是否与 `SECTIONS` 里的 `num` 拼出的 id 一致。
+  `node tools/verify-cdp.js <url>` 的标记可直接看出：正常应是 `header:true`、`pager:2`。

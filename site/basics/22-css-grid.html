@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十二式 · Grid 网格布局 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="网格线、轨道与单元格的心智模型，fr/repeat/minmax/auto-fit、跨格与 grid-area、模板区域、对齐与覆盖层，以及 Grid 与 Flex 的选择。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-22">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        Flex 排一行，Grid 排一张表。
+        上一式的弹性布局管的是“一条线上的分配”，这一式的网格布局管的是
+        “<strong>横竖同时要对齐</strong>”的场面——整页骨架、相册、仪表盘都归它管。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>理解网格的三件套：网格线、轨道、单元格，分得清显式网格与隐式网格</li>
+          <li>会用 <code>fr</code>、<code>repeat()</code>、<code>minmax()</code>、<code>auto-fit</code> 写会自适应的列</li>
+          <li>会让项目跨格（<code>span</code> / 坐标 / <code>grid-area</code>）或用模板区域排整页</li>
+          <li>会用对齐属性与“同一格叠加”，知道 Grid 与 Flex 各自的主场</li>
+        </ul>
+      </div>
+
+      <h2>心智模型：线、轨道、单元格</h2>
+      <p>
+        声明 <code>display: grid</code> 之后，容器就变成一张网格。理解它只需要三样东西：
+      </p>
+      <ul>
+        <li><strong>网格线（line）</strong>：划分网格的每一条线，<strong>从 1 开始编号</strong>，
+          负数则从末尾数（<code>-1</code> 是最后一条线）；</li>
+        <li><strong>轨道（track）</strong>：两条线之间的行或列，也就是“一行”“一列”；</li>
+        <li><strong>单元格（cell）</strong>：行与列交叉出的一格，是项目最自然的落点。</li>
+      </ul>
+      <p>
+        还有一对概念值得先分清：你在 <code>grid-template-*</code> 里<strong>写出来的</strong>叫
+        <strong>显式网格</strong>；项目多出来、容器自动补出的行列叫<strong>隐式网格</strong>，
+        它的尺寸由 <code>grid-auto-rows</code> / <code>grid-auto-columns</code> 决定
+        （不写的话按内容高度自适应）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 第一个网格：三列两行，格与格之间留 gap</div>
+        <div class="demo-preview">
+          <style>
+            #css22-demo1 .board {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;   /* 三列等宽 */
+              grid-auto-rows: 62px;                 /* 每行 62px 高 */
+              gap: .6rem;
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo1 .cell {
+              background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e;
+              display: flex; align-items: center; justify-content: center; font-size: .82rem;
+            }
+          </style>
+          <div id="css22-demo1">
+            <div class="board">
+              <div class="cell">1-1</div><div class="cell">1-2</div><div class="cell">1-3</div>
+              <div class="cell">2-1</div><div class="cell">2-2</div>
+              <div class="cell">2-3（最后一个没写满也没关系）</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css22-demo1">
+              <div class="board">
+                <div class="cell">1-1</div><div class="cell">1-2</div><div class="cell">1-3</div>
+                <div class="cell">2-1</div><div class="cell">2-2</div>
+                <div class="cell">2-3（最后一个没写满也没关系）</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css22-demo1 .board {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;   /* 三列等宽 */
+              grid-auto-rows: 62px;                 /* 每行 62px 高 */
+              gap: .6rem;
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo1 .cell {
+              background: #fffdf7; border: 1px solid #b03a2e; color: #b03a2e;
+              display: flex; align-items: center; justify-content: center; font-size: .82rem;
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        三个格子一行是“自动”的：写完 <code>grid-template-columns</code>，
+        浏览器就把项目按顺序从左到右、从上到下填进去（这叫<strong>自动流</strong>，由
+        <code>grid-auto-flow</code> 控制）。所以 Grid 的第一印象应该是：
+        <strong>先搭框架，再往里放东西</strong>。
+      </p>
+
+      <h2>列宽怎么写：fr、repeat、minmax、auto-fit</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>典型用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>1fr 1fr 1fr</code></td>
+            <td><code>fr</code> 是“剩余空间的一份”，三份就是三等分</td>
+            <td>等宽列</td>
+          </tr>
+          <tr>
+            <td><code>repeat(3, 1fr)</code></td>
+            <td>重复三次，等价于上面那种写法</td>
+            <td>列数固定但不想数格子</td>
+          </tr>
+          <tr>
+            <td><code>200px 1fr</code></td>
+            <td>第一列固定 200px，第二列吃掉剩下的</td>
+            <td>固定侧栏 + 自适应主栏</td>
+          </tr>
+          <tr>
+            <td><code>minmax(200px, 1fr)</code></td>
+            <td>最小 200px、最大 1fr，在区间里伸缩</td>
+            <td>配合 auto-fit 写“自动换列”的卡片墙</td>
+          </tr>
+          <tr>
+            <td><code>repeat(auto-fit, minmax(200px, 1fr))</code></td>
+            <td>能塞几列塞几列，每列不小于 200px</td>
+            <td><strong>最常用的自适应写法</strong>（不写媒体查询）</td>
+          </tr>
+          <tr>
+            <td><code>repeat(auto-fill, …)</code></td>
+            <td>同 auto-fit，但会保留空轨道占位</td>
+            <td>想让卡片列数固定、留白时用</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        一个容易踩的点：<code>1fr</code> 的最小值默认是 <code>auto</code>——
+        意思是“不能比内容还窄”。遇到长内容同样会撑破布局（和第二十一式的
+        <code>min-width: auto</code> 是同一个家族的问题），
+        这时写成 <code>minmax(0, 1fr)</code> 就能治好。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · auto-fit + minmax：把窗口拉宽拉窄，看列数自己变</div>
+        <div class="demo-preview">
+          <style>
+            #css22-demo2 .wall {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+              gap: .6rem;
+            }
+            #css22-demo2 .tile {
+              background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3;
+              border-radius: 8px; padding: .6rem; font-size: .82rem; text-align: center;
+            }
+            #css22-demo2 .out { font-size: .82rem; color: #6f6a5e; margin: .6rem 0 0; }
+          </style>
+          <div id="css22-demo2">
+            <div class="wall" id="css22-demo2-wall">
+              <div class="tile">卡片一</div><div class="tile">卡片二</div>
+              <div class="tile">卡片三</div><div class="tile">卡片四</div>
+              <div class="tile">卡片五</div>
+            </div>
+            <p class="out" id="css22-demo2-out">正在量列宽……</p>
+            <script>
+              var wall2 = document.getElementById('css22-demo2-wall');
+              var out2 = document.getElementById('css22-demo2-out');
+              function report2() {
+                var tiles2 = wall2.children;
+                if (!tiles2.length) return;
+                var gap2 = parseFloat(getComputedStyle(wall2).columnGap) || 0;
+                var tileW2 = Math.round(tiles2[0].getBoundingClientRect().width);
+                var perRow2 = Math.round((wall2.getBoundingClientRect().width + gap2) / (tileW2 + gap2));
+                out2.textContent = '当前每列约 ' + tileW2 + 'px，一行放 ' + perRow2
+                  + ' 列（把窗口拉宽拉窄，数字会跟着变）。';
+              }
+              DOJO.ready(report2);                       /* 等整站布局就位再量一次 */
+              window.addEventListener('resize', report2); /* 窗口变化时重新量 */
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css22-demo2">
+              <div class="wall" id="css22-demo2-wall">
+                <div class="tile">卡片一</div><div class="tile">卡片二</div>
+                <div class="tile">卡片三</div><div class="tile">卡片四</div>
+                <div class="tile">卡片五</div>
+              </div>
+              <p class="out" id="css22-demo2-out">正在量列宽……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css22-demo2 .wall {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+              gap: .6rem;
+            }
+            #css22-demo2 .tile {
+              background: #fffdf7; border: 1px solid #2f6db3; color: #2f6db3;
+              border-radius: 8px; padding: .6rem; font-size: .82rem; text-align: center;
+            }
+            #css22-demo2 .out { font-size: .82rem; color: #6f6a5e; margin: .6rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（数一数列数，演示用）">
+            var wall2 = document.getElementById('css22-demo2-wall');
+            var out2 = document.getElementById('css22-demo2-out');
+            function report2() {
+              var tiles2 = wall2.children;
+              if (!tiles2.length) return;
+              var gap2 = parseFloat(getComputedStyle(wall2).columnGap) || 0;
+              var tileW2 = Math.round(tiles2[0].getBoundingClientRect().width);
+              var perRow2 = Math.round((wall2.getBoundingClientRect().width + gap2) / (tileW2 + gap2));
+              out2.textContent = '当前每列约 ' + tileW2 + 'px，一行放 ' + perRow2
+                + ' 列（把窗口拉宽拉窄，数字会跟着变）。';
+            }
+            DOJO.ready(report2);                       /* 等整站布局就位再量一次 */
+            window.addEventListener('resize', report2); /* 窗口变化时重新量 */
+          </script>
+        </div>
+      </div>
+
+      <h2>放哪一格、跨几格</h2>
+      <p>
+        项目默认按顺序自动落位，但你完全可以手动指定。两种写法都很常用：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>grid-column: 1 / 3</code></td><td>从第 1 条竖线跨到第 3 条竖线（占两列）</td></tr>
+          <tr><td><code>grid-column: 2 / -1</code></td><td>从第 2 条线一直到最右边那条线</td></tr>
+          <tr><td><code>grid-column: span 2</code></td><td>不关心起点，<strong>向后占两列</strong></td></tr>
+          <tr><td><code>grid-row: 1 / 3</code></td><td>纵向跨两行（做竖排侧栏常用）</td></tr>
+          <tr><td><code>grid-area: 3 / 3</code></td><td>简写：行起 / 列起（也可以写全四个值）</td></tr>
+          <tr><td><code>grid-area: header</code></td><td>直接用命名区域（配合 <code>grid-template-areas</code>）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 跨格：标题跨三列、侧栏跨两行、还有一格被显式点名</div>
+        <div class="demo-preview">
+          <style>
+            #css22-demo3 .board {
+              display: grid;
+              grid-template-columns: 1fr 2fr 1fr;
+              grid-auto-rows: 56px;
+              gap: .5rem;
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo3 .cell {
+              background: #fffdf7; border: 1px solid #d4cab0; font-size: .8rem;
+              display: flex; align-items: center; justify-content: center; text-align: center;
+            }
+            #css22-demo3 .head { grid-column: span 3; background: #f3e3dd; border-color: #b03a2e; color: #b03a2e; }
+            #css22-demo3 .side { grid-row: span 2; background: #e9f0e4; border-color: #2e7d32; color: #2e7d32; }
+            #css22-demo3 .pinned { grid-area: 3 / 3; background: #e8edf5; border-color: #2f6db3; color: #2f6db3; }
+          </style>
+          <div id="css22-demo3">
+            <div class="board">
+              <div class="cell head">标题（span 3，横跨三列）</div>
+              <div class="cell side">侧栏（row span 2，竖跨两行）</div>
+              <div class="cell">普通格子</div>
+              <div class="cell">普通格子</div>
+              <div class="cell">普通格子</div>
+              <div class="cell pinned">我用 grid-area: 3 / 3 点名站位</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css22-demo3">
+              <div class="board">
+                <div class="cell head">标题（span 3，横跨三列）</div>
+                <div class="cell side">侧栏（row span 2，竖跨两行）</div>
+                <div class="cell">普通格子</div>
+                <div class="cell">普通格子</div>
+                <div class="cell">普通格子</div>
+                <div class="cell pinned">我用 grid-area: 3 / 3 点名站位</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css22-demo3 .board {
+              display: grid;
+              grid-template-columns: 1fr 2fr 1fr;
+              grid-auto-rows: 56px;
+              gap: .5rem;
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo3 .cell {
+              background: #fffdf7; border: 1px solid #d4cab0; font-size: .8rem;
+              display: flex; align-items: center; justify-content: center; text-align: center;
+            }
+            #css22-demo3 .head { grid-column: span 3; background: #f3e3dd; border-color: #b03a2e; color: #b03a2e; }
+            #css22-demo3 .side { grid-row: span 2; background: #e9f0e4; border-color: #2e7d32; color: #2e7d32; }
+            #css22-demo3 .pinned { grid-area: 3 / 3; background: #e8edf5; border-color: #2f6db3; color: #2f6db3; }
+          </script>
+        </div>
+      </div>
+      <p>
+        注意“跟着队伍走”与“点名站位”的区别：<code>span</code> 是“我占两格，队伍继续排”，
+        <code>grid-area: 3 / 3</code> 是“我就在第三行第三列，谁也别管”。
+        混用时要有心理准备：被点名的项目会先占好位置，
+        其余项目再按顺序填剩下的空格（必要时会被挤到后面的隐式行里）。
+      </p>
+
+      <h2>模板区域：把骨架画成一行行文字</h2>
+      <p>
+        <code>grid-template-areas</code> 是 Grid 最讨人喜欢的地方：
+        你能用 ASCII 画图的方式描述整页布局，再把项目“分配”给区域名。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="一页骨架，画出来就是代码">
+        .page {
+          display: grid;
+          grid-template-columns: 200px 1fr;
+          grid-template-rows: auto 1fr auto;
+          grid-template-areas:
+            "header header"
+            "side   main"
+            "foot   foot";
+          gap: 1rem;
+        }
+        .page > header { grid-area: header; }
+        .page > aside  { grid-area: side; }
+        .page > main   { grid-area: main; }
+        .page > footer { grid-area: foot; }
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 用模板区域排一个完整页面骨架</div>
+        <div class="demo-preview">
+          <style>
+            #css22-demo4 .page {
+              display: grid;
+              grid-template-columns: 120px 1fr;
+              grid-template-rows: 44px 150px 40px;
+              grid-template-areas:
+                "head head"
+                "side main"
+                "foot foot";
+              gap: .5rem;
+              border: 1px dashed #d4cab0; padding: .5rem; background: #faf6ec;
+            }
+            #css22-demo4 .box {
+              display: flex; align-items: center; justify-content: center;
+              font-size: .8rem; border: 1px solid; border-radius: 6px;
+            }
+            #css22-demo4 .b-head { grid-area: head; background: #f3e3dd; border-color: #b03a2e; color: #b03a2e; }
+            #css22-demo4 .b-side { grid-area: side; background: #e9f0e4; border-color: #2e7d32; color: #2e7d32; }
+            #css22-demo4 .b-main { grid-area: main; background: #fffdf7; border-color: #d4cab0; }
+            #css22-demo4 .b-foot { grid-area: foot; background: #e8edf5; border-color: #2f6db3; color: #2f6db3; }
+          </style>
+          <div id="css22-demo4">
+            <div class="page">
+              <div class="box b-head">页头 header</div>
+              <div class="box b-side">侧栏 aside</div>
+              <div class="box b-main">正文 main（占最大的一块）</div>
+              <div class="box b-foot">页脚 footer</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css22-demo4">
+              <div class="page">
+                <div class="box b-head">页头 header</div>
+                <div class="box b-side">侧栏 aside</div>
+                <div class="box b-main">正文 main（占最大的一块）</div>
+                <div class="box b-foot">页脚 footer</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css22-demo4 .page {
+              display: grid;
+              grid-template-columns: 120px 1fr;
+              grid-template-rows: 44px 150px 40px;
+              grid-template-areas:
+                "head head"
+                "side main"
+                "foot foot";
+              gap: .5rem;
+              border: 1px dashed #d4cab0; padding: .5rem; background: #faf6ec;
+            }
+            #css22-demo4 .box {
+              display: flex; align-items: center; justify-content: center;
+              font-size: .8rem; border: 1px solid; border-radius: 6px;
+            }
+            #css22-demo4 .b-head { grid-area: head; background: #f3e3dd; border-color: #b03a2e; color: #b03a2e; }
+            #css22-demo4 .b-side { grid-area: side; background: #e9f0e4; border-color: #2e7d32; color: #2e7d32; }
+            #css22-demo4 .b-main { grid-area: main; background: #fffdf7; border-color: #d4cab0; }
+            #css22-demo4 .b-foot { grid-area: foot; background: #e8edf5; border-color: #2f6db3; color: #2f6db3; }
+          </script>
+        </div>
+      </div>
+      <p>
+        模板区域里用 <code>.</code> 表示那一格留空，同一个名字连着写就表示跨格。
+        它最大的好处是<strong>改布局只需重画那张图</strong>：
+        把 <code>"side main"</code> 改成 <code>"main side"</code>，侧栏就跑到右边；
+        加一句媒体查询（第二十三式）就能在窄屏把它变成单列。
+      </p>
+
+      <h2>对齐与叠加：格子里怎么放、能不能叠</h2>
+      <p>
+        Grid 的对齐属性分三层，名字都是 <code>justify-</code>（横轴）与 <code>align-</code>（竖轴）：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>层级</th>
+            <th>属性</th>
+            <th>管什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>单元格内部</td>
+            <td><code>justify-items</code> / <code>align-items</code>（简写 <code>place-items</code>）</td>
+            <td>每个项目在自己格子里的位置（默认 <code>stretch</code>，拉满格子）</td>
+          </tr>
+          <tr>
+            <td>单个项目</td>
+            <td><code>justify-self</code> / <code>align-self</code>（简写 <code>place-self</code>）</td>
+            <td>只改这一个项目的对齐</td>
+          </tr>
+          <tr>
+            <td>整张网格</td>
+            <td><code>justify-content</code> / <code>align-content</code>（简写 <code>place-content</code>）</td>
+            <td>网格整体比容器小时，整体往哪摆（轨道用了 <code>1fr</code> 时就无事可做）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 格子内的对齐，以及“两个项目叠在一格”</div>
+        <div class="demo-preview">
+          <style>
+            #css22-demo5 .board {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              grid-auto-rows: 84px;
+              gap: .5rem;
+              place-items: center;          /* 所有格子里的项目都居中 */
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo5 .cell {
+              background: #fffdf7; border: 1px solid #d4cab0; border-radius: 6px;
+              padding: .3rem .5rem; font-size: .8rem;
+            }
+            #css22-demo5 .stretchOne { justify-self: stretch; align-self: stretch; display: flex; align-items: flex-end; }
+            #css22-demo5 .stack {
+              grid-area: 2 / 3;                 /* 两个项目都放这一格 */
+              padding: .3rem .5rem; font-size: .8rem; border-radius: 6px;
+            }
+            #css22-demo5 .under {
+              background: #e9f0e4; border: 1px solid #2e7d32; color: #2e7d32;
+              place-self: stretch;                  /* 底层：撑满整个格子，像一张图 */
+              display: flex; align-items: flex-end; padding: .35rem .5rem;
+            }
+            #css22-demo5 .over { background: rgb(176 58 46 / 88%); color: #fff; place-self: end start; margin: .3rem; }
+          </style>
+          <div id="css22-demo5">
+            <div class="board">
+              <div class="cell">居中（默认被 place-items 管）</div>
+              <div class="cell stretchOne">我偏要撑满这一格</div>
+              <div class="cell">普通格子</div>
+              <div class="cell">普通格子</div>
+              <div class="cell">普通格子</div>
+              <div class="cell stack under">底层</div>
+              <div class="cell stack over">上层（后写的盖住先写的）</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css22-demo5">
+              <div class="board">
+                <div class="cell">居中（默认被 place-items 管）</div>
+                <div class="cell stretchOne">我偏要撑满这一格</div>
+                <div class="cell">普通格子</div>
+                <div class="cell">普通格子</div>
+                <div class="cell">普通格子</div>
+                <div class="cell stack under">底层</div>
+                <div class="cell stack over">上层（后写的盖住先写的）</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css22-demo5 .board {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              grid-auto-rows: 84px;
+              gap: .5rem;
+              place-items: center;          /* 所有格子里的项目都居中 */
+              background: #f4edde; padding: .6rem; border: 1px dashed #d4cab0;
+            }
+            #css22-demo5 .cell {
+              background: #fffdf7; border: 1px solid #d4cab0; border-radius: 6px;
+              padding: .3rem .5rem; font-size: .8rem;
+            }
+            #css22-demo5 .stretchOne { justify-self: stretch; align-self: stretch; display: flex; align-items: flex-end; }
+            #css22-demo5 .stack {
+              grid-area: 2 / 3;                 /* 两个项目都放这一格 */
+              padding: .3rem .5rem; font-size: .8rem; border-radius: 6px;
+            }
+            #css22-demo5 .under {
+              background: #e9f0e4; border: 1px solid #2e7d32; color: #2e7d32;
+              place-self: stretch;                  /* 底层：撑满整个格子，像一张图 */
+              display: flex; align-items: flex-end; padding: .35rem .5rem;
+            }
+            #css22-demo5 .over { background: rgb(176 58 46 / 88%); color: #fff; place-self: end start; margin: .3rem; }
+          </style>
+        </div>
+      </div>
+      <p>
+        最后那一格里两个项目叠在一起：<strong>写在同一格的项目会互相覆盖</strong>，
+        DOM 里靠后的画在上面——这是做“图片 + 文字”“图表 + 标注”这类覆盖层最省事的办法，
+        比 <code>position: absolute</code> 干净得多。需要精确控制层次时，再配合 <code>z-index</code>。
+      </p>
+
+      <h2>常见套路与选择标准</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>想要的效果</th>
+            <th>写法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>等宽三列</td><td><code>grid-template-columns: repeat(3, 1fr)</code></td></tr>
+          <tr><td>自适应卡片墙</td><td><code>grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))</code> + <code>gap</code></td></tr>
+          <tr><td>固定侧栏 + 自适应主栏</td><td><code>grid-template-columns: 220px 1fr</code></td></tr>
+          <tr><td>整页骨架</td><td><code>grid-template-areas</code> + 各项目 <code>grid-area</code></td></tr>
+          <tr><td>隐式行高度统一</td><td><code>grid-auto-rows: minmax(80px, auto)</code></td></tr>
+          <tr><td>覆盖层</td><td>两个项目写同一个 <code>grid-area: 1 / 1</code></td></tr>
+        </tbody>
+      </table>
+      <p>最后把两式的分工再钉一遍：</p>
+      <ul>
+        <li><strong>一维用 Flex</strong>：导航栏、按钮组、卡片行、任何“一排就好”的场合；</li>
+        <li><strong>二维用 Grid</strong>：整页骨架、行列都要对齐的相册/仪表盘/表单网格；</li>
+        <li><strong>内容优先用 Flex</strong>（谁大谁小由内容决定），
+          <strong>版式优先用 Grid</strong>（先规定好在哪，再往里放内容）；</li>
+        <li>实际项目里两者总是嵌套：Grid 搭骨架，每个区块内部用 Flex 排细节。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>网格三件套：线（从 1 数、负数从末尾数）、轨道、单元格；写出来的叫显式网格，自动补的叫隐式网格；</li>
+        <li>列宽三件宝：<code>fr</code> 分剩余空间、<code>repeat()</code> 省字、<code>minmax()</code> 限定区间；
+          <code>repeat(auto-fit, minmax(220px, 1fr))</code> 是最常用的自适应写法；</li>
+        <li><code>1fr</code> 的最小值是 <code>auto</code>，长内容会撑破，需要时写 <code>minmax(0, 1fr)</code>；</li>
+        <li>跨格用 <code>grid-column/row</code> 的坐标或 <code>span</code>，点名站位用 <code>grid-area</code>；</li>
+        <li><code>grid-template-areas</code> 把布局画成 ASCII 图，改布局就是改那张图；</li>
+        <li>对齐三层：<code>*-items</code>（格内全体）、<code>*-self</code>（单个项目）、<code>*-content</code>（整张网格）；</li>
+        <li>两个项目写同一格即可叠加；一维用 Flex、二维用 Grid，二者嵌套使用。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十二式</div>
+        <ol>
+          <li>用 <code>repeat(auto-fit, minmax(180px, 1fr))</code> 做一面卡片墙（五张卡片），
+            把窗口从窄拉到宽，观察列数变化。</li>
+          <li>用 <code>grid-template-areas</code> 排一个“页头 / 侧栏 / 正文 / 页脚”的页面骨架；
+            然后把侧栏挪到右边，看看要改几行。</li>
+          <li>思考：什么时候该用 Flex，什么时候该用 Grid？请用“一行卡片”和“整页骨架”
+            两个例子说明你的判断标准。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="卡片墙">
+            .wall {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+              gap: 1rem;
+            }
+          </script>
+          <p>
+            观察要点：窗口变窄到放不下两列时，会自动变成一列；
+            变宽时列数增加，但每列都不会小于 180px。
+            想固定列数（例如始终四列，不足时留空）就把 <code>auto-fit</code> 换成
+            <code>auto-fill</code>，或直接写 <code>repeat(4, 1fr)</code> 配合媒体查询。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="页面骨架（侧栏在右）">
+            .page {
+              display: grid;
+              grid-template-columns: 1fr 220px;      /* 只改这一行 */
+              grid-template-rows: auto 1fr auto;
+              grid-template-areas:
+                "head head"                        /* 与下面两行一起改 */
+                "main side"
+                "foot foot";
+              gap: 1rem;
+            }
+          </script>
+          <p>
+            只需要改“那张图”（以及列的宽度顺序），项目上的 <code>grid-area</code> 完全不用动——
+            这正是模板区域的价值：<strong>布局的变化集中在容器一处</strong>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            一行卡片：卡片数量不定、每张宽度由剩余空间分配——这是典型的一维分配，
+            用 <code>display: flex</code> + <code>gap</code> + <code>flex: 1 1 220px</code> 最直接；
+            或者用 Grid 的 <code>repeat(auto-fit, minmax(220px, 1fr))</code>，
+            两者都能做，看团队习惯。
+            整页骨架：页头、侧栏、正文、页脚需要<strong>横竖同时对齐</strong>，
+            而且“谁在哪一格”是设计决定而不是内容决定——这正是 Grid 的主场，
+            用 <code>grid-template-areas</code> 一眼就能看懂整张版式。
+            一句话：<strong>内容决定排布用 Flex，版式决定位置用 Grid。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，让布局随屏幕变形：响应式心法与媒体查询。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十九式 · 异步 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="setTimeout 与 setInterval、Promise 的三种状态与组合方法、async/await 与错误处理，以及事件循环里谁先谁后。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-39">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        江湖上的活计，多半不能立等可取：水要烧开、信要送到、数据要等回话。
+        前面三十八式里，代码都是一口气跑完的；这一式学会<strong>等</strong>——
+        等的时候不耽误别的事。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>setTimeout</code> / <code>setInterval</code> 安排将来要做的事，并会取消</li>
+          <li>理解 Promise 的三种状态，会用 <code>.then</code> / <code>.catch</code> / <code>.finally</code></li>
+          <li>会用 <code>Promise.all</code> / <code>allSettled</code> / <code>race</code> / <code>any</code> 组合多个异步任务</li>
+          <li>会写 <code>async</code> 函数、用 <code>await</code> 拿结果、用 <code>try/catch</code> 接错误</li>
+          <li>说得清事件循环里“同步 → 微任务 → 宏任务”的先后顺序</li>
+        </ul>
+      </div>
+
+      <h2>同步与异步：什么都不等的写法会出事</h2>
+      <p>
+        到目前为止，我们写的代码都是<strong>同步</strong>的：一行跑完才跑下一行，
+        顺序明明白白。可有些事天生快不了——下载一张图、问服务器要数据、等用户思考，
+        如果让浏览器“站在原地等”，整张页面就冻住了。
+      </p>
+      <p>
+        于是浏览器给了一个办法：把慢活儿交出去，<strong>登记一个回调</strong>，
+        自己继续往下跑；等慢活儿有结果了，浏览器再回头叫你。
+        这就是<strong>异步</strong>。最常见的异步入口有两个：
+        <strong>定时器</strong>（到点叫我）和 <strong>Promise</strong>（干完叫我）。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">心法</div>
+        <p style="margin:0">
+          异步不是“同时干两件事”的魔法，而是“先记下这事，别堵住后面”。
+          页面之所以能一边等数据一边还能滚动、还能点按钮，全靠这个“先记下”。
+        </p>
+      </div>
+
+      <h2>定时器：到点叫我</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>意思</th>
+            <th>取消</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>setTimeout(fn, 毫秒)</code></td><td>过一会儿执行一次 <code>fn</code></td><td><code>clearTimeout(编号)</code></td></tr>
+          <tr><td><code>setInterval(fn, 毫秒)</code></td><td>每隔这么久执行一次，直到取消</td><td><code>clearInterval(编号)</code></td></tr>
+          <tr><td><code>requestAnimationFrame(fn)</code></td><td>下一次画面刷新前执行（做动画用它）</td><td><code>cancelAnimationFrame(编号)</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        两个必须记住的事实：<strong>一是毫秒数只是“至少等这么久”</strong>，
+        主线程一忙，回调就会晚点；<strong>二是定时器不保证顺序</strong>，
+        连续几个 <code>setTimeout(fn, 0)</code> 也是排队来，不一定是“立刻”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一行行看清楚：谁先执行、谁最后到</div>
+        <div class="demo-preview">
+          <ul id="js39-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var out1 = document.getElementById('js39-demo1-out');
+            var n1 = 0;
+            function step1(text) {
+              n1 += 1;
+              var li = document.createElement('li');
+              li.textContent = n1 + '. ' + text;
+              out1.appendChild(li);
+            }
+
+            step1('同步：第一行');
+            setTimeout(function () {
+              step1('宏任务：定时器回调（就算写 0 毫秒，也得排队）');
+            }, 0);
+            step1('同步：第二行');
+            Promise.resolve().then(function () {
+              step1('微任务：Promise.then（插队在定时器前面）');
+            });
+            step1('同步：第三行');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js39-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out1 = document.getElementById('js39-demo1-out');
+            var n1 = 0;
+            function step1(text) {
+              n1 += 1;
+              var li = document.createElement('li');
+              li.textContent = n1 + '. ' + text;
+              out1.appendChild(li);
+            }
+
+            step1('同步：第一行');
+            setTimeout(function () {
+              step1('宏任务：定时器回调（就算写 0 毫秒，也得排队）');
+            }, 0);
+            step1('同步：第二行');
+            Promise.resolve().then(function () {
+              step1('微任务：Promise.then（插队在定时器前面）');
+            });
+            step1('同步：第三行');
+          </script>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 倒计时：会开的定时器，也要会关</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js39-demo2-start">开始 5 秒倒计时</button>
+            <button type="button" id="js39-demo2-stop">取消</button>
+            <strong id="js39-demo2-count" style="margin-left: .6rem">5.0</strong>
+          </p>
+          <p id="js39-demo2-note" style="margin: 0">点「开始」：数字每 100 毫秒减 0.1，中途可以「取消」。</p>
+          <script>
+            "use strict";
+            var count2 = document.getElementById('js39-demo2-count');
+            var note2 = document.getElementById('js39-demo2-note');
+            var timer2 = null;
+            var left2 = 5.0;
+
+            document.getElementById('js39-demo2-start').addEventListener('click', function () {
+              if (timer2) return;                     // 已经在跑，别重复开
+              left2 = 5.0;
+              count2.textContent = left2.toFixed(1);
+              note2.textContent = '倒计时进行中……';
+
+              timer2 = setInterval(function () {
+                left2 = Math.max(0, Math.round((left2 - 0.1) * 10) / 10);
+                count2.textContent = left2.toFixed(1);
+                if (left2 <= 0) {
+                  clearInterval(timer2);              // 到点自己收工
+                  timer2 = null;
+                  note2.textContent = '时间到！（定时器已经自己 clearInterval 了）';
+                }
+              }, 100);
+            });
+
+            document.getElementById('js39-demo2-stop').addEventListener('click', function () {
+              if (!timer2) {
+                note2.textContent = '现在没有在跑的定时器。';
+                return;
+              }
+              clearInterval(timer2);
+              timer2 = null;
+              note2.textContent = '已取消，停在 ' + left2.toFixed(1) + ' 秒（clearInterval 之后回调不再触发）';
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js39-demo2-start">开始 5 秒倒计时</button>
+              <button type="button" id="js39-demo2-stop">取消</button>
+              <strong id="js39-demo2-count" style="margin-left: .6rem">5.0</strong>
+            </p>
+            <p id="js39-demo2-note" style="margin: 0">点「开始」：数字每 100 毫秒减 0.1，中途可以「取消」。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var count2 = document.getElementById('js39-demo2-count');
+            var note2 = document.getElementById('js39-demo2-note');
+            var timer2 = null;
+            var left2 = 5.0;
+
+            document.getElementById('js39-demo2-start').addEventListener('click', function () {
+              if (timer2) return;                     // 已经在跑，别重复开
+              left2 = 5.0;
+              count2.textContent = left2.toFixed(1);
+              note2.textContent = '倒计时进行中……';
+
+              timer2 = setInterval(function () {
+                left2 = Math.max(0, Math.round((left2 - 0.1) * 10) / 10);
+                count2.textContent = left2.toFixed(1);
+                if (left2 <= 0) {
+                  clearInterval(timer2);              // 到点自己收工
+                  timer2 = null;
+                  note2.textContent = '时间到！（定时器已经自己 clearInterval 了）';
+                }
+              }, 100);
+            });
+
+            document.getElementById('js39-demo2-stop').addEventListener('click', function () {
+              if (!timer2) {
+                note2.textContent = '现在没有在跑的定时器。';
+                return;
+              }
+              clearInterval(timer2);
+              timer2 = null;
+              note2.textContent = '已取消，停在 ' + left2.toFixed(1) + ' 秒（clearInterval 之后回调不再触发）';
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>Promise：一张“将来会有结果”的收据</h2>
+      <p>
+        <code>setTimeout</code> 只解决“到点叫我”，可复杂点的活儿会有
+        <strong>成功</strong>和<strong>失败</strong>两种结局。Promise
+        （承诺）就是为这件事设计的对象：它一诞生就是<strong>等待中</strong>（pending），
+        将来要么<strong>兑现</strong>（fulfilled）、要么<strong>拒绝</strong>（rejected），
+        而且只定一次，不会再改。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="Promise 的样子与三种状态">
+        const p = new Promise((resolve, reject) => {
+          // 在这里干那件慢活儿
+          const ok = true;
+          if (ok) resolve("结果");   // 兑现：把结果带出去
+          else reject(new Error("原因"));  // 拒绝：把错误带出去
+        });
+
+        // pending（等待中）→ fulfilled（兑现）或 rejected（拒绝），只变一次
+        p.then(值 => console.log("成功：", 值))
+         .catch(错误 => console.log("失败：", 错误.message))
+         .finally(() => console.log("不管成败都走这里"));
+      </script>
+      <p>
+        自己造 Promise 的场合其实不多，日常更多是<strong>用</strong>别人返回的 Promise
+        （比如第四十式要讲的 <code>fetch</code>）。真正的重点是：
+        <strong>拿到 Promise 之后怎么等它、怎么组合多个 Promise</strong>。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>组合方法</th>
+            <th>什么时候给你结果</th>
+            <th>适合</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Promise.all([...])</code></td><td>全部成功才成功；任何一个失败就立刻失败</td><td>几件事都要办成，缺一不可</td></tr>
+          <tr><td><code>Promise.allSettled([...])</code></td><td>全部有结局（成功或失败）才给你</td><td>要逐条汇报，不怕个别失败</td></tr>
+          <tr><td><code>Promise.race([...])</code></td><td>第一个有结局的就给你（不论成败）</td><td>超时控制：跟一个“到点就失败”的计时器赛跑</td></tr>
+          <tr><td><code>Promise.any([...])</code></td><td>第一个<strong>成功</strong>的给你；全失败才失败</td><td>多个镜像源，谁先成谁算</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 串行要等三段相加，Promise.all 只用等最慢那段</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js39-demo3-serial">串行做三件事</button>
+            <button type="button" id="js39-demo3-parallel">Promise.all 并行做</button>
+          </p>
+          <ul id="js39-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var out3 = document.getElementById('js39-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out3.appendChild(li);
+            }
+
+            // 假任务：等 ms 毫秒之后完成，回报自己用掉了多久
+            function task3(name, ms) {
+              return new Promise(function (resolve) {
+                setTimeout(function () {
+                  resolve(name + '（' + ms + ' ms）');
+                }, ms);
+              });
+            }
+
+            function lock3(locked) {
+              document.getElementById('js39-demo3-serial').disabled = locked;
+              document.getElementById('js39-demo3-parallel').disabled = locked;
+            }
+
+            document.getElementById('js39-demo3-serial').addEventListener('click', function () {
+              var t0 = performance.now();
+              lock3(true);
+              say3('串行开始：烧水 400ms → 洗杯 300ms → 备茶 200ms');
+              task3('烧水', 400)
+                .then(function (r) { say3('完成：' + r); return task3('洗杯', 300); })
+                .then(function (r) { say3('完成：' + r); return task3('备茶', 200); })
+                .then(function (r) {
+                  say3('完成：' + r);
+                  say3('串行总耗时：约 ' + Math.round(performance.now() - t0) + ' ms（三段时间相加）');
+                  lock3(false);
+                });
+            });
+
+            document.getElementById('js39-demo3-parallel').addEventListener('click', function () {
+              var t0 = performance.now();
+              lock3(true);
+              say3('并行开始：三件事同时开工');
+              Promise.all([task3('烧水', 400), task3('洗杯', 300), task3('备茶', 200)])
+                .then(function (results) {
+                  results.forEach(function (r) { say3('完成：' + r); });
+                  say3('并行总耗时：约 ' + Math.round(performance.now() - t0) + ' ms（只等最慢的那段）');
+                  lock3(false);
+                });
+            });
+
+            say3('两种方式的三件活儿完全一样，只有“等法”不同：各点一次，对照总耗时。');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js39-demo3-serial">串行做三件事</button>
+              <button type="button" id="js39-demo3-parallel">Promise.all 并行做</button>
+            </p>
+            <ul id="js39-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out3 = document.getElementById('js39-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out3.appendChild(li);
+            }
+
+            // 假任务：等 ms 毫秒之后完成，回报自己用掉了多久
+            function task3(name, ms) {
+              return new Promise(function (resolve) {
+                setTimeout(function () {
+                  resolve(name + '（' + ms + ' ms）');
+                }, ms);
+              });
+            }
+
+            function lock3(locked) {
+              document.getElementById('js39-demo3-serial').disabled = locked;
+              document.getElementById('js39-demo3-parallel').disabled = locked;
+            }
+
+            document.getElementById('js39-demo3-serial').addEventListener('click', function () {
+              var t0 = performance.now();
+              lock3(true);
+              say3('串行开始：烧水 400ms → 洗杯 300ms → 备茶 200ms');
+              task3('烧水', 400)
+                .then(function (r) { say3('完成：' + r); return task3('洗杯', 300); })
+                .then(function (r) { say3('完成：' + r); return task3('备茶', 200); })
+                .then(function (r) {
+                  say3('完成：' + r);
+                  say3('串行总耗时：约 ' + Math.round(performance.now() - t0) + ' ms（三段时间相加）');
+                  lock3(false);
+                });
+            });
+
+            document.getElementById('js39-demo3-parallel').addEventListener('click', function () {
+              var t0 = performance.now();
+              lock3(true);
+              say3('并行开始：三件事同时开工');
+              Promise.all([task3('烧水', 400), task3('洗杯', 300), task3('备茶', 200)])
+                .then(function (results) {
+                  results.forEach(function (r) { say3('完成：' + r); });
+                  say3('并行总耗时：约 ' + Math.round(performance.now() - t0) + ' ms（只等最慢的那段）');
+                  lock3(false);
+                });
+            });
+
+            say3('两种方式的三件活儿完全一样，只有“等法”不同：各点一次，对照总耗时。');
+          </script>
+        </div>
+      </div>
+
+      <h2>async / await：把异步写得像同步</h2>
+      <p>
+        Promise 的 <code>.then()</code> 链越接越长就越难读。于是有了
+        <code>async</code> / <code>await</code> 这对语法糖：
+        <strong>在 <code>async</code> 函数里，<code>await</code> 一个 Promise 就等于“等它的结果”</strong>，
+        写起来和同步代码一样顺；出错则用 <code>try/catch</code> 接住，
+        跟第三十六式学过的错误处理完全一致。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="同一件事，两种写法">
+        // .then 版
+        function loadThen() {
+          return fetch("data.json")
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.error("出错了：", err.message));
+        }
+
+        // async / await 版：读起来就是“拿结果 → 用结果”
+        async function loadAwait() {
+          try {
+            const res = await fetch("data.json");
+            const data = await res.json();
+            console.log(data);
+          } catch (err) {
+            console.error("出错了：", err.message);
+          }
+        }
+
+        // 记住两点：
+        // ① async 函数自己总是返回一个 Promise；
+        // ② await 只能写在 async 函数（或模块顶层）里。
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · async/await 走一遍：成功、失败、finally、allSettled</div>
+        <div class="demo-preview">
+          <p style="margin: 0 0 .4rem">
+            <button type="button" id="js39-demo4-run">用 async/await 走一遍</button>
+          </p>
+          <ul id="js39-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var out4 = document.getElementById('js39-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out4.appendChild(li);
+            }
+
+            // 假任务：等 ms 毫秒，ok 为 false 时拒绝（模拟失败）
+            function wait4(name, ms, ok) {
+              return new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                  if (ok) resolve(name + ' 成功');
+                  else reject(new Error(name + ' 失败：材料不够'));
+                }, ms);
+              });
+            }
+
+            async function brew4() {
+              try {
+                var water = await wait4('烧水', 300, true);
+                say4('await 拿到结果：' + water);
+
+                var tea = await wait4('备茶', 200, false);   // 这一步会失败
+                say4('这行不会执行到：' + tea);
+              } catch (error) {
+                say4('try/catch 接住了：' + error.message);
+              } finally {
+                say4('finally：无论成败都走这里');
+              }
+
+              var settled = await Promise.allSettled([
+                wait4('点火', 100, true),
+                wait4('取柴', 150, false)
+              ]);
+              settled.forEach(function (item) {
+                say4('allSettled → ' + item.status + '：'
+                  + (item.status === 'fulfilled' ? item.value : item.reason.message));
+              });
+              say4('三件事都有了结局，收工');
+            }
+
+            document.getElementById('js39-demo4-run').addEventListener('click', function () {
+              say4('开始：async 函数一调用就立刻返回一个 Promise，结果只能等它自己来说');
+              brew4();
+            });
+
+            say4('点按钮跑一遍：先成功一步、再失败被 catch、接着 finally、最后 allSettled 收尾');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p style="margin: 0 0 .4rem">
+              <button type="button" id="js39-demo4-run">用 async/await 走一遍</button>
+            </p>
+            <ul id="js39-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var out4 = document.getElementById('js39-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              out4.appendChild(li);
+            }
+
+            // 假任务：等 ms 毫秒，ok 为 false 时拒绝（模拟失败）
+            function wait4(name, ms, ok) {
+              return new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                  if (ok) resolve(name + ' 成功');
+                  else reject(new Error(name + ' 失败：材料不够'));
+                }, ms);
+              });
+            }
+
+            async function brew4() {
+              try {
+                var water = await wait4('烧水', 300, true);
+                say4('await 拿到结果：' + water);
+
+                var tea = await wait4('备茶', 200, false);   // 这一步会失败
+                say4('这行不会执行到：' + tea);
+              } catch (error) {
+                say4('try/catch 接住了：' + error.message);
+              } finally {
+                say4('finally：无论成败都走这里');
+              }
+
+              var settled = await Promise.allSettled([
+                wait4('点火', 100, true),
+                wait4('取柴', 150, false)
+              ]);
+              settled.forEach(function (item) {
+                say4('allSettled → ' + item.status + '：'
+                  + (item.status === 'fulfilled' ? item.value : item.reason.message));
+              });
+              say4('三件事都有了结局，收工');
+            }
+
+            document.getElementById('js39-demo4-run').addEventListener('click', function () {
+              say4('开始：async 函数一调用就立刻返回一个 Promise，结果只能等它自己来说');
+              brew4();
+            });
+
+            say4('点按钮跑一遍：先成功一步、再失败被 catch、接着 finally、最后 allSettled 收尾');
+          </script>
+        </div>
+      </div>
+      <p>
+        最后一个常被忘掉的角落：<strong>异步的活儿也能取消</strong>。
+        定时器有 <code>clearTimeout</code>，而“正在路上的网络请求”要用一个专门的开关——
+        <code>AbortController</code>：它身上的 <code>signal</code> 递给 <code>fetch</code>，
+        想反悔时喊一声 <code>abort()</code>，请求就会被中止、<code>await</code> 那边抛出一个
+        <code>AbortError</code>：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="取消一个请求：AbortController">
+        const controller = new AbortController();
+
+        async function load(url) {
+          try {
+            const res = await fetch(url, { signal: controller.signal });
+            return await res.json();
+          } catch (error) {
+            if (error.name === "AbortError") {
+              console.log("这次不算数——请求已被取消");
+              return null;
+            }
+            throw error;                 // 其他错误照旧往上抛（第三十六式）
+          }
+        }
+
+        load("https://example.com/data.json");   // 发出去
+        controller.abort();                      // 不要了：请求中止，load 里走进 catch
+      </script>
+      <p>
+        为什么要它？回到第三十八式的<strong>防抖搜索</strong>：用户每停一次手就发一次请求，
+        如果前一次还没回来，后面的结果可能<strong>晚到并把新结果覆盖掉</strong>。
+        正确姿势是：发新请求前先 <code>abort()</code> 掉上一个——
+        这也是“<kbd>Esc</kbd> 停下正在加载的页面”“切走标签页就别再请求”这类需求的统一解法。
+      </p>
+
+      <h2>事件循环：谁先谁后，一次说清</h2>
+      <p>
+        JavaScript 只有<strong>一个主线程</strong>：同一时刻只能干一件事。
+        异步能成立，靠的是浏览器在背后排队，再用<strong>事件循环</strong>
+        （event loop）一条条取出来执行。队列有两条，优先级不一样：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="事件循环的两条队列">
+        同步代码 = 排队买票时“正在窗口办的人”，谁也插不了队
+        微任务队列（microtask）：Promise.then、queueMicrotask、await 之后的部分
+        宏任务队列（macrotask）：setTimeout、setInterval、事件回调
+        两个宏任务之间：浏览器找机会重绘画面（所以长任务会卡住渲染）
+
+        每一轮的顺序：同步代码跑完 → 清空全部微任务 → 取一个宏任务 → 再清空微任务 → …
+      </script>
+      <p>
+        所以例 1 里 <code>Promise.then</code> 的回调会插在
+        <code>setTimeout(…, 0)</code> 前面：微任务永远比下一个宏任务先跑。
+        另外要记住：<strong>主线程被一段长循环占住时，定时器、点击回调、
+        页面渲染统统都得等</strong>——这就是“页面卡死”的真相。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>想知道</th>
+            <th>答案</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>setTimeout(fn, 0)</code> 会立刻执行吗？</td><td>不会，它排在宏任务队列里，等当前同步代码和微任务都清完</td></tr>
+          <tr><td><code>.then</code> 和 <code>setTimeout(fn, 0)</code> 谁先？</td><td><code>.then</code>（微任务先于下一个宏任务）</td></tr>
+          <tr><td>定时器时间是精确的吗？</td><td>不精确，只是“至少等这么久”；主线程忙就顺延</td></tr>
+          <tr><td>为什么长循环会让页面卡住？</td><td>主线程只有一条，它没空，渲染和事件回调都轮不上</td></tr>
+        </tbody>
+      </table>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>setTimeout</code> 一次、<code>setInterval</code> 反复；
+          拿到编号就要想好什么条件下 <code>clear</code>，别让它一直跑；</li>
+        <li>Promise 三态：等待中 → 兑现或拒绝，只变一次；
+          <code>.then</code> 接成功、<code>.catch</code> 接失败、<code>.finally</code> 收尾；</li>
+        <li>组合多个任务：<code>all</code>（全成才成）、<code>allSettled</code>（全有结局）、
+          <code>race</code>（第一个有结局）、<code>any</code>（第一个成功）；</li>
+        <li><code>async</code> 函数返回 Promise，<code>await</code> 等结果，
+          错误用 <code>try/catch</code> 接——异步的错误不会自己冒到你面前；</li>
+        <li>事件循环：同步 → 清空微任务 → 一个宏任务 → 再清空微任务……
+          <code>Promise.then</code> 永远排在 <code>setTimeout</code> 前面；</li>
+        <li>别用长循环霸占主线程；需要等的时候，就让代码“先记下、回头再说”。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十九式</div>
+        <ol>
+          <li>做一个“三秒后提示”：点按钮，3 秒后页面上出现一行字；
+            再加一个「算了」按钮，能在时间到之前取消它
+            （提示：<code>setTimeout</code> 的编号存进变量）。</li>
+          <li>写一个 <code>delay(ms)</code>：返回一个 Promise，等 <code>ms</code> 毫秒后兑现
+            <code>"等了 ms 毫秒"</code>；再用 <code>async/await</code> +
+            <code>Promise.all</code> 让三个任务（200 / 500 / 300 毫秒）并行，
+            最后打印总耗时。</li>
+          <li>思考：为什么 <code>setTimeout(fn, 0)</code> 的回调会排在
+            <code>Promise.resolve().then(fn)</code> 后面？如果主线程里有一段跑十秒的死循环，
+            这十秒里定时器回调、按钮点击、页面重绘会怎样？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <button type="button" id="later-start">三秒后提示</button>
+            <button type="button" id="later-cancel">算了</button>
+            <p id="later-out"></p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+
+            const startBtn = document.getElementById("later-start");
+            const cancelBtn = document.getElementById("later-cancel");
+            const out = document.getElementById("later-out");
+
+            let timer = null;
+
+            startBtn.addEventListener("click", () => {
+              if (timer) return;                     // 已经在等，就别再排一个
+              out.textContent = "好，三秒之后提醒你……";
+              timer = setTimeout(() => {
+                out.textContent = "三秒到！该起来活动一下了。";
+                timer = null;
+              }, 3000);
+            });
+
+            cancelBtn.addEventListener("click", () => {
+              if (!timer) { out.textContent = "现在没有在等的定时器。"; return; }
+              clearTimeout(timer);
+              timer = null;
+              out.textContent = "取消了，当我没说。";
+            });
+          </script>
+          <p>
+            三个习惯：①编号存进变量，才有东西可取消；
+            ②回调里把变量清回 <code>null</code>，下次才好判断“有没有在等”；
+            ③先判断再开新的，避免连点攒出一堆定时器。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="delay 与并行等待">
+            "use strict";
+
+            function delay(ms) {
+              return new Promise((resolve) => {
+                setTimeout(() => resolve("等了 " + ms + " 毫秒"), ms);
+              });
+            }
+
+            async function run() {
+              const t0 = performance.now();
+              const results = await Promise.all([delay(200), delay(500), delay(300)]);
+              results.forEach((text) => console.log(text));
+              console.log("总耗时约 " + Math.round(performance.now() - t0) + " 毫秒");
+            }
+
+            run();
+          </script>
+          <p>
+            总耗时约 500 毫秒而不是 1000 ——因为 <code>Promise.all</code> 里的三个任务
+            <strong>同时开工</strong>，等的只是最慢的那个。
+            顺手记住 <code>delay</code> 这个写法：以后想把 async 函数“暂停一下”就用它。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为两类回调排在不同的队列里：<code>Promise.then</code> 属于<strong>微任务</strong>，
+            <code>setTimeout</code> 属于<strong>宏任务</strong>。
+            事件循环的规矩是“一轮宏任务结束后，先把微任务队列全部清空，再去取下一个宏任务”，
+            所以哪怕定时器写的是 0 毫秒，也得排在微任务后面。
+            至于十秒死循环：这十秒里主线程被占死，<strong>定时器回调不会执行、
+            点击事件不会派发、页面也不会重绘</strong>——浏览器把这几件事全推后了，
+            读者看到的就是“页面卡住了”。所以长任务要拆成小段，
+            或干脆交给异步流程排队去做。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，出了这支笔还有什么：window、location 与浏览器里的那间仓库。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第六式 · 表格 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="表格的行列结构、caption 与 thead/tbody/tfoot、th 的表头语义、colspan 与 rowspan 合并单元格，以及什么时候不该用表格。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-06">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        有些信息天生就长着横竖两个方向：课表、价目单、对战记录。
+        把它们塞进段落里是折磨读者，这时候就该请出表格——HTML 里唯一为“二维数据”准备的元素。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>table</code>、<code>tr</code>、<code>th</code>、<code>td</code> 搭出行与列</li>
+          <li>会用 <code>caption</code> 写表名，用 <code>thead</code> / <code>tbody</code> / <code>tfoot</code> 分组</li>
+          <li>明白 <code>th</code> 与 <code>scope</code> 是给读屏软件用的“指南针”</li>
+          <li>会用 <code>colspan</code> 与 <code>rowspan</code> 合并单元格，并保持格子总数不出错</li>
+        </ul>
+      </div>
+
+      <h2>行与列：表格的基本结构</h2>
+      <p>
+        规则只有三条，记牢就不会写乱：
+      </p>
+      <ul>
+        <li><code>table</code> 是整张表；</li>
+        <li><code>tr</code>（table row）是<strong>一行</strong>；</li>
+        <li>行里的每个格子是 <code>td</code>（table data），表头格子用 <code>th</code>（table header）。</li>
+      </ul>
+      <p>
+        也就是说，表格的书写顺序是<strong>一行一行写</strong>，
+        每行里按<strong>从左到右</strong>写格子——和你在纸上画表的方向完全一致。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 最小的表格：一行表头 + 两行数据</div>
+        <div class="demo-preview">
+          <table>
+            <tr>
+              <th>招式</th>
+              <th>要点</th>
+            </tr>
+            <tr>
+              <td>站桩</td>
+              <td>沉肩坠肘，气息平稳</td>
+            </tr>
+            <tr>
+              <td>出拳</td>
+              <td>力从地起，出于腰背</td>
+            </tr>
+          </table>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table>
+              <tr>
+                <th>招式</th>
+                <th>要点</th>
+              </tr>
+              <tr>
+                <td>站桩</td>
+                <td>沉肩坠肘，气息平稳</td>
+              </tr>
+              <tr>
+                <td>出拳</td>
+                <td>力从地起，出于腰背</td>
+              </tr>
+            </table>
+          </script>
+        </div>
+      </div>
+      <p>
+        注意每行的格子数量要一致：例 1 每行都是两个格子。少写或多写一个，
+        表格就会出现看不见的错位——这是排查表格时的第一号线索。
+      </p>
+
+      <h2>表名与行组：让表格有“目录”</h2>
+      <p>
+        数据一多，光看格子就不够了。HTML 给表格准备了四样零件来补充说明：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>元素</th>
+            <th>作用</th>
+            <th>写法上的讲究</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>caption</code></td>
+            <td>表格的标题（如“修行日程表”）</td>
+            <td>必须是 <code>table</code> 的第一个子元素；写它比在外面写个标题更“绑定”</td>
+          </tr>
+          <tr>
+            <td><code>thead</code></td>
+            <td>表头区（那一行标题格子）</td>
+            <td>滚动长表格时，浏览器可以让表头保持可见</td>
+          </tr>
+          <tr>
+            <td><code>tbody</code></td>
+            <td>数据主体</td>
+            <td>可以写多个 <code>tbody</code> 给数据分组</td>
+          </tr>
+          <tr>
+            <td><code>tfoot</code></td>
+            <td>表尾，通常是合计、备注</td>
+            <td>按规范写在 <code>tbody</code> 之后</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        推荐的书写顺序是：<code>caption</code> → <code>colgroup</code>（可选，稍后讲）→
+        <code>thead</code> → <code>tbody</code> → <code>tfoot</code>。
+        不写 <code>tbody</code> 时浏览器会自动替你补一个，但显式写出来结构更清楚。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 带表名、表头、表尾的日程表</div>
+        <div class="demo-preview">
+          <table>
+            <caption>本周修行日程</caption>
+            <thead>
+              <tr>
+                <th scope="col">日期</th>
+                <th scope="col">功课</th>
+                <th scope="col">时长</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">周一</th>
+                <td>抄写页面骨架</td>
+                <td>30 分钟</td>
+              </tr>
+              <tr>
+                <th scope="row">周三</th>
+                <td>拆解一个喜欢的网页</td>
+                <td>45 分钟</td>
+              </tr>
+              <tr>
+                <th scope="row">周五</th>
+                <td>写一页自己的介绍</td>
+                <td>60 分钟</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">合计</td>
+                <td>135 分钟</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table>
+              <caption>本周修行日程</caption>
+              <thead>
+                <tr>
+                  <th scope="col">日期</th>
+                  <th scope="col">功课</th>
+                  <th scope="col">时长</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">周一</th>
+                  <td>抄写页面骨架</td>
+                  <td>30 分钟</td>
+                </tr>
+                <tr>
+                  <th scope="row">周三</th>
+                  <td>拆解一个喜欢的网页</td>
+                  <td>45 分钟</td>
+                </tr>
+                <tr>
+                  <th scope="row">周五</th>
+                  <td>写一页自己的介绍</td>
+                  <td>60 分钟</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2">合计</td>
+                  <td>135 分钟</td>
+                </tr>
+              </tfoot>
+            </table>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        这张表里有两个细节值得单独说：
+      </p>
+      <ul>
+        <li><strong>第一列的日期也用了 <code>th</code></strong>：它其实是每一行的“行首标签”，
+          所以用表头格子，并配 <code>scope="row"</code> 说明“我管的是这一行”；</li>
+        <li><strong><code>scope</code> 是给读屏软件的路标</strong>：有了它，读屏软件读到
+          “45 分钟”时能念出“周三 · 时长：45 分钟”，而不是孤零零一个数字。
+          表头格子写 <code>scope="col"</code>，行首格子写 <code>scope="row"</code>。</li>
+      </ul>
+
+      <h2>合并单元格：colspan 与 rowspan</h2>
+      <p>
+        两个格子内容相同、可以并成一个时，就用得上合并：
+        <code>colspan</code> 横着并（跨几列），<code>rowspan</code> 竖着并（跨几行）。
+        值都是正整数，表示“占几个格子”。
+      </p>
+      <p>
+        这里有个新手最容易犯的错：<strong>合并之后，后面的行要少写对应数量的格子</strong>。
+        因为格子总数是固定的——你多了占位，别人就要让位。把每一行的格子数加起来核对一遍，
+        是检查表格的正确方法。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 一张课表：同一时段跨两行，同一天跨两列</div>
+        <div class="demo-preview">
+          <table>
+            <caption>练功房课表</caption>
+            <thead>
+              <tr>
+                <th scope="col">时段</th>
+                <th scope="col">周一</th>
+                <th scope="col">周二</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">晨课</th>
+                <td rowspan="2">基本功集训</td>
+                <td>桩功</td>
+              </tr>
+              <tr>
+                <th scope="row">午课</th>
+                <td>拳法</td>
+              </tr>
+              <tr>
+                <th scope="row">晚课</th>
+                <td colspan="2">自由练习（全场地开放）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table>
+              <caption>练功房课表</caption>
+              <thead>
+                <tr>
+                  <th scope="col">时段</th>
+                  <th scope="col">周一</th>
+                  <th scope="col">周二</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">晨课</th>
+                  <td rowspan="2">基本功集训</td>
+                  <td>桩功</td>
+                </tr>
+                <tr>
+                  <th scope="row">午课</th>
+                  <td>拳法</td>
+                </tr>
+                <tr>
+                  <th scope="row">晚课</th>
+                  <td colspan="2">自由练习（全场地开放）</td>
+                </tr>
+              </tbody>
+            </table>
+          </script>
+        </div>
+      </div>
+      <p>
+        数一数就明白了：第二行只写了两个格子（“午课” + “拳法”），
+        因为周一那一格被上一行的 <code>rowspan="2"</code> 占住了。
+        合并让表格更紧凑，但也更容易数错——格子多的时候，宁可先画一张草图。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：表格不多了，也别省 <code>td</code></div>
+        <p style="margin:0">
+          空着的格子也要写出 <code>&lt;td&gt;&lt;/td&gt;</code>，不能省略标签。
+          省掉一个格子，后面所有格子都会向前挤一格，整张表就错位了。
+        </p>
+      </div>
+
+      <h2>让列更好管：colgroup</h2>
+      <p>
+        如果想让某几列有统一的宽度或底色，可以在表头之前用 <code>colgroup</code>
+        声明一下“这一列长什么样”：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="colgroup 的写法">
+        <table>
+          <caption>月度开销</caption>
+          <colgroup>
+            <col class="col-item">
+            <col span="2" class="col-money">
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">项目</th>
+              <th scope="col">预算</th>
+              <th scope="col">实付</th>
+            </tr>
+          </thead>
+          …
+        </table>
+      </script>
+      <p>
+        <code>col</code> 用 <code>span</code> 指定“接下来几列”，样式交给 CSS
+        （第十九式之后的样式篇章会回来把它用起来）。
+      </p>
+
+      <h2>什么时候不该用表格</h2>
+      <p>
+        在很久以前，网页开发者用表格来<strong>排页面布局</strong>——“左边一列导航、
+        右边一列内容”就是两张表格嵌套出来的。那个时代已经过去了：
+      </p>
+      <ul>
+        <li>表格的语义是“二维数据”，用它布局会让读屏软件把整个页面念成一张表；</li>
+        <li>表格的默认行为（自动分配宽度、按内容撑开）本来就不适合布局；</li>
+        <li>排布局现在有 Flex 与 Grid 两把利器（第二十一、二十二式），表达能力远超表格。</li>
+      </ul>
+      <p>
+        判断标准很简单：<strong>内容可以念成“第几行第几列”吗？</strong>
+        可以，就用表格；不可以（只是想让东西左右排开），就用 CSS。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>表格按行写：<code>table</code> → <code>tr</code> → <code>th</code> / <code>td</code>，每行格子数要一致；</li>
+        <li><code>caption</code> 写表名（放在最前），<code>thead</code> / <code>tbody</code> / <code>tfoot</code> 分区；</li>
+        <li><code>th</code> 配 <code>scope="col"</code> 或 <code>scope="row"</code>，给读屏软件指路；</li>
+        <li><code>colspan</code> 横着并、<code>rowspan</code> 竖着并，合并后要在后续行少写格子；</li>
+        <li>空格子也要写 <code>&lt;td&gt;&lt;/td&gt;</code>；</li>
+        <li>表格只用来放数据；页面布局交给 CSS 的 Flex 与 Grid。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第六式</div>
+        <ol>
+          <li>做一张“三招对照表”：三列分别是招式名、要点、易错处，至少三行数据，
+            加上 <code>caption</code> 与 <code>thead</code>。</li>
+          <li>做一张两行两列的小课表，把“周一上午”两节课合并成一个格子（提示：
+            需要 <code>rowspan</code> 还是 <code>colspan</code>？）。</li>
+          <li>思考：同样是把内容排成几列，用表格和用 CSS 布局，
+            对“看不见屏幕的读者”来说差别在哪里？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="三招对照表">
+            <table>
+              <caption>三招对照</caption>
+              <thead>
+                <tr>
+                  <th scope="col">招式</th>
+                  <th scope="col">要点</th>
+                  <th scope="col">易错处</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>马步</td>
+                  <td>膝盖不过脚尖，重心落于两脚之间</td>
+                  <td>塌腰、耸肩</td>
+                </tr>
+                <tr>
+                  <td>直拳</td>
+                  <td>出拳时肩部放松，回收比打出更快</td>
+                  <td>只用手臂发力</td>
+                </tr>
+                <tr>
+                  <td>扫腿</td>
+                  <td>支撑脚外旋，扫击高度不过膝</td>
+                  <td>转体不足</td>
+                </tr>
+              </tbody>
+            </table>
+          </script>
+          <p>
+            检查点：<code>caption</code> 是 <code>table</code> 的第一个子元素；
+            三行数据的格子数都为 3；表头格子都带 <code>scope="col"</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="合并两节课">
+            <table>
+              <caption>周一上午</caption>
+              <thead>
+                <tr>
+                  <th scope="col">时段</th>
+                  <th scope="col">节次</th>
+                  <th scope="col">课程</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row" rowspan="2">上午</th>
+                  <td>第一节</td>
+                  <td>基础拳法</td>
+                </tr>
+                <tr>
+                  <td>第二节</td>
+                  <td>基础拳法（连堂）</td>
+                </tr>
+              </tbody>
+            </table>
+          </script>
+          <p>
+            这里“上午”一栏竖着跨两行，所以用 <code>rowspan="2"</code>；
+            第二行就<strong>不能再写这个格子</strong>，只写“第二节、基础拳法（连堂）”。
+            判断口诀：<strong>横着并用 colspan，竖着并用 rowspan</strong>——
+            字母 c 像“横”，字母 r 像“立”。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            用表格布局时，读屏软件会把页面当成一张巨大的数据表来念，
+            不断报出“第 3 行第 2 列”这类信息，读者根本听不出哪里是导航、哪里是正文；
+            而正确的语义（导航用 <code>nav</code>、正文用 <code>main</code>、
+            真数据才用 <code>table</code>）能让读屏软件用快捷键按“地标”跳转。
+            <strong>结构对了，机器才帮得上忙</strong>——这是第九式与第十一式的主题。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，轮到网页与读者交互的门面：表单（上）。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二式 · 文本与语义 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="标题、段落、换行、强调、引用、代码与字符实体：把一段文字写成有结构、有语气的 HTML。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-02">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        网页上最多的东西是文字，而文字最讲究“身份”：哪句是标题、哪句是重点、
+        哪段是引用别人的话。这一式，我们把每一个标签用到它该用的地方。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>用 <code>h1</code>–<code>h6</code> 搭出标题层级，不跳级、不把标题当字号用</li>
+          <li>分清 <code>p</code>、<code>br</code>、<code>hr</code> 的职责，理解浏览器的空白合并规则</li>
+          <li>用 <code>strong</code>、<code>em</code>、<code>mark</code>、<code>del</code>、<code>ins</code> 表达语气</li>
+          <li>会写引用、代码、缩写、上下标与字符实体</li>
+        </ul>
+      </div>
+
+      <h2>标题：六级台阶</h2>
+      <p>
+        <code>h1</code> 到 <code>h6</code> 表示六级标题（heading），数字越小级别越高。
+        它们不只是“大号字”，而是页面的<strong>目录骨架</strong>：读屏软件靠它给读者导航，
+        搜索引擎靠它判断页面重点。三条规矩请记牢：
+      </p>
+      <ul>
+        <li>一个页面只有<strong>一个一级标题</strong>，说明“这一页是什么”；</li>
+        <li>层级<strong>逐级向下</strong>：二级下面才用三级，不要从 <code>h2</code> 跳到 <code>h4</code>；</li>
+        <li>想让字变小、变灰，那是 CSS 的事——<strong>不要为了样式挑标题级别</strong>。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 六级标题在浏览器里的默认大小</div>
+        <div class="demo-preview">
+          <h1>一级标题 h1</h1>
+          <h2>二级标题 h2</h2>
+          <h3>三级标题 h3</h3>
+          <h4>四级标题 h4</h4>
+          <h5>五级标题 h5</h5>
+          <h6>六级标题 h6</h6>
+          <p class="mb-0">正文用 <code>p</code>，看起来最小，但读起来最舒服。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <h1>一级标题 h1</h1>
+            <h2>二级标题 h2</h2>
+            <h3>三级标题 h3</h3>
+            <h4>四级标题 h4</h4>
+            <h5>五级标题 h5</h5>
+            <h6>六级标题 h6</h6>
+            <p class="mb-0">正文用 <code>p</code>，看起来最小，但读起来最舒服。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        平时写作，用 <code>h1</code> 报上页面主题，用 <code>h2</code> 分小节、<code>h3</code> 分小点，
+        四五级已经很少见了。瞧，本站每一式右侧的“本式目录”，就是由正文里的
+        <code>h2</code>、<code>h3</code> 自动生成的——标题写得好，目录就好用。
+      </p>
+
+      <h2>段落、换行与水平线</h2>
+      <p>
+        <code>p</code> 是段落，是正文的默认容器。<code>br</code> 是强制换行（line break），
+        一般只用在“地址、诗歌”这类<strong>换行本身就是内容</strong>的地方；
+        <code>hr</code> 是水平线（horizontal rule），表示话题的转折，而不是“画一条线好看”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 空白会被合并，所以要靠元素来分段</div>
+        <div class="demo-preview">
+          <p>这一行在源代码里写了            很多个空格，
+换了好几行，
+但浏览器把它们统统合并成一个空格。</p>
+          <p>所以想分段，就老老实实用 p；确实需要在段落中间换行时，才用 br。</p>
+          <p>比如这个地址：<br>青山路 42 号<br>第一栋 3 单元</p>
+          <hr>
+          <p class="mb-0">hr 以上是一个话题，以下换一个话题。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>这一行在源代码里写了            很多个空格，
+            换了好几行，
+            但浏览器把它们统统合并成一个空格。</p>
+            <p>所以想分段，就老老实实用 p；确实需要在段落中间换行时，才用 br。</p>
+            <p>比如这个地址：<br>青山路 42 号<br>第一栋 3 单元</p>
+            <hr>
+            <p class="mb-0">hr 以上是一个话题，以下换一个话题。</p>
+          </script>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：连续的空格、换行、缩进都只算一个空格</div>
+        <p style="margin:0">
+          这条规则叫<strong>空白折叠</strong>。它有两个直接后果：其一，想让文字断开，得用元素而不是回车；
+          其二，代码缩进怎么写都不会影响页面——大胆缩进，让自己看得舒服。
+          唯一的例外是 <code>pre</code> 元素，它里面的空白原样保留（本节最后会见到它）。
+        </p>
+      </div>
+
+      <h2>强调与语气</h2>
+      <p>
+        同一句话，重音不同，意思就不同。HTML 提供了几对小工具来表达语气，
+        它们的用法区别在于<strong>“有没有语义”</strong>：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>标签</th>
+            <th>含义</th>
+            <th>怎么选</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>strong</code></td>
+            <td>重要、严重</td>
+            <td>“注意！这条必须看”——有语义，优先用它</td>
+          </tr>
+          <tr>
+            <td><code>b</code></td>
+            <td>粗体</td>
+            <td>只是视觉上加粗（如产品名），没有强调意味时才用</td>
+          </tr>
+          <tr>
+            <td><code>em</code></td>
+            <td>强调、重读</td>
+            <td>语气上的重音：“<em>是</em>他干的”</td>
+          </tr>
+          <tr>
+            <td><code>i</code></td>
+            <td>斜体</td>
+            <td>外来词、术语、心里话等约定俗成的场合</td>
+          </tr>
+          <tr>
+            <td><code>mark</code></td>
+            <td>高亮标记</td>
+            <td>像荧光笔划重点，比如搜索结果里的关键词</td>
+          </tr>
+          <tr>
+            <td><code>del</code> / <code>ins</code></td>
+            <td>删除 / 新增</td>
+            <td>改稿留痕：原价与现价、修订说明</td>
+          </tr>
+          <tr>
+            <td><code>small</code></td>
+            <td>附带说明</td>
+            <td>版权声明、法律小字这类“次要信息”</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 语气词各就各位</div>
+        <div class="demo-preview">
+          <p><strong>注意：</strong>明天有暴雨，出门记得带伞。</p>
+          <p>师父说：<em>是</em>你先动的手。</p>
+          <p>他从怀里掏出的，是<mark>一本《纯静态网页的修行》</mark>。</p>
+          <p>原价 <del>九十九</del> 现价 <ins>免费</ins>，仅限江湖同道。</p>
+          <p class="mb-0">本页示例仅供学习<small>（版权归原作者所有）</small>。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p><strong>注意：</strong>明天有暴雨，出门记得带伞。</p>
+            <p>师父说：<em>是</em>你先动的手。</p>
+            <p>他从怀里掏出的，是<mark>一本《纯静态网页的修行》</mark>。</p>
+            <p>原价 <del>九十九</del> 现价 <ins>免费</ins>，仅限江湖同道。</p>
+            <p class="mb-0">本页示例仅供学习<small>（版权归原作者所有）</small>。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        它们的默认样子（粗体、斜体、黄底、删除线）是浏览器给的；
+        语义是给机器（读屏软件、搜索引擎）看的。用对标签，两种读者都满意。
+      </p>
+
+      <h2>引用、代码与其它行内元素</h2>
+      <p>写文章还会经常遇到这几类内容，各有专用标签：</p>
+      <ul>
+        <li><strong>引用</strong>：整段引用用 <code>blockquote</code>（独立成块），句中短引用用 <code>q</code>（浏览器自动加引号），来源用 <code>cite</code>；</li>
+        <li><strong>代码</strong>：行内代码用 <code>code</code>，多行代码用 <code>pre</code> 包住 <code>code</code>（保留空白与换行）；</li>
+        <li><strong>键盘与输出</strong>：<code>kbd</code> 表示按键，<code>samp</code> 表示程序输出，<code>var</code> 表示变量名；</li>
+        <li><strong>缩写</strong>：<code>abbr</code> 配 <code>title</code> 属性，鼠标悬停能看到全称；</li>
+        <li><strong>上下标</strong>：<code>sub</code> 与 <code>sup</code>，写化学式与脚注<sup>1</sup>时用得上。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 引用与代码的写法</div>
+        <div class="demo-preview">
+          <blockquote>知之为知之，不知为不知，是知也。</blockquote>
+          <p>短引用交给 <code>q</code>：<q>日拱一卒，功不唐捐。</q></p>
+          <p>按下 <kbd>Ctrl</kbd> + <kbd>S</kbd> 保存文件；控制台会输出 <samp>Saved!</samp>。</p>
+          <p>把 <abbr title="HyperText Markup Language">HTML</abbr> 读成“艾赤提艾姆艾尔”，是新手最容易露怯的地方。</p>
+          <pre><code>const greet = function (name) {
+  return '你好，' + name + '！';
+};</code></pre>
+          <p class="mb-0">水分子是 H<sub>2</sub>O，平方写作 x<sup>2</sup>。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <blockquote>知之为知之，不知为不知，是知也。</blockquote>
+            <p>短引用交给 <code>q</code>：<q>日拱一卒，功不唐捐。</q></p>
+            <p>按下 <kbd>Ctrl</kbd> + <kbd>S</kbd> 保存文件；控制台会输出 <samp>Saved!</samp>。</p>
+            <p>把 <abbr title="HyperText Markup Language">HTML</abbr> 读成“艾赤提艾姆艾尔”，是新手最容易露怯的地方。</p>
+            <pre><code>const greet = function (name) {
+              return '你好，' + name + '！';
+            };</code></pre>
+            <p class="mb-0">水分子是 H<sub>2</sub>O，平方写作 x<sup>2</sup>。</p>
+          </script>
+        </div>
+      </div>
+      <p>
+        注意 <code>pre</code> 里那段代码：它的缩进被<strong>原样保留</strong>了，
+        这正是它和普通段落的区别。也正因如此，<code>pre</code> 里的缩进要写得克制，
+        否则读者会看到一大片空白。
+      </p>
+
+      <h2>特殊字符：字符实体</h2>
+      <p>
+        问题来了：小于号 <code>&lt;</code> 是 HTML 的“语法符号”，
+        直接写出来浏览器会以为要开始一个标签。写“小于号本身”要用<strong>字符实体</strong>
+        （character entity）：一个以 <code>&amp;</code> 开头、以 <code>;</code> 结尾的短代码。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 用实体写出特殊字符</div>
+        <div class="demo-preview">
+          <p>行内元素写成 &lt;span&gt;，键盘上的与号写成 &amp;。</p>
+          <p>版权符号：&copy; 2026 墨白；破折号：日拱一卒&mdash;功不唐捐。</p>
+          <p class="mb-0">箭头 &rarr; 省略号&hellip; 乘号 &times;，都能用实体写出来。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>行内元素写成 &lt;span&gt;，键盘上的与号写成 &amp;。</p>
+            <p>版权符号：&copy; 2026 墨白；破折号：日拱一卒&mdash;功不唐捐。</p>
+            <p class="mb-0">箭头 &rarr; 省略号&hellip; 乘号 &times;，都能用实体写出来。</p>
+          </script>
+        </div>
+      </div>
+
+      <p>常用的实体不多，这张表背下来一半就够用了：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>实体</th>
+            <th>显示为</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>&amp;lt;</code></td><td>&lt;</td><td>小于号，写标签字面量时必用</td></tr>
+          <tr><td><code>&amp;gt;</code></td><td>&gt;</td><td>大于号</td></tr>
+          <tr><td><code>&amp;amp;</code></td><td>&amp;</td><td>与号本身</td></tr>
+          <tr><td><code>&amp;quot;</code></td><td>&quot;</td><td>双引号（在属性值里写引号时用）</td></tr>
+          <tr><td><code>&amp;copy;</code></td><td>&copy;</td><td>版权符号</td></tr>
+          <tr><td><code>&amp;nbsp;</code></td><td>&nbsp;</td><td>不换行空格：既占位置，又不允许在此换行</td></tr>
+          <tr><td><code>&amp;mdash;</code> / <code>&amp;ndash;</code></td><td>&mdash; / &ndash;</td><td>长破折号与短破折号</td></tr>
+          <tr><td><code>&amp;hellip;</code></td><td>&hellip;</td><td>省略号</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：<code>&amp;nbsp;</code> 别拿来排版</div>
+        <p style="margin:0">
+          新手常用一串 <code>&amp;nbsp;</code> 把文字“顶”到想要的位置。
+          它确实能用，但那是用空格做设计的下策：一旦屏幕变窄，页面就会散架。
+          空白的活儿，以后交给 CSS 的 <code>margin</code> 与 <code>padding</code>（第十六式）。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>标题是结构不是字号：一个 <code>h1</code>，层级逐级向下，不跳级；</li>
+        <li><code>p</code> 是段落，<code>br</code> 只在换行本身有意义时用，<code>hr</code> 表示话题转折；</li>
+        <li>空白折叠：连续空格与换行都算一个空格，<code>pre</code> 是唯一例外；</li>
+        <li>语气标签优先选有语义的：<code>strong</code>、<code>em</code>、<code>mark</code>、<code>del</code>、<code>ins</code>；</li>
+        <li>引用用 <code>blockquote</code> / <code>q</code>，代码用 <code>code</code> / <code>pre</code>，缩写用 <code>abbr</code>；</li>
+        <li>特殊字符用实体：<code>&amp;lt;</code>、<code>&amp;gt;</code>、<code>&amp;amp;</code>、<code>&amp;copy;</code>……</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二式</div>
+        <ol>
+          <li>写一篇 150 字左右的“读书笔记”：要有标题层级、至少两段正文、一处引用、一处行内代码。</li>
+          <li>把下面这句话里的符号用实体写出来，让它能正常显示：
+            “在 HTML 里，<code>&lt;div&gt;</code> 与 <code>&amp;</code> 都要转义。”
+            （目标：页面上看到的就是尖括号与与号本身）</li>
+          <li>思考：把“整段文字加粗”和“把整段文字包进 <code>strong</code>”，
+            在视觉上可能一样，但对读屏软件来说有什么不同？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>一份结构完整、语气用到位的示范（读者可按自己的阅读内容替换文字）：</p>
+          <script type="text/plain" data-lang="html" data-title="读书笔记">
+            <h1>《HTML 入门》读书笔记</h1>
+            <p><strong>今天读到的最重要的一句话：</strong><em>标签是给机器看的，排版是给眼睛看的。</em></p>
+            <p>作者提醒：<q>不要把 h3 当小号标题用。</q>我原来经常这么干，现在知道该让 CSS 去管字号。</p>
+            <p>另外记一个细节：写标签字面量时要用 <code>&amp;lt;</code> 转义，否则浏览器会真的解析它。</p>
+          </script>
+          <p>
+            检查要点：只有一个小节标题是 <code>h2</code> 级别？没有跳级？
+            引用、代码、强调是否各自用对了标签？这三点都对，就合格。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="转义后的句子">
+            <p>在 HTML 里，&lt;div&gt; 与 &amp; 都要转义。</p>
+          </script>
+          <p>
+            <code>&lt;div&gt;</code> 要写成 <code>&amp;lt;div&amp;gt;</code>，
+            <code>&amp;</code> 要写成 <code>&amp;amp;</code>。
+            口诀：<strong>尖括号和与号，写自己时都要“打包”</strong>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            视觉上它们可能一模一样（都变粗），但读屏软件会照字面读：
+            用 <code>strong</code> 时它会加重语气提示“重要内容”，
+            用 CSS 加粗时它就只是普通文字。语文课上的“这个字要重读”，
+            在网页里就对应 <code>strong</code> 与 <code>em</code>。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，文字要开始“连起来”了：列表与链接。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

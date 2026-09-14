@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十三式 · CSS 初识 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="CSS 的语法结构、三种引入方式与它们的关系、第一批能立刻见效的规则，以及用开发者工具查看与调试样式的方法。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-13">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        骨架搭好了，该裁衣服了。CSS 这门手艺有个可爱的特点：
+        <strong>改一行，立刻看得见</strong>。这一式先不讲花哨的招式，只把“一条样式怎么生效”这件事说透。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>看懂 CSS 的规则集：选择器、声明块、属性与值，以及注释的写法</li>
+          <li>会用三种引入方式（外部、内部、行内），并知道它们的优先级关系</li>
+          <li>写出第一批立刻见效的样式：颜色、字号、行高、背景</li>
+          <li>会用浏览器开发者工具查看、临时修改、定位样式问题</li>
+        </ul>
+      </div>
+
+      <h2>CSS 长什么样</h2>
+      <p>
+        CSS（Cascading Style Sheets，层叠样式表）的语法只有一种“句型”：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="一条规则集的解剖">
+        选择器 {
+          属性: 值;
+          属性: 值;
+        }
+
+        /* 这是 CSS 的注释：斜杠加星号包起来 */
+        p {
+          color: #b03a2e;      /* 文字颜色 */
+          font-size: 1.05rem;  /* 字号 */
+          line-height: 1.8;    /* 行高 */
+        }
+      </script>
+      <p>四个名词先对上号，后面每一式都会用到：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>名词</th>
+            <th>在上面的例子里</th>
+            <th>作用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>选择器（selector）</td>
+            <td><code>p</code></td>
+            <td>“我要给谁化妆”——挑出页面上的哪些元素</td>
+          </tr>
+          <tr>
+            <td>声明块</td>
+            <td><code>{ … }</code></td>
+            <td>一对花括号里的全部内容</td>
+          </tr>
+          <tr>
+            <td>声明（declaration）</td>
+            <td><code>color: #b03a2e;</code></td>
+            <td>一条“属性：值”的交代，末尾的分号不能漏（最后一条可省，但建议都写）</td>
+          </tr>
+          <tr>
+            <td>属性 / 值</td>
+            <td><code>color</code> / <code>#b03a2e</code></td>
+            <td>要改哪一项，改成什么</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        三个容易踩的小坑，第一次写就该避开：
+        用中文标点（冒号、分号打成全角）会整条规则失效；
+        <code>//</code> 不是 CSS 的注释（那是 JavaScript 的写法）；
+        花括号忘了成对，后面的样式会跟着一起崩。
+      </p>
+
+      <h2>三种引入方式</h2>
+      <p>样式可以写在三个地方，效力与用途各不相同：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>方式</th>
+            <th>写法</th>
+            <th>适合</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>外部样式表</strong><br>（推荐）</td>
+            <td><code>&lt;link rel="stylesheet" href="style.css"&gt;</code> 写在 <code>head</code> 里</td>
+            <td>正式项目的首选：一份文件管全站，浏览器还能缓存</td>
+          </tr>
+          <tr>
+            <td><strong>内部样式</strong></td>
+            <td><code>&lt;style&gt;…&lt;/style&gt;</code> 写在 <code>head</code> 里</td>
+            <td>这一页专属的样式、教程演示、临时试验</td>
+          </tr>
+          <tr>
+            <td><strong>行内样式</strong></td>
+            <td><code>&lt;p style="color: red"&gt;</code></td>
+            <td>应急与脚本动态设置；写多了会很难维护</td>
+          </tr>
+          <tr>
+            <td><code>@import</code></td>
+            <td>在 CSS 里再引一份 CSS</td>
+            <td>不推荐：它会等主样式表下载之后再排队请求，拖慢首次显示</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        三者的关系可以用一句话记住：<strong>行内样式最“重”</strong>；
+        内部与外部样式之间，则看谁写在后面——<strong>同样“分量”的规则，后写的赢</strong>。
+        看一个现场实验：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 行内样式盖过内部样式（谁在后面谁赢的前奏）</div>
+        <div class="demo-preview">
+          <style>
+            #css13-demo1 p { color: #2f6db3; font-weight: 700; }
+          </style>
+          <div id="css13-demo1">
+            <p>这一段由内部样式管：蓝色、加粗。</p>
+            <p style="color: #b03a2e">这一段又加了行内样式，于是它变成了朱砂色。</p>
+            <p style="color: #b03a2e; font-weight: 400">行内样式可以只改一部分：这次颜色变了，字重回到了正常。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css13-demo1">
+              <p>这一段由内部样式管：蓝色、加粗。</p>
+              <p style="color: #b03a2e">这一段又加了行内样式，于是它变成了朱砂色。</p>
+              <p style="color: #b03a2e; font-weight: 400">行内样式可以只改一部分：这次颜色变了，字重回到了正常。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则（内部样式）">
+            #css13-demo1 p { color: #2f6db3; font-weight: 700; }
+          </script>
+        </div>
+      </div>
+      <p>
+        这不是“行内天生更正确”，而是层叠规则里的一条：<strong>行内样式比外部、内部样式表更“重”</strong>。
+        第十五式会把整套比较规则摊开讲；现在只要知道它存在，并顺手养成习惯——
+        <strong>正式样式写进样式表，行内只留给应急</strong>。
+      </p>
+
+      <h2>第一批能立刻见效的规则</h2>
+      <p>
+        有三类选择器先认识：元素选择器（按标签挑）、类选择器（按 <code>class</code> 挑）、
+        ID 选择器（按 <code>id</code> 挑，页面里只该出现一次）。它们的写法与用途：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>名字</th>
+            <th>挑中的是</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>p { }</code></td>
+            <td>元素选择器</td>
+            <td>页面上所有 <code>p</code></td>
+            <td>给全站正文定行高</td>
+          </tr>
+          <tr>
+            <td><code>.note { }</code></td>
+            <td>类选择器（前面一个点）</td>
+            <td>所有 <code>class="note"</code> 的元素</td>
+            <td>把一类提示文字变成灰底小字</td>
+          </tr>
+          <tr>
+            <td><code>#top { }</code></td>
+            <td>ID 选择器（前面一个井号）</td>
+            <td><code>id="top"</code> 的那一个元素</td>
+            <td>页面头部这种“只此一处”的区域</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 三种选择器各挑各的</div>
+        <div class="demo-preview">
+          <style>
+            #css13-demo2 .note {
+              background: #f4edde; border-left: 3px solid #b03a2e;
+              padding: .4rem .7rem; color: #6f6a5e;
+            }
+            #css13-demo2 #special { color: #2f6db3; font-weight: 700; }
+          </style>
+          <div id="css13-demo2">
+            <p>我是普通段落，只有浏览器的默认样式。</p>
+            <p class="note">我带着 class="note"，所以有灰底与左边线。</p>
+            <p id="special">我是 id="special" 的段落，被单独点了名。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css13-demo2">
+              <p>我是普通段落，只有浏览器的默认样式。</p>
+              <p class="note">我带着 class="note"，所以有灰底与左边线。</p>
+              <p id="special">我是 id="special" 的段落，被单独点了名。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css13-demo2 .note {
+              background: #f4edde; border-left: 3px solid #b03a2e;
+              padding: .4rem .7rem; color: #6f6a5e;
+            }
+            #css13-demo2 #special { color: #2f6db3; font-weight: 700; }
+          </script>
+        </div>
+      </div>
+      <p>
+        注意演示里的选择器写成了 <code>#css13-demo2 .note</code>——
+        这是一条<strong>后代选择器</strong>：意思是“在 <code>#css13-demo2</code> 这个范围里找 <code>.note</code>”。
+        教程的演示都要加这样的“范围前缀”，否则就会误伤页面上的其它元素；
+        放到你自己的项目里，写 <code>.note { … }</code> 就够用了。第十四式专讲选择器的各种组合。
+      </p>
+
+      <h2>开发者工具：CSS 的第二双眼</h2>
+      <p>
+        样式写多了必然要问“这条规则为什么没生效”。答案都在开发者工具里，
+        五步就能上手（Chrome / Edge / Firefox 操作基本一致）：
+      </p>
+      <ol>
+        <li>按 <kbd>F12</kbd> 或 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> 打开开发者工具；</li>
+        <li>切到 <strong>Elements（元素）</strong>面板，点左上角的箭头图标，再去页面上点你想查的元素；</li>
+        <li>右侧 <strong>Styles（样式）</strong>面板从上往下列出所有命中的规则，<strong>被划掉的行就是被别的规则盖住了</strong>；</li>
+        <li>直接在上面改数值、加属性，页面会立刻变——这不会保存到文件，只是临时试验；</li>
+        <li>切到 <strong>Computed（计算样式）</strong>，能看到“最终算出来”的值，长宽、颜色一目了然。</li>
+      </ol>
+      <div class="callout warn">
+        <div class="callout-title">心法：先用工具找原因，再回去改文件</div>
+        <p style="margin:0">
+          新手最常见的两种徒劳：一是“我明明写了却没生效”——其实被别的规则盖住了（Styles 面板里划掉那行）；
+          二是“为什么这么宽”——其实上一式留下的空白在撑场面（Computed 面板里看盒模型）。
+          <strong>在工具里改到满意，再抄回文件</strong>，比反复刷新猜十次都快。
+        </p>
+      </div>
+
+      <h2>给页面换一副面孔</h2>
+      <p>
+        把学到的拼起来，就是一次“换肤”。下面这份样式表适合当作任何页面的起步配置，
+        其中每一行都能独立认出来：
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 一份可复用的起步样式表</div>
+        <div class="demo-preview">
+          <style>
+            #css13-demo3 { font-family: Georgia, "Songti SC", "Noto Serif CJK SC", "SimSun", serif; }
+            #css13-demo3 h2 { margin: 0 0 .5rem; font-size: 1.5rem; letter-spacing: .04em; }
+            #css13-demo3 p { margin: 0 0 .8rem; line-height: 1.9; color: #2b2a26; }
+            #css13-demo3 .byline { color: #6f6a5e; font-size: .88rem; }
+            #css13-demo3 .tag { background: #f4edde; border-radius: 999px; padding: .1rem .6rem; font-size: .8rem; }
+            #css13-demo3 .d-card { background: #fffdf7; border: 1px solid #e3dcc8; border-radius: 10px; padding: 1rem 1.1rem; }
+          </style>
+          <div id="css13-demo3">
+            <div class="d-card">
+              <h2>山不让尘</h2>
+              <p class="byline">墨白 · 2026 年 9 月 14 日 <span class="tag">基本功</span></p>
+              <p>山不让尘，故能成其高；川不辞盈，故能成其深。</p>
+              <p style="margin-bottom: 0">把这句话抄在便签上，比抄十遍样式表更能撑住你练下去。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css13-demo3">
+              <div class="d-card">
+                <h2>山不让尘</h2>
+                <p class="byline">墨白 · 2026 年 9 月 14 日 <span class="tag">基本功</span></p>
+                <p>山不让尘，故能成其高；川不辞盈，故能成其深。</p>
+                <p style="margin-bottom: 0">把这句话抄在便签上，比抄十遍样式表更能撑住你练下去。</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css13-demo3 { font-family: Georgia, "Songti SC", "Noto Serif CJK SC", "SimSun", serif; }
+            #css13-demo3 h2 { margin: 0 0 .5rem; font-size: 1.5rem; letter-spacing: .04em; }
+            #css13-demo3 p { margin: 0 0 .8rem; line-height: 1.9; color: #2b2a26; }
+            #css13-demo3 .byline { color: #6f6a5e; font-size: .88rem; }
+            #css13-demo3 .tag { background: #f4edde; border-radius: 999px; padding: .1rem .6rem; font-size: .8rem; }
+            #css13-demo3 .d-card { background: #fffdf7; border: 1px solid #e3dcc8; border-radius: 10px; padding: 1rem 1.1rem; }
+          </script>
+        </div>
+      </div>
+
+      <p>
+        最后一行 <code>margin-bottom: 0</code> 值得留意：它写成了一个<strong>行内样式</strong>，
+        只是为了演示“临时改一处”的感觉。正式项目里请把这类微调也搬到样式表，
+        用一个类名解决（例如 <code>.last { margin-bottom: 0 }</code>）。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>CSS 的句型：<code>选择器 { 属性: 值; }</code>；注释用 <code>/* … */</code>，别用 <code>//</code>；</li>
+        <li>三种引入方式：外部（推荐）、内部、行内；行内样式最“重”，样式表之间后写者赢，正式样式一律进样式表；</li>
+        <li>三种基础选择器：元素 <code>p</code>、类 <code>.note</code>、ID <code>#top</code>；</li>
+        <li>颜色、字号、行高、字体、背景、圆角，是最先见效的一批属性；</li>
+        <li>开发者工具的 Styles 面板看“谁盖住了谁”，Computed 面板看“最终值”，改到满意再抄回文件。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十三式</div>
+        <ol>
+          <li>给第十二式的个人主页建一份 <code>style.css</code>，用 <code>link</code> 引进去：
+            给 <code>body</code> 设一个字体、给段落设行高、给链接换颜色。</li>
+          <li>在同一页里加一段内部样式，把 <code>h1</code> 的字号改大；
+            再用开发者工具找到它，试着临时改成另一个值。</li>
+          <li>思考：既然行内样式的“分量”最重，为什么反而不推荐用它写正式样式？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="引入外部样式表">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>墨白的主页</title>
+              <link rel="stylesheet" href="style.css">
+            </head>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="style.css 起步三行">
+            body {
+              font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            }
+            p { line-height: 1.8; }
+            a { color: #b03a2e; }
+          </script>
+          <p>
+            检查点：<code>link</code> 放在 <code>head</code> 里；<code>href</code> 的相对路径与
+            <code>style.css</code> 的位置对得上；保存后在开发者工具的 Network（网络）面板能看到它返回 200。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="内部样式">
+            <style>
+              h1 { font-size: 2.4rem; letter-spacing: .06em; }
+            </style>
+          </script>
+          <p>
+            在 Elements 面板选中 <code>h1</code>，右侧 Styles 里会出现 <code>h1 { font-size: 2.4rem; }</code>。
+            点数字即可改，页面上立刻变形；刷新页面，改动消失——
+            这就是“工具里试验、文件里定稿”的工作方式。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            三个理由：其一，行内样式<strong>写在标签上</strong>，同一个样式要改十处就得改十次；
+            其二，它<strong>盖住</strong>了所有样式表里的规则，以后想统一改主题（比如换一套配色）
+            会发现怎么改都不生效，只能回头一个个删；
+            其三，它把“结构”和“外衣”又混在了一起，第十二式辛苦搭好的干净骨架被弄脏了。
+            结论：行内样式是应急工具，不是常规武器。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          CSS 的属性很多，现在不必背。想先浏览一遍全貌，可以看
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS">MDN 的 CSS 栏目</a>；
+          遇到不认识的属性时再回去查，比通读效率高得多。
+        </p>
+      </div>
+
+      <blockquote>下一式，把选择器练成一把手术刀：从一页元素里精确挑出你要的那几个。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

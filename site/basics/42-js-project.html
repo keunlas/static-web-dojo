@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四十二式 · 综合修炼：让主页动起来 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="在第十二式的骨架、第二十六式的样式之上，只加一个原生 JavaScript 脚本：主题切换、作品筛选、留言板、回到顶部与滚动高亮导航。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-42">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        骨架搭过、衣服穿过，这一页还差一味：会应答。
+        这一式不教新招式，只把前十五式攒下的本事用一遍——
+        <strong>结构不动、样式不动，只加一个脚本</strong>，让它活起来。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>学会先列“行为清单”，再决定每一件事该用哪个本事</li>
+          <li>用 <code>dataset</code> + CSS 变量做主题切换，并用 <code>localStorage</code> 记住选择</li>
+          <li>用 <code>hidden</code> 与事件委托做筛选、留言与删除</li>
+          <li>用 <code>scroll</code> + 节流 + <code>scrollTo</code> 做“回到顶部”，
+            用 <code>IntersectionObserver</code> 做滚动高亮导航</li>
+          <li>用一份验收清单给成品打分：能用键盘、关掉 JS 也不散、没有行内事件</li>
+        </ul>
+      </div>
+
+      <h2>成品先看</h2>
+      <p>
+        先看结果，再学过程。这一页的前两版都在，可以并排对比：
+      </p>
+      <ul>
+        <li><a href="../demo/html-home/index.html">第十二式的成品：纯 HTML 版</a>（只有结构）；</li>
+        <li><a href="../demo/html-home-styled/index.html">第二十六式的成品：穿上衣服版</a>（加了 CSS）；</li>
+        <li><a href="../demo/html-home-interactive/index.html">第四十二式的成品：动起来版</a>（本式新加的脚本）。</li>
+      </ul>
+      <p>
+        第三版的 <strong>HTML 与 CSS 与前两版几乎一字未改</strong>——
+        只多了一个 <code>&lt;script&gt;</code>、几个 <code>id</code> 与
+        <code>data-kind</code> 之类的标记。这就是这一式最想让你看到的东西：
+        <strong>行为是叠加上去的，不是把结构推倒重来</strong>。
+      </p>
+
+      <h2>动手拆解</h2>
+      <p>
+        成品页的脚本一共五步，按顺序读一遍即可。每步都给出页面里真实的代码，
+        粘贴出去就能用。
+      </p>
+
+      <h3>第 0 步 · 先列行为清单</h3>
+      <p>
+        写代码之前先想清“这一页要会做什么”。清单列得越具体，写起来越不慌：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>要的效果</th>
+            <th>用到的本事</th>
+            <th>学过的地方</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>暗一点 / 亮一点，且刷新后还记得</td><td><code>dataset</code> + CSS 变量 + <code>localStorage</code></td><td>第二十五、三十七、四十式</td></tr>
+          <tr><td>作品按“网页 / 表单”筛选</td><td><code>dataset</code> + <code>hidden</code> + 事件</td><td>第三十七、三十八式</td></tr>
+          <tr><td>留言、显示、删除，刷新还在</td><td>表单校验 + <code>textContent</code> + 事件委托 + 存储</td><td>第三十七、三十八、四十式</td></tr>
+          <tr><td>滚下去出现“回到顶部”</td><td><code>scroll</code> 事件 + 节流 + <code>scrollTo</code></td><td>第三十八、四十式</td></tr>
+          <tr><td>滚到哪一节，导航就高亮哪一节</td><td><code>IntersectionObserver</code></td><td>第四十一式的特性检测清单里见过它</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法</div>
+        <p style="margin:0">
+          功能清单也是豁免清单：没列上去的就不做。
+          一页主页不需要轮播、不需要弹窗、不需要加载动画——
+          把该做的事做扎实，比会做很多事更像个手艺人。
+        </p>
+      </div>
+
+      <h3>第 1 步 · 主题切换：只换变量，不改颜色</h3>
+      <p>
+        样式这边，第二十六式已经把颜色都收进了 <code>:root</code> 的变量里，
+        所以“换主题”只需要再写一套同名变量挂在 <code>html[data-theme="night"]</code> 上：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="换主题：只覆盖变量">
+        html[data-theme="night"] {
+          --paper: #17181d;
+          --card: #20222a;
+          --ink: #e6e1d2;
+          --soft: #a7a293;
+          --line: #34363f;
+          --accent: #d46a5d;
+          --accent-soft: #3a2b2b;
+          --field: #262832;
+        }
+      </script>
+      <p>
+        脚本这边只做三件事：读记忆、切主题、写记忆。
+        读写存储都包在 <code>try/catch</code> 里——浏览器可能不允许本地存储，
+        那时页面也要能用，只是记不住而已：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="第 1 步 · 主题切换">
+        const THEME_KEY = "home-theme";
+        const themeBtn = document.getElementById("theme-toggle");
+
+        function readSetting(key) {
+          try { return localStorage.getItem(key); } catch (error) { return null; }
+        }
+        function writeSetting(key, value) {
+          try { localStorage.setItem(key, value); } catch (error) { /* 存储不可用就只在这次会话里生效 */ }
+        }
+
+        function applyTheme(theme) {
+          document.documentElement.dataset.theme = theme;
+          const dark = theme === "night";
+          themeBtn.textContent = dark ? "☀ 亮一点" : "🌙 暗一点";
+          themeBtn.setAttribute("aria-pressed", String(dark));
+        }
+
+        applyTheme(readSetting(THEME_KEY) || "day");
+        themeBtn.addEventListener("click", () => {
+          const next = document.documentElement.dataset.theme === "night" ? "day" : "night";
+          writeSetting(THEME_KEY, next);
+          applyTheme(next);
+        });
+      </script>
+      <p>
+        注意 <code>aria-pressed</code>：它把“按钮现在是按下的状态”说给读屏软件听。
+        切主题不只是换颜色，也要让看不见颜色的人知道状态变了。
+      </p>
+
+      <h3>第 2 步 · 作品筛选：让 CSS 之外的属性说话</h3>
+      <p>
+        筛选栏是三个真按钮，每件作品上挂一个 <code>data-kind</code>：
+      </p>
+      <script type="text/plain" data-lang="html" data-title="筛选栏与作品卡片上的标记">
+        <div class="toolbar" id="works-filter" role="group" aria-label="按类别筛选作品">
+          <button type="button" data-kind="all" aria-pressed="true">全部</button>
+          <button type="button" data-kind="page" aria-pressed="false">网页</button>
+          <button type="button" data-kind="form" aria-pressed="false">表单</button>
+          <span class="status" id="works-status" role="status">显示 3 / 3 件作品</span>
+        </div>
+
+        <article class="card" data-kind="page">
+          <h3>第一个网页</h3>
+          <p>八行骨架、一个标题、两段文字。它的价值不在好看，而在于“这是我自己写的”。</p>
+          <p><a href="../../basics/01-html-intro.html">它出自第一式：网页与 HTML</a></p>
+        </article>
+      </script>
+      <p>
+        脚本只改一件事：给不该显示的那张卡片加 <code>hidden</code>。
+        显示与隐藏交给浏览器，样式一行都不用动：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="第 2 步 · 作品筛选">
+        const filterBtns = document.querySelectorAll("#works-filter button");
+        const workCards = document.querySelectorAll("#works .card");
+        const worksStatus = document.getElementById("works-status");
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const kind = btn.dataset.kind;
+            filterBtns.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+            workCards.forEach((card) => {
+              card.hidden = kind !== "all" && card.dataset.kind !== kind;
+            });
+            const shown = [...workCards].filter((card) => !card.hidden).length;
+            worksStatus.textContent = `显示 ${shown} / ${workCards.length} 件作品`;
+          });
+        });
+      </script>
+      <p>
+        两个细节：<code>aria-pressed</code> 标出“当前选中的是哪个按钮”；
+        结果条用 <code>role="status"</code>，读屏软件会自动播报“显示 1 / 3 件作品”。
+      </p>
+
+      <h3>第 3 步 · 留言板：校验、存储、委托删除</h3>
+      <p>
+        三件事各就各位：<strong>表单负责收集</strong>（HTML 校验先挡一道）、
+        <strong>脚本负责拦提交</strong>（<code>preventDefault</code>）、
+        <strong>存储负责记住</strong>。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="第 3 步 · 留言板">
+        const MSG_KEY = "home-messages";
+        const form = document.getElementById("msg-form");
+        const msgList = document.getElementById("msg-list");
+        const msgStatus = document.getElementById("msg-status");
+        const nameInput = document.getElementById("msg-name");
+        const textInput = document.getElementById("msg-text");
+
+        let messages = loadMessages();
+
+        function loadMessages() {
+          try { return JSON.parse(localStorage.getItem(MSG_KEY)) || []; }
+          catch (error) { return []; }
+        }
+        function saveMessages() {
+          try { localStorage.setItem(MSG_KEY, JSON.stringify(messages)); }
+          catch (error) { msgStatus.textContent = "这台浏览器不允许本地存储，口信只在本次会话里有效。"; }
+        }
+        function renderMessages() {
+          msgList.textContent = "";
+          if (!messages.length) {
+            const li = document.createElement("li");
+            li.textContent = "（还没有口信）";
+            msgList.append(li);
+            return;
+          }
+          messages.forEach((msg, index) => {
+            const li = document.createElement("li");
+            const who = document.createElement("strong");
+            who.textContent = msg.name;                 // 用户输入一律当文字（第三十七式）
+            const said = document.createElement("span");
+            said.textContent = "：" + msg.text;
+            const when = document.createElement("time");
+            when.textContent = msg.at;
+            const del = document.createElement("button");
+            del.type = "button";
+            del.className = "del";
+            del.dataset.index = index;
+            del.textContent = "删除";
+            li.append(who, said, when, del);
+            msgList.append(li);
+          });
+        }
+
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();                       // 拦下默认提交（第三十八式）
+          const name = nameInput.value.trim();
+          const text = textInput.value.trim();
+          if (!name || !text) {
+            msgStatus.textContent = "称谓与口信都要填哦。";
+            return;
+          }
+          messages.unshift({ name, text, at: new Date().toISOString().slice(0, 10) });
+          saveMessages();
+          renderMessages();
+          form.reset();
+          msgStatus.textContent = "收下了，谢谢你的口信。";
+        });
+
+        msgList.addEventListener("click", (event) => {
+          const btn = event.target.closest(".del");
+          if (!btn) return;
+          messages.splice(Number(btn.dataset.index), 1);
+          saveMessages();
+          renderMessages();
+        });
+
+        renderMessages();
+      </script>
+      <p>
+        四个要点：①新口信 <code>unshift</code> 进数组，最新的在最上面；
+        ②每次改动后重新 <code>renderMessages()</code>，界面永远等于数据；
+        ③删除用事件委托绑在列表上，按钮是渲染出来的也一样管用；
+        ④<code>dataset.index</code> 存的是字符串，用之前 <code>Number()</code> 转回来。
+      </p>
+
+      <h3>第 4 步 · 回到顶部：跑得少的活儿，别每帧都干</h3>
+      <script type="text/plain" data-lang="js" data-title="第 4 步 · 回到顶部">
+        const toTop = document.getElementById("to-top");
+        let lastScrollCheck = 0;
+
+        window.addEventListener("scroll", () => {
+          const now = Date.now();
+          if (now - lastScrollCheck < 150) return;       // 简单节流，别每像素都问一次
+          lastScrollCheck = now;
+          toTop.hidden = window.scrollY < 320;
+        });
+
+        toTop.addEventListener("click", () => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      </script>
+      <p>
+        按钮本身在 HTML 里带 <code>hidden</code> 属性（初始不显示），CSS 里一行
+        <code>[hidden] { display: none !important; }</code> 保证它真的藏起来。
+        <code>behavior: "smooth"</code> 是平滑滚动；如果读者在系统里选了“减少动态效果”，
+        别忘了用媒体查询把它和卡片动效一起关掉（第二十四式的规矩）。
+      </p>
+
+      <h3>第 5 步 · 滚动高亮：请观察者帮忙</h3>
+      <p>
+        自己监听滚动、算每个小节的位置，既啰嗦又容易算错。
+        现代浏览器里有个更省事的角色——<code>IntersectionObserver</code>
+        （交叉观察者）：它替你盯着“某个元素有没有进入视野”，进了就叫你一声。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="第 5 步 · 滚动高亮导航">
+        const navLinks = document.querySelectorAll(".site-nav a");
+        const navSections = [...navLinks]
+          .map((link) => document.querySelector(link.getAttribute("href")))
+          .filter(Boolean);
+
+        const watcher = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const target = "#" + entry.target.id;
+            navLinks.forEach((link) => {
+              const active = link.getAttribute("href") === target;
+              link.classList.toggle("is-current", active);
+              if (active) link.setAttribute("aria-current", "true");
+              else link.removeAttribute("aria-current");
+            });
+          });
+        }, { rootMargin: "-45% 0px -50% 0px" });
+
+        navSections.forEach((section) => watcher.observe(section));
+      </script>
+      <p>
+        那个 <code>rootMargin</code> 的意思是“把视野缩小成屏幕正中间的一条窄缝”：
+        谁穿过这条缝，谁就是“当前这一节”。高亮之外还挂了
+        <code>aria-current="true"</code>，让读屏软件也能听出“你在这一节”。
+      </p>
+
+      <h3>收尾 · 把脚本放对地方</h3>
+      <p>
+        所有代码都写在 <code>&lt;body&gt;</code> 最后、<code>&lt;/body&gt;</code> 之前：
+        脚本要操作的元素这时都已经在页面里了，不用等、也不用包一层“加载完成”的回调
+        （第二十七式讲时机时留下的习惯）。
+      </p>
+
+      <h2>对照验收清单</h2>
+      <p>交付前逐条过一遍，每一条都能在浏览器里当场验证：</p>
+      <ul>
+        <li><strong>关掉 JavaScript，页面依然可读</strong>：内容都在 HTML 里，
+          脚本只负责加行为——滚动高亮没了、留言板不能用了，但主页还站得住；</li>
+        <li><strong>所有操作都能用键盘完成</strong>：主题、筛选、提交、删除、回到顶部
+          全是真 <code>&lt;button&gt;</code>（第十一式）；</li>
+        <li><strong>用户输入一律走 <code>textContent</code></strong>，
+          HTML 里没有一处把用户输入拼进 <code>innerHTML</code>；</li>
+        <li><strong>没有行内事件</strong>：全页 <code>onclick="…"</code> 出现次数为 0，
+          监听都在脚本里 <code>addEventListener</code>；</li>
+        <li><strong>刷新之后该记住的还在</strong>：主题与口信；
+          浏览器禁止存储时给出提示而不是报错；</li>
+        <li><strong>两种打开方式都试一遍</strong>：直接双击（file://）与本地服务器
+          （http://）各走一遍五个行为，控制台不该有红字；</li>
+        <li><strong>动效照顾“减少动态效果”</strong>：<code>prefers-reduced-motion</code>
+          里关掉了卡片放大与平滑滚动。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>综合修炼的顺序：先列行为清单 → 再逐条实现 → 最后逐条验收；</li>
+        <li>换主题的诀窍是<strong>换变量</strong>（<code>dataset</code> 挂到
+          <code>html</code> 上 + 一套同名 CSS 变量），不要让 JS 去改每个元素的颜色；</li>
+        <li>筛选用 <code>dataset</code> 存分类、用 <code>hidden</code> 显隐，
+          数据与样式各管各的；</li>
+        <li>留言板三件套：<code>preventDefault</code> 拦提交、<code>textContent</code> 保安全、
+          <code>localStorage</code> 保记忆；</li>
+        <li>高频事件配节流（回到顶部），复杂的观测交给
+          <code>IntersectionObserver</code>（导航高亮）；</li>
+        <li>行为是<strong>叠加</strong>在结构与样式之上的：HTML 立骨架、CSS 裁外衣、
+          JavaScript 点灵魂，三样各归其位，页面就稳。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第四十二式</div>
+        <ol>
+          <li>给成品页再加一个行为：把「修行日志」按日期正序 / 倒序切换
+            （提示：把两篇文章的节点按 <code>time</code> 的 <code>datetime</code> 排序后重新
+            <code>append</code> 进容器）。</li>
+          <li>给留言板加两条约束：一页最多留最近 10 条；每条显示“刚刚 / N 分钟前”这样的
+            相对时间（提示：<code>Date.now()</code> 与 <code>msg.at</code> 相减）。</li>
+          <li>思考：主题切换为什么用“<code>dataset</code> + CSS 变量”，
+            而不是在 JS 里给每个元素挨个改颜色？说出两条理由。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="按日期排序日志">
+            "use strict";
+
+            const logBox = document.querySelector("#log");
+            const logCards = () => [...logBox.querySelectorAll("article.card")];
+            let asc = true;
+
+            function sortLogs() {
+              const sorted = logCards().sort((a, b) => {
+                const da = a.querySelector("time").dateTime;
+                const db = b.querySelector("time").dateTime;
+                return asc ? da.localeCompare(db) : db.localeCompare(da);
+              });
+              sorted.forEach((card) => logBox.append(card));
+              asc = !asc;
+            }
+
+            document.getElementById("log-sort").addEventListener("click", sortLogs);
+          </script>
+          <p>
+            关键点：<code>sort</code> 只改变数组顺序，还得把节点按新顺序
+            <code>append</code> 回容器（<code>append</code> 一个已在页面上的节点＝移动它）；
+            比较用的是 <code>datetime</code> 里的
+            <code>2026-09-14</code> 这种写法，字符串排序恰好就是时间顺序。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="只留最近十条 + 相对时间">
+            "use strict";
+
+            // 加进数组之后、存起来之前，剪掉多余的
+            messages.unshift({ name, text, at: new Date().toISOString() });
+            messages = messages.slice(0, 10);
+            saveMessages();
+            renderMessages();
+
+            // 渲染时把时间戳换成“人话”
+            function humanTime(iso) {
+              const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+              if (minutes < 1) return "刚刚";
+              if (minutes < 60) return minutes + " 分钟前";
+              if (minutes < 1440) return Math.floor(minutes / 60) + " 小时前";
+              return Math.floor(minutes / 1440) + " 天前";
+            }
+          </script>
+          <p>
+            两点提醒：①<code>at</code> 改存完整的 ISO 时间戳
+            （<code>toISOString()</code>），显示时再换算成人话，别把“刚刚”这种相对说法存进去；
+            ②裁剪要在<strong>写入之前</strong>做，否则存储里会越攒越多。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            第一，<strong>颜色只写了一处</strong>：整套主题是十几个变量，
+            改一处变量，所有用到它的地方一起变；若用 JS 挨个改，
+            等于把 CSS 抄进 JS，以后每加一个元素都要记得补一行，
+            漏掉的地方就会在暗色下变成“黑底黑字”。
+            第二，<strong>职责分家</strong>：JS 只负责“现在是哪个主题”这一个状态
+            （挂在 <code>html</code> 的 <code>data-theme</code> 上），
+            具体怎么变全是 CSS 的事——这也正是第十二式里“结构、样式、行为各归其位”的延续。
+            顺带还有第三个好处：以后想加第三套主题，只写一段 CSS，JS 一行都不用改。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，最后一式：回顾这条路，把查文档的方法和下一步的方向交给你。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

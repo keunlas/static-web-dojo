@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十一式 · 函数与作用域 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="三种函数写法与提升、参数与返回值、作用域与遮蔽、闭包、递归、回调与高阶函数，以及 this 的初步认识。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-31">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        前面几式的代码都是“从头写到尾”。但真实项目里，同一段逻辑要反复用、还要按需调整——
+        这时就该把它装进一个盒子，起个名字，随时取用。这个盒子就叫<strong>函数</strong>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用三种函数写法，知道“函数声明会提升、函数表达式不会”</li>
+          <li>会用参数默认值、rest 参数与提前 <code>return</code>，写出好用的函数</li>
+          <li>说清全局、函数、块级三层作用域与“就近查找、同名遮蔽”</li>
+          <li>理解<strong>闭包</strong>：函数记住了它出生时的环境，因此能做计数器与私有变量</li>
+          <li>认识递归、回调与 <code>this</code> 的初步规则</li>
+        </ul>
+      </div>
+
+      <h2>三种写法，一个身份</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>样子</th>
+            <th>特点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>函数声明</strong></td>
+            <td><code>function greet(name) { … }</code></td>
+            <td>会被“提升”：<strong>可以在定义之前调用</strong>；适合写模块里的主要函数</td>
+          </tr>
+          <tr>
+            <td><strong>函数表达式</strong></td>
+            <td><code>const greet = function (name) { … };</code></td>
+            <td>赋值之后才存在；写法灵活（可以放进对象、当作参数传）</td>
+          </tr>
+          <tr>
+            <td><strong>箭头函数</strong></td>
+            <td><code>const greet = (name) =&gt; `你好，${name}`;</code></td>
+            <td>最短；<strong>没有自己的 <code>this</code></strong>；适合回调与小工具</td>
+          </tr>
+        </tbody>
+      </table>
+      <script type="text/plain" data-lang="js" data-title="三种写法对照">
+        // 1. 函数声明（会提升）
+        function double(n) {
+          return n * 2;
+        }
+
+        // 2. 函数表达式（赋值之后才能用）
+        const triple = function (n) {
+          return n * 3;
+        };
+
+        // 3. 箭头函数（最简洁；只有一句表达式时连 return 都能省）
+        const square = (n) => n * n;
+
+        // 箭头函数的几种长相
+        const noArg = () => "我没有参数";
+        const oneArg = n => n + 1;                 // 只有一个参数时括号可省
+        const manyLines = (a, b) => {
+          const sum = a + b;
+          return sum * 2;                          // 用了花括号就得自己写 return
+        };
+      </script>
+      <p>
+        新手最常问“到底用哪个”，可以照这个顺序挑：
+        <strong>要单独给一段逻辑起名 → 函数声明</strong>；
+        <strong>当成值来传递（回调） → 箭头函数</strong>；
+        <strong>需要用到 <code>this</code> 指向调用者 → 用 <code>function</code> 写法</strong>
+        （为什么，本节最后会讲）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 提升：函数声明能“提前上岗”，函数表达式不行</div>
+        <div class="demo-preview">
+          <ul id="js31-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list1 = document.getElementById('js31-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            // 注意：这里是“在函数声明之前”调用它
+            say1('函数声明提前调用 → ' + declared('墨白'));
+            say1('函数表达式的名字在赋值前是什么？→ typeof ' + typeof expressed);
+
+            function declared(name) {
+              return '你好，' + name + '（我是函数声明）';
+            }
+
+            var expressed = function (name) {
+              return '你好，' + name + '（我是函数表达式）';
+            };
+            say1('赋值之后再调用函数表达式 → ' + expressed('墨白'));
+            var arrowed = (name) => '你好，' + name + '（我是箭头函数）';
+            say1('箭头函数也是表达式，赋值后才能用 → ' + arrowed('墨白'));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js31-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list1 = document.getElementById('js31-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            // 注意：这里是“在函数声明之前”调用它
+            say1('函数声明提前调用 → ' + declared('墨白'));
+            say1('函数表达式的名字在赋值前是什么？→ typeof ' + typeof expressed);
+
+            function declared(name) {
+              return '你好，' + name + '（我是函数声明）';
+            }
+
+            var expressed = function (name) {
+              return '你好，' + name + '（我是函数表达式）';
+            };
+            say1('赋值之后再调用函数表达式 → ' + expressed('墨白'));
+            var arrowed = (name) => '你好，' + name + '（我是箭头函数）';
+            say1('箭头函数也是表达式，赋值后才能用 → ' + arrowed('墨白'));
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里那句 <code>typeof expressed</code> 得到的是 <code>"undefined"</code>：
+        用 <code>var</code> 声明的名字会被提升（存在但值是 undefined），
+        所以能安全地“问一问”；而如果用 <code>const expressed = …</code>，
+        在赋值前访问会直接报错（暂时性死区，第二十八式）。
+      </p>
+
+      <h2>参数与返回值</h2>
+      <p>
+        参数是函数的“输入口”，返回值是“输出口”。几个实用的写法：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="参数与返回值的常用写法">
+        // 默认参数：调用时没给（或给了 undefined）才生效
+        function greet(name = "无名氏") {
+          return `你好，${name}！`;
+        }
+
+        // rest 参数：把多出来的实参收成一个真数组
+        function sum(...nums) {
+          let total = 0;
+          for (const n of nums) total += n;
+          return total;
+        }
+
+        // 提前返回（守卫）：把“不合法的情况”先挡掉，正文就清爽了
+        function formatPrice(yuan) {
+          if (typeof yuan !== "number" || Number.isNaN(yuan)) return "价格未知";
+          if (yuan < 0) return "价格不能为负";
+          return `¥${yuan.toFixed(2)}`;
+        }
+
+        // 没有 return 的函数，返回 undefined
+        function logOnly(text) {
+          console.log(text);
+        }
+      </script>
+      <p>
+        两个细节值得知道：其一，<strong>实参多于形参</strong>时多出来的会被忽略
+        （但可以用 <code>arguments</code> 或 rest 参数接住）；
+        其二，函数内部的 <code>arguments</code> 是一个“像数组但不是数组”的东西，
+        现代写法一律用 rest 参数代替它，箭头函数里更是没有 <code>arguments</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 默认参数、rest 参数与守卫式返回</div>
+        <div class="demo-preview">
+          <ul id="js31-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js31-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            function greet2(name = "无名氏") {
+              return '你好，' + name + '！';
+            }
+            say2(greet2());
+            say2(greet2("墨白"));
+            say2('显式传 undefined 也走默认值 → ' + greet2(undefined));
+            say2('传空字符串不会走默认值 → ' + greet2("") + '（空字符串是有效值）');
+
+            function sum2(...nums) {
+              var total = 0;
+              for (const n of nums) { total += n; }
+              return total;
+            }
+            say2('rest 参数求和：sum2(1, 2, 3, 4) = ' + sum2(1, 2, 3, 4));
+            say2('一个参数也不传：' + sum2() + '（nums 是空数组，不是 undefined）');
+
+            function formatPrice2(yuan) {
+              if (typeof yuan !== "number" || Number.isNaN(yuan)) { return "价格未知"; }
+              if (yuan < 0) { return "价格不能为负"; }
+              return "¥" + yuan.toFixed(2);
+            }
+            say2('守卫式返回：formatPrice2("abc") → ' + formatPrice2("abc"));
+            say2('守卫式返回：formatPrice2(-1) → ' + formatPrice2(-1));
+            say2('守卫式返回：formatPrice2(12.5) → ' + formatPrice2(12.5));
+
+            function logOnly2(text) { return; }
+            say2('只写 return 或干脆不写，返回的是 → ' + String(logOnly2("随便传点什么")));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js31-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js31-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            function greet2(name = "无名氏") {
+              return '你好，' + name + '！';
+            }
+            say2(greet2());
+            say2(greet2("墨白"));
+            say2('显式传 undefined 也走默认值 → ' + greet2(undefined));
+            say2('传空字符串不会走默认值 → ' + greet2("") + '（空字符串是有效值）');
+
+            function sum2(...nums) {
+              var total = 0;
+              for (const n of nums) { total += n; }
+              return total;
+            }
+            say2('rest 参数求和：sum2(1, 2, 3, 4) = ' + sum2(1, 2, 3, 4));
+            say2('一个参数也不传：' + sum2() + '（nums 是空数组，不是 undefined）');
+
+            function formatPrice2(yuan) {
+              if (typeof yuan !== "number" || Number.isNaN(yuan)) { return "价格未知"; }
+              if (yuan < 0) { return "价格不能为负"; }
+              return "¥" + yuan.toFixed(2);
+            }
+            say2('守卫式返回：formatPrice2("abc") → ' + formatPrice2("abc"));
+            say2('守卫式返回：formatPrice2(-1) → ' + formatPrice2(-1));
+            say2('守卫式返回：formatPrice2(12.5) → ' + formatPrice2(12.5));
+
+            function logOnly2(text) { return; }
+            say2('只写 return 或干脆不写，返回的是 → ' + String(logOnly2("随便传点什么")));
+          </script>
+        </div>
+      </div>
+
+      <h2>作用域：变量的可见范围</h2>
+      <p>
+        JavaScript 的作用域有三层，从外到内是：
+        <strong>全局</strong>（整个脚本）、<strong>函数</strong>（函数体内部）、
+        <strong>块级</strong>（<code>{ }</code> 之内，只有 <code>let</code>/<code>const</code> 认这个界）。
+      </p>
+      <ul>
+        <li><strong>就近查找</strong>：用到一个名字时，先从最近的一层找，找不到才往外层找；</li>
+        <li><strong>同名遮蔽</strong>：内层声明了同名的变量，外层的就被“挡”住了——
+          在里层看不到外层的它；</li>
+        <li><strong>别污染全局</strong>：脚本顶部随手写的 <code>let data = …</code>
+          会和页面其它脚本的名字打架。栈越浅越好，用函数把逻辑包起来。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三层同名变量，看看到底读到哪一个</div>
+        <div class="demo-preview">
+          <ul id="js31-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js31-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var who = "全局的我";
+
+            function outer() {
+              var who = "函数作用域的我";
+              say3("函数里读到：" + who);
+
+              {
+                let who = "块级的我";
+                say3("块里读到：" + who);
+              }
+
+              say3("出了块再读：" + who + "（块级的那个只在花括号里活着）");
+            }
+
+            outer();
+            say3("函数外面读到：" + who + "（函数内部的同名变量不影响外面）");
+
+            function readsOuter() {
+              say3("没有同名变量的函数读到：" + who + "（往外层找）");
+            }
+            readsOuter();
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js31-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js31-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var who = "全局的我";
+
+            function outer() {
+              var who = "函数作用域的我";
+              say3("函数里读到：" + who);
+
+              {
+                let who = "块级的我";
+                say3("块里读到：" + who);
+              }
+
+              say3("出了块再读：" + who + "（块级的那个只在花括号里活着）");
+            }
+
+            outer();
+            say3("函数外面读到：" + who + "（函数内部的同名变量不影响外面）");
+
+            function readsOuter() {
+              say3("没有同名变量的函数读到：" + who + "（往外层找）");
+            }
+            readsOuter();
+          </script>
+        </div>
+      </div>
+
+      <h2>闭包：函数记得它出生的地方</h2>
+      <p>
+        当一个函数在另一个函数里被创建，它就会“<strong>记住</strong>”外层函数里的变量——
+        即使外层函数已经执行完毕，这些变量依然活着，只有这个内层函数能碰它们。
+        这就是<strong>闭包</strong>。它不是语法特性，而是“作用域 + 函数是值”自然产生的结果。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="闭包的两个经典用途">
+        // 用途一：计数器——count 藏在外面拿不到，只能通过 add 改
+        function makeCounter() {
+          let count = 0;
+          return function () {
+            count += 1;
+            return count;
+          };
+        }
+        const next = makeCounter();
+        next();   // 1
+        next();   // 2
+
+        // 用途二：给循环里的每一项“记住”自己的 i
+        const fns = [];
+        for (let i = 0; i < 3; i++) {
+          fns.push(function () { return i; });
+        }
+        fns.map(fn => fn());   // [0, 1, 2]  ← let 每轮都有自己的 i
+        // 如果把 let 换成 var，三个函数都会返回 3（第三十式的预告就是这件事）
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 闭包现场：计数器，以及 var 与 let 的差别</div>
+        <div class="demo-preview">
+          <ul id="js31-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js31-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            function makeCounter() {
+              var count = 0;
+              return function () {
+                count += 1;
+                return count;
+              };
+            }
+            var next = makeCounter();
+            var other = makeCounter();
+            say4('计数器一：' + next() + ' → ' + next() + ' → ' + next());
+            say4('另一个计数器有自己的一份：' + other() + '（互不干扰）');
+            say4('外面拿不到 count：typeof count 在函数外 → ' + typeof count);
+
+            function collectWithVar() {
+              var fns = [];
+              for (var i = 0; i < 3; i++) {
+                fns.push(function () { return i; });      // 三个函数共用同一个 i
+              }
+              return fns.map(function (fn) { return fn(); });
+            }
+            function collectWithLet() {
+              var fns = [];
+              for (let i = 0; i < 3; i++) {
+                fns.push(function () { return i; });      // 每轮都有自己的 i
+              }
+              return fns.map(function (fn) { return fn(); });
+            }
+            say4('用 var 的循环 → ' + collectWithVar().join('、') + '（互相打架）');
+            say4('用 let 的循环 → ' + collectWithLet().join('、') + '（各记各的）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js31-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js31-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            function makeCounter() {
+              var count = 0;
+              return function () {
+                count += 1;
+                return count;
+              };
+            }
+            var next = makeCounter();
+            var other = makeCounter();
+            say4('计数器一：' + next() + ' → ' + next() + ' → ' + next());
+            say4('另一个计数器有自己的一份：' + other() + '（互不干扰）');
+            say4('外面拿不到 count：typeof count 在函数外 → ' + typeof count);
+
+            function collectWithVar() {
+              var fns = [];
+              for (var i = 0; i < 3; i++) {
+                fns.push(function () { return i; });      // 三个函数共用同一个 i
+              }
+              return fns.map(function (fn) { return fn(); });
+            }
+            function collectWithLet() {
+              var fns = [];
+              for (let i = 0; i < 3; i++) {
+                fns.push(function () { return i; });      // 每轮都有自己的 i
+              }
+              return fns.map(function (fn) { return fn(); });
+            }
+            say4('用 var 的循环 → ' + collectWithVar().join('、') + '（互相打架）');
+            say4('用 let 的循环 → ' + collectWithLet().join('、') + '（各记各的）');
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">闭包不是免费的</div>
+        <p style="margin:0">
+          被闭包“记住”的变量会一直留在内存里。
+          偶发的计数器、事件处理函数完全没问题；
+          但如果在循环里给成千上万个元素各绑一个闭包，或者把大数组塞进闭包里长期持有，
+          内存就会一路涨。第三十八式讲事件绑定时会再遇到这个话题。
+        </p>
+      </div>
+
+      <h2>递归与回调：把函数当积木</h2>
+      <p>
+        <strong>递归</strong>是“函数调用自己”，写起来优雅，但必须有<strong>终止条件</strong>，
+        否则栈会溢出（报 <code>RangeError: Maximum call stack size exceeded</code>）。
+        <strong>回调</strong>则是“把函数当参数交给别人，等时机到了再调用”——
+        这是 JavaScript 里最常见的协作方式：<code>forEach</code>、<code>map</code>、
+        事件监听、定时器，收到的都是回调。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 递归阶乘，以及把函数当参数传递（高阶函数）</div>
+        <div class="demo-preview">
+          <ul id="js31-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js31-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            function factorial(n) {
+              if (n <= 1) { return 1; }        // 终止条件：没有它就会一直调下去
+              return n * factorial(n - 1);
+            }
+            say5('递归：5! = ' + factorial(5) + '，10! = ' + factorial(10));
+
+            function countdown(n) {
+              var steps = [];
+              (function walk(current) {
+                steps.push(current);
+                if (current > 1) { walk(current - 1); }
+              })(n);
+              return steps.join(' → ');
+            }
+            say5('递归倒计时：' + countdown(5));
+
+            var nums = [3, 8, 1, 12];
+            var doubled = nums.map(function (n) { return n * 2; });
+            say5('把函数交给 map（回调）：' + nums.join('、') + ' → ' + doubled.join('、'));
+
+            function pick(list, test) {           // test 也是一个函数
+              var out = [];
+              for (const item of list) {
+                if (test(item)) { out.push(item); }
+              }
+              return out;
+            }
+            var big = pick(nums, function (n) { return n > 4; });
+            var odd = pick(nums, (n) => n % 2 === 1);
+            say5('自定义高阶函数：大于 4 的 → ' + big.join('、') + '；奇数 → ' + odd.join('、'));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js31-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js31-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            function factorial(n) {
+              if (n <= 1) { return 1; }        // 终止条件：没有它就会一直调下去
+              return n * factorial(n - 1);
+            }
+            say5('递归：5! = ' + factorial(5) + '，10! = ' + factorial(10));
+
+            function countdown(n) {
+              var steps = [];
+              (function walk(current) {
+                steps.push(current);
+                if (current > 1) { walk(current - 1); }
+              })(n);
+              return steps.join(' → ');
+            }
+            say5('递归倒计时：' + countdown(5));
+
+            var nums = [3, 8, 1, 12];
+            var doubled = nums.map(function (n) { return n * 2; });
+            say5('把函数交给 map（回调）：' + nums.join('、') + ' → ' + doubled.join('、'));
+
+            function pick(list, test) {           // test 也是一个函数
+              var out = [];
+              for (const item of list) {
+                if (test(item)) { out.push(item); }
+              }
+              return out;
+            }
+            var big = pick(nums, function (n) { return n > 4; });
+            var odd = pick(nums, (n) => n % 2 === 1);
+            say5('自定义高阶函数：大于 4 的 → ' + big.join('、') + '；奇数 → ' + odd.join('、'));
+          </script>
+        </div>
+      </div>
+      <p>
+        递归解决“结构自相似”的问题（目录树、嵌套评论都适合），
+        但能用循环表达的简单重复就别用递归——循环更好读，也不担心栈的深度。
+      </p>
+
+      <h2>this 初步：函数里的“我”是谁</h2>
+      <p>
+        <code>this</code> 是函数被调用时自动获得的一个变量，指向“谁在调用它”。
+        规则不复杂，先用三条保住日常：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>调用方式</th>
+            <th>函数里的 this</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>作为对象的方法调用</td>
+            <td><strong>那个对象</strong></td>
+            <td><code>cat.say()</code> 里 <code>this</code> 是 <code>cat</code></td>
+          </tr>
+          <tr>
+            <td>直接调用（严格模式）</td>
+            <td><code>undefined</code></td>
+            <td><code>say()</code> 单独跑，<code>this</code> 是 undefined</td>
+          </tr>
+          <tr>
+            <td>箭头函数</td>
+            <td><strong>没有自己的 this</strong>，用外层的</td>
+            <td>回调里写 <code>() =&gt; …</code> 往往正是为了避免 this 出问题</td>
+          </tr>
+        </tbody>
+      </table>
+      <script type="text/plain" data-lang="js" data-title="this 的三条规则">
+        "use strict";
+
+        const cat = {
+          name: "墨白",
+          say() {
+            return `我是 ${this.name}`;      // this 是调用它的对象 cat
+          }
+        };
+        cat.say();                            // "我是 墨白"
+
+        function alone() {
+          return this;                        // 严格模式：undefined
+        }
+        alone();
+
+        const team = {
+          name: "修行小队",
+          members: ["甲", "乙"],
+          list() {
+            return this.members.map((m) => `${m}（${this.name}）`);  // 箭头函数沿用外层 this
+          }
+        };
+        team.list();                          // ["甲（修行小队）", "乙（修行小队）"]
+      </script>
+      <p>
+        这一段现在只需要“见过”：第三十五式讲类与对象时会展开，
+        第三十八式讲事件时会遇到“回调里的 this 不是元素”这个真实坑。
+        记住一句话就够：<strong>要 <code>this</code> 用 <code>function</code>，不要 <code>this</code> 用箭头</strong>。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>三种写法：函数声明（会提升）、函数表达式、箭头函数（没有自己的 <code>this</code>）；</li>
+        <li>默认参数只在“没传或传 undefined”时生效；rest 参数 <code>...nums</code> 收成真数组，
+          取代老式的 <code>arguments</code>；</li>
+        <li>守卫式返回（提前 <code>return</code>）能让函数体少一层缩进、读起来更顺；</li>
+        <li>作用域三层：全局 / 函数 / 块级；就近查找、同名遮蔽；逻辑尽量包进函数，别污染全局；</li>
+        <li>闭包＝函数记着出生时的环境：能做计数器与私有变量，也解释了“循环里 var 与 let”的差别；</li>
+        <li>递归必须有终止条件；回调与高阶函数是 JavaScript 的日常，<code>map</code>/<code>filter</code> 就是它们；</li>
+        <li><code>this</code> 看调用方式：方法调用指向对象、直接调用在严格模式下是 undefined、
+          箭头函数用外层 <code>this</code>。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十一式</div>
+        <ol>
+          <li>写一个函数 <code>repeatText(text, times = 3)</code>，返回把 <code>text</code> 重复若干次的字符串；
+            再写一个使用 rest 参数的 <code>average(...scores)</code> 求平均分（没有参数时返回 0）。</li>
+          <li>写一个闭包工厂 <code>makeAccumulator()</code>：返回一个函数，
+            每次调用把传入的数字累加起来并返回当前总和。</li>
+          <li>思考：为什么“循环里用 <code>var</code> 注册的三个函数会返回同一个值”，
+            而换成 <code>let</code> 就正常了？请用“闭包 + 作用域”来解释。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="两个小工具函数">
+            "use strict";
+
+            function repeatText(text, times = 3) {
+              if (typeof text !== "string") return "";
+              return text.repeat(times);          // String.prototype.repeat 第三十四式细讲
+            }
+            console.log(repeatText("卒"));        // 卒卒卒
+            console.log(repeatText("卒", 1));     // 卒
+
+            function average(...scores) {
+              if (scores.length === 0) return 0;
+              let sum = 0;
+              for (const s of scores) sum += s;
+              return sum / scores.length;
+            }
+            console.log(average());               // 0
+            console.log(average(80, 90, 100));    // 90
+          </script>
+          <p>
+            要点：<code>average</code> 里先用 <code>scores.length === 0</code> 挡住“空数组除以 0”的情况
+            （否则会得到 <code>NaN</code>）；这就是守卫式返回的实用价值。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="累加器">
+            "use strict";
+
+            function makeAccumulator() {
+              let total = 0;                    // 只有返回的那个函数能碰到它
+              return function (n) {
+                total += n;
+                return total;
+              };
+            }
+
+            const acc = makeAccumulator();
+            console.log(acc(5));    // 5
+            console.log(acc(10));   // 15
+            console.log(acc(-3));   // 12
+
+            const acc2 = makeAccumulator();   // 另起一份，互不影响
+            console.log(acc2(100)); // 100
+          </script>
+          <p>
+            检查点：<code>total</code> 在函数外无法访问（闭包的“私有变量”效果）；
+            调两次 <code>makeAccumulator()</code> 会得到两份独立的状态——
+            每次调用外层函数，都会创建一套新的变量环境。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>var</code> 是<strong>函数作用域</strong>：整个循环只用同一个 <code>i</code>，
+            循环结束时它的值是 3（<code>i &lt; 3</code> 的最后一个不成立值）。
+            三个函数都是闭包，记住的是<strong>同一个变量</strong>，
+            所以调用时读到的都是最后那个 3。
+            换成 <code>let</code> 之后，每执行一轮循环体会创建一个<strong>新的块级变量</strong>，
+            三个闭包各记住自己那一轮的 <code>i</code>，于是依次得到 0、1、2。
+            一句话：<strong>闭包记住的是“变量”，不是“值”；变量有几个，取决于作用域怎么划。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，给数据排队整队：数组与它的方法全家桶。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

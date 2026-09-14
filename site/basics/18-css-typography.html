@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十八式 · 排版与字体 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="字体栈的写法、@font-face 与字体加载、字号字重行高、文本属性大全（装饰、阴影、换行、省略号）与中文排版实践。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-18">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        网页上最多的还是字。盒子决定“东西放在哪”，排版决定“读起来累不累”。
+        这一式讲字体怎么选、字号行高怎么配、文字效果怎么写，最后落回中文排版那几件最要紧的事。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会写字体栈（<code>font-family</code>）与通用族，知道中文字体怎么排顺序</li>
+          <li>知道 <code>@font-face</code> 与 <code>font-display</code> 的作用，明白离线项目为什么优先系统字体</li>
+          <li>掌握字号、字重、行高的写法，理解“行高写无单位数字”的理由</li>
+          <li>会用文本属性：对齐、装饰、阴影、字距、换行与单行/多行省略号</li>
+          <li>记住中文排版的几条硬经验：字号下限、行高区间、每行字数</li>
+        </ul>
+      </div>
+
+      <h2>字体家族与字体栈</h2>
+      <p>
+        <code>font-family</code> 不是“一个字体”，而是<strong>一份候选名单</strong>：
+        浏览器从头往后找，找到系统里装着的就用它，这叫<strong>字体栈</strong>（font stack）。
+        名单末尾一定要写一个<strong>通用族</strong>兜底：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>通用族</th>
+            <th>含义</th>
+            <th>典型场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>serif</code></td><td>衬线体（笔画有装饰脚）</td><td>长文、书籍感标题</td></tr>
+          <tr><td><code>sans-serif</code></td><td>无衬线体</td><td>界面与正文的默认选择</td></tr>
+          <tr><td><code>monospace</code></td><td>等宽字体</td><td>代码、数字对齐</td></tr>
+          <tr><td><code>system-ui</code></td><td>“当前操作系统的界面字体”</td><td>最省事的现代写法（自动贴合系统外观）</td></tr>
+          <tr><td><code>cursive</code> / <code>fantasy</code></td><td>手写体 / 装饰体</td><td>罕见；不同系统差异极大，慎用</td></tr>
+        </tbody>
+      </table>
+      <p>
+        写名字时有两个细节：<strong>名字里有空格（或数字开头）要用引号</strong>包起来，
+        例如 <code>"PingFang SC"</code>、<code>"Microsoft YaHei"</code>；
+        <strong>通用族不能加引号</strong>（<code>sans-serif</code> 加上引号就变成“找一款叫 sans-serif 的字体”了）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 字体栈：同一段话，三种顺序</div>
+        <div class="demo-preview">
+          <style>
+            #css18-demo1 .sans { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+            #css18-demo1 .serif { font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif; }
+            #css18-demo1 .mono { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace; }
+            #css18-demo1 p { margin: 0 0 .6rem; }
+          </style>
+          <div id="css18-demo1">
+            <p class="sans">无衬线栈：日拱一卒，功不唐捐。适合界面与正文（sans-serif）。</p>
+            <p class="serif">衬线栈：日拱一卒，功不唐捐。适合长文与标题（serif）。</p>
+            <p class="mono" style="margin-bottom: 0">等宽栈：日拱一卒 0123456789 —— 数字与代码对齐用它。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css18-demo1">
+              <p class="sans">无衬线栈：日拱一卒，功不唐捐。适合界面与正文（sans-serif）。</p>
+              <p class="serif">衬线栈：日拱一卒，功不唐捐。适合长文与标题（serif）。</p>
+              <p class="mono" style="margin-bottom: 0">等宽栈：日拱一卒 0123456789 —— 数字与代码对齐用它。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css18-demo1 .sans { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+            #css18-demo1 .serif { font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif; }
+            #css18-demo1 .mono { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace; }
+            #css18-demo1 p { margin: 0 0 .6rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        中文项目为什么要排这么一长串？因为不同系统的中文字体不同：
+        Mac 上是苹方，Windows 上是微软雅黑，Linux 上常见 Noto Sans CJK。
+        按“<strong>先写更想要的、每个平台都兜一个</strong>”的顺序排，
+        最后拿通用族收尾，就能在哪儿都不难看。本站皮肤用的正是这套思路（全部系统字体，零网络请求）。
+      </p>
+
+      <h2>@font-face：把字体文件带进项目</h2>
+      <p>
+        想用一份“任何系统都没有的字体”，就要自己提供字体文件，用 <code>@font-face</code> 登记：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="登记一份本地字体">
+        @font-face {
+          font-family: "Dojo Serif";                     /* 自己起的名字 */
+          src: url("fonts/dojo-serif.woff2") format("woff2"),
+               url("fonts/dojo-serif.woff") format("woff");   /* 从新到旧兜底 */
+          font-weight: 400 700;                          /* 这份文件覆盖哪些字重 */
+          font-display: swap;                            /* 先用回退字体显示，字体到了再换 */
+        }
+
+        body {
+          font-family: "Dojo Serif", "Songti SC", serif;
+        }
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th><code>font-display</code></th>
+            <th>行为</th>
+            <th>什么时候用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>swap</code></td><td>立刻用回退字体显示，字体到了再换</td><td>正文最常用（先读得到最重要）</td></tr>
+          <tr><td><code>block</code></td><td>短暂留白等字体</td><td>标题；等待太久用户会看到空白</td></tr>
+          <tr><td><code>fallback</code> / <code>optional</code></td><td>给很短的等待机会，超时就一直用回退字体</td><td>网络慢、又不想看到字体跳变</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">心法：离线项目的第一选择是系统字体</div>
+        <p style="margin:0">
+          自带字体有两个代价：<strong>体积</strong>（中文字体动辄几 MB，比整站还大）与
+          <strong>加载闪烁</strong>（字体没到之前的替换效果）。所以本站选择“系统字体栈 + 一小段手写 SVG”，
+          零字体请求、完全离线可用。真要自带，优先西文子集或可变字体，并务必写 <code>font-display: swap</code>。
+        </p>
+      </div>
+
+      <h2>字号、字重与样式</h2>
+      <p>
+        三兄弟各管一件事：<code>font-size</code> 管多大、<code>font-weight</code> 管多粗、
+        <code>font-style</code> 管正体还是斜体。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>常用取值</th>
+            <th>要点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>font-size</code></td>
+            <td><code>1rem</code>、<code>1.125rem</code>、<code>clamp(1rem, 2vw, 1.25rem)</code></td>
+            <td>正文建议 16px 起步（<code>1rem</code>）；用 <code>rem</code> 让用户调字号时整站跟随</td>
+          </tr>
+          <tr>
+            <td><code>font-weight</code></td>
+            <td><code>400</code>（normal）、<code>700</code>（bold）、<code>100</code>–<code>900</code></td>
+            <td>系统字体通常只有 400 与 700 两档；中间值可能被就近取用或合成，不一定有真字重</td>
+          </tr>
+          <tr>
+            <td><code>font-style</code></td>
+            <td><code>normal</code>、<code>italic</code>、<code>oblique</code></td>
+            <td>中文字体多半没有斜体，浏览器会“硬斜”——正式排版慎用</td>
+          </tr>
+          <tr>
+            <td><code>font-synthesis</code></td>
+            <td><code>none</code> 等</td>
+            <td>控制浏览器能不能“假加粗、假斜体”；对印刷级要求时可以关掉</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 七档字重排一行（看看你的系统有几档真字重）</div>
+        <div class="demo-preview">
+          <style>
+            #css18-demo2 { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+            #css18-demo2 span { display: inline-block; margin: 0 .8rem .4rem 0; }
+          </style>
+          <div id="css18-demo2">
+            <span style="font-weight: 100">100 极细</span>
+            <span style="font-weight: 300">300 细</span>
+            <span style="font-weight: 400">400 常规</span>
+            <span style="font-weight: 500">500 中等</span>
+            <span style="font-weight: 600">600 半粗</span>
+            <span style="font-weight: 700">700 粗体</span>
+            <span style="font-weight: 900">900 极粗</span>
+            <p class="mt-2 mb-0">如果 100 与 900 看起来和 400 一样，说明这套字体没有对应字重，浏览器只能凑合。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css18-demo2">
+              <span style="font-weight: 100">100 极细</span>
+              <span style="font-weight: 300">300 细</span>
+              <span style="font-weight: 400">400 常规</span>
+              <span style="font-weight: 500">500 中等</span>
+              <span style="font-weight: 600">600 半粗</span>
+              <span style="font-weight: 700">700 粗体</span>
+              <span style="font-weight: 900">900 极粗</span>
+              <p class="mt-2 mb-0">如果 100 与 900 看起来和 400 一样，说明这套字体没有对应字重，浏览器只能凑合。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css18-demo2 { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+            #css18-demo2 span { display: inline-block; margin: 0 .8rem .4rem 0; }
+          </script>
+        </div>
+      </div>
+
+      <h3>font 简写</h3>
+      <p>
+        有一份简写可以把上面几项一次写完，注意两个硬规矩：
+        <strong><code>font-size</code> 与 <code>font-family</code> 必须写</strong>，
+        且字号与行高之间要用斜杠连接：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="font 简写">
+        .lead {
+          /* 样式 字重 字号/行高 字体栈 */
+          font: italic 700 1.125rem/1.7 "Songti SC", "Noto Serif CJK SC", serif;
+        }
+      </script>
+      <p>
+        简写写起来利落，但它会把没写的部分<strong>重置成初始值</strong>（比如你前面设过的
+        <code>font-variant</code> 会被清掉）。初学阶段建议分开写，读起来更清楚。
+      </p>
+
+      <h2>行高：让文字“喘口气”</h2>
+      <p>
+        <code>line-height</code> 是排版里最被低估的属性。它决定行与行之间的距离，
+        也决定了整段文字读起来是“通透”还是“挤成一团”。写法有三种，效果差别很大：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>继承时会发生什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>line-height: 1.7</code>（无单位）</td>
+            <td>当前字号 × 1.7</td>
+            <td>子元素<strong>按自己的字号重算</strong>——推荐</td>
+          </tr>
+          <tr>
+            <td><code>line-height: 1.7em</code> 或 <code>px</code></td>
+            <td>先按父元素字号算出一个固定值</td>
+            <td>子元素继承固定值，字号变大后显得挤</td>
+          </tr>
+          <tr>
+            <td><code>line-height: 170%</code></td>
+            <td>同样先算出固定值</td>
+            <td>与上面一样会有“字号大了行高不跟”的毛病</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 行高 1.2 / 1.7 / 2.2 的阅读感受（并看大字会不会挤）</div>
+        <div class="demo-preview">
+          <style>
+            #css18-demo3 p { margin: 0 0 .6rem; background: #f4edde; padding: .5rem .7rem; }
+            #css18-demo3 .tight { line-height: 1.2; }
+            #css18-demo3 .normal { line-height: 1.7; }
+            #css18-demo3 .loose { line-height: 2.2; }
+            #css18-demo3 .parent { line-height: 1.7; }
+            #css18-demo3 .big { font-size: 1.6rem; }
+          </style>
+          <div id="css18-demo3">
+            <p class="tight">line-height: 1.2 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。行与行贴得很紧，短段落还能忍，长文会很累。</p>
+            <p class="normal">line-height: 1.7 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。这是中文正文最舒服的区间（1.6–1.8）。</p>
+            <p class="loose">line-height: 2.2 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。太松了，行与行的关系变弱，适合很短的引文。</p>
+            <p class="parent" style="margin-bottom: 0">父元素写 1.7，<span class="big">这里字号放大到 1.6rem，行高会按新字号重新算</span>，
+              所以大字不会挤在一起；如果当初写的是 <code>1.7em</code>，这里就会显得拥挤。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css18-demo3">
+              <p class="tight">line-height: 1.2 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。行与行贴得很紧，短段落还能忍，长文会很累。</p>
+              <p class="normal">line-height: 1.7 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。这是中文正文最舒服的区间（1.6–1.8）。</p>
+              <p class="loose">line-height: 2.2 —— 日拱一卒，功不唐捐。山不让尘，川不辞盈。太松了，行与行的关系变弱，适合很短的引文。</p>
+              <p class="parent" style="margin-bottom: 0">父元素写 1.7，<span class="big">这里字号放大到 1.6rem，行高会按新字号重新算</span>，
+                所以大字不会挤在一起；如果当初写的是 <code>1.7em</code>，这里就会显得拥挤。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css18-demo3 p { margin: 0 0 .6rem; background: #f4edde; padding: .5rem .7rem; }
+            #css18-demo3 .tight { line-height: 1.2; }
+            #css18-demo3 .normal { line-height: 1.7; }
+            #css18-demo3 .loose { line-height: 2.2; }
+            #css18-demo3 .parent { line-height: 1.7; }
+            #css18-demo3 .big { font-size: 1.6rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        还有一对常与行高一起调的属性：<code>letter-spacing</code>（字距）与
+        <code>word-spacing</code>（词距）。中文正文通常保持默认；标题可以加一点
+        （如 <code>letter-spacing: .05em</code>）显得舒展，但别加太多，否则会散。
+      </p>
+
+      <h2>常用的文本属性</h2>
+      <p>下面这张表是排版时最常回来的地方：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>常用取值 / 例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>text-align</code></td><td>水平对齐</td><td><code>left</code>（默认）、<code>center</code>、<code>right</code>、<code>justify</code>（两端对齐）</td></tr>
+          <tr><td><code>text-indent</code></td><td>首行缩进</td><td><code>2em</code>（正好两个汉字宽）</td></tr>
+          <tr><td><code>text-decoration</code></td><td>下划线等装饰</td><td><code>underline</code>、<code>line-through</code>、<code>underline wavy #b03a2e 2px</code></td></tr>
+          <tr><td><code>text-transform</code></td><td>字母大小写转换</td><td><code>uppercase</code>、<code>capitalize</code>、<code>lowercase</code>（对中文无效果）</td></tr>
+          <tr><td><code>text-shadow</code></td><td>文字阴影</td><td><code>0 1px 2px rgb(0 0 0 / 30%)</code></td></tr>
+          <tr><td><code>white-space</code></td><td>空白与换行怎么处理</td><td><code>normal</code>、<code>nowrap</code>（不换行）、<code>pre</code>、<code>pre-wrap</code></td></tr>
+          <tr><td><code>overflow-wrap</code></td><td>超长单词怎么办</td><td><code>break-word</code> / <code>anywhere</code>：长网址不再撑破布局</td></tr>
+          <tr><td><code>word-break</code></td><td>换行断点规则</td><td><code>break-all</code> 会打断英文单词，中文场景一般不需要</td></tr>
+          <tr><td><code>text-overflow</code></td><td>溢出部分怎么表示</td><td><code>ellipsis</code>（要配合前两个属性才生效）</td></tr>
+          <tr><td><code>vertical-align</code></td><td>行内元素与表格单元格的竖直对齐</td><td><code>middle</code>、<code>baseline</code>、<code>text-top</code></td></tr>
+          <tr><td><code>writing-mode</code></td><td>书写方向</td><td><code>vertical-rl</code> 竖排（古籍风格、侧边标签）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 装饰、阴影、字距与首行缩进</div>
+        <div class="demo-preview">
+          <style>
+            #css18-demo4 .u-wavy { text-decoration: underline wavy #b03a2e 2px; }
+            #css18-demo4 .strike { text-decoration: line-through; color: #9a9486; }
+            #css18-demo4 .d-shadow { text-shadow: 0 1px 2px rgb(0 0 0 / 35%); font-size: 1.3rem; }
+            #css18-demo4 .spaced { letter-spacing: .18em; }
+            #css18-demo4 .indent { text-indent: 2em; }
+            #css18-demo4 p { margin: 0 0 .5rem; }
+          </style>
+          <div id="css18-demo4">
+            <p class="u-wavy">波浪下划线：<code>underline wavy #b03a2e 2px</code>。</p>
+            <p class="strike">删除线常用于“原价”或“已完成”。</p>
+            <p class="d-shadow">一点点文字阴影能让标题从背景里浮起来。</p>
+            <p class="spaced">字距加宽（letter-spacing: .18em）适合短标题。</p>
+            <p class="indent" style="margin-bottom: 0">首行缩进两个汉字宽（text-indent: 2em），这是中文排版的老规矩。它只作用于第一行，后面的行自然贴着左边缘，读起来有节奏。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css18-demo4">
+              <p class="u-wavy">波浪下划线：<code>underline wavy #b03a2e 2px</code>。</p>
+              <p class="strike">删除线常用于“原价”或“已完成”。</p>
+              <p class="d-shadow">一点点文字阴影能让标题从背景里浮起来。</p>
+              <p class="spaced">字距加宽（letter-spacing: .18em）适合短标题。</p>
+              <p class="indent" style="margin-bottom: 0">首行缩进两个汉字宽（text-indent: 2em），这是中文排版的老规矩。它只作用于第一行，后面的行自然贴着左边缘，读起来有节奏。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css18-demo4 .u-wavy { text-decoration: underline wavy #b03a2e 2px; }
+            #css18-demo4 .strike { text-decoration: line-through; color: #9a9486; }
+            #css18-demo4 .d-shadow { text-shadow: 0 1px 2px rgb(0 0 0 / 35%); font-size: 1.3rem; }
+            #css18-demo4 .spaced { letter-spacing: .18em; }
+            #css18-demo4 .indent { text-indent: 2em; }
+            #css18-demo4 p { margin: 0 0 .5rem; }
+          </script>
+        </div>
+      </div>
+
+      <h2>换行与省略号</h2>
+      <p>
+        卡片、列表、表格里最常见的需求是“一行放不下就显示省略号”。
+        它需要<strong>三条属性一起上</strong>，缺一不可：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="单行省略号的固定配方">
+        .ellipsis {
+          width: 220px;              /* 或者任何能限制宽度的写法 */
+          white-space: nowrap;       /* 1. 不换行 */
+          overflow: hidden;          /* 2. 超出部分裁掉 */
+          text-overflow: ellipsis;   /* 3. 用省略号表示被裁掉 */
+        }
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 单行省略号、多行截断与长网址换行</div>
+        <div class="demo-preview">
+          <style>
+            #css18-demo5 .one {
+              width: 230px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+              background: #f4edde; padding: .4rem .6rem;
+            }
+            #css18-demo5 .multi {
+              width: 230px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+              overflow: hidden; background: #e9f0e4; padding: .4rem .6rem;
+            }
+            #css18-demo5 .wrap-long { width: 230px; overflow-wrap: break-word; background: #e8edf5; padding: .4rem .6rem; }
+            #css18-demo5 p { margin: 0 0 .5rem; font-size: .9rem; }
+          </style>
+          <div id="css18-demo5">
+            <p class="one">单行省略号：山不让尘，川不辞盈，日拱一卒，功不唐捐。</p>
+            <p class="multi">多行截断（两行）：山不让尘，川不辞盈，日拱一卒，功不唐捐。这句老话我已经抄了三个月，越抄越觉得它说的是耐心。</p>
+            <p class="wrap-long" style="margin-bottom: 0">超长单词或网址：https://developer.mozilla.org/zh-CN/docs/Web/CSS/text-overflow 加了 overflow-wrap: break-word 就不会撑破盒子。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css18-demo5">
+              <p class="one">单行省略号：山不让尘，川不辞盈，日拱一卒，功不唐捐。</p>
+              <p class="multi">多行截断（两行）：山不让尘，川不辞盈，日拱一卒，功不唐捐。这句老话我已经抄了三个月，越抄越觉得它说的是耐心。</p>
+              <p class="wrap-long" style="margin-bottom: 0">超长单词或网址：https://developer.mozilla.org/zh-CN/docs/Web/CSS/text-overflow 加了 overflow-wrap: break-word 就不会撑破盒子。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css18-demo5 .one {
+              width: 230px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+              background: #f4edde; padding: .4rem .6rem;
+            }
+            #css18-demo5 .multi {
+              width: 230px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+              overflow: hidden; background: #e9f0e4; padding: .4rem .6rem;
+            }
+            #css18-demo5 .wrap-long { width: 230px; overflow-wrap: break-word; background: #e8edf5; padding: .4rem .6rem; }
+            #css18-demo5 p { margin: 0 0 .5rem; font-size: .9rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        多行截断目前依赖一组带 <code>-webkit-</code> 前缀的属性，但它已经是事实标准，
+        主流浏览器都支持；想要更“正统”的写法，可以关注新的 <code>line-clamp</code> 属性。
+        另外别忘了一句：<strong>省略号意味着信息被藏起来了</strong>——
+        重要的内容要给读者看全的办法（比如悬停提示或点开详情）。
+      </p>
+
+      <h2>中文排版的几条硬经验</h2>
+      <ul>
+        <li><strong>字号下限</strong>：正文不小于 16px（<code>1rem</code>），辅助说明不小于 13px，
+          再小就只适合“几乎没人读”的角落；</li>
+        <li><strong>行高区间</strong>：正文 1.6–1.8，标题 1.2–1.4，长引文可到 2.0；</li>
+        <li><strong>每行字数</strong>：桌面端 30–40 个汉字最舒服（用 <code>max-width</code> 或 <code>ch</code> 限制，第十七式）；</li>
+        <li><strong>别整段居中</strong>：居中最适合短标题与按钮文字，长句居中会让每行的起点都在变，眼睛很累；</li>
+        <li><strong>标点与空隙</strong>：中文标点自带空白，不必再加空格；中英文之间要不要空格看团队约定，
+          但<strong>站内要统一</strong>；</li>
+        <li><strong>慎用纯色块上的细体字</strong>：细字重在小字号下会“断线”，对比度也不足（第十一式）。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>字体栈是候选名单：从最想要的排到通用族，名字带空格要加引号；</li>
+        <li><code>@font-face</code> 用来引入自带字体，配 <code>font-display: swap</code>；
+          中文字体常以 MB 计，离线项目优先系统字体栈；</li>
+        <li>字号用 <code>rem</code>，字重用 400/700（系统字体多半只有这两档），中文慎用斜体；</li>
+        <li>行高写无单位数字：子元素会按自己的字号重算，这正是我们要的行为；</li>
+        <li>文本属性速查：对齐、缩进、装饰、阴影、字距、空白处理、省略号、竖排；</li>
+        <li>单行省略号＝<code>nowrap</code> + <code>overflow: hidden</code> + <code>text-overflow: ellipsis</code>，
+          多行截断用 <code>-webkit-line-clamp</code>；</li>
+        <li>中文排版记住四条：字号 ≥16px、行高 1.6–1.8、每行 30–40 字、长文别居中。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十八式</div>
+        <ol>
+          <li>给第十二式的主页配一套排版：正文 1rem/1.8、标题 2rem/1.3、
+            正文最大宽度限制在 30–40 个汉字左右（想一想用哪个单位最合适）。</li>
+          <li>做一张“新闻卡片”：标题一行、摘要两行，超出的部分都要显示省略号。</li>
+          <li>思考：为什么 <code>line-height</code> 建议写 <code>1.7</code> 而不是 <code>1.7em</code>？
+            请举一个“字号变大后立刻看出差别”的场景。</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="一套克制的排版">
+            body {
+              font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+              font-size: 1rem;
+              line-height: 1.8;
+            }
+            h1 { font-size: 2rem; line-height: 1.3; letter-spacing: .02em; }
+            main { max-width: 36rem; }   /* 约 576px，一行 30–40 个汉字 */
+          </script>
+          <p>
+            用 <code>rem</code> 而不是 <code>px</code>：用户调大浏览器字号时整站跟随。
+            行宽也可以用 <code>ch</code>（第十七式），关键是把“一行多少个字”当作设计目标。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="新闻卡片">
+            <article class="news">
+              <h3 class="news-title">站桩三月记：从站不稳到不想停</h3>
+              <p class="news-summary">两脚分开与肩同宽，膝盖微屈，重心落在两脚之间。三个月后我才明白，站桩练的不是腿，是耐心。</p>
+            </article>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="标题一行、摘要两行">
+            .news { width: 260px; }
+            .news-title {
+              white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+              font-size: 1.05rem; margin: 0 0 .35rem;
+            }
+            .news-summary {
+              display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+              overflow: hidden; margin: 0; color: #6f6a5e; font-size: .9rem;
+            }
+          </script>
+          <p>
+            注意三个属性的配合关系：单行省略号靠 <code>nowrap</code>，
+            多行截断靠 <code>-webkit-box</code> 那一组；两者都需要一个“有宽度限制”的容器，
+            否则内容会一直铺开，永远不触发省略。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为无单位数字在继承时保留的是“倍数”，而不是算好的像素值。
+            场景：一段 1rem 的正文里嵌了一个 2rem 的小标题。
+            父元素写 <code>line-height: 1.7</code> 时，小标题按自己的字号重算——
+            行高自动变成 3.4rem；而父元素写 <code>1.7em</code> 时，子元素继承的是
+            27.2px 这个固定值，2rem 的字几乎贴着上下行，看起来又挤又乱。
+            <strong>一行之差，就是“会跟着缩放”与“写死”的区别。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，给盒子做外观：背景、渐变、边框、圆角与阴影。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

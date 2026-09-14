@@ -53,6 +53,9 @@
 | `scrollspy-anchor-id-on-heading.md` | 滚动监听的 id 挂在小标题上，标题滑出视野后高亮全灭；id 应挂整节容器 |
 | `unwrap-parent-not-stage.md` | `unwrap()` 拆的是“被选中元素的父级”，选错了对象会把演示的舞台容器整个拆掉 |
 | `uniquesort-not-for-numbers.md` | `$.uniqueSort` 只对 DOM 元素数组去重排序，数字数组原样返回，演示“点了没反应” |
+| `file-protocol-track-blocked.md` | file:// 下 `<track>`（.vtt）被当作跨源请求拦下，字幕不显示；与 Ajax 同源的安全策略 |
+| `demo-class-name-collision-with-bootstrap.md` | 演示类名撞上 Bootstrap（`.row` 等）被框架规则悄悄改写，效果与源码对不上且不报错 |
+| `pkill-f-kills-own-shell.md` | `pkill -f "cdp-eval.js"` 把执行清理命令的 shell 自己也匹配上，命令静默中断（退出码 143）；改为 pgrep + ps + kill 具体 PID |
 
 ## 使用约定
 

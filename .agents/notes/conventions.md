@@ -81,6 +81,56 @@
 - 预览内 id 全页唯一，用章节前缀（如 `#bs08-demo1`、`#jq03-demo2`）；源码块里的 id 必须与预览一致；
 - 演示效果要在**本站皮肤下**也好看（纸墨风，见 style-guide）。
 
+### 3.1 基础篇（site/basics/）的三种写法
+
+基础篇要教 HTML / CSS / JS 本体，演示写法比组件篇多三样约定（`check-demo-parity.py`
+都已支持，写完必须跑它）：
+
+1. **HTML 演示**：预览就是真实渲染结果，源码块照抄预览即可；
+   凡是“预览不了”的东西（`<!doctype html>`、`<head>` 里的元数据、文件树）用**非 .demo 的
+   结构块**呈现（直接放 `<script type="text/plain" data-lang="html">`，不配预览，parity 不管它）。
+   同理，效果依赖视口或设备像素比的写法（`srcset` / `picture`）、以及
+   `check-links.py` 不认识的协议链接（如 `tel:`）也一律放结构块，别放进预览。
+2. **CSS 演示**：预览里写一段 `<style>`，选择器用**演示专属 id 作用域**
+   （如 `#css14-demo1 .box { … }`，包一层 `<div id="css14-demo1">`），
+   源码块配 `data-lang="css"`；parity 会拿 `<style>` 内容与 css 源码块比对
+   （只做空白与注释归一化，其余必须逐字一致）。**HTML 源码块里不要再抄一遍 `<style>`**——
+   预览侧比对时 `<style>` 会被跳过、源码侧却会计入，必然报不一致。
+   演示 CSS 里涉及文字颜色时，用明确的
+   前景+背景配对（如纸底 + 墨字）或站内变量，保证明暗两种主题下都看得清。
+3. **JS 演示**：预览里写**紧跟在元素之后**的裸 `<script>`（这正是“脚本放在 body 末尾”的教学示范），
+   源码块用 `data-lang="js"`；需要等全站资源就绪时改用 `DOJO.ready(function(){…})` 包裹。
+   parity 会把两侧的 `$(function(){…})` / `DOJO.ready(…)` 外壳都剥掉再比对。
+4. 演示内部允许出现 `<h1>`（讲六级标题这类内容绕不开），它属于演示内容，
+   不算“正文里的第二个 h1”；但正文本身仍然不写 `<h1>`。
+5. **演示自己会读出并打印的计算样式，别加过渡**（2026-09-14 第三十七式真实踩到）：
+   例 3 原来给 `background` / `border-color` 也加了 `.2s` 过渡，点按钮的瞬间
+   `getComputedStyle(card).backgroundColor` 读到的是**过渡中的旧色**，
+   于是演示打印出一句与“切换成功”矛盾的文案。写法：过渡只留给看得见的位移/形变
+   （如 `transition: transform .2s ease-out`），**凡演示代码要读的属性就不加过渡**，
+   让它立即生效——读者与断言看到的值才会一致。
+
+### 3.2 演示类名：基础篇一律用 `d-` 前缀
+
+**坑（2026-09-14 真实踩到）**：站点皮肤叠加在 Bootstrap 之上，
+基础篇演示里若用 `.row`、`.card`、`.navbar` 这类 Bootstrap 已有的类名，
+会悄悄继承栅格/组件样式（例如 `.row > *` 会强制 `width:100%; flex-shrink:0`），
+于是**预览效果与源码对不上，而且不报任何错**。
+
+约定：
+
+1. 基础篇演示内的自定义类名统一加 `d-` 前缀（`d-row`、`d-card`、`d-navbar`…），
+   与演示专属 id 作用域双保险；
+2. **有意使用**的 Bootstrap 间距工具类（`mt-2`、`mb-0`、`p-3` 等）与图标类（`bi-*`）除外；
+3. 改类名时别忘了 JS 里按类名查找的地方（`closest('.row')` → `closest('.d-row')`），
+   否则会静默抛错、演示“点了没反应”；
+4. 检查命令（基础篇专用，Bootstrap/jQuery 篇本来就该用 Bootstrap 类名，不在检查范围）：
+
+   ```bash
+   python3 tools/check-demo-classes.py            # 扫描 site/basics/
+   python3 tools/check-demo-classes.py site/basics/21-css-flexbox.html
+   ```
+
 ## 4. 常用样式类清单（site.css 已提供，直接用）
 
 | 类 | 用途 |
@@ -106,7 +156,12 @@
 
 1. `<link>/<script>/<img>/<iframe>/<source>/<video>/<audio>` 的 src/href **禁止** `http(s)://`；
 2. `<a>` 外链仅限 MDN / VS Code 等必要链接，每章 ≤2 个，能不写就不写；
-3. 无 `type="module"`、无 fetch/XHR 读本地文件；
+3. 无 `type="module"`、无 fetch/XHR 读本地文件。
+   **注意口径**：这条红线约束的是“页面里真正会执行的脚本”，
+   正文与 `text/plain` 教学源码块里**可以也应该**讲到这些 API（JS 篇要讲清它们在
+   file:// 下的限制）。`tools/check-offline.sh` 因此调用
+   `tools/check-offline-tech.py` 做“脚本感知”的扫描：只拦真实的
+   `<script>`（含内联与外部）里的 `type="module"` / `fetch(` / `XMLHttpRequest`；
 4. 教程中展示“引入方式”示例时，统一用**教学路径** `libs/bootstrap.min.css`、
    `libs/bootstrap.bundle.min.js`、`libs/jquery-4.0.0.min.js`，并说明本站实际放在 vendor 目录；
 5. 引用本站资源的相对路径以**当前文件**为基准（如从 `bootstrap/05-*.html` 引藏经阁是

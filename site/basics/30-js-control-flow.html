@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十式 · 控制流 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="if 与 switch 的分支、while 与 for 的循环、for...of 与 for...in 的区别、break 与 continue，以及各场景该用哪一种的速查表。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-30">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        程序的力量来自两件事：<strong>会分岔</strong>与<strong>会重复</strong>。
+        分岔让代码能根据情况走不同的路，重复让我们不必把手写的十遍改成一百遍。
+        这一式就是这两件事的全部家当。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>if / else if / else</code> 处理范围与复杂条件，避开 <code>=</code> 与 <code>===</code> 的坑</li>
+          <li>会用 <code>switch</code> 处理“等值判断”，并知道漏写 <code>break</code> 会发生什么</li>
+          <li>分得清 <code>while</code>、<code>do…while</code>、<code>for</code> 各自适合什么场景</li>
+          <li>说得出 <code>for…of</code> 与 <code>for…in</code> 的区别，知道遍历数组与对象各该用什么</li>
+          <li>会用 <code>break</code> 与 <code>continue</code> 控制循环的“提前结束”与“跳过这一轮”</li>
+        </ul>
+      </div>
+
+      <h2>分岔：if 与 switch</h2>
+      <p>
+        <code>if</code> 是最常用的分支：括号里的东西会按第二十八式的真假值规则转成真假。
+        条件从具体到宽泛地排，第一个成立的生效：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="if / else if / else">
+        if (score >= 90) {
+          level = "优秀";
+        } else if (score >= 75) {
+          level = "良好";
+        } else if (score >= 60) {
+          level = "及格";
+        } else {
+          level = "需要再练";
+        }
+      </script>
+      <p>
+        两个新手必踩的坑，提前钉住：
+      </p>
+      <ul>
+        <li><strong>别把 <code>===</code> 写成 <code>=</code></strong>：<code>if (x = 1)</code> 不是判断，
+          而是“把 1 赋给 x，然后判断 1 是不是真”——它永远为真（而且很多编辑器会提醒你）；</li>
+        <li><strong>大括号别省</strong>：<code>if (ok) doA(); doB();</code> 里的 <code>doB()</code>
+          其实不在 <code>if</code> 里。省一对花括号，后患无穷。</li>
+      </ul>
+      <p>
+        当判断的都是“<strong>某个值等于哪一项</strong>”时，<code>switch</code> 比一串
+        <code>else if</code> 更清楚。它有两个要点：
+        <strong>比较用的是严格相等（<code>===</code>）</strong>，
+        以及<strong>每个 <code>case</code> 末尾要写 <code>break</code></strong>：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="switch 的标准写法">
+        switch (day) {
+          case "周六":
+          case "周日":                    // 两个 case 共用一段逻辑：故意“贯穿”是有用的
+            plan = "休息与复习";
+            break;
+          case "周一":
+            plan = "抄写骨架";
+            break;
+          default:                        // 都不匹配时走这里
+            plan = "拆解一个网页";
+        }
+      </script>
+      <p>
+        漏写 <code>break</code> 时，代码会<strong>继续往下执行下一个 case 的内容</strong>，
+        这叫“贯穿”（fallthrough）。有时我们故意这么写（上面把周六周日并在一起），
+        但多数时候它是 bug 的来源——例 2 会把两种情形都演出来。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · if 分级：条件从具体排到宽泛</div>
+        <div class="demo-preview">
+          <table id="js30-demo1-out" style="width: 100%">
+            <thead><tr><th>分数</th><th>等级</th><th>命中的条件</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody1 = document.querySelector('#js30-demo1-out tbody');
+            function grade(score) {
+              if (score >= 90) { return ["优秀", "score >= 90"]; }
+              else if (score >= 75) { return ["良好", "score >= 75"]; }
+              else if (score >= 60) { return ["及格", "score >= 60"]; }
+              else { return ["需要再练", "其余情况（else）"]; }
+            }
+            [95, 80, 61, 59, 0].forEach(function (score) {
+              var result = grade(score);
+              var tr = document.createElement('tr');
+              [score, result[0], result[1]].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js30-demo1-out" style="width: 100%">
+              <thead><tr><th>分数</th><th>等级</th><th>命中的条件</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody1 = document.querySelector('#js30-demo1-out tbody');
+            function grade(score) {
+              if (score >= 90) { return ["优秀", "score >= 90"]; }
+              else if (score >= 75) { return ["良好", "score >= 75"]; }
+              else if (score >= 60) { return ["及格", "score >= 60"]; }
+              else { return ["需要再练", "其余情况（else）"]; }
+            }
+            [95, 80, 61, 59, 0].forEach(function (score) {
+              var result = grade(score);
+              var tr = document.createElement('tr');
+              [score, result[0], result[1]].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        为什么把 <code>score &gt;= 90</code> 放最前面？因为这条路最“窄”，先筛掉最严格的情况，
+        后面的条件就可以写得更宽松。反过来写（先判断 <code>&gt;= 60</code>）就会把所有及格的人都归到同一档。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · switch：漏写 break 会“贯穿”到下一档</div>
+        <div class="demo-preview">
+          <ul id="js30-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js30-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+            function plan(day) {
+              var result = "";
+              switch (day) {
+                case "周六":
+                case "周日":
+                  result += "休息与复习 ";
+                  break;                     // 故意贯穿：两天共用一段逻辑
+                case "周一":
+                  result += "抄写骨架 ";
+                  break;
+                default:
+                  result += "拆解一个网页 ";
+              }
+              return result.trim();
+            }
+            ["周六", "周日", "周一", "周三"].forEach(function (day) {
+              say2(day + " → '" + plan(day) + "'");
+            });
+
+            function planBroken(day) {
+              var result = "";
+              switch (day) {
+                case "周一":
+                  result += "抄写骨架 ";
+                                                   // 忘了 break！
+                case "周二":
+                  result += "读第二式 ";
+                  break;
+                default:
+                  result += "拆解一个网页 ";
+              }
+              return result.trim();
+            }
+            say2("漏写 break 的版本：周一 → '" + planBroken("周一") + "'（两天的功课都执行了）");
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js30-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js30-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+            function plan(day) {
+              var result = "";
+              switch (day) {
+                case "周六":
+                case "周日":
+                  result += "休息与复习 ";
+                  break;                     // 故意贯穿：两天共用一段逻辑
+                case "周一":
+                  result += "抄写骨架 ";
+                  break;
+                default:
+                  result += "拆解一个网页 ";
+              }
+              return result.trim();
+            }
+            ["周六", "周日", "周一", "周三"].forEach(function (day) {
+              say2(day + " → '" + plan(day) + "'");
+            });
+
+            function planBroken(day) {
+              var result = "";
+              switch (day) {
+                case "周一":
+                  result += "抄写骨架 ";
+                                                   // 忘了 break！
+                case "周二":
+                  result += "读第二式 ";
+                  break;
+                default:
+                  result += "拆解一个网页 ";
+              }
+              return result.trim();
+            }
+            say2("漏写 break 的版本：周一 → '" + planBroken("周一") + "'（两天的功课都执行了）");
+          </script>
+        </div>
+      </div>
+      <p>
+        还有一个细节值得知道：<code>switch</code> 用<strong>严格相等</strong>比较，
+        所以 <code>case "1"</code> 与数字 <code>1</code> 不匹配；
+        而 <code>default</code> 的位置不影响匹配顺序（只有“所有 case 都没中”时才轮到它）。
+      </p>
+
+      <h2>重复：三种循环</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>什么时候用</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>for (let i = 0; i &lt; n; i++)</code></td>
+            <td><strong>已知次数</strong>或需要下标时</td>
+            <td>三段分别是“起步 / 继续条件 / 每轮之后”；最容易犯“差一”（<code>&lt;=</code> 写成 <code>&lt;</code>）</td>
+          </tr>
+          <tr>
+            <td><code>while (条件)</code></td>
+            <td><strong>次数未知</strong>，只知道“什么时候停”</td>
+            <td>条件不成立时一次都不执行；别忘了让条件最终会变假</td>
+          </tr>
+          <tr>
+            <td><code>do { … } while (条件)</code></td>
+            <td>至少要执行一次的场景（比如“先问再看”）</td>
+            <td>判断在末尾，所以第一轮一定会跑</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三种循环跑同一件事：从 1 数到 5</div>
+        <div class="demo-preview">
+          <ul id="js30-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js30-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var a = [];
+            for (var i = 1; i <= 5; i++) { a.push(i); }
+            say3('for：' + a.join(" "));
+
+            var b = [];
+            var n = 1;
+            while (n <= 5) { b.push(n); n++; }
+            say3('while：' + b.join(" "));
+
+            var c = [];
+            var m = 1;
+            do { c.push(m); m++; } while (m <= 5);
+            say3('do…while：' + c.join(" "));
+
+            // 条件一开始就不成立时，差别立刻出现
+            var never = [];
+            var x = 10;
+            while (x <= 5) { never.push(x); x++; }
+            say3('while 条件一开始就不成立 → 循环体执行了 ' + never.length + " 次");
+
+            var once = [];
+            var y = 10;
+            do { once.push(y); y++; } while (y <= 5);
+            say3('do…while 同样的条件 → 循环体执行了 ' + once.length + " 次（值是 " + once[0] + "）");
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js30-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js30-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var a = [];
+            for (var i = 1; i <= 5; i++) { a.push(i); }
+            say3('for：' + a.join(" "));
+
+            var b = [];
+            var n = 1;
+            while (n <= 5) { b.push(n); n++; }
+            say3('while：' + b.join(" "));
+
+            var c = [];
+            var m = 1;
+            do { c.push(m); m++; } while (m <= 5);
+            say3('do…while：' + c.join(" "));
+
+            // 条件一开始就不成立时，差别立刻出现
+            var never = [];
+            var x = 10;
+            while (x <= 5) { never.push(x); x++; }
+            say3('while 条件一开始就不成立 → 循环体执行了 ' + never.length + " 次");
+
+            var once = [];
+            var y = 10;
+            do { once.push(y); y++; } while (y <= 5);
+            say3('do…while 同样的条件 → 循环体执行了 ' + once.length + " 次（值是 " + once[0] + "）");
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">小心无限循环</div>
+        <p style="margin:0">
+          如果循环条件永远为真，页面就会卡死（浏览器会弹“页面无响应”）。
+          排查口诀：<strong>把循环体里“让条件变化”的那一句找出来</strong>——
+          <code>i++</code> 忘了写、或者写在了 <code>if</code> 里面，是最常见的两种。
+          在开发者工具里试代码时也要留神：卡死时只能关标签页。
+        </p>
+      </div>
+
+      <h2>遍历：for…of 与 for…in</h2>
+      <p>
+        这两个名字只差一个词，用途完全不同，是新手最容易混的一对：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th><code>for…of</code></th>
+            <th><code>for…in</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>给你什么</td>
+            <td><strong>值</strong>（数组里的元素、字符串里的字符）</td>
+            <td><strong>键</strong>（对象的属性名；数组则是字符串下标）</td>
+          </tr>
+          <tr>
+            <td>适合</td>
+            <td>数组、字符串、<code>Map</code>、<code>Set</code>、<code>NodeList</code></td>
+            <td>对象（但更推荐 <code>Object.keys/values/entries</code>）</td>
+          </tr>
+          <tr>
+            <td>注意</td>
+            <td>拿不到下标；需要下标就用 <code>entries()</code> 或经典 <code>for</code></td>
+            <td>会把<strong>继承来的可枚举属性</strong>也翻出来；<strong>不要拿它遍历数组</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 同一个数组，两种遍历；再看对象该怎么遍历</div>
+        <div class="demo-preview">
+          <ul id="js30-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js30-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var fruits = ["苹果", "橘子", "梨"];
+
+            var ofResult = [];
+            for (const fruit of fruits) { ofResult.push(fruit); }
+            say4('for…of 数组 → ' + ofResult.join("、") + '（拿到的是值）');
+
+            var inResult = [];
+            for (const key in fruits) { inResult.push(key + ":" + fruits[key]); }
+            say4('for…in 数组 → ' + inResult.join("、") + '（拿到的是字符串下标）');
+
+            var withIndex = [];
+            for (const [i, fruit] of fruits.entries()) { withIndex.push(i + "=" + fruit); }
+            say4('需要下标时用 entries() → ' + withIndex.join("、"));
+
+            var skill = { html: "入门", css: "进阶", js: "刚起步" };
+            var keys = Object.keys(skill);
+            say4('对象用 Object.keys → ' + keys.join("、"));
+            say4('配合 Object.entries 取键值 → ' + Object.entries(skill).map(function (pair) {
+              return pair[0] + "：" + pair[1];
+            }).join("；"));
+
+            var fromProto = [];
+            for (const k in skill) { fromProto.push(k); }
+            say4('for…in 对象 → ' + fromProto.join("、") + '（本例没有继承属性，但换成带原型的对象就会多出来）');
+
+            var chars = [];
+            for (const ch of "日拱一卒") { chars.push(ch); }
+            say4('for…of 字符串 → ' + chars.join(" / "));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js30-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js30-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var fruits = ["苹果", "橘子", "梨"];
+
+            var ofResult = [];
+            for (const fruit of fruits) { ofResult.push(fruit); }
+            say4('for…of 数组 → ' + ofResult.join("、") + '（拿到的是值）');
+
+            var inResult = [];
+            for (const key in fruits) { inResult.push(key + ":" + fruits[key]); }
+            say4('for…in 数组 → ' + inResult.join("、") + '（拿到的是字符串下标）');
+
+            var withIndex = [];
+            for (const [i, fruit] of fruits.entries()) { withIndex.push(i + "=" + fruit); }
+            say4('需要下标时用 entries() → ' + withIndex.join("、"));
+
+            var skill = { html: "入门", css: "进阶", js: "刚起步" };
+            var keys = Object.keys(skill);
+            say4('对象用 Object.keys → ' + keys.join("、"));
+            say4('配合 Object.entries 取键值 → ' + Object.entries(skill).map(function (pair) {
+              return pair[0] + "：" + pair[1];
+            }).join("；"));
+
+            var fromProto = [];
+            for (const k in skill) { fromProto.push(k); }
+            say4('for…in 对象 → ' + fromProto.join("、") + '（本例没有继承属性，但换成带原型的对象就会多出来）');
+
+            var chars = [];
+            for (const ch of "日拱一卒") { chars.push(ch); }
+            say4('for…of 字符串 → ' + chars.join(" / "));
+          </script>
+        </div>
+      </div>
+      <p>
+        一句话记法：<strong><code>of</code> 要值，<code>in</code> 要键</strong>。
+        数组用 <code>for…of</code>（或 <code>forEach</code>/<code>map</code>，第三十二式），
+        对象用 <code>Object.keys/values/entries</code>——它们只翻“自己的”属性，不会把继承来的也带上。
+        演示里那句 <code>for (const [i, fruit] of …)</code> 用到了一点“解构”——
+        把每一对 <code>[下标, 值]</code> 直接拆成两个变量，第三十二式会专门讲它，
+        现在照着读成“第 i 项是 fruit”即可。
+      </p>
+
+      <h2>提前收工：break 与 continue</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>关键字</th>
+            <th>作用</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>break</code></td>
+            <td><strong>立刻结束</strong>整个循环（或 switch）</td>
+            <td>列表里找到目标就停，不必再往后看</td>
+          </tr>
+          <tr>
+            <td><code>continue</code></td>
+            <td><strong>跳过本轮剩下的代码</strong>，直接进入下一轮</td>
+            <td>遇到空白项就跳过，不参与统计</td>
+          </tr>
+          <tr>
+            <td>标签 <code>outer:</code></td>
+            <td>跳出<strong>外层</strong>循环（嵌套循环时用）</td>
+            <td>少用；能用函数提前 <code>return</code> 就别用标签</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · break 与 continue 的现场</div>
+        <div class="demo-preview">
+          <ul id="js30-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js30-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var trace = [];
+            var found = null;
+            for (var i = 1; i <= 20; i++) {
+              trace.push(i);
+              if (i % 7 === 0) { found = i; break; }     // 找到就走人
+            }
+            say5('找 1–20 里第一个能被 7 整除的数：' + found
+              + '；实际只看过这些数：' + trace.join("、"));
+
+            var odds = [];
+            for (var j = 1; j <= 10; j++) {
+              if (j % 2 === 0) { continue; }             // 偶数直接跳过
+              odds.push(j);
+            }
+            say5('continue 跳过偶数后的结果：' + odds.join("、"));
+
+            var grid = [];
+            outer:
+            for (var row = 1; row <= 3; row++) {
+              for (var col = 1; col <= 3; col++) {
+                if (row * col === 6) { break outer; }     // 一次跳出两层
+                grid.push(row + "-" + col);
+              }
+            }
+            say5('带标签的 break：命中 6 之前走过的格子 → ' + grid.join("、"));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js30-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js30-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var trace = [];
+            var found = null;
+            for (var i = 1; i <= 20; i++) {
+              trace.push(i);
+              if (i % 7 === 0) { found = i; break; }     // 找到就走人
+            }
+            say5('找 1–20 里第一个能被 7 整除的数：' + found
+              + '；实际只看过这些数：' + trace.join("、"));
+
+            var odds = [];
+            for (var j = 1; j <= 10; j++) {
+              if (j % 2 === 0) { continue; }             // 偶数直接跳过
+              odds.push(j);
+            }
+            say5('continue 跳过偶数后的结果：' + odds.join("、"));
+
+            var grid = [];
+            outer:
+            for (var row = 1; row <= 3; row++) {
+              for (var col = 1; col <= 3; col++) {
+                if (row * col === 6) { break outer; }     // 一次跳出两层
+                grid.push(row + "-" + col);
+              }
+            }
+            say5('带标签的 break：命中 6 之前走过的格子 → ' + grid.join("、"));
+          </script>
+        </div>
+      </div>
+      <p>
+        这两个关键字没有“风格好坏”，只有“该不该用”：
+        <strong>已经找到答案就别再找</strong>（<code>break</code> 往往还能省下大量循环），
+        <strong>这一轮不满足条件就别往下算</strong>（<code>continue</code> 能少写一层 <code>if</code>）。
+      </p>
+
+      <h2>该用哪一个：速查表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th>首选</th>
+            <th>理由</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>按范围 / 多个条件分支</td><td><code>if / else if / else</code></td><td>条件可以任意写</td></tr>
+          <tr><td>按“某个值等于哪一项”分支</td><td><code>switch</code></td><td>比一串 <code>else if</code> 更整齐</td></tr>
+          <tr><td>简单的二选一</td><td>三元 <code>? :</code></td><td>一行写完，但别嵌套太深</td></tr>
+          <tr><td>已知次数或需要下标</td><td><code>for</code></td><td>三段式一眼看清边界</td></tr>
+          <tr><td>次数不定、只知道何时停</td><td><code>while</code></td><td>条件即出口</td></tr>
+          <tr><td>至少要跑一次</td><td><code>do…while</code></td><td>判断在末尾</td></tr>
+          <tr><td>遍历数组 / 字符串 / <code>Map</code> / <code>Set</code></td><td><code>for…of</code></td><td>直接拿值，也不怕下标写错</td></tr>
+          <tr><td>遍历对象属性</td><td><code>Object.keys/values/entries</code></td><td>只取自己的属性，还可以配合 <code>map</code> / <code>filter</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <div class="callout-title">预告一个经典坑：循环里的 var 与 let</div>
+        <p style="margin:0">
+          用 <code>var</code> 在循环里创建函数（比如给每个按钮绑事件），
+          它们最后都会看到同一个“最后的 i”——因为 <code>var</code> 是函数作用域。
+          把 <code>var</code> 换成 <code>let</code>，每轮都会得到自己的 <code>i</code>，问题自然消失。
+          背后的原理是闭包与作用域，第三十一式会把这段讲透。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>if</code> 条件从具体排到宽泛；别把 <code>===</code> 写成 <code>=</code>，别省大括号；</li>
+        <li><code>switch</code> 用于等值判断，用严格相等比较；<code>break</code> 漏写会贯穿，
+          有时故意（合并多个 case），多数时候是 bug；<code>default</code> 兜底；</li>
+        <li>三种循环：已知次数用 <code>for</code>、次数不定用 <code>while</code>、
+          至少执行一次用 <code>do…while</code>；记得让条件最终会变假，否则页面卡死；</li>
+        <li><code>for…of</code> 拿值（数组、字符串、Map、Set），
+          <code>for…in</code> 拿键（数组上是字符串下标，不推荐）；对象遍历优先
+          <code>Object.keys/values/entries</code>；</li>
+        <li><code>break</code> 结束整个循环、<code>continue</code> 跳过本轮；标签能跳出多层，但少用；</li>
+        <li>循环里创建函数时，用 <code>let</code> 而不是 <code>var</code>（第三十一式详解）。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十式</div>
+        <ol>
+          <li>写一个函数：传入 1–12 的月份数字，返回该月的天数（用 <code>switch</code> 写，
+            注意 2 月按 28 天算；想想哪些 case 可以故意贯穿）。</li>
+          <li>用循环算出 1 到 100 里所有奇数的和，并把计算过程的前三行打印出来
+            （提示：<code>for</code> 配 <code>continue</code>，或者干脆只遍历奇数）。</li>
+          <li>思考：遍历一个对象时，为什么推荐 <code>Object.keys(obj)</code> 而不是
+            <code>for…in</code>？它们的结果什么时候会不一样？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="月份天数">
+            "use strict";
+
+            function daysInMonth(month) {
+              switch (month) {
+                case 4:
+                case 6:
+                case 9:
+                case 11:          // 四个小月共用一段逻辑（故意贯穿）
+                  return 30;
+                case 2:
+                  return 28;
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                case 8:
+                case 10:
+                case 12:
+                  return 31;
+                default:
+                  return null;    // 传入非法月份时给个明确的信号
+              }
+            }
+
+            console.log(daysInMonth(2));   // 28
+            console.log(daysInMonth(4));   // 30
+            console.log(daysInMonth(12));  // 31
+            console.log(daysInMonth(13));  // null
+          </script>
+          <p>
+            检查点：<code>return</code> 本身就结束了函数，所以这几个分支不需要 <code>break</code>；
+            但如果你把逻辑改成“先赋值再统一返回”，那就得记得补上 <code>break</code>。
+            另外别在 <code>case 2:</code> 里写死 29——闰年判断要结合年份，第三十四式的日期部分会讲。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="奇数之和">
+            "use strict";
+
+            let sum = 0;
+            let printed = 0;
+
+            for (let i = 1; i <= 100; i++) {
+              if (i % 2 === 0) continue;      // 偶数跳过
+              sum += i;
+              if (printed < 3) {
+                console.log(`第 ${printed + 1} 步：累加 ${i}，目前合计 ${sum}`);
+                printed++;
+              }
+            }
+
+            console.log("1 到 100 的奇数之和：" + sum);   // 2500
+          </script>
+          <p>
+            三行过程分别是：累加 1 得 1、累加 3 得 4、累加 5 得 9；
+            最终结果是 2500（也可以用公式 50² 验算）。
+            这个练习的要点是“<strong>统计与打印分开</strong>”：<code>sum</code> 负责算，
+            <code>printed</code> 负责数，逻辑一眼可读。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为 <code>for…in</code> 遍历的是“<strong>可枚举的属性</strong>”，
+            其中<strong>包含从原型链继承来的属性</strong>。
+            如果某个库给 <code>Object.prototype</code> 加过一个可枚举的方法
+            （老代码里真的发生过），<code>for…in</code> 就会把它也翻出来，
+            你的循环里突然多出一个莫名其妙的键。
+            <code>Object.keys(obj)</code> 只返回“自己的、可枚举的”属性名，
+            行为稳定、还能接着用 <code>map</code> / <code>filter</code> 等数组方法处理。
+            如果确实要用 <code>for…in</code>，记得前面加一句
+            <code>if (!Object.hasOwn(obj, key)) continue;</code> 过滤。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把重复的逻辑装进盒子：函数与作用域。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

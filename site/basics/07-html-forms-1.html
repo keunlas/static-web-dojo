@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第七式 · 表单（上） | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="form 的 action 与 method、GET 与 POST 的区别、label 的绑定写法，以及文本类 input 与三种按钮的类型与常用属性。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-07">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        网页不光给人看，也要听人说话——登录、搜索、留言、下单，全靠表单把读者的意思收进来。
+        这一式的目标很朴素：<strong>把一次对话的入口搭对</strong>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 <code>form</code> 的 <code>action</code>、<code>method</code> 各管什么，GET 与 POST 有什么区别</li>
+          <li>会给每个输入框配 <code>label</code>，并说清它为什么不是可选项</li>
+          <li>认得文本类 <code>input</code> 的几种类型与常用属性（<code>name</code> 是重中之重）</li>
+          <li>分得清 <code>submit</code> / <code>reset</code> / <code>button</code> 三种按钮</li>
+        </ul>
+      </div>
+
+      <h2>表单里有两个角色</h2>
+      <p>
+        写表单时要同时照看两个人：<strong>坐在屏幕前的人</strong>要看得懂、点得准；
+        <strong>机器（浏览器与服务器）</strong>要知道每一格填的是什么、送到哪里去。
+        所有容易踩的坑，几乎都是只顾了一个角色。
+      </p>
+      <p>
+        先交代一句本站的现实：这是一个<strong>纯静态站点，没有后端服务器</strong>。
+        表单填完之后把数据送到哪里、怎么保存，需要后端或第三方服务——
+        这超出了本教程的范围。所以教程里的演示只做两件事：
+        <strong>把结构与校验教对</strong>，以及在需要时用一小段脚本拦住提交、就地显示结果。
+      </p>
+
+      <h2>form 与提交：action 与 method</h2>
+      <p>
+        <code>form</code> 是整个表单的容器，两个属性决定“提交”这件事怎么发生：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>常见取值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>action</code></td>
+            <td>数据送到哪个地址</td>
+            <td>后端接口地址；留空表示提交给当前页面</td>
+          </tr>
+          <tr>
+            <td><code>method</code></td>
+            <td>用什么方法送</td>
+            <td><code>get</code>（默认）或 <code>post</code></td>
+          </tr>
+          <tr>
+            <td><code>enctype</code></td>
+            <td>数据的编码方式</td>
+            <td>有文件上传时必须用 <code>multipart/form-data</code></td>
+          </tr>
+          <tr>
+            <td><code>target</code></td>
+            <td>提交后在哪里显示结果</td>
+            <td><code>_blank</code> 新窗口等，与链接的 <code>target</code> 同理</td>
+          </tr>
+          <tr>
+            <td><code>novalidate</code></td>
+            <td>关闭浏览器自带的校验</td>
+            <td>想自己写校验提示时才用（第八式细说）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>GET 与 POST 的区别，用一张表就能说清：</p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th><code>method="get"</code></th>
+            <th><code>method="post"</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>数据放在哪</td>
+            <td>拼在网址后面：<code>search.html?q=站桩</code></td>
+            <td>放在请求体里，网址上看不到</td>
+          </tr>
+          <tr>
+            <td>适合什么</td>
+            <td>搜索、筛选这类“看一眼就好”的查询</td>
+            <td>登录、注册、下单这类“会改变数据”的提交</td>
+          </tr>
+          <tr>
+            <td>能收藏/分享结果吗</td>
+            <td>能——网址里带着条件</td>
+            <td>不能，刷新还可能重复提交</td>
+          </tr>
+          <tr>
+            <td>安全性</td>
+            <td>参数暴露在网址与历史记录里，<strong>不能放密码</strong></td>
+            <td>不暴露在网址上，但<strong>不代表加密</strong>——加密靠 HTTPS</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <script type="text/plain" data-lang="html" data-title="一个真实项目的表单开头（示意）">
+        <form action="/api/login" method="post">
+          <!-- 用户名、口令等字段写在这里 -->
+        </form>
+      </script>
+
+      <h2>label：每个输入框都该有个名字</h2>
+      <p>
+        <code>label</code> 是输入框的“名牌”，两种写法都合法：
+      </p>
+      <ul>
+        <li><strong>显式绑定</strong>：<code>&lt;label for="user"&gt;</code> 与
+          <code>&lt;input id="user"&gt;</code> 用 <code>for</code> 和 <code>id</code> 对上暗号；</li>
+        <li><strong>包裹式</strong>：把 <code>input</code> 直接放进 <code>label</code> 里面。</li>
+      </ul>
+      <p>
+        带 <code>label</code> 的输入框能多得到三样东西：
+        <strong>点标签文字就能聚焦输入框</strong>（小屏与触屏上体验差别很大）；
+        读屏软件会念出“用户名，编辑框”而不是“编辑框”；
+        以及给屏幕阅读器的用户一个可靠的“填到哪了”的线索。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">心法：placeholder 不是标签</div>
+        <p style="margin:0">
+          <code>placeholder</code> 只是淡淡的示例文字，一开始输入就消失，
+          读屏软件对它的朗读也不可靠。<strong>它永远不能代替 <code>label</code></strong>——
+          可以把 label 想成门牌号，placeholder 想成贴在门上的便签。
+        </p>
+      </div>
+
+      <h2>文本类输入框与常用属性</h2>
+      <p>
+        <code>input</code> 的能力靠 <code>type</code> 切换。先看文本家族：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th><code>type</code></th>
+            <th>用途</th>
+            <th>手机上会怎样</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>text</code></td><td>单行文本，默认值</td><td>普通键盘</td></tr>
+          <tr><td><code>search</code></td><td>搜索词</td><td>键盘上常带“搜索”键，部分浏览器给一个清除小叉</td></tr>
+          <tr><td><code>email</code></td><td>邮箱地址</td><td>键盘带 <code>@</code> 与 <code>.</code></td></tr>
+          <tr><td><code>tel</code></td><td>电话号码</td><td>弹出数字键盘（注意：<code>tel</code> 不做格式校验）</td></tr>
+          <tr><td><code>url</code></td><td>网址</td><td>键盘带 <code>/</code> 与 <code>.com</code></td></tr>
+          <tr><td><code>password</code></td><td>口令</td><td>输入内容被隐去</td></tr>
+          <tr><td><code>number</code></td><td>数字（可带上下微调按钮）</td><td>数字键盘</td></tr>
+        </tbody>
+      </table>
+      <p>
+        选对 <code>type</code> 是“免费赚到”的体验：手机上键盘不同、浏览器还能顺手做校验。
+        接下来是属性表，前四个是重点：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>name</code></td>
+            <td>这一格数据叫什么名字</td>
+            <td><strong>没写 name 的输入框，提交时数据会被丢弃</strong>（最常见的白干原因）</td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td>初始值（或提交时携带的值）</td>
+            <td>用户改了，就以用户填的为准</td>
+          </tr>
+          <tr>
+            <td><code>required</code></td>
+            <td>必填</td>
+            <td>布尔属性；留空提交时浏览器会拦下并提示</td>
+          </tr>
+          <tr>
+            <td><code>autocomplete</code></td>
+            <td>自动填充提示</td>
+            <td>如 <code>name</code>、<code>email</code>、<code>new-password</code>，帮用户少打字</td>
+          </tr>
+          <tr>
+            <td><code>placeholder</code></td>
+            <td>灰字示例</td>
+            <td>不能代替 label</td>
+          </tr>
+          <tr>
+            <td><code>readonly</code></td>
+            <td>只读</td>
+            <td>可以选中复制，<strong>会</strong>随表单提交</td>
+          </tr>
+          <tr>
+            <td><code>disabled</code></td>
+            <td>禁用</td>
+            <td>变灰、不能聚焦，<strong>不会</strong>提交；读屏软件也会跳过</td>
+          </tr>
+          <tr>
+            <td><code>maxlength</code> / <code>minlength</code></td>
+            <td>长度上限 / 下限</td>
+            <td>下限在提交时校验，上限在输入时就拦住</td>
+          </tr>
+          <tr>
+            <td><code>pattern</code></td>
+            <td>用正则限定格式</td>
+            <td>如邮编：<code>pattern="\d{6}"</code>（第八式会用起来）</td>
+          </tr>
+          <tr>
+            <td><code>autofocus</code></td>
+            <td>进页面就聚焦</td>
+            <td>一个页面最多用一次，别抢用户的注意力</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一个完整的小表单（提交动作被脚本拦下，就地显示结果）</div>
+        <div class="demo-preview">
+          <form id="html07-demo1" action="#" method="get">
+            <p>
+              <label for="html07-demo1-name">称谓</label><br>
+              <input type="text" id="html07-demo1-name" name="name" placeholder="例如：墨白" required autocomplete="name">
+            </p>
+            <p>
+              <label for="html07-demo1-mail">邮箱</label><br>
+              <input type="email" id="html07-demo1-mail" name="email" placeholder="you@example.com" required autocomplete="email">
+            </p>
+            <p><button type="submit">递上名帖</button></p>
+          </form>
+          <p class="mb-0" id="html07-demo1-out">提交后会在这里显示你填的内容。（演示用脚本拦住了真实提交）</p>
+          <script>
+            var f1 = document.getElementById('html07-demo1');
+            var out1 = document.getElementById('html07-demo1-out');
+            f1.addEventListener('submit', function (event) {
+              event.preventDefault();          // 演示用：拦下真实提交
+              var name = f1.elements.name.value;
+              var mail = f1.elements.email.value;
+              out1.textContent = '收到名帖：称谓 = ' + name + '，邮箱 = ' + mail;
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="html07-demo1" action="#" method="get">
+              <p>
+                <label for="html07-demo1-name">称谓</label><br>
+                <input type="text" id="html07-demo1-name" name="name" placeholder="例如：墨白" required autocomplete="name">
+              </p>
+              <p>
+                <label for="html07-demo1-mail">邮箱</label><br>
+                <input type="email" id="html07-demo1-mail" name="email" placeholder="you@example.com" required autocomplete="email">
+              </p>
+              <p><button type="submit">递上名帖</button></p>
+            </form>
+            <p class="mb-0" id="html07-demo1-out">提交后会在这里显示你填的内容。（演示用脚本拦住了真实提交）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用，JS 篇会细讲）">
+            var f1 = document.getElementById('html07-demo1');
+            var out1 = document.getElementById('html07-demo1-out');
+            f1.addEventListener('submit', function (event) {
+              event.preventDefault();          // 演示用：拦下真实提交
+              var name = f1.elements.name.value;
+              var mail = f1.elements.email.value;
+              out1.textContent = '收到名帖：称谓 = ' + name + '，邮箱 = ' + mail;
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        试着留空直接提交：会看到浏览器自己跳出来提示——那是 <code>required</code> 在起作用。
+        把邮箱写成 <code>abc</code> 再提交，<code>type="email"</code> 也会拦下。
+        这些校验不需要一行脚本，是浏览器免费给的（第八式细讲）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 文本家族各就各位</div>
+        <div class="demo-preview">
+          <p><label for="html07-demo2-q">搜索</label><br>
+            <input type="search" id="html07-demo2-q" name="q" placeholder="搜索招式"></p>
+          <p><label for="html07-demo2-tel">电话</label><br>
+            <input type="tel" id="html07-demo2-tel" name="tel" placeholder="13800000000" pattern="1[3-9]\d{9}"></p>
+          <p><label for="html07-demo2-site">站点</label><br>
+            <input type="url" id="html07-demo2-site" name="site" placeholder="https://example.com"></p>
+          <p><label for="html07-demo2-skill">熟练度（0–10）</label><br>
+            <input type="number" id="html07-demo2-skill" name="skill" min="0" max="10" step="1" value="3"></p>
+          <p class="mb-0"><label for="html07-demo2-read">编号（只读，会提交）</label><br>
+            <input type="text" id="html07-demo2-read" name="no" value="DOJO-2026" readonly></p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p><label for="html07-demo2-q">搜索</label><br>
+              <input type="search" id="html07-demo2-q" name="q" placeholder="搜索招式"></p>
+            <p><label for="html07-demo2-tel">电话</label><br>
+              <input type="tel" id="html07-demo2-tel" name="tel" placeholder="13800000000" pattern="1[3-9]\d{9}"></p>
+            <p><label for="html07-demo2-site">站点</label><br>
+              <input type="url" id="html07-demo2-site" name="site" placeholder="https://example.com"></p>
+            <p><label for="html07-demo2-skill">熟练度（0–10）</label><br>
+              <input type="number" id="html07-demo2-skill" name="skill" min="0" max="10" step="1" value="3"></p>
+            <p class="mb-0"><label for="html07-demo2-read">编号（只读，会提交）</label><br>
+              <input type="text" id="html07-demo2-read" name="no" value="DOJO-2026" readonly></p>
+          </script>
+        </div>
+      </div>
+
+      <h2>按钮：提交、重置、普通按钮</h2>
+      <p>
+        按钮用 <code>button</code> 元素写，<code>type</code> 决定它的身份：
+      </p>
+      <ul>
+        <li><code>type="submit"</code>：<strong>默认类型</strong>，提交表单（等于按下回车）；</li>
+        <li><code>type="reset"</code>：把表单里的字段恢复成初始值（不是清空，是回到初始值）；</li>
+        <li><code>type="button"</code>：什么也不做，留给你自己写脚本用。</li>
+      </ul>
+      <p>
+        老写法 <code>&lt;input type="submit" value="提交"&gt;</code> 也能用，
+        但它显示的文字来自 <code>value</code>，且不能包含图标等子元素，
+        <strong>新代码统一用 <code>button</code></strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三种按钮各干各的（试试“重置”按钮）</div>
+        <div class="demo-preview">
+          <form id="html07-demo3">
+            <p><label for="html07-demo3-say">留句口信</label><br>
+              <input type="text" id="html07-demo3-say" name="say" value="日拱一卒"></p>
+            <p>
+              <button type="submit">提交（演示里被拦下）</button>
+              <button type="reset">重置</button>
+              <button type="button" id="html07-demo3-plain">普通按钮</button>
+            </p>
+          </form>
+          <p class="mb-0" id="html07-demo3-out">按钮的说明会显示在这里。</p>
+          <script>
+            var f3 = document.getElementById('html07-demo3');
+            var out3 = document.getElementById('html07-demo3-out');
+            f3.addEventListener('submit', function (event) {
+              event.preventDefault();
+              out3.textContent = 'submit 按钮：拿到口信“' + f3.elements.say.value + '”';
+            });
+            f3.addEventListener('reset', function () {
+              out3.textContent = 'reset 按钮：字段已恢复成初始值（日拱一卒）';
+            });
+            document.getElementById('html07-demo3-plain').addEventListener('click', function () {
+              out3.textContent = 'button 按钮：没有默认行为，全靠脚本安排';
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="html07-demo3">
+              <p><label for="html07-demo3-say">留句口信</label><br>
+                <input type="text" id="html07-demo3-say" name="say" value="日拱一卒"></p>
+              <p>
+                <button type="submit">提交（演示里被拦下）</button>
+                <button type="reset">重置</button>
+                <button type="button" id="html07-demo3-plain">普通按钮</button>
+              </p>
+            </form>
+            <p class="mb-0" id="html07-demo3-out">按钮的说明会显示在这里。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var f3 = document.getElementById('html07-demo3');
+            var out3 = document.getElementById('html07-demo3-out');
+            f3.addEventListener('submit', function (event) {
+              event.preventDefault();
+              out3.textContent = 'submit 按钮：拿到口信“' + f3.elements.say.value + '”';
+            });
+            f3.addEventListener('reset', function () {
+              out3.textContent = 'reset 按钮：字段已恢复成初始值（日拱一卒）';
+            });
+            document.getElementById('html07-demo3-plain').addEventListener('click', function () {
+              out3.textContent = 'button 按钮：没有默认行为，全靠脚本安排';
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：三个最容易白干的错误</div>
+        <ul style="margin:0">
+          <li>输入框<strong>忘了写 <code>name</code></strong>——用户填得再认真，提交时也不带它走；</li>
+          <li><strong>用 <code>placeholder</code> 当标签</strong>——输入一多，用户就忘了这一格要填什么；</li>
+          <li><strong>口令框不给 <code>name</code> 却写 <code>autocomplete="current-password"</code></strong>
+            这类矛盾配置——密码管理器会认不出来。</li>
+        </ul>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li><code>form</code> 用 <code>action</code> 说明送到哪、用 <code>method</code> 说明怎么送；</li>
+        <li>查询用 GET（参数在网址上，能收藏分享），会改数据用 POST（参数在请求体里）；</li>
+        <li>每个输入框都要有 <code>label</code>（<code>for</code> + <code>id</code> 或包裹式），placeholder 不能替代它；</li>
+        <li>输入框必须写 <code>name</code>，否则数据会被丢弃；<code>type</code> 选对能免费换来合适的键盘与校验；</li>
+        <li><code>required</code>、<code>autocomplete</code>、<code>readonly</code>、<code>disabled</code>、<code>maxlength</code>、<code>pattern</code> 各司其职；</li>
+        <li>按钮三兄弟：<code>submit</code> 提交、<code>reset</code> 恢复初始值、<code>button</code> 交给脚本。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第七式</div>
+        <ol>
+          <li>做一个“报名表单”：姓名（必填）、邮箱（必填）、电话（可空但格式要对），
+            每个字段都要有 <code>label</code> 与 <code>name</code>，并配一个提交按钮。</li>
+          <li>把上一题的表单改成 GET 提交，猜一猜提交后网址会变成什么样；
+            再想想：换成 POST 会有什么不同？</li>
+          <li>思考：为什么 <code>disabled</code> 的字段不会提交，而 <code>readonly</code> 的会？
+            这两种状态各自适合什么场景？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="报名表单">
+            <form action="#" method="post">
+              <p><label for="signup-name">姓名</label><br>
+                <input type="text" id="signup-name" name="name" required autocomplete="name"></p>
+              <p><label for="signup-mail">邮箱</label><br>
+                <input type="email" id="signup-mail" name="email" required autocomplete="email"></p>
+              <p><label for="signup-tel">电话（可选）</label><br>
+                <input type="tel" id="signup-tel" name="tel" pattern="1[3-9]\d{9}"></p>
+              <p><button type="submit">报名</button></p>
+            </form>
+          </script>
+          <p>
+            检查点：三个 <code>label</code> 的 <code>for</code> 与对应 <code>id</code> 一致；
+            三个字段都有 <code>name</code>；必填项写了 <code>required</code>；
+            电话用了 <code>pattern</code>（可留空，留空不触发校验）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <p>
+            GET 提交后，网址会变成类似
+            <code>signup.html?name=墨白&amp;email=mo%40example.com&amp;tel=</code>
+            ——所有字段拼在问号后面，特殊字符被转义（<code>@</code> 变成 <code>%40</code>）。
+            POST 提交时网址不变，数据放在请求体里发给 <code>action</code> 指定的地址。
+            所以：报名这种会“留下记录”的提交应该用 POST；而且真正的表单提交都需要一个
+            接收数据的服务器地址——纯静态页面上，按下按钮只会跳到 <code>action</code> 那张页面。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为两者的含义不同：<code>disabled</code> 表示“这个字段此刻不参与”，
+            所以浏览器既不提交它，也把它从交互与朗读里拿掉；
+            <code>readonly</code> 表示“能看不能改”，值仍然有意义，因此照常提交。
+            典型用法：<code>readonly</code> 放订单号、只读金额这类要一起提交的值；
+            <code>disabled</code> 放“尚未满足条件前不允许填写”的字段（例如未选套餐前的子选项）。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，表单（下）：选择框、单选复选、日期文件，以及浏览器自带的校验。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

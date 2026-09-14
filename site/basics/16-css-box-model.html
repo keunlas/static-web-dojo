@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十六式 · 盒模型 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="盒模型的四层结构、box-sizing 的两种算法、padding 与 margin 的简写与百分比、外边距折叠、溢出处理，以及行内元素的特殊表现。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-16">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        在 CSS 眼里，页面上没有“文字”和“图片”，只有一个个<strong>盒子</strong>。
+        这一式就把盒子拆开看：它有几层、每层多厚、盒子之间为什么有时会“粘”在一起。
+        明白了这些，你就能回答那句经典疑问——“为什么它比我以为的宽”。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>认清盒子的四层：内容、内边距、边框、外边距</li>
+          <li>分清 <code>content-box</code> 与 <code>border-box</code>，并知道为什么项目里常用后者</li>
+          <li>会用 <code>padding</code> / <code>margin</code> 简写，理解百分比与负值、<code>auto</code> 的用法</li>
+          <li>看懂外边距折叠、会用 <code>overflow</code> 处理溢出，知道行内元素为什么“不听话”</li>
+        </ul>
+      </div>
+
+      <h2>每个元素都是一个盒子</h2>
+      <p>
+        元素的盒子由内到外分四层，用一件包裹来打比方最清楚：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>层</th>
+            <th>CSS 属性</th>
+            <th>打比方</th>
+            <th>要点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>内容</td>
+            <td><code>width</code> / <code>height</code></td>
+            <td>包裹里的东西本身</td>
+            <td>文字、图片等实际内容所占的区域</td>
+          </tr>
+          <tr>
+            <td>内边距</td>
+            <td><code>padding</code></td>
+            <td>包裹里的泡沫纸</td>
+            <td>内容与边框之间的空隙，<strong>有背景色</strong></td>
+          </tr>
+          <tr>
+            <td>边框</td>
+            <td><code>border</code></td>
+            <td>包裹的纸箱壳</td>
+            <td>有厚度、有颜色、有样式（第十九式细讲）</td>
+          </tr>
+          <tr>
+            <td>外边距</td>
+            <td><code>margin</code></td>
+            <td>包裹之间留的距离</td>
+            <td>透明，<strong>不属于盒子本身</strong>，只负责推开邻居</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 四层盒子的样子（每一层都标了颜色）</div>
+        <div class="demo-preview">
+          <style>
+            #css16-demo1 .outer {
+              margin: 24px;                     /* 最外层：透明，但占位置 */
+              padding: 16px;                    /* 这一层是父盒子的内边距 */
+              border: 6px solid #d4cab0;
+              background: repeating-linear-gradient(45deg, #f4edde 0 8px, #efe6d2 8px 16px);
+            }
+            #css16-demo1 .inner {
+              padding: 14px;                    /* 内边距：有底色 */
+              border: 5px dashed #b03a2e;       /* 边框 */
+              background: #fffdf7;              /* 内容区底色 */
+              color: #2b2a26;
+            }
+          </style>
+          <div id="css16-demo1">
+            <div class="outer">
+              <div class="inner">我是一个盒子：浅色渐变是外边距的位置（透明），粗虚线是边框，虚线以内是内边距，中间白底才是内容。</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css16-demo1">
+              <div class="outer">
+                <div class="inner">我是一个盒子：浅色渐变是外边距的位置（透明），粗虚线是边框，虚线以内是内边距，中间白底才是内容。</div>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css16-demo1 .outer {
+              margin: 24px;                     /* 最外层：透明，但占位置 */
+              padding: 16px;                    /* 这一层是父盒子的内边距 */
+              border: 6px solid #d4cab0;
+              background: repeating-linear-gradient(45deg, #f4edde 0 8px, #efe6d2 8px 16px);
+            }
+            #css16-demo1 .inner {
+              padding: 14px;                    /* 内边距：有底色 */
+              border: 5px dashed #b03a2e;       /* 边框 */
+              background: #fffdf7;              /* 内容区底色 */
+              color: #2b2a26;
+            }
+          </script>
+        </div>
+      </div>
+      <p>
+        一句话记住分工：<strong><code>padding</code> 是盒子自己的“肉”，<code>margin</code> 是盒子与邻居的“距离”</strong>。
+        所以给按钮加 <code>padding</code> 会让按钮变大，加 <code>margin</code> 只会把它推离旁边的东西。
+      </p>
+
+      <h2>width 量的是哪一层：box-sizing</h2>
+      <p>
+        这是盒模型里最容易出错的一处：<code>width: 200px</code> 到底量的是哪一段？
+        答案取决于 <code>box-sizing</code>：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>取值</th>
+            <th>width 的含义</th>
+            <th>实际占位公式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>content-box</code>（默认）</td>
+            <td>只算<strong>内容区</strong></td>
+            <td>width + padding×2 + border×2</td>
+          </tr>
+          <tr>
+            <td><code>border-box</code>（推荐）</td>
+            <td>把内边距与边框<strong>算进去</strong></td>
+            <td>就是 width（内容区 = width − padding − border）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 同样写 width: 200px，实际占位却不一样（脚本量给你看）</div>
+        <div class="demo-preview">
+          <style>
+            #css16-demo2 .d-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css16-demo2 .box {
+              width: 200px; padding: 20px; border: 5px solid #b03a2e;
+              background: #fffdf7; font-size: .9rem;
+            }
+            #css16-demo2 .d-contentbox { box-sizing: content-box; }
+            #css16-demo2 .d-bordered { box-sizing: border-box; border-color: #2f6db3; }
+          </style>
+          <div id="css16-demo2">
+            <div class="d-row">
+              <div class="box d-contentbox" id="css16-demo2-a">content-box：width 只管内容区</div>
+              <div class="box d-bordered" id="css16-demo2-b">border-box：width 已经把四周算进去</div>
+            </div>
+            <p class="mt-2 mb-0" id="css16-demo2-out">正在量尺寸……</p>
+            <script>
+              var a2 = document.getElementById('css16-demo2-a');
+              var b2 = document.getElementById('css16-demo2-b');
+              document.getElementById('css16-demo2-out').textContent =
+                '两个盒子都写了 width: 200px —— 左边实际占 ' + a2.offsetWidth
+                + 'px，右边实际占 ' + b2.offsetWidth + 'px。';
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css16-demo2">
+              <div class="d-row">
+                <div class="box d-contentbox" id="css16-demo2-a">content-box：width 只管内容区</div>
+                <div class="box d-bordered" id="css16-demo2-b">border-box：width 已经把四周算进去</div>
+              </div>
+              <p class="mt-2 mb-0" id="css16-demo2-out">正在量尺寸……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css16-demo2 .d-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css16-demo2 .box {
+              width: 200px; padding: 20px; border: 5px solid #b03a2e;
+              background: #fffdf7; font-size: .9rem;
+            }
+            #css16-demo2 .d-contentbox { box-sizing: content-box; }
+            #css16-demo2 .d-bordered { box-sizing: border-box; border-color: #2f6db3; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量尺寸，演示用）">
+            var a2 = document.getElementById('css16-demo2-a');
+            var b2 = document.getElementById('css16-demo2-b');
+            document.getElementById('css16-demo2-out').textContent =
+              '两个盒子都写了 width: 200px —— 左边实际占 ' + a2.offsetWidth
+              + 'px，右边实际占 ' + b2.offsetWidth + 'px。';
+          </script>
+        </div>
+      </div>
+      <p>
+        左边是 <code>200 + 20×2 + 5×2 = 250</code>，右边是 <code>200</code>。
+        现实项目里，几乎所有人都会在样式表开头写一句：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="几乎人人都会写的起手式">
+        html {
+          box-sizing: border-box;
+        }
+        *, *::before, *::after {
+          box-sizing: inherit;   /* 让所有元素都继承这个算法 */
+        }
+      </script>
+      <p>
+        好处很直接：<strong>写的宽度就是看得见的宽度</strong>，加个 padding 也不会把布局挤爆。
+        本站的皮肤也用了这套写法（你可以打开开发者工具验证）。
+      </p>
+      <p>
+        顺带记住几个尺寸相关属性：<code>min-width</code> / <code>max-width</code>、
+        <code>min-height</code> / <code>max-height</code>。
+        它们常用来做“最小读得下去、最大不至于长到天边”的限制，
+        <code>max-width: 100%</code> 更是图片自适应容器的标准解法。
+      </p>
+
+      <h2>padding 与 margin 的写法</h2>
+      <p>
+        两者写法完全一样，从一条到四条，按<strong>顺时针</strong>顺序取值：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>padding: 10px</code></td><td>四边都是 10</td></tr>
+          <tr><td><code>padding: 10px 20px</code></td><td>上下 10，左右 20</td></tr>
+          <tr><td><code>padding: 10px 20px 30px</code></td><td>上 10，左右 20，下 30</td></tr>
+          <tr><td><code>padding: 10px 20px 30px 40px</code></td><td>上、右、下、左（顺时针）</td></tr>
+          <tr><td><code>padding-top</code>、<code>margin-inline</code> 等</td><td>单独指定；<code>inline</code> 指书写方向上的“左右”</td></tr>
+        </tbody>
+      </table>
+      <p>三个容易踩的点：</p>
+      <ul>
+        <li><strong>百分比怎么算</strong>：<code>padding</code> 与 <code>margin</code> 的百分比
+          <strong>都以“包含块的宽度”为基准</strong>——包括上下方向！所以
+          <code>padding-top: 50%</code> 得到的是一段竖着的高度，常被用来做固定比例占位；</li>
+        <li><strong>负 margin</strong> 合法：能让元素向左上“拉”，一些经典布局用它做边缘对齐，
+          但也会让元素互相压住，使用时务必在窄屏下检查；</li>
+        <li><strong><code>margin: 0 auto</code></strong>：给定了宽度的块级元素，水平方向会居中——
+          这是最省事的水平居中法（竖向的 <code>auto</code> 一律算 0）。</li>
+      </ul>
+
+      <h2>外边距折叠：为什么它们“粘”在一起</h2>
+      <p>
+        相邻的竖直外边距会合并成一个，取<strong>较大</strong>的那个，而不是相加。
+        这个现象叫<strong>外边距折叠</strong>（margin collapsing），共三种典型情况：
+      </p>
+      <ol>
+        <li><strong>兄弟之间</strong>：上面盒子的下边距与下面盒子的上边距合并；</li>
+        <li><strong>父子之间</strong>：父元素没有上边框 / 上内边距 / 内容时，
+          子元素的上边距会“跑”到父元素外面去（看起来父元素也被推下去了）；</li>
+        <li><strong>空盒子</strong>：一个没有内容、没有 padding/border 的块，自己的上下边距合并成一个。</li>
+      </ol>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三种折叠现场（脚本量出真实间距）</div>
+        <div class="demo-preview">
+          <style>
+            #css16-demo3 .sib1 { margin-bottom: 30px; background: #f4edde; padding: .4rem .6rem; }
+            #css16-demo3 .sib2 { margin-top: 10px; background: #e9f0e4; padding: .4rem .6rem; }
+            #css16-demo3 .parent { background: #f3e3dd; }
+            #css16-demo3 .child { margin-top: 20px; background: #fffdf7; padding: .4rem .6rem; }
+            #css16-demo3 .fixed { overflow: hidden; }   /* 触发新的格式化上下文，阻止父子折叠 */
+          </style>
+          <div id="css16-demo3">
+            <div class="sib1" id="css16-demo3-a">兄弟 A：下边距 30px</div>
+            <div class="sib2" id="css16-demo3-b">兄弟 B：上边距 10px —— 两者不叠加，取大的那个</div>
+            <div class="parent" id="css16-demo3-parent">
+              <div class="child" id="css16-demo3-child">父子折叠：我的上边距跑到了父元素外面</div>
+            </div>
+            <div class="parent fixed" id="css16-demo3-parent2">
+              <div class="child" id="css16-demo3-child2">同样的结构，给父元素加 overflow: hidden 后就不再折叠</div>
+            </div>
+            <p class="mt-2 mb-0" id="css16-demo3-out">正在测量……</p>
+            <script>
+              var a3 = document.getElementById('css16-demo3-a').getBoundingClientRect();
+              var b3 = document.getElementById('css16-demo3-b').getBoundingClientRect();
+              var p3 = document.getElementById('css16-demo3-parent').getBoundingClientRect();
+              var c3 = document.getElementById('css16-demo3-child').getBoundingClientRect();
+              var p4 = document.getElementById('css16-demo3-parent2').getBoundingClientRect();
+              var c4 = document.getElementById('css16-demo3-child2').getBoundingClientRect();
+              document.getElementById('css16-demo3-out').textContent =
+                '兄弟间距实测 ' + Math.round(b3.top - a3.bottom) + 'px（30 与 10 折叠成 30）；'
+                + '普通父元素里，子元素的顶边与父元素的顶边只差 ' + Math.round(c3.top - p3.top)
+                + 'px（上边距跑到外面去了）；换成加了 overflow: hidden 的父元素，'
+                + '这个距离变成 ' + Math.round(c4.top - p4.top) + 'px（边距被留在里面）。';
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css16-demo3">
+              <div class="sib1" id="css16-demo3-a">兄弟 A：下边距 30px</div>
+              <div class="sib2" id="css16-demo3-b">兄弟 B：上边距 10px —— 两者不叠加，取大的那个</div>
+              <div class="parent" id="css16-demo3-parent">
+                <div class="child" id="css16-demo3-child">父子折叠：我的上边距跑到了父元素外面</div>
+              </div>
+              <div class="parent fixed" id="css16-demo3-parent2">
+                <div class="child" id="css16-demo3-child2">同样的结构，给父元素加 overflow: hidden 后就不再折叠</div>
+              </div>
+              <p class="mt-2 mb-0" id="css16-demo3-out">正在测量……</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css16-demo3 .sib1 { margin-bottom: 30px; background: #f4edde; padding: .4rem .6rem; }
+            #css16-demo3 .sib2 { margin-top: 10px; background: #e9f0e4; padding: .4rem .6rem; }
+            #css16-demo3 .parent { background: #f3e3dd; }
+            #css16-demo3 .child { margin-top: 20px; background: #fffdf7; padding: .4rem .6rem; }
+            #css16-demo3 .fixed { overflow: hidden; }   /* 触发新的格式化上下文，阻止父子折叠 */
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（量间距，演示用）">
+            var a3 = document.getElementById('css16-demo3-a').getBoundingClientRect();
+            var b3 = document.getElementById('css16-demo3-b').getBoundingClientRect();
+            var p3 = document.getElementById('css16-demo3-parent').getBoundingClientRect();
+            var c3 = document.getElementById('css16-demo3-child').getBoundingClientRect();
+            var p4 = document.getElementById('css16-demo3-parent2').getBoundingClientRect();
+            var c4 = document.getElementById('css16-demo3-child2').getBoundingClientRect();
+            document.getElementById('css16-demo3-out').textContent =
+              '兄弟间距实测 ' + Math.round(b3.top - a3.bottom) + 'px（30 与 10 折叠成 30）；'
+              + '普通父元素里，子元素的顶边与父元素的顶边只差 ' + Math.round(c3.top - p3.top)
+              + 'px（上边距跑到外面去了）；换成加了 overflow: hidden 的父元素，'
+              + '这个距离变成 ' + Math.round(c4.top - p4.top) + 'px（边距被留在里面）。';
+          </script>
+        </div>
+      </div>
+      <p>
+        折叠只发生在<strong>块级元素竖直方向</strong>之间，下面这些情况都不折叠：
+        水平方向、行内块、浮动元素、绝对定位元素、以及
+        <strong>flex / grid 容器里的子项</strong>。
+        想阻止父子折叠，最常用的三招是给父元素加 <code>padding</code>、<code>border</code>，
+        或者让它成为一个独立的格式化上下文（例如 <code>overflow: hidden</code>、<code>display: flow-root</code>）。
+      </p>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：别跟折叠较劲，理解它就行</div>
+        <p style="margin:0">
+          折叠不是 bug，而是排版传统（印刷时代段落之间的间距就是合并的）。
+          排版正文时它让间距均匀好看；需要精确控制间距时，
+          <strong>优先用 <code>padding</code> 或容器 + <code>gap</code>，而不是一串 <code>margin</code></strong>
+          （第二十一、二十二式会看到 <code>gap</code> 有多省心）。
+        </p>
+      </div>
+
+      <h2>溢出：内容装不下怎么办</h2>
+      <p>
+        给盒子定死了宽高，内容却更多时，就发生<strong>溢出</strong>。
+        <code>overflow</code> 决定怎么办：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>取值</th>
+            <th>行为</th>
+            <th>常见用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>visible</code>（默认）</td><td>照样画出来，哪怕超出盒子</td><td>保持原样；可能出现重叠</td></tr>
+          <tr><td><code>hidden</code></td><td>超出部分裁掉，不出现滚动条</td><td>清理浮动、做圆角裁切；<strong>内容会被真的切掉</strong></td></tr>
+          <tr><td><code>scroll</code></td><td>总是显示滚动条</td><td>需要固定滚动区域时</td></tr>
+          <tr><td><code>auto</code></td><td>需要时才出现滚动条</td><td>最常用：可滚动的列表、代码块</td></tr>
+          <tr><td><code>clip</code></td><td>裁掉且<strong>不允许</strong>任何滚动</td><td>纯粹的视觉裁切</td></tr>
+        </tbody>
+      </table>
+      <p>
+        还能分方向：<code>overflow-x: auto; overflow-y: hidden</code>
+        （横向可滚、纵向裁切）——宽表格在小屏上常这么处理。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 同一段文字，四种 overflow 处理方式</div>
+        <div class="demo-preview">
+          <style>
+            #css16-demo4 .cell {
+              width: 150px; height: 62px; border: 1px solid #d4cab0;
+              background: #fffdf7; padding: .4rem .5rem; font-size: .82rem;
+              display: inline-block; vertical-align: top; margin: 0 .4rem .5rem 0;
+            }
+            #css16-demo4 .d-visible { overflow: visible; }
+            #css16-demo4 .hidden { overflow: hidden; }
+            #css16-demo4 .scroll { overflow: scroll; }
+            #css16-demo4 .auto { overflow: auto; }
+            #css16-demo4 b { display: block; margin-bottom: .2rem; }
+          </style>
+          <div id="css16-demo4">
+            <div class="cell d-visible"><b>visible</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段会溢出到盒子外面。</div>
+            <div class="cell hidden"><b>hidden</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段被裁掉了。</div>
+            <div class="cell scroll"><b>scroll</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段可以滚动查看。</div>
+            <div class="cell auto"><b>auto</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段需要时才出滚动条。</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css16-demo4">
+              <div class="cell d-visible"><b>visible</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段会溢出到盒子外面。</div>
+              <div class="cell hidden"><b>hidden</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段被裁掉了。</div>
+              <div class="cell scroll"><b>scroll</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段可以滚动查看。</div>
+              <div class="cell auto"><b>auto</b>日拱一卒，功不唐捐。山不让尘，川不辞盈。这一段需要时才出滚动条。</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css16-demo4 .cell {
+              width: 150px; height: 62px; border: 1px solid #d4cab0;
+              background: #fffdf7; padding: .4rem .5rem; font-size: .82rem;
+              display: inline-block; vertical-align: top; margin: 0 .4rem .5rem 0;
+            }
+            #css16-demo4 .d-visible { overflow: visible; }
+            #css16-demo4 .hidden { overflow: hidden; }
+            #css16-demo4 .scroll { overflow: scroll; }
+            #css16-demo4 .auto { overflow: auto; }
+            #css16-demo4 b { display: block; margin-bottom: .2rem; }
+          </script>
+        </div>
+      </div>
+
+      <h2>行内元素的“不听话”</h2>
+      <p>
+        前面讲的宽高、上下边距，对<strong>行内元素</strong>（<code>display: inline</code>，如
+        <code>span</code>、<code>a</code>、<code>strong</code>）并不完全适用，这是新手最常撞的墙：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>块级（block）</th>
+            <th>行内（inline）</th>
+            <th>行内块（inline-block）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>width</code> / <code>height</code></td><td>生效</td><td><strong>无效</strong>（由内容决定）</td><td>生效</td></tr>
+          <tr><td>水平 <code>margin</code> / <code>padding</code></td><td>生效</td><td>生效</td><td>生效</td></tr>
+          <tr><td>竖直 <code>margin</code></td><td>生效</td><td><strong>不生效</strong></td><td>生效</td></tr>
+          <tr><td>竖直 <code>padding</code> / 边框</td><td>撑开盒子</td><td>画出来，但<strong>不撑开行高</strong>（可能压住上下行）</td><td>撑开</td></tr>
+          <tr><td>排列方式</td><td>独占一行</td><td>跟着文字排</td><td>跟文字排，但内部当盒子处理</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 三种显示方式对比（注意竖直边距有没有生效）</div>
+        <div class="demo-preview">
+          <style>
+            #css16-demo5 .block { display: block; width: 220px; height: 34px; margin: 8px 0; background: #f3e3dd; }
+            #css16-demo5 .inline { display: inline; width: 220px; height: 60px; margin: 20px 0; background: #e9f0e4; }
+            #css16-demo5 .ib { display: inline-block; width: 220px; height: 34px; margin: 8px 0; background: #e8edf5; }
+            #css16-demo5 .wrap { background: #f4edde; padding: .4rem; }
+          </style>
+          <div id="css16-demo5">
+            <div class="wrap">
+              <span class="block">block：宽高与上下边距都生效</span>
+              <span class="inline">inline：宽高与上下边距<b>不生效</b>，底色只跟着文字走</span>
+              <span class="ib">inline-block：盒子属性生效，但仍跟文字排在一行</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css16-demo5">
+              <div class="wrap">
+                <span class="block">block：宽高与上下边距都生效</span>
+                <span class="inline">inline：宽高与上下边距<b>不生效</b>，底色只跟着文字走</span>
+                <span class="ib">inline-block：盒子属性生效，但仍跟文字排在一行</span>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css16-demo5 .block { display: block; width: 220px; height: 34px; margin: 8px 0; background: #f3e3dd; }
+            #css16-demo5 .inline { display: inline; width: 220px; height: 60px; margin: 20px 0; background: #e9f0e4; }
+            #css16-demo5 .ib { display: inline-block; width: 220px; height: 34px; margin: 8px 0; background: #e8edf5; }
+            #css16-demo5 .wrap { background: #f4edde; padding: .4rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        实际写页面时的经验：<strong>想让一个元素“自带盒子行为”又不想独占一行，
+        用 <code>inline-block</code></strong>（标签、按钮、小卡片）；
+        但在现在的项目里，更常见的做法是用 <code>display: flex</code> 排一行，
+        让每个孩子天然成为“有盒子属性的块”（第二十一式）。
+      </p>
+      <p>
+        补一句细节：行内块元素的竖直边距<strong>确实会生效</strong>，
+        只是在行内排版里它还要和“基线对齐”一起算，位置常常比你预想的更靠上或更靠下。
+        所以真要整整齐齐排一行元素时，用 flex 加 <code>gap</code> 才是省心且不易出错的做法。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>盒子四层：内容、<code>padding</code>（有底色）、<code>border</code>、<code>margin</code>（透明、只推邻居）；</li>
+        <li>默认 <code>content-box</code>：width 只算内容区；常用 <code>border-box</code> 让宽度所见即所得；</li>
+        <li>简写按顺时针：上 → 右 → 下 → 左；百分比以包含块<strong>宽度</strong>为基准（含上下方向）；</li>
+        <li><code>margin: 0 auto</code> 水平居中；负 margin 能用但要小心压盖；</li>
+        <li>竖直方向的外边距会折叠（兄弟取大者、父子会“外溢”），flex/grid 子项与行内块不折叠；</li>
+        <li><code>overflow</code>：<code>auto</code> 最常用，<code>hidden</code> 会真裁掉内容；</li>
+        <li>行内元素的宽高与竖直 margin 不生效，<code>inline-block</code> 是折中方案。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十六式</div>
+        <ol>
+          <li>做一个“消息气泡”：宽 260px、内边距 12px、边框 2px、圆角 10px；
+            分别用 <code>content-box</code> 与 <code>border-box</code> 各写一遍，
+            比较两者实际占位。</li>
+          <li>复现一次外边距折叠：写两个上下相邻的段落，分别给 40px 与 24px 的竖直边距，
+            量一量它们之间的实际距离，并想办法让它变成 64px。</li>
+          <li>思考：为什么“给父元素加 <code>overflow: hidden</code>”既能阻止父子边距折叠，
+            又常常被用来“包住浮动的子元素”？这两件事背后是同一个机制吗？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="两种 box-sizing">
+            .bubble-content { box-sizing: content-box; width: 260px; padding: 12px; border: 2px solid #b03a2e; border-radius: 10px; }
+            .bubble-border  { box-sizing: border-box;  width: 260px; padding: 12px; border: 2px solid #b03a2e; border-radius: 10px; }
+          </script>
+          <p>
+            结果：第一条实际占 <code>260 + 24 + 4 = 288px</code>，第二条正好 260px。
+            用脚本量的话就是 <code>offsetWidth</code>（含边框）——可以在 DevTools 里对照着看。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="让间距真的变成 64px">
+            /* 折叠中：40 与 24 取大者，得到 40px */
+            .a { margin-bottom: 40px; }
+            .b { margin-top: 24px; }
+
+            /* 方案一：只留一个方向的边距，另一侧清零 */
+            .a { margin-bottom: 64px; }
+            .b { margin-top: 0; }
+
+            /* 方案二：给父容器加 padding 或改用 flex + gap（推荐后者的思路） */
+            .wrap { display: flex; flex-direction: column; gap: 64px; }
+          </script>
+          <p>
+            三种做法的取舍：直接加到一个方向上最简单，但下次有人再改另一个方向又会踩坑；
+            用 <code>gap</code> 则完全绕开折叠——这也是现代布局推荐 flex/grid 的原因之一。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            是同一个机制：<code>overflow: hidden</code> 让这个元素成为一块<strong>独立的格式化上下文</strong>
+            （BFC，block formatting context）。在这个“独立王国”里：
+            ① 子元素的外边距不再和父元素的外边距合并（父子折叠被切断）；
+            ② 浮动子元素会被父元素的高度计算包含进去（父元素不再“塌陷”），
+            所以看起来就像把浮动包住了。同一套机制还顺带让元素避开旁边浮动的影响。
+            现代写法更愿意用 <code>display: flow-root</code> 来做这件事——它专门为“我要一个干净的 BFC”而生，
+            副作用比 <code>overflow: hidden</code> 小（不会裁掉内容）。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，给尺寸找把尺子：CSS 的单位、数值与颜色。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

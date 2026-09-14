@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三式 · 列表与链接 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="无序、有序与描述列表的用法，a 元素的四种去处，以及相对路径与绝对路径的写法。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-03">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        文字连成句子，句子连成段落，段落之间靠什么连接？在网页里，答案是两样东西：
+        <strong>列表</strong>把并列的内容排整齐，<strong>链接</strong>把一个个页面串成江湖。
+        传说中超文本的“超”，说的就是后面的链接。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用 <code>ul</code>、<code>ol</code> 写无序与有序列表，并能正确嵌套</li>
+          <li>会用 <code>dl</code>、<code>dt</code>、<code>dd</code> 写术语解释</li>
+          <li>会用 <code>a</code> 链接到页面、锚点、邮箱与电话，并写对 <code>target</code> 与 <code>rel</code></li>
+          <li>看得懂相对路径与绝对路径，知道 <code>../</code> 与 <code>./</code> 各指哪里</li>
+        </ul>
+      </div>
+
+      <h2>无序列表与有序列表</h2>
+      <p>
+        列表用两个元素套着写：外层是列表容器，内层每一项都用 <code>li</code>（list item）：
+      </p>
+      <ul>
+        <li><code>ul</code>（unordered list）：不分先后，浏览器默认画圆点；</li>
+        <li><code>ol</code>（ordered list）：有先后顺序，浏览器默认自动编号。</li>
+      </ul>
+      <p>
+        一条硬规矩：<strong><code>ul</code> 和 <code>ol</code> 的直接子元素只能是 <code>li</code></strong>，
+        不能把 <code>p</code>、<code>div</code> 直接塞进去。想放别的元素，就套在 <code>li</code> 里面。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 无序用圆点，有序自动编号</div>
+        <div class="demo-preview">
+          <p class="mb-1">今日功课（无序）：</p>
+          <ul>
+            <li>抄一遍页面骨架</li>
+            <li>读第二式的小结</li>
+            <li>在练功场里随便写两笔</li>
+          </ul>
+          <p class="mb-1">备茶步骤（有序）：</p>
+          <ol>
+            <li>烧水</li>
+            <li>温杯</li>
+            <li>投茶注水</li>
+          </ol>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="mb-1">今日功课（无序）：</p>
+            <ul>
+              <li>抄一遍页面骨架</li>
+              <li>读第二式的小结</li>
+              <li>在练功场里随便写两笔</li>
+            </ul>
+            <p class="mb-1">备茶步骤（有序）：</p>
+            <ol>
+              <li>烧水</li>
+              <li>温杯</li>
+              <li>投茶注水</li>
+            </ol>
+          </script>
+        </div>
+      </div>
+      <p>
+        列表天生带缩进与项目符号，所以“看起来像列表”的内容就该用列表，而不是用一串
+        <code>&lt;br&gt;</code> 硬敲出来——读屏软件会念出“共三项，第一项……”，
+        而后者只会念成一团。
+      </p>
+
+      <h2>嵌套列表与编号控制</h2>
+      <p>
+        列表可以嵌套：把子列表写在某一项的 <code>li</code> <strong>里面</strong>（紧跟在文字之后）。
+        有序列表还能微调编号——从头开始数、倒着数、换个编号风格：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>写在哪</th>
+            <th>作用</th>
+            <th>示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>start</code></td>
+            <td><code>ol</code></td>
+            <td>编号从第几项开始</td>
+            <td><code>&lt;ol start="3"&gt;</code></td>
+          </tr>
+          <tr>
+            <td><code>reversed</code></td>
+            <td><code>ol</code></td>
+            <td>倒序编号（从大到小），布尔属性，写了就生效</td>
+            <td><code>&lt;ol reversed&gt;</code></td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td><code>ol</code></td>
+            <td>编号风格：<code>1</code> 数字、<code>a</code>/<code>A</code> 字母、<code>i</code>/<code>I</code> 罗马数字</td>
+            <td><code>&lt;ol type="A"&gt;</code></td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td><code>li</code></td>
+            <td>单独指定这一项的编号</td>
+            <td><code>&lt;li value="10"&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 嵌套的提纲与倒数的清单</div>
+        <div class="demo-preview">
+          <ul>
+            <li>基础篇
+              <ol>
+                <li>HTML 骨架
+                  <ul>
+                    <li>文本与语义</li>
+                    <li>列表与链接</li>
+                  </ul>
+                </li>
+                <li>CSS 外衣</li>
+              </ol>
+            </li>
+            <li>Bootstrap 篇</li>
+          </ul>
+          <p class="mb-1">倒数的三个数（<code>reversed</code>）：</p>
+          <ol reversed>
+            <li>三</li>
+            <li>二</li>
+            <li>一</li>
+          </ol>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul>
+              <li>基础篇
+                <ol>
+                  <li>HTML 骨架
+                    <ul>
+                      <li>文本与语义</li>
+                      <li>列表与链接</li>
+                    </ul>
+                  </li>
+                  <li>CSS 外衣</li>
+                </ol>
+              </li>
+              <li>Bootstrap 篇</li>
+            </ul>
+            <p class="mb-1">倒数的三个数（<code>reversed</code>）：</p>
+            <ol reversed>
+              <li>三</li>
+              <li>二</li>
+              <li>一</li>
+            </ol>
+          </script>
+        </div>
+      </div>
+      <p>
+        嵌套时按层级缩进写，自己能一眼看出谁属于谁；浏览器会用不同的符号区分层级
+        （圆点、圆圈、方块轮流出现），所以一眼就能看出“这是第二层”。
+      </p>
+
+      <h2>描述列表：术语与解释</h2>
+      <p>
+        还有一类内容天生是“名词 + 解释”的关系，比如词典条目、参数表、常见问题。
+        它们用描述列表（description list，旧称定义列表）来写：
+      </p>
+      <ul>
+        <li><code>dl</code>：整个列表；</li>
+        <li><code>dt</code>：被解释的词（term）；</li>
+        <li><code>dd</code>：对这个词的解释（description），<strong>一个词可以配多条解释</strong>。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 一张小词典</div>
+        <div class="demo-preview">
+          <dl>
+            <dt>标签</dt>
+            <dd>尖括号包起来的那一段，如 <code>&lt;h1&gt;</code>。</dd>
+            <dt>元素</dt>
+            <dd>开始标签、内容与结束标签的整体。</dd>
+            <dt>属性</dt>
+            <dd>写在开始标签里的补充说明。</dd>
+            <dd>格式是 <code>名字="值"</code>。</dd>
+          </dl>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <dl>
+              <dt>标签</dt>
+              <dd>尖括号包起来的那一段，如 <code>&lt;h1&gt;</code>。</dd>
+              <dt>元素</dt>
+              <dd>开始标签、内容与结束标签的整体。</dd>
+              <dt>属性</dt>
+              <dd>写在开始标签里的补充说明。</dd>
+              <dd>格式是 <code>名字="值"</code>。</dd>
+            </dl>
+          </script>
+        </div>
+      </div>
+      <p>
+        注意演示里“属性”配了两条 <code>dd</code>——这是合法且常见的写法，
+        适合“定义 + 补充说明”的场景。
+      </p>
+
+      <h2 id="html03-links">链接：页面之间的小径</h2>
+      <p>
+        <code>a</code> 元素（anchor，锚）负责跳转，最重要的属性是 <code>href</code>
+        （hypertext reference），它指出“跳到哪去”。常见去处有四种：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>去处</th>
+            <th>写法</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>另一个页面</td>
+            <td><code>href="02-html-text.html"</code></td>
+            <td>站内的相对路径，最常用</td>
+          </tr>
+          <tr>
+            <td>本页的某处</td>
+            <td><code>href="#section-id"</code></td>
+            <td>锚点跳转：目标元素要有对应的 <code>id</code>，页内目录就是这么做出来的</td>
+          </tr>
+          <tr>
+            <td>写邮件</td>
+            <td><code>href="mailto:you@example.com"</code></td>
+            <td>点击后打开本机邮件客户端</td>
+          </tr>
+          <tr>
+            <td>打电话</td>
+            <td><code>href="tel:+8613800000000"</code></td>
+            <td>手机上点击直接拨号，国际写法以 <code>+</code> 开头</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 链接的几种去处（点一下试试）</div>
+        <div class="demo-preview">
+          <p>去<a href="../basics/02-html-text.html">上一式：文本与语义</a>补一补语气标签。</p>
+          <p>直接<a href="#html03-links">跳回本式“链接”一节的标题</a>。</p>
+          <p>给作者<a href="mailto:mo@example.com">写封信</a>（会打开本机邮件客户端）。</p>
+          <p class="mb-0">也可以<a href="../basics/01-html-intro.html" target="_blank" rel="noopener">在新标签页打开第一式</a>。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p>去<a href="../basics/02-html-text.html">上一式：文本与语义</a>补一补语气标签。</p>
+            <p>直接<a href="#html03-links">跳回本式“链接”一节的标题</a>。</p>
+            <p>给作者<a href="mailto:mo@example.com">写封信</a>（会打开本机邮件客户端）。</p>
+            <p class="mb-0">也可以<a href="../basics/01-html-intro.html" target="_blank" rel="noopener">在新标签页打开第一式</a>。</p>
+          </script>
+        </div>
+      </div>
+
+      <p>两个与“打开方式”有关的属性：</p>
+      <ul>
+        <li><code>target</code>：<code>target="_blank"</code> 表示在新标签页打开。
+          现代浏览器已默认按 <code>rel="noopener"</code> 处理它，显式写上更稳妥，也照顾老浏览器；</li>
+        <li><code>download</code>：让浏览器直接下载而不是打开，可附带建议的文件名：
+          <code>&lt;a href="report.pdf" download="年度报告.pdf"&gt;</code>。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：链接文字要能“独立成句”</div>
+        <p style="margin:0">
+          避免“点这里”“更多”这种写法。读屏软件会把页面上的链接单独列出来供人跳转，
+          一屏的“点这里”等于什么都没说。<strong>把链接文字写成它要去的地方</strong>：
+          “上一式：文本与语义”永远比“点这里”清楚。
+        </p>
+      </div>
+
+      <h2>路径：告诉浏览器文件在哪</h2>
+      <p>
+        写链接时最常出错的地方就是<strong>路径</strong>。记住三条规则，之后就不容易错了：
+        同目录直接写文件名，<code>./</code> 就是“当前目录”，<code>../</code> 表示“上一层”。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>举例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>02-html-text.html</code></td>
+            <td>当前目录下的文件</td>
+            <td>本式链接第二式</td>
+          </tr>
+          <tr>
+            <td><code>./02-html-text.html</code></td>
+            <td>同上，<code>./</code> 显式表示当前目录</td>
+            <td>意思一样，写出来更“看得见”</td>
+          </tr>
+          <tr>
+            <td><code>../index.html</code></td>
+            <td>上一层目录下的文件</td>
+            <td>从 <code>basics/</code> 回到站点首页</td>
+          </tr>
+          <tr>
+            <td><code>images/cat.jpg</code></td>
+            <td>子目录里的文件</td>
+            <td>把图片放进 <code>images</code> 文件夹</td>
+          </tr>
+          <tr>
+            <td><code>/index.html</code></td>
+            <td><strong>以站点根目录为起点</strong>的绝对路径</td>
+            <td>部署在服务器上没问题；<code>file://</code> 双击打开时<strong>不可用</strong></td>
+          </tr>
+          <tr>
+            <td><code>https://example.com/a.html</code></td>
+            <td>完整地址（绝对 URL），可以指向任何网站</td>
+            <td>外链；离线站点应尽量少用</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        本站所有页面都用<strong>相对路径</strong>，就是为了双击打开也能正常跳转——
+        这也是“完全离线可用”的关键。另外记得：指向一个目录时，服务器会自动送出该目录下的
+        <code>index.html</code>，所以 <code>basics/</code> 与 <code>basics/index.html</code> 是同一个页面。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">排查链接失效的三步</div>
+        <ol style="margin:0">
+          <li>先看文件名有没有拼错、大小写是否一致（服务器区分大小写）；</li>
+          <li>再看层级：从当前文件所在文件夹出发，往上几层、往下几层，画一遍目录树就清楚了；</li>
+          <li>最后看后缀：<code>.html</code> 有没有漏写，路径里有没有混进中文标点或空格。</li>
+        </ol>
+      </div>
+
+      <h2 id="html03-summary">本式小结</h2>
+      <ul>
+        <li>并列内容用 <code>ul</code>，有先后用 <code>ol</code>，每一项都装进 <code>li</code>；</li>
+        <li>嵌套列表写在 <code>li</code> 里面；<code>start</code>、<code>reversed</code>、<code>type</code>、<code>value</code> 可以微调编号；</li>
+        <li>“词 + 解释”用 <code>dl</code> / <code>dt</code> / <code>dd</code>；</li>
+        <li>链接用 <code>a</code> 加 <code>href</code>：页面、锚点、邮件、电话四种去处；</li>
+        <li>新窗口用 <code>target="_blank"</code>，配上 <code>rel="noopener"</code>；下载用 <code>download</code>；</li>
+        <li>路径三件套：<code>./</code> 当前目录、<code>../</code> 上一层、直接写文件名同目录；以 <code>/</code> 开头的是站点根，<code>file://</code> 下不可用。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三式</div>
+        <ol>
+          <li>写一份“我的工具清单”：用 <code>ul</code> 列出三个常用网站，其中每一项里再嵌套一个
+            <code>ol</code> 写明你用它做什么。</li>
+          <li>做一个三页的迷你站点：<code>index.html</code> 里放两个链接，分别指向
+            <code>about.html</code> 与 <code>contact.html</code>，每个子页面里放一个链接回到首页。
+            放在同一个文件夹里，双击测试跳转。</li>
+          <li>思考：为什么推荐用列表做导航菜单，而不是用一排 <code>&lt;a&gt;</code> 直接排开？
+            （提示：谁也“读”页面结构？）</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="嵌套的清单">
+            <h2>我的工具清单</h2>
+            <ul>
+              <li>MDN Web Docs
+                <ol>
+                  <li>查标签与属性的权威解释</li>
+                  <li>看 CSS 属性的取值与兼容性</li>
+                </ol>
+              </li>
+              <li>练功场
+                <ol>
+                  <li>随手试 CSS 与 JS</li>
+                </ol>
+              </li>
+              <li>本站藏经阁
+                <ol>
+                  <li>离线查 Bootstrap 文档</li>
+                </ol>
+              </li>
+            </ul>
+          </script>
+          <p>
+            检查点：子列表必须写在 <code>li</code> 里面（写在两个 <code>li</code> 之间是错的）；
+            缩进只是为了好看，但能帮你一眼看清层级。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="index.html">
+            <h1>我的迷你站点</h1>
+            <p><a href="about.html">关于我</a></p>
+            <p><a href="contact.html">联系我</a></p>
+          </script>
+          <script type="text/plain" data-lang="html" data-title="about.html（contact.html 同理）">
+            <h1>关于我</h1>
+            <p>我是一个正在学写网页的初学者。</p>
+            <p><a href="index.html">返回首页</a></p>
+          </script>
+          <p>
+            三个文件放在同一个文件夹里，所以互相链接时直接写文件名即可——
+            这就是最常见的相对路径。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为导航本质上就是“一组并列的链接”，列表能把这件事如实告诉机器：
+            读屏软件会念出“列表，共三项”，并用列表导航快捷键快速跳转；
+            搜索引擎也能更清楚地识别站点结构。视觉上横着排还是竖着排，交给 CSS 决定——
+            <strong>结构用 HTML，排版用 CSS</strong>，这是全篇反复出现的分工。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，页面里该有画了：图片的十种写法与两个好习惯。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

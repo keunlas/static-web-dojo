@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十九式 · 运算符与表达式 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="算术与字符串、比较（=== 与 ==）、逻辑运算符与短路、?? 与 ?.、其它运算符速查，以及优先级与结合性的实战要点。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-29">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        变量把值存起来，运算符则把值“用起来”：
+        加加减减、比大小、判断真假、给缺省值兜底。
+        这一式是 JavaScript 的算盘——算盘打错一格，后面全歪。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用算术运算符，知道除法与取余在 JavaScript 里的特殊结果</li>
+          <li>认清 <code>+</code> 的双重身份：既做加法也做字符串拼接</li>
+          <li>比较一律用 <code>===</code>，知道 <code>==</code> 会在哪里咬人</li>
+          <li>掌握逻辑运算符的<strong>短路与返回值</strong>，会用 <code>??</code> 与 <code>?.</code> 处理“可能没有”的值</li>
+          <li>看得懂优先级与结合性，知道 <code>??</code> 为什么必须加括号</li>
+        </ul>
+      </div>
+
+      <h2>算术运算符</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>运算符</th>
+            <th>含义</th>
+            <th>例子</th>
+            <th>结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>+</code></td><td>加</td><td><code>1 + 2</code></td><td><code>3</code></td></tr>
+          <tr><td><code>-</code></td><td>减</td><td><code>5 - 8</code></td><td><code>-3</code></td></tr>
+          <tr><td><code>*</code></td><td>乘</td><td><code>3 * 4</code></td><td><code>12</code></td></tr>
+          <tr><td><code>/</code></td><td>除</td><td><code>7 / 2</code></td><td><code>3.5</code>（没有整除这回事）</td></tr>
+          <tr><td><code>%</code></td><td>取余</td><td><code>7 % 3</code></td><td><code>1</code>；<code>-7 % 3</code> 得 <code>-1</code>（结果跟被除数同号）</td></tr>
+          <tr><td><code>**</code></td><td>幂</td><td><code>2 ** 10</code></td><td><code>1024</code>；<code>2 ** 0.5</code> 约 <code>1.414</code>（开方）</td></tr>
+          <tr><td><code>++</code> / <code>--</code></td><td>自增 / 自减</td><td><code>i++</code> 与 <code>++i</code></td><td>都能让 <code>i</code> 加一，但“返回的值”不同（见下）</td></tr>
+        </tbody>
+      </table>
+      <p>
+        三个特殊结果必须认识，否则会以为程序疯了：
+      </p>
+      <ul>
+        <li><code>1 / 0</code> → <code>Infinity</code>（正无穷）；<code>-1 / 0</code> → <code>-Infinity</code>；</li>
+        <li><code>0 / 0</code> → <code>NaN</code>（不是数字）；</li>
+        <li><code>NaN</code> 参与的任何算术都还是 <code>NaN</code>——<strong>一旦某处算出 NaN，它会像墨滴一样染开</strong>，
+          所以看到 NaN 要往回找“第一个变 NaN 的地方”。</li>
+      </ul>
+      <p>
+        自增的两种写法差别在“返回值”：
+        <code>i++</code> 先给人旧值、再加一（后置）；
+        <code>++i</code> 先加一、再给新值（前置）。
+        写在自己的那一行（<code>i++;</code>）时两者没区别；
+        一旦嵌进别的表达式就会咬人——<strong>建议永远单独写一行</strong>。
+      </p>
+      <script type="text/plain" data-lang="js" data-title="自增的差别">
+        let i = 1;
+        console.log(i++);   // 1  ← 先给旧值
+        console.log(i);     // 2
+        let j = 1;
+        console.log(++j);   // 2  ← 先加一再给值
+      </script>
+      <p>
+        复合赋值是“算完再存回去”的简写：
+        <code>x += 1</code> 等于 <code>x = x + 1</code>，
+        同理还有 <code>-=</code>、<code>*=</code>、<code>/=</code>、<code>%=</code>、<code>**=</code>。
+        累加计数时最常用。
+      </p>
+
+      <h2>两个“看起来一样”的加号</h2>
+      <p>
+        <code>+</code> 是 JavaScript 里唯一“身兼两职”的运算符：
+        两边都是数字时做加法，<strong>只要有一边是字符串就变成拼接</strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 算术、拼接与那些“奇怪但正确”的结果</div>
+        <div class="demo-preview">
+          <table id="js29-demo1-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody1 = document.querySelector('#js29-demo1-out tbody');
+            function row1(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+            row1('1 + 2', 1 + 2, '数字相加');
+            row1('7 / 2', 7 / 2, '除法不取整');
+            row1('7 % 3', 7 % 3, '取余');
+            row1('-7 % 3', -7 % 3, '取余结果跟着被除数走');
+            row1('2 ** 10', 2 ** 10, '幂运算');
+            row1('1 / 0', 1 / 0, '正无穷');
+            row1('0 / 0', 0 / 0, 'NaN：不是数字');
+            row1('"1" + 1', "1" + 1, '有字符串 → 拼接');
+            row1('1 + true', 1 + true, 'true 被转成 1');
+            row1('"3" * "4"', "3" * "4", '减法乘法会先转数字');
+            row1('"日拱一卒" + 3 + "天"', "日拱一卒" + 3 + "天", '从字符串开始，后面全被拼起来');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js29-demo1-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody1 = document.querySelector('#js29-demo1-out tbody');
+            function row1(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, String(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody1.appendChild(tr);
+            }
+            row1('1 + 2', 1 + 2, '数字相加');
+            row1('7 / 2', 7 / 2, '除法不取整');
+            row1('7 % 3', 7 % 3, '取余');
+            row1('-7 % 3', -7 % 3, '取余结果跟着被除数走');
+            row1('2 ** 10', 2 ** 10, '幂运算');
+            row1('1 / 0', 1 / 0, '正无穷');
+            row1('0 / 0', 0 / 0, 'NaN：不是数字');
+            row1('"1" + 1', "1" + 1, '有字符串 → 拼接');
+            row1('1 + true', 1 + true, 'true 被转成 1');
+            row1('"3" * "4"', "3" * "4", '减法乘法会先转数字');
+            row1('"日拱一卒" + 3 + "天"', "日拱一卒" + 3 + "天", '从字符串开始，后面全被拼起来');
+          </script>
+        </div>
+      </div>
+      <p>
+        结论很实用：<strong>想拼字符串就用模板字符串，想让数字相加就先确保两边都是数字</strong>
+        （必要时用 <code>Number()</code> 转换，见第二十八式）。
+        别让 <code>+</code> 去猜你的意图。
+      </p>
+
+      <h2>比较运算符：一律用 ===</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>运算符</th>
+            <th>含义</th>
+            <th>建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></td><td>比大小</td><td>数字之间正常用</td></tr>
+          <tr><td><code>===</code> <code>!==</code></td><td>严格相等 / 严格不等（类型与值都要一样）</td><td><strong>默认就用它</strong></td></tr>
+          <tr><td><code>==</code> <code>!=</code></td><td>宽松相等：先转类型再比</td><td>会咬人，避开（唯一例外见下）</td></tr>
+          <tr><td><code>Object.is(a, b)</code></td><td>“同值”判断</td><td>需要区分 <code>NaN</code> 与 <code>-0</code> 时用</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · === 与 == 的对照（哪一行让你意外？）</div>
+        <div class="demo-preview">
+          <table id="js29-demo2-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>===</th><th>==</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody2 = document.querySelector('#js29-demo2-out tbody');
+            function pair(a, b, note) {
+              var tr = document.createElement('tr');
+              [a + " ? " + b, String(a === b), String(a == b), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody2.appendChild(tr);
+            }
+            pair(1, 1, "类型与值都一样");
+            pair(1, "1", "数字与字符串：== 会先转类型");
+            pair(0, "", "空字符串转成 0");
+            pair(0, false, "false 也转成 0");
+            pair(null, undefined, "== 认为两者等价（惯用例外）");
+            pair(NaN, NaN, "NaN 不等于任何值，包括自己");
+            pair([], false, "空数组转成 0 → 宽松相等为真");
+          </script>
+          <p class="mt-2 mb-0" id="js29-demo2-note" style="font-size: .82rem; color: #6f6a5e">
+            正在补充说明……
+          </p>
+          <script>
+            "use strict";
+            document.getElementById('js29-demo2-note').textContent =
+              '结论：宽松相等等于“先转类型再比”，规则又长又反直觉；'
+              + '唯一值得记的例外是 x == null 可以一次判掉 null 与 undefined。'
+              + '要判断 NaN，用 Number.isNaN(x)；要判断数组，用 Array.isArray(x)。';
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js29-demo2-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>===</th><th>==</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="mt-2 mb-0" id="js29-demo2-note" style="font-size: .82rem; color: #6f6a5e">
+              正在补充说明……
+            </p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本（前半：画表格）">
+            "use strict";
+            var tbody2 = document.querySelector('#js29-demo2-out tbody');
+            function pair(a, b, note) {
+              var tr = document.createElement('tr');
+              [a + " ? " + b, String(a === b), String(a == b), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody2.appendChild(tr);
+            }
+            pair(1, 1, "类型与值都一样");
+            pair(1, "1", "数字与字符串：== 会先转类型");
+            pair(0, "", "空字符串转成 0");
+            pair(0, false, "false 也转成 0");
+            pair(null, undefined, "== 认为两者等价（惯用例外）");
+            pair(NaN, NaN, "NaN 不等于任何值，包括自己");
+            pair([], false, "空数组转成 0 → 宽松相等为真");
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本（后半：补一句说明）">
+            "use strict";
+            document.getElementById('js29-demo2-note').textContent =
+              '结论：宽松相等等于“先转类型再比”，规则又长又反直觉；'
+              + '唯一值得记的例外是 x == null 可以一次判掉 null 与 undefined。'
+              + '要判断 NaN，用 Number.isNaN(x)；要判断数组，用 Array.isArray(x)。';
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">两个与大小比较有关的怪脾气</div>
+        <ul style="margin:0">
+          <li><code>null</code> 与数字比大小时会被转成 0：于是
+            <code>null &gt; 0</code> 为 <code>false</code>，而 <code>null &gt;= 0</code> 为 <code>true</code>——
+            看起来矛盾，其实只是转换规则不同（一个用数值比较，一个先转数字）；
+            结论：<strong>比较前先确认值不是 null/undefined</strong>；</li>
+          <li><code>NaN</code> 与任何值比较都是 <code>false</code>：
+            <code>NaN &lt; 1</code>、<code>NaN &gt; 1</code>、<code>NaN === NaN</code> 全是 false。</li>
+        </ul>
+      </div>
+
+      <h2>逻辑运算符：不只是真假</h2>
+      <p>
+        <code>&amp;&amp;</code>（并且）、<code>||</code>（或者）、<code>!</code>（取反）
+        的特别之处在于：<strong>它们返回的是“操作数本身”，而不是 true/false</strong>。
+        加上“短路”特性（结果已定就不再看后面），就长出了几种常用写法：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>怎么读</th>
+            <th>典型用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>a &amp;&amp; b</code></td>
+            <td><code>a</code> 为假就用 <code>a</code>，否则用 <code>b</code></td>
+            <td>“条件成立才做”：<code>isReady &amp;&amp; start()</code></td>
+          </tr>
+          <tr>
+            <td><code>a || b</code></td>
+            <td><code>a</code> 为真就用 <code>a</code>，否则用 <code>b</code></td>
+            <td>给默认值：<code>name || "匿名"</code>（注意 0、"" 也会被换掉）</td>
+          </tr>
+          <tr>
+            <td><code>!a</code></td>
+            <td>转成布尔再取反</td>
+            <td>判断“没有”：<code>if (!list.length) { … }</code></td>
+          </tr>
+          <tr>
+            <td><code>!!a</code></td>
+            <td>取反两次，等于“转成布尔”</td>
+            <td>把任意值变成 <code>true</code>/<code>false</code>：<code>!!""</code> 为 <code>false</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 短路与返回值（每一行都能当口诀背）</div>
+        <div class="demo-preview">
+          <table id="js29-demo3-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>结果</th><th>解释</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody3 = document.querySelector('#js29-demo3-out tbody');
+            function row3(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, value === undefined ? "undefined" : JSON.stringify(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text === undefined ? 'undefined' : text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+            row3('0 || "兜底"', 0 || "兜底", '左边是假值 → 用右边');
+            row3('"用户" || "兜底"', "用户" || "兜底", '左边是真值 → 用左边');
+            row3('0 ?? "兜底"', 0 ?? "兜底", '?? 只在 null/undefined 时兜底，0 是有效值');
+            row3('null ?? "兜底"', null ?? "兜底", 'null 触发兜底');
+            row3('"" || "x"', "" || "x", '空字符串会被 || 换掉——这是它最常见的误伤');
+            row3('"" ?? "x"', "" ?? "x", '空字符串是有效值，?? 不换');
+            row3('true && "执行了"', true && "执行了", '左边为真 → 返回右边');
+            row3('false && "不会执行"', false && "不会执行", '左边为假 → 直接返回 false，右边不求值');
+            row3('!""', !"", '转布尔再取反');
+            row3('!!"0"', !!"0", '非空字符串是真');
+            var sideEffect = 0;
+            (false && (sideEffect = 1));
+            (true || (sideEffect = 1));
+            row3('短路副作用计数', sideEffect, '两次都没执行赋值 → 仍是 0');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js29-demo3-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>结果</th><th>解释</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody3 = document.querySelector('#js29-demo3-out tbody');
+            function row3(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, value === undefined ? "undefined" : JSON.stringify(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text === undefined ? 'undefined' : text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+            row3('0 || "兜底"', 0 || "兜底", '左边是假值 → 用右边');
+            row3('"用户" || "兜底"', "用户" || "兜底", '左边是真值 → 用左边');
+            row3('0 ?? "兜底"', 0 ?? "兜底", '?? 只在 null/undefined 时兜底，0 是有效值');
+            row3('null ?? "兜底"', null ?? "兜底", 'null 触发兜底');
+            row3('"" || "x"', "" || "x", '空字符串会被 || 换掉——这是它最常见的误伤');
+            row3('"" ?? "x"', "" ?? "x", '空字符串是有效值，?? 不换');
+            row3('true && "执行了"', true && "执行了", '左边为真 → 返回右边');
+            row3('false && "不会执行"', false && "不会执行", '左边为假 → 直接返回 false，右边不求值');
+            row3('!""', !"", '转布尔再取反');
+            row3('!!"0"', !!"0", '非空字符串是真');
+            var sideEffect = 0;
+            (false && (sideEffect = 1));
+            (true || (sideEffect = 1));
+            row3('短路副作用计数', sideEffect, '两次都没执行赋值 → 仍是 0');
+          </script>
+        </div>
+      </div>
+      <p>
+        三条结论：<strong><code>||</code> 与 <code>??</code> 的分工</strong>——
+        后者只在值真的“没有”（<code>null</code>/<code>undefined</code>）时兜底，
+        前者会连 <code>0</code>、<code>""</code>、<code>false</code> 一起换掉；
+        <strong><code>&amp;&amp;</code> 适合“满足条件才执行”</strong>；
+        <strong>副作用只在需要时发生</strong>（这正是“短路”这个名字的来历）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 可选链 ?. 与空值合并 ??：对付“可能没有”的数据</div>
+        <div class="demo-preview">
+          <table id="js29-demo4-out" style="width: 100%">
+            <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody4 = document.querySelector('#js29-demo4-out tbody');
+            function row4(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, value === undefined ? "undefined" : JSON.stringify(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody4.appendChild(tr);
+            }
+
+            var user = { name: "墨白", profile: { city: "杭州" } };
+            var guest = { name: "路人" };
+
+            row4('user.profile.city', user.profile.city, '一路都存在');
+            row4('guest.profile.city', undefined, 'guest 没有 profile —— 直接取会报错，所以这一行只是文字说明');
+            row4('guest.profile?.city', guest.profile?.city, '?. 遇到 null/undefined 就停下，返回 undefined');
+            row4('guest.profile?.city ?? "未填写"', guest.profile?.city ?? "未填写", '配合 ?? 给出默认值');
+            row4('user.name ?? "匿名"', user.name ?? "匿名", '有值就用原值');
+            row4('user.nickname ?? "匿名"', user.nickname ?? "匿名", 'undefined 触发兜底');
+
+            var arr = [10, 20];
+            row4('arr[3] ?? "没有这项"', arr[3] ?? "没有这项", '数组越界得到 undefined');
+            row4('arr?.[0]', arr?.[0], '可选的元素访问');
+
+            var obj = { hello: function () { return "你好"; } };
+            row4('obj.hello?.()', obj.hello?.(), '存在就调用');
+            row4('obj.bye?.()', obj.bye?.(), '不存在就安静地返回 undefined，不报错');
+          </script>
+          <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+            注意 <code>?.</code> 只保护“它左边那一步”：写成 <code>user.profile.city</code>
+            而 <code>profile</code> 不存在时，照样会报错——所以要写在最可能缺的那一环上。
+          </p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js29-demo4-out" style="width: 100%">
+              <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+              注意 <code>?.</code> 只保护“它左边那一步”：写成 <code>user.profile.city</code>
+              而 <code>profile</code> 不存在时，照样会报错——所以要写在最可能缺的那一环上。
+            </p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody4 = document.querySelector('#js29-demo4-out tbody');
+            function row4(expr, value, note) {
+              var tr = document.createElement('tr');
+              [expr, value === undefined ? "undefined" : JSON.stringify(value), note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody4.appendChild(tr);
+            }
+
+            var user = { name: "墨白", profile: { city: "杭州" } };
+            var guest = { name: "路人" };
+
+            row4('user.profile.city', user.profile.city, '一路都存在');
+            row4('guest.profile.city', undefined, 'guest 没有 profile —— 直接取会报错，所以这一行只是文字说明');
+            row4('guest.profile?.city', guest.profile?.city, '?. 遇到 null/undefined 就停下，返回 undefined');
+            row4('guest.profile?.city ?? "未填写"', guest.profile?.city ?? "未填写", '配合 ?? 给出默认值');
+            row4('user.name ?? "匿名"', user.name ?? "匿名", '有值就用原值');
+            row4('user.nickname ?? "匿名"', user.nickname ?? "匿名", 'undefined 触发兜底');
+
+            var arr = [10, 20];
+            row4('arr[3] ?? "没有这项"', arr[3] ?? "没有这项", '数组越界得到 undefined');
+            row4('arr?.[0]', arr?.[0], '可选的元素访问');
+
+            var obj = { hello: function () { return "你好"; } };
+            row4('obj.hello?.()', obj.hello?.(), '存在就调用');
+            row4('obj.bye?.()', obj.bye?.(), '不存在就安静地返回 undefined，不报错');
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>?.</code> 与 <code>??</code> 是处理“接口返回的数据可能缺字段”的标准武器。
+        老代码里常见的写法是层层判断（<code>if (user &amp;&amp; user.profile &amp;&amp; user.profile.city)</code>），
+        现在一行就够了。
+      </p>
+
+      <h2>其它运算符速查</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>运算符</th>
+            <th>含义</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>条件 ? a : b</code></td><td>三元：条件真取 a，假取 b</td><td><code>n &gt; 0 ? "正" : "非正"</code></td></tr>
+          <tr><td><code>...</code></td><td>展开 / 收集</td><td><code>[...arr, 4]</code>、<code>sum(...nums)</code></td></tr>
+          <tr><td><code>typeof</code></td><td>问类型（第二十八式）</td><td><code>typeof 42</code> → <code>"number"</code></td></tr>
+          <tr><td><code>instanceof</code></td><td>问“是不是某个类的实例”</td><td><code>d instanceof Date</code></td></tr>
+          <tr><td><code>in</code></td><td>问“属性在不在”</td><td><code>"name" in user</code></td></tr>
+          <tr><td><code>delete</code></td><td>删除对象属性</td><td><code>delete user.name</code>（数组用它不合适，会留空洞）</td></tr>
+          <tr><td><code>void</code></td><td>求值后返回 <code>undefined</code></td><td>极少用；<code>&lt;a href="javascript:void(0)"&gt;</code> 是老写法，新代码别学</td></tr>
+          <tr><td><code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code> <code>&gt;&gt;&gt;</code></td><td>位运算（按 32 位整数处理）</td><td>前端日常少用；<code>x &gt;&gt; 1</code> 等于“除以 2 取整”</td></tr>
+        </tbody>
+      </table>
+
+      <h2>优先级、结合性与那个必须加括号的规定</h2>
+      <p>
+        表达式里谁先算，由<strong>优先级</strong>决定；同样优先级的，由<strong>结合性</strong>
+        （从左还是从右）决定。常用的顺序从高到低大致是：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>层次</th>
+            <th>包含</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>最高</td><td>分组 <code>( )</code>、成员访问 <code>.</code> <code>[ ]</code>、可选链 <code>?.</code>、<code>new</code>、函数调用</td></tr>
+          <tr><td>↓</td><td><code>!</code>、<code>typeof</code>、<code>void</code>、<code>delete</code>、<code>++</code>、<code>--</code></td></tr>
+          <tr><td>↓</td><td><code>**</code>（右结合：<code>2 ** 3 ** 2</code> ＝ <code>2 ** 9</code>）</td></tr>
+          <tr><td>↓</td><td><code>*</code> <code>/</code> <code>%</code>，然后 <code>+</code> <code>-</code></td></tr>
+          <tr><td>↓</td><td>比较 <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code>，然后 <code>===</code> <code>!==</code></td></tr>
+          <tr><td>↓</td><td><code>&amp;&amp;</code>，然后 <code>||</code>，然后 <code>??</code></td></tr>
+          <tr><td>↓</td><td>三元 <code>? :</code></td></tr>
+          <tr><td>↓</td><td>赋值 <code>=</code> <code>+=</code> …（右结合：<code>a = b = 0</code> 从右往左）</td></tr>
+          <tr><td>最低</td><td>逗号 <code>,</code>（在参数、数组里是分隔符，不是逗号运算符）</td></tr>
+        </tbody>
+      </table>
+      <p>
+        但真正要紧的不是背表，而是记住一条<strong>硬规定</strong>：
+        <code>??</code> 不能和 <code>&amp;&amp;</code>、<code>||</code> 直接混用，必须加括号——
+        因为它们的优先级容易写错，语言干脆禁止你写模糊代码。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 优先级现场（含那条“必须加括号”的规定）</div>
+        <div class="demo-preview">
+          <ul id="js29-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js29-demo5-out');
+            function say5(expr, value) {
+              var li = document.createElement('li');
+              li.textContent = expr + ' → ' + value;
+              list5.appendChild(li);
+            }
+            say5('2 + 3 * 4', 2 + 3 * 4);
+            say5('(2 + 3) * 4', (2 + 3) * 4);
+            say5('2 ** 3 ** 2（右结合）', 2 ** 3 ** 2);
+            say5('1 + 2 + "岁"', 1 + 2 + "岁");
+            say5('1 + (2 + "岁")', 1 + (2 + "岁"));
+            say5('a = b = 5（从右往左）', (function () { var a, b; return (a = b = 5) + "｜a = " + a + "，b = " + b; })());
+            say5('true || false && false', true || false && false);
+            say5('(true || false) && false', (true || false) && false);
+            say5('null ?? "兜底" || "更兜底"', '这句会报语法错误，下面单独演示');
+            var syntaxNote;
+            try {
+              new Function('return null ?? "a" || "b";');
+              syntaxNote = '居然没报错';
+            } catch (err) {
+              syntaxNote = err.name + '：' + err.message;
+            }
+            say5('把 ?? 与 || 直接混用', syntaxNote);
+            say5('加上括号就没问题：(null ?? "a") || "b"', (null ?? "a") || "b");
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js29-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js29-demo5-out');
+            function say5(expr, value) {
+              var li = document.createElement('li');
+              li.textContent = expr + ' → ' + value;
+              list5.appendChild(li);
+            }
+            say5('2 + 3 * 4', 2 + 3 * 4);
+            say5('(2 + 3) * 4', (2 + 3) * 4);
+            say5('2 ** 3 ** 2（右结合）', 2 ** 3 ** 2);
+            say5('1 + 2 + "岁"', 1 + 2 + "岁");
+            say5('1 + (2 + "岁")', 1 + (2 + "岁"));
+            say5('a = b = 5（从右往左）', (function () { var a, b; return (a = b = 5) + "｜a = " + a + "，b = " + b; })());
+            say5('true || false && false', true || false && false);
+            say5('(true || false) && false', (true || false) && false);
+            say5('null ?? "兜底" || "更兜底"', '这句会报语法错误，下面单独演示');
+            var syntaxNote;
+            try {
+              new Function('return null ?? "a" || "b";');
+              syntaxNote = '居然没报错';
+            } catch (err) {
+              syntaxNote = err.name + '：' + err.message;
+            }
+            say5('把 ?? 与 || 直接混用', syntaxNote);
+            say5('加上括号就没问题：(null ?? "a") || "b"', (null ?? "a") || "b");
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里用 <code>new Function("…")</code> 把那段有语法错误的代码“送进去编译”，
+        从而安全地把 <code>SyntaxError</code> 抓出来——因为语法错误在解析阶段就会中断脚本，
+        普通的 <code>try…catch</code> 是接不住的（第二十七式提过，第三十六式细讲）。
+      </p>
+      <div class="callout warn">
+        <div class="callout-title">心法：拿不准就加括号</div>
+        <p style="margin:0">
+          优先级表是给“读懂别人代码”用的，不是给自己炫技用的。
+          写的时候宁可多打两对括号：<strong>代码是给人读的，编译器不需要你省这两个字符</strong>。
+          一条实用的自查：把表达式念出来，如果需要停顿两秒才能说清先算哪一步，就该加括号了。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>算术：<code>7 / 2</code> 得 <code>3.5</code>；<code>1 / 0</code> 是 <code>Infinity</code>；
+          <code>0 / 0</code> 是 <code>NaN</code>，且 NaN 会“传染”；</li>
+        <li><code>+</code> 双重身份：有字符串就拼接；想拼串请用模板字符串，想算数先转数字；</li>
+        <li>比较一律 <code>===</code>；<code>==</code> 会先转类型，只有 <code>x == null</code> 这个惯用法值得保留；</li>
+        <li>逻辑运算符返回<strong>操作数本身</strong>并短路：<code>&amp;&amp;</code> 做“条件成立才执行”，
+          <code>||</code> 做“兜底但会换掉 0 与空串”，<code>!x</code> / <code>!!x</code> 做真假转换；</li>
+        <li><code>??</code> 只在 <code>null</code>/<code>undefined</code> 时兜底；<code>?.</code> 让“可能没有”的访问不再报错；</li>
+        <li>速查表里的三元、展开、<code>typeof</code>、<code>in</code>、<code>delete</code>、位运算先混个脸熟，用到再回查；</li>
+        <li>优先级与结合性：<code>**</code> 与赋值右结合，其余多为左结合；<strong><code>??</code> 不能与
+          <code>&amp;&amp;</code>/<code>||</code> 直接混用</strong>，加括号即可；拿不准就加括号。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十九式</div>
+        <ol>
+          <li>已知 <code>minutes = 137</code>，用运算符算出“几小时几分钟”并打印成
+            <code>2 小时 17 分钟</code> 这样的格式。</li>
+          <li>写一个“安全取名”表达式：变量 <code>nickname</code> 可能是
+            <code>""</code>、<code>null</code>、<code>undefined</code> 或正常字符串，
+            要求只有后三种情况才使用“匿名”兜底（提示：想清楚该用 <code>||</code> 还是 <code>??</code>）。</li>
+          <li>思考：为什么 JavaScript 规定 <code>??</code> 不能和 <code>&amp;&amp;</code>、<code>||</code>
+            直接混用？这条规定的出发点是什么？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="把分钟拆成小时与分钟">
+            "use strict";
+
+            const minutes = 137;
+            const hours = (minutes - minutes % 60) / 60;   // 或者用 Math.floor(minutes / 60)
+            const rest = minutes % 60;
+
+            console.log(`${hours} 小时 ${rest} 分钟`);
+            // 控制台输出：2 小时 17 分钟
+          </script>
+          <p>
+            关键点：<code>%</code> 拿来算“余下的部分”非常顺手；
+            <code>Math.floor(minutes / 60)</code> 也能得到小时数，第三十四式会正式认识 <code>Math</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="只有 null / undefined 才兜底">
+            "use strict";
+
+            let nickname = "";
+            const shown = nickname ?? "匿名";
+            console.log(shown);   // 空字符串原样保留
+
+            nickname = null;
+            console.log(nickname ?? "匿名");   // 匿名
+
+            nickname = undefined;
+            console.log(nickname ?? "匿名");   // 匿名
+
+            // 如果用 ||，空字符串会被换成“匿名”——那是另一种需求（“没填就当没填”）
+          </script>
+          <p>
+            判断标准：<strong>空字符串算不算“有效的值”</strong>。
+            算 → 用 <code>??</code>；不算（“填了空也当作没填”） → 用 <code>||</code>。
+            这类需求一定要先问清业务含义，别凭手感选运算符。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为这三者的优先级挨得很近、又没有直观的“常识”可依：
+            <code>a ?? b || c</code> 到底是 <code>(a ?? b) || c</code> 还是 <code>a ?? (b || c)</code>，
+            不同语言的约定不一样，写的人与读的人极易理解错。
+            语言设计者干脆<strong>禁止这种模糊写法</strong>，逼你用括号把意图写出来——
+            这与“宁可让代码啰嗦一点，也不要让人猜”的总体取向一致。
+            这也解释了本式的心法：<strong>拿不准就加括号，括号是最便宜的注释。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，让代码会分岔与循环：控制流。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

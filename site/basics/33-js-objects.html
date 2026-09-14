@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十三式 · 对象与 Map/Set | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="对象的创建与读写、方法与 this、解构与展开、浅复制与深复制、Object 静态方法、Map/Set，以及 JSON 的字符串与解析。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-33">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        数组是把同类东西排成队，对象则是给东西<strong>贴上名字</strong>：
+        名字 + 值，成对出现。这一式讲清对象的读写与复制，
+        再补上两位更专门的容器——<code>Map</code> 与 <code>Set</code>。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会创建与读写对象，分得清点号与方括号的用法</li>
+          <li>会用解构与展开，知道“复制”在对象上意味着什么（浅复制）</li>
+          <li>认得 <code>Object.keys/values/entries/fromEntries/assign/freeze/hasOwn</code></li>
+          <li>会用 <code>Map</code> 与 <code>Set</code> 解决对象与数组解决不好的问题</li>
+          <li>会用 <code>JSON.stringify</code> 与 <code>JSON.parse</code>，并知道它们会丢什么</li>
+        </ul>
+      </div>
+
+      <h2>创建与读写</h2>
+      <script type="text/plain" data-lang="js" data-title="创建对象的几种写法">
+        // 最常见的字面量写法
+        const user = {
+          name: "墨白",              // 属性
+          days: 21,
+          "喜欢的招式": "站桩",       // 名字含空格/中文时可以用引号
+          greet() {                  // 方法简写
+            return `你好，我是${this.name}`;
+          }
+        };
+
+        // 简写属性：变量名当键、变量值当值
+        const name = "墨白";
+        const days = 21;
+        const short = { name, days };          // 等价于 { name: name, days: days }
+
+        // 计算属性名：键由表达式算出来
+        const key = "skill-" + 1;
+        const dynamic = { [key]: "HTML" };     // { "skill-1": "HTML" }
+
+        // 先有键值再拼对象
+        const pairs = [["html", "入门"], ["css", "进阶"]];
+        const fromPairs = Object.fromEntries(pairs);   // { html: "入门", css: "进阶" }
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>操作</th>
+            <th>写法</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>读属性（名字固定）</td><td><code>user.name</code></td><td>最常用，读起来像一句英文</td></tr>
+          <tr><td>读属性（名字在变量里）</td><td><code>user[key]</code></td><td>方括号里放<strong>表达式</strong>，动态键必须用它</td></tr>
+          <tr><td>写属性</td><td><code>user.days = 22</code></td><td>键不存在就是“新增”</td></tr>
+          <tr><td>删属性</td><td><code>delete user.days</code></td><td>返回布尔值；成功删除后 <code>user.days</code> 是 <code>undefined</code></td></tr>
+          <tr><td>问“有没有这个键”</td><td><code>"name" in user</code></td><td>会沿着原型链找；只想问<strong>自己的</strong>属性用 <code>Object.hasOwn(user, "name")</code></td></tr>
+          <tr><td>取不存在的属性</td><td><code>user.age</code></td><td>得到 <code>undefined</code>（不报错，但后面一用就可能炸）</td></tr>
+          <tr><td>安全取深层属性</td><td><code>user.profile?.city</code></td><td>可选链，第二十九式讲过</td></tr>
+          <tr><td>列出全部键 / 值 / 键值对</td><td><code>Object.keys/values/entries(user)</code></td><td>返回数组，可以接着 <code>map</code> / <code>filter</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 读写、动态键、方法与 this</div>
+        <div class="demo-preview">
+          <ul id="js33-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list1 = document.getElementById('js33-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            var user = {
+              name: "墨白",
+              days: 21,
+              "喜欢的招式": "站桩",
+              greet: function () { return '你好，我是' + this.name; }
+            };
+
+            say1('点号读：user.name → ' + user.name);
+            say1('方括号读中文键：user["喜欢的招式"] → ' + user["喜欢的招式"]);
+
+            var key = "days";
+            say1('方括号读动态键：user[key] → ' + user[key] + '（点号做不到这件事）');
+
+            user.days = 22;
+            say1('改属性：user.days = 22 → ' + user.days);
+
+            user.level = "入门";
+            say1('加属性：user.level → ' + user.level);
+
+            say1('方法里的 this：对象调用 → ' + user.greet());
+            var greetFn = user.greet;
+            var detachedNote;
+            try {
+              detachedNote = '得到「' + greetFn() + '」';
+            } catch (err) {
+              detachedNote = err.name + '：' + err.message;
+            }
+            say1('把方法摘出来单独调用 → ' + detachedNote + '（严格模式下 this 是 undefined）');
+
+            say1('问键：\'name\' in user → ' + ('name' in user)
+              + '；Object.hasOwn(user, "name") → ' + Object.hasOwn(user, "name"));
+            say1('问一个继承来的键：\'toString\' in user → ' + ('toString' in user)
+              + '；Object.hasOwn(user, "toString") → ' + Object.hasOwn(user, "toString"));
+
+            var deleted = delete user.level;
+            say1('delete user.level 返回 ' + deleted + '，之后 user.level → ' + user.level);
+
+            say1('列出所有键：' + Object.keys(user).join('、'));
+            say1('列出所有值：' + Object.values(user).map(function (v) {
+              return typeof v === 'function' ? '（一个方法）' : v;
+            }).join('、'));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js33-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list1 = document.getElementById('js33-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            var user = {
+              name: "墨白",
+              days: 21,
+              "喜欢的招式": "站桩",
+              greet: function () { return '你好，我是' + this.name; }
+            };
+
+            say1('点号读：user.name → ' + user.name);
+            say1('方括号读中文键：user["喜欢的招式"] → ' + user["喜欢的招式"]);
+
+            var key = "days";
+            say1('方括号读动态键：user[key] → ' + user[key] + '（点号做不到这件事）');
+
+            user.days = 22;
+            say1('改属性：user.days = 22 → ' + user.days);
+
+            user.level = "入门";
+            say1('加属性：user.level → ' + user.level);
+
+            say1('方法里的 this：对象调用 → ' + user.greet());
+            var greetFn = user.greet;
+            var detachedNote;
+            try {
+              detachedNote = '得到「' + greetFn() + '」';
+            } catch (err) {
+              detachedNote = err.name + '：' + err.message;
+            }
+            say1('把方法摘出来单独调用 → ' + detachedNote + '（严格模式下 this 是 undefined）');
+
+            say1('问键：\'name\' in user → ' + ('name' in user)
+              + '；Object.hasOwn(user, "name") → ' + Object.hasOwn(user, "name"));
+            say1('问一个继承来的键：\'toString\' in user → ' + ('toString' in user)
+              + '；Object.hasOwn(user, "toString") → ' + Object.hasOwn(user, "toString"));
+
+            var deleted = delete user.level;
+            say1('delete user.level 返回 ' + deleted + '，之后 user.level → ' + user.level);
+
+            say1('列出所有键：' + Object.keys(user).join('、'));
+            say1('列出所有值：' + Object.values(user).map(function (v) {
+              return typeof v === 'function' ? '（一个方法）' : v;
+            }).join('、'));
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里有一行刻意“搞坏”了：把 <code>user.greet</code> 摘出来赋给
+        <code>greetFn</code> 再调用，严格模式下 <code>this</code> 变成 <code>undefined</code>，
+        于是 <code>this.name</code> 直接抛出
+        <code>TypeError: Cannot read properties of undefined</code>——
+        因为 <code>this</code> 取决于“<strong>怎么调用</strong>”，而不是“定义在哪”。
+        这条规则在第三十一式见过，第三十八式讲事件回调时还会撞上它。
+      </p>
+
+      <h2>解构与展开</h2>
+      <script type="text/plain" data-lang="js" data-title="从对象里“取”与“摊”">
+        const user = { name: "墨白", days: 21, profile: { city: "杭州", job: "初学者" } };
+
+        // 按名字取值（名字要与键一致）
+        const { name, days } = user;
+
+        // 改名、给默认值
+        const { name: nickName, level = "入门" } = user;
+
+        // 嵌套解构
+        const { profile: { city } } = user;
+
+        // 剩下的都收起来
+        const { name: onlyName, ...others } = user;   // others 是剩下的键值对
+
+        // 展开：复制与合并（后面的覆盖前面的）
+        const copy = { ...user };
+        const merged = { ...user, days: 22, level: "进阶" };
+        const overridden = { days: 1, ...{ days: 2 } };   // days 最终是 2
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 解构、合并与“浅复制”的真相</div>
+        <div class="demo-preview">
+          <ul id="js33-demo2-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list2 = document.getElementById('js33-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var user2 = { name: "墨白", days: 21, profile: { city: "杭州" } };
+
+            var name2 = user2.name, days2 = user2.days;
+            say2('解构：name = ' + name2 + '，days = ' + days2);
+
+            var nickName2 = user2.name;
+            var level2 = user2.level === undefined ? "入门" : user2.level;
+            say2('改名 + 默认值：nickName = ' + nickName2 + '，level = ' + level2);
+
+            var city2 = user2.profile.city;
+            say2('嵌套解构：city = ' + city2);
+
+            var others2 = {};
+            Object.keys(user2).forEach(function (k) {
+              if (k !== "name") { others2[k] = user2[k]; }
+            });
+            say2('剩余属性：others = ' + Object.keys(others2).join('、'));
+
+            var copy2 = Object.assign({}, user2);
+            copy2.days = 99;
+            say2('展开复制再改 days → 副本 ' + copy2.days + '，原对象 ' + user2.days + '（顶层不受影响）');
+
+            copy2.profile.city = "成都";
+            say2('但复制是“浅”的：改副本的 profile.city → 原对象也变成 ' + user2.profile.city);
+
+            var deep = structuredClone(user2);
+            deep.profile.city = "苏州";
+            say2('用 structuredClone 深复制后再改 → 副本 ' + deep.profile.city
+              + '，原对象仍是 ' + user2.profile.city);
+
+            var merged2 = Object.assign({}, user2, { days: 30, level: "进阶" });
+            say2('合并（后面的覆盖前面的）：days = ' + merged2.days + '，level = ' + merged2.level);
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js33-demo2-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list2 = document.getElementById('js33-demo2-out');
+            function say2(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list2.appendChild(li);
+            }
+
+            var user2 = { name: "墨白", days: 21, profile: { city: "杭州" } };
+
+            var name2 = user2.name, days2 = user2.days;
+            say2('解构：name = ' + name2 + '，days = ' + days2);
+
+            var nickName2 = user2.name;
+            var level2 = user2.level === undefined ? "入门" : user2.level;
+            say2('改名 + 默认值：nickName = ' + nickName2 + '，level = ' + level2);
+
+            var city2 = user2.profile.city;
+            say2('嵌套解构：city = ' + city2);
+
+            var others2 = {};
+            Object.keys(user2).forEach(function (k) {
+              if (k !== "name") { others2[k] = user2[k]; }
+            });
+            say2('剩余属性：others = ' + Object.keys(others2).join('、'));
+
+            var copy2 = Object.assign({}, user2);
+            copy2.days = 99;
+            say2('展开复制再改 days → 副本 ' + copy2.days + '，原对象 ' + user2.days + '（顶层不受影响）');
+
+            copy2.profile.city = "成都";
+            say2('但复制是“浅”的：改副本的 profile.city → 原对象也变成 ' + user2.profile.city);
+
+            var deep = structuredClone(user2);
+            deep.profile.city = "苏州";
+            say2('用 structuredClone 深复制后再改 → 副本 ' + deep.profile.city
+              + '，原对象仍是 ' + user2.profile.city);
+
+            var merged2 = Object.assign({}, user2, { days: 30, level: "进阶" });
+            say2('合并（后面的覆盖前面的）：days = ' + merged2.days + '，level = ' + merged2.level);
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">浅复制：最常见的一类“意外联动”</div>
+        <p style="margin:0">
+          <code>{ ...obj }</code> 与 <code>Object.assign({}, obj)</code> 都只复制<strong>第一层</strong>：
+          里面如果装着对象或数组，副本与原对象<strong>仍然共享</strong>它们。
+          改副本的嵌套字段，原对象也跟着变——演示里那一步正是如此。
+          需要彻底独立的一份时用 <code>structuredClone(obj)</code>（现代浏览器已支持；
+          它不能复制函数与 DOM 节点，遇到会抛错）。
+        </p>
+      </div>
+
+      <h2>Object 静态方法速查</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>做什么</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Object.keys/values/entries(obj)</code></td><td>取出键 / 值 / [键, 值] 数组</td><td>只取<strong>自己的、可枚举的</strong>属性</td></tr>
+          <tr><td><code>Object.fromEntries(pairs)</code></td><td>把 [键, 值] 数组变回对象</td><td>常与 <code>entries</code> + <code>map</code> 配对使用</td></tr>
+          <tr><td><code>Object.assign(目标, …来源)</code></td><td>把来源的属性合并进目标</td><td><strong>会修改并返回目标</strong>；要新建就写 <code>Object.assign({}, a, b)</code></td></tr>
+          <tr><td><code>Object.hasOwn(obj, key)</code></td><td>是不是自己的属性</td><td>比 <code>obj.hasOwnProperty(key)</code> 稳（后者可能被覆盖）</td></tr>
+          <tr><td><code>Object.freeze(obj)</code></td><td>冻结：不能增删改属性</td><td><strong>浅冻结</strong>；严格模式下修改会报错，非严格模式静默失败</td></tr>
+          <tr><td><code>Object.isFrozen(obj)</code></td><td>是否已冻结</td><td>常与 freeze 配套做自检</td></tr>
+          <tr><td><code>Object.seal(obj)</code></td><td>封闭：能改不能增删</td><td>比 freeze 松一档</td></tr>
+          <tr><td><code>Object.entries(obj).map(…)</code></td><td>遍历并变换对象</td><td>想“把对象里的值统一处理”时最顺手</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 把对象“翻过来看”：keys / entries / fromEntries 与冻结</div>
+        <div class="demo-preview">
+          <ul id="js33-demo3-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list3 = document.getElementById('js33-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var skill = { html: 80, css: 60, js: 40 };
+
+            say3('keys → ' + Object.keys(skill).join('、'));
+            say3('values → ' + Object.values(skill).join('、'));
+            say3('entries → ' + JSON.stringify(Object.entries(skill)));
+
+            var doubled = Object.fromEntries(
+              Object.entries(skill).map(function (pair) { return [pair[0], pair[1] * 2]; })
+            );
+            say3('entries + map + fromEntries（分数翻倍）→ ' + JSON.stringify(doubled));
+
+            var passed = Object.fromEntries(
+              Object.entries(skill).filter(function (pair) { return pair[1] >= 60; })
+            );
+            say3('只留及格项 → ' + JSON.stringify(passed));
+
+            var frozen = Object.freeze({ level: "入门" });
+            var frozenNote;
+            try {
+              frozen.level = "进阶";        // 严格模式下会抛错
+              frozenNote = '居然改成功了？';
+            } catch (err) {
+              frozenNote = err.name + '：' + err.message;
+            }
+            say3('冻结对象后赋值 → ' + frozenNote + '，值仍是 ' + frozen.level);
+            say3('Object.isFrozen(frozen) → ' + Object.isFrozen(frozen)
+              + '；改里面的嵌套对象仍可成功（浅冻结）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js33-demo3-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list3 = document.getElementById('js33-demo3-out');
+            function say3(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list3.appendChild(li);
+            }
+
+            var skill = { html: 80, css: 60, js: 40 };
+
+            say3('keys → ' + Object.keys(skill).join('、'));
+            say3('values → ' + Object.values(skill).join('、'));
+            say3('entries → ' + JSON.stringify(Object.entries(skill)));
+
+            var doubled = Object.fromEntries(
+              Object.entries(skill).map(function (pair) { return [pair[0], pair[1] * 2]; })
+            );
+            say3('entries + map + fromEntries（分数翻倍）→ ' + JSON.stringify(doubled));
+
+            var passed = Object.fromEntries(
+              Object.entries(skill).filter(function (pair) { return pair[1] >= 60; })
+            );
+            say3('只留及格项 → ' + JSON.stringify(passed));
+
+            var frozen = Object.freeze({ level: "入门" });
+            var frozenNote;
+            try {
+              frozen.level = "进阶";        // 严格模式下会抛错
+              frozenNote = '居然改成功了？';
+            } catch (err) {
+              frozenNote = err.name + '：' + err.message;
+            }
+            say3('冻结对象后赋值 → ' + frozenNote + '，值仍是 ' + frozen.level);
+            say3('Object.isFrozen(frozen) → ' + Object.isFrozen(frozen)
+              + '；改里面的嵌套对象仍可成功（浅冻结）');
+          </script>
+        </div>
+      </div>
+
+      <h2>Map 与 Set：两种更专门的容器</h2>
+      <p>
+        对象很好用，但它有两个限制：<strong>键只能是字符串或 Symbol</strong>，
+        而且它身上还带着一堆“继承来的属性”（比如 <code>toString</code>）。
+        需要“用对象当键”“按插入顺序遍历”“随时知道有几项”时，就该请出
+        <code>Map</code>；而 <code>Set</code> 则是“<strong>不重复值的集合</strong>”，去重与判重最拿手。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>对象 <code>{}</code></th>
+            <th><code>Map</code></th>
+            <th><code>Set</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>键的类型</td><td>字符串 / Symbol</td><td><strong>任意类型</strong>（含对象）</td><td>不适用（只有值）</td></tr>
+          <tr><td>有没有 size</td><td>要自己数</td><td><code>map.size</code></td><td><code>set.size</code></td></tr>
+          <tr><td>遍历顺序</td><td>基本按插入顺序（整数键会提前）</td><td>严格按插入顺序</td><td>严格按插入顺序</td></tr>
+          <tr><td>常见用途</td><td>描述一个“东西”</td><td>键值映射、缓存、计数</td><td>去重、判重、集合运算</td></tr>
+        </tbody>
+      </table>
+      <script type="text/plain" data-lang="js" data-title="Map 与 Set 的常用方法">
+        // Map：键可以是任何东西
+        const visits = new Map();
+        visits.set("home", 3);
+        visits.set(userObject, "对象也能当键");   // 用对象当键，这是对象本身做不到的
+        visits.get("home");        // 3
+        visits.has("home");        // true
+        visits.delete("home");
+        visits.size;               // 还剩几项
+        for (const [key, value] of visits) { /* 按插入顺序遍历 */ }
+
+        // Set：不重复
+        const tags = new Set(["基本功", "拆解", "基本功"]);   // 重复的自动去掉
+        tags.add("表单");
+        tags.has("拆解");           // true
+        [...tags];                  // 转回数组
+
+        // 数组去重：最常用的一招
+        const unique = [...new Set([1, 2, 2, 3, 1])];   // [1, 2, 3]
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · Map 当计数器、Set 去重与集合运算</div>
+        <div class="demo-preview">
+          <ul id="js33-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js33-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            // 用 Map 统计词频
+            var words = ["站桩", "直拳", "站桩", "扫腿", "站桩"];
+            var counter = new Map();
+            words.forEach(function (w) {
+              counter.set(w, (counter.get(w) || 0) + 1);
+            });
+            say4('Map 统计词频：' + Array.from(counter).map(function (pair) {
+              return pair[0] + '×' + pair[1];
+            }).join('、') + '，size = ' + counter.size);
+
+            // 键可以是对象
+            var keyObj = { id: 1 };
+            var cache = new Map();
+            cache.set(keyObj, "我挂在对象键上");
+            say4('用对象当键：cache.get(keyObj) → ' + cache.get(keyObj)
+              + '；换一个长得一样的对象去查 → ' + cache.get({ id: 1 }));
+
+            // Set 去重
+            var raw = ["基本功", "拆解", "基本功", "表单", "拆解"];
+            var uniqueTags = new Set(raw);
+            say4('Set 去重：' + raw.length + ' 项 → ' + uniqueTags.size + ' 项：' + [...uniqueTags].join('、'));
+            say4('数组去重最简写法：[...new Set([1, 2, 2, 3, 1])] → '
+              + JSON.stringify([...new Set([1, 2, 2, 3, 1])]));
+
+            // 集合运算：并集 / 交集 / 差集
+            var a = new Set([1, 2, 3, 4]);
+            var b = new Set([3, 4, 5]);
+            var union = new Set([...a, ...b]);
+            var intersection = new Set([...a].filter(function (x) { return b.has(x); }));
+            var difference = new Set([...a].filter(function (x) { return !b.has(x); }));
+            say4('并集 → ' + [...union].join('、')
+              + '；交集 → ' + [...intersection].join('、')
+              + '；差集（a 减 b）→ ' + [...difference].join('、'));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js33-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js33-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            // 用 Map 统计词频
+            var words = ["站桩", "直拳", "站桩", "扫腿", "站桩"];
+            var counter = new Map();
+            words.forEach(function (w) {
+              counter.set(w, (counter.get(w) || 0) + 1);
+            });
+            say4('Map 统计词频：' + Array.from(counter).map(function (pair) {
+              return pair[0] + '×' + pair[1];
+            }).join('、') + '，size = ' + counter.size);
+
+            // 键可以是对象
+            var keyObj = { id: 1 };
+            var cache = new Map();
+            cache.set(keyObj, "我挂在对象键上");
+            say4('用对象当键：cache.get(keyObj) → ' + cache.get(keyObj)
+              + '；换一个长得一样的对象去查 → ' + cache.get({ id: 1 }));
+
+            // Set 去重
+            var raw = ["基本功", "拆解", "基本功", "表单", "拆解"];
+            var uniqueTags = new Set(raw);
+            say4('Set 去重：' + raw.length + ' 项 → ' + uniqueTags.size + ' 项：' + [...uniqueTags].join('、'));
+            say4('数组去重最简写法：[...new Set([1, 2, 2, 3, 1])] → '
+              + JSON.stringify([...new Set([1, 2, 2, 3, 1])]));
+
+            // 集合运算：并集 / 交集 / 差集
+            var a = new Set([1, 2, 3, 4]);
+            var b = new Set([3, 4, 5]);
+            var union = new Set([...a, ...b]);
+            var intersection = new Set([...a].filter(function (x) { return b.has(x); }));
+            var difference = new Set([...a].filter(function (x) { return !b.has(x); }));
+            say4('并集 → ' + [...union].join('、')
+              + '；交集 → ' + [...intersection].join('、')
+              + '；差集（a 减 b）→ ' + [...difference].join('、'));
+          </script>
+        </div>
+      </div>
+      <p>
+        一段经验：<strong>“描述一个东西”用对象，“查表 / 计数 / 存任意键”用 <code>Map</code>，
+        “去重 / 判重”用 <code>Set</code></strong>。
+        另外 <code>WeakMap</code> / <code>WeakSet</code> 的键是“弱引用”——
+        对象没人再用时会被自动回收，常用来给 DOM 元素挂额外数据而不担心内存泄漏，
+        但它们不能遍历、也没有 <code>size</code>。用到再回查即可。
+      </p>
+
+      <h2>JSON：把数据变成字符串，再变回来</h2>
+      <p>
+        数据要在页面之间传递（比如存进 <code>localStorage</code>、发给服务器），
+        都得先变成字符串。<code>JSON</code> 就是这套“文本格式”的通用语——
+        它长得像 JavaScript 的对象字面量，但<strong>不是 JavaScript</strong>：
+        键必须用双引号、不能有注释、不能写函数，也<strong>不能有 undefined</strong>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · JSON 的来回：能存的、会丢的、会报错的</div>
+        <div class="demo-preview">
+          <ul id="js33-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js33-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var note = { title: "站桩三月记", days: 21, done: false, tags: ["基本功", "拆解"] };
+            var text = JSON.stringify(note);
+            say5('stringify → ' + text);
+            var back = JSON.parse(text);
+            say5('parse 回来：back.title = ' + back.title + '，back.tags 是数组吗？' + Array.isArray(back.tags));
+
+            var messy = {
+              keep: "保留",
+              fn: function () { return 1; },
+              nothing: undefined,
+              nan: NaN,
+              when: new Date("2026-09-14T00:00:00Z")
+            };
+            say5('会丢东西的 stringify → ' + JSON.stringify(messy)
+              + '（函数与 undefined 被丢掉，NaN 变成 null，日期变成 ISO 字符串）');
+
+            var arr = [1, undefined, function () { }, 4];
+            say5('数组里的“空”会变成 null → ' + JSON.stringify(arr));
+
+            var circular = { name: "自己指自己" };
+            circular.self = circular;
+            var circularNote;
+            try {
+              JSON.stringify(circular);
+              circularNote = '居然成功了？';
+            } catch (err) {
+              circularNote = err.name + '：' + err.message;
+            }
+            say5('循环引用 → ' + circularNote);
+
+            var badNote;
+            try {
+              JSON.parse("{ title: '单引号不行' }");
+              badNote = '居然解析成功了？';
+            } catch (err) {
+              badNote = err.name + '：' + err.message;
+            }
+            say5('非法 JSON → ' + badNote);
+
+            say5('（小提示：JSON 里没有注释、没有单引号、末尾不能多逗号）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js33-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js33-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var note = { title: "站桩三月记", days: 21, done: false, tags: ["基本功", "拆解"] };
+            var text = JSON.stringify(note);
+            say5('stringify → ' + text);
+            var back = JSON.parse(text);
+            say5('parse 回来：back.title = ' + back.title + '，back.tags 是数组吗？' + Array.isArray(back.tags));
+
+            var messy = {
+              keep: "保留",
+              fn: function () { return 1; },
+              nothing: undefined,
+              nan: NaN,
+              when: new Date("2026-09-14T00:00:00Z")
+            };
+            say5('会丢东西的 stringify → ' + JSON.stringify(messy)
+              + '（函数与 undefined 被丢掉，NaN 变成 null，日期变成 ISO 字符串）');
+
+            var arr = [1, undefined, function () { }, 4];
+            say5('数组里的“空”会变成 null → ' + JSON.stringify(arr));
+
+            var circular = { name: "自己指自己" };
+            circular.self = circular;
+            var circularNote;
+            try {
+              JSON.stringify(circular);
+              circularNote = '居然成功了？';
+            } catch (err) {
+              circularNote = err.name + '：' + err.message;
+            }
+            say5('循环引用 → ' + circularNote);
+
+            var badNote;
+            try {
+              JSON.parse("{ title: '单引号不行' }");
+              badNote = '居然解析成功了？';
+            } catch (err) {
+              badNote = err.name + '：' + err.message;
+            }
+            say5('非法 JSON → ' + badNote);
+
+            say5('（小提示：JSON 里没有注释、没有单引号、末尾不能多逗号）');
+          </script>
+        </div>
+      </div>
+      <p>
+        实例方法里还有一个好用的老朋友：<code>JSON.stringify(obj, null, 2)</code>
+        会带缩进输出，调试时看着舒服得多。第四十式讲 <code>localStorage</code> 时，
+        我们会用这一对方法把数据存进去、读出来。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>对象是键值对的集合；读固定名字用点号，动态键用方括号；<code>delete</code> 删属性；</li>
+        <li><code>in</code> 会查原型链，<code>Object.hasOwn</code> 只查自己的；
+          <code>Object.keys/values/entries</code> 只列自己的可枚举属性；</li>
+        <li>方法里的 <code>this</code> 看“怎么调用”：摘出来单独调用就不再指向原对象；</li>
+        <li>解构能改名、给默认值、嵌套取值、收集剩余属性；展开用来复制与合并（后者覆盖前者）；</li>
+        <li>展开与 <code>Object.assign</code> 都是<strong>浅复制</strong>；要彻底独立用 <code>structuredClone</code>；</li>
+        <li><code>Object.freeze</code> 是浅冻结，严格模式下写被冻结的属性会报错；</li>
+        <li>查表 / 计数 / 任意键用 <code>Map</code>，去重与判重用 <code>Set</code>，描述一个东西用对象；</li>
+        <li>JSON 是数据交换的通用格式：函数与 undefined 会被丢掉、NaN 变 null、日期变字符串、
+          循环引用会抛错；解析非法 JSON 也会抛错——所以 <code>JSON.parse</code> 常要配 <code>try…catch</code>。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十三式</div>
+        <ol>
+          <li>写一个对象 <code>book</code>（书名、作者、页数、标签数组），
+            用解构把书名与作者取出来，再用展开复制一份并修改页数，最后打印两份做对比。</li>
+          <li>有一段打卡记录 <code>["周一", "周三", "周一", "周五", "周三"]</code>：
+            用 <code>Map</code> 统计每个星期几出现了几次，用 <code>Set</code> 列出共有哪几天打过卡。</li>
+          <li>思考：<code>const settings = { theme: "light" };</code> 之后
+            <code>settings.theme = "dark"</code> 是合法的；但 <code>Object.freeze(settings)</code>
+            之后再改就会报错。为什么要有“冻结”这种能力？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="解构 + 展开复制">
+            "use strict";
+
+            const book = {
+              title: "纯静态网页的修行",
+              author: "墨白",
+              pages: 260,
+              tags: ["HTML", "CSS", "JavaScript"]
+            };
+
+            const { title, author } = book;
+            const edited = { ...book, pages: 300 };
+
+            console.log(`${title}／${author}`);
+            console.log("原书页数：" + book.pages + "，副本页数：" + edited.pages);
+            console.log("tags 是同一个数组吗？" + (book.tags === edited.tags));  // true —— 浅复制
+          </script>
+          <p>
+            最后一行值得留意：<code>edited.tags === book.tags</code> 为 <code>true</code>，
+            说明两个对象<strong>共享同一个数组</strong>。想让它们彻底分开，
+            要把 <code>tags</code> 也复制一份（<code>[...book.tags]</code>），或者整体用
+            <code>structuredClone(book)</code>。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="Map 计数 + Set 去重">
+            "use strict";
+
+            const records = ["周一", "周三", "周一", "周五", "周三"];
+
+            const counts = new Map();
+            for (const day of records) {
+              counts.set(day, (counts.get(day) || 0) + 1);
+            }
+            console.log([...counts].map(([day, n]) => `${day}×${n}`).join("、"));
+            // 周一×2、周三×2、周五×1
+
+            const days = new Set(records);
+            console.log(`共 ${days.size} 天打过卡：${[...days].join("、")}`);
+            // 共 3 天打过卡：周一、周三、周五
+          </script>
+          <p>
+            两处小技巧：<code>counts.get(day) || 0</code> 处理“第一次见到这一天”的情况；
+            <code>[...counts]</code> 把 Map 变成 <code>[键, 值]</code> 数组，就能用
+            <code>map</code> 与<strong>解构参数</strong> <code>([day, n]) =&gt; …</code> 一次拿到两样东西。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为“不会被改”本身就是一种<strong>信息</strong>：写代码的人看到冻结过的对象，
+            就知道可以放心把它交给别人、缓存起来、反复复用，而不必担心某个角落把它悄悄改掉。
+            典型场景有三类：<strong>常量配置</strong>（全年不变的主题色表）、
+            <strong>共享给多个模块的对象</strong>（谁改了都不知道）、
+            以及<strong>冻结后能带来性能优化</strong>的场景（某些引擎对不变对象优化得更好）。
+            记住它的局限：冻结是<strong>浅</strong>的，里面嵌套的对象照样能改；
+            所以真正的“不可变数据”要么逐层冻结，要么靠团队约定与工具库来保证。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，处理文字与时间：字符串、正则、数字与日期。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

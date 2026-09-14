@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十六式 · 综合修炼：把主页打扮起来 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="CSS 部分收官：给第十二式那页纯 HTML 的个人主页穿上衣服——设计令牌、排版、网格骨架、卡片、表单与动效，六步走完并附验收清单。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-26">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        CSS 十四式学完，该交答卷了。这一式不教新属性，只做一件事：
+        <strong>给第十二式那页“光着身子”的个人主页穿上衣服</strong>——
+        而且不改动它的结构，一行语义都不动。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>体验“结构不动、样式全换”的工程感：HTML 是骨架，CSS 是外衣</li>
+          <li>用设计令牌（CSS 变量）统一颜色、间距、圆角与字体</li>
+          <li>把 Flex、Grid、媒体查询、动效、无障碍照顾一次用齐</li>
+          <li>用一份验收清单给成品打分，找出自己的盲区</li>
+        </ul>
+      </div>
+
+      <h2>成品先看</h2>
+      <p>
+        两页对照着看，差别一眼就明白——<strong>它们的 HTML 结构几乎一模一样</strong>：
+      </p>
+      <ul>
+        <li><a href="../demo/html-home/index.html">第十二式的成品：纯 HTML 版</a>（浏览器的默认样式）；</li>
+        <li><a href="../demo/html-home-styled/index.html">第二十六式的成品：穿上衣服版</a>（本式新加的样式）。</li>
+      </ul>
+      <p>
+        改了哪些东西？大致是这些，每一项都能在前面的式子里找到出处：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>这一式做了什么</th>
+            <th>用到的式子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>一组设计令牌（颜色、间距、圆角、字体栈）</td><td>第十三、十七、二十五式</td></tr>
+          <tr><td>正文排版：字体、字号、行高、行宽</td><td>第十六、十八式</td></tr>
+          <tr><td>整页骨架：窄屏单列、宽屏“正文 + 侧栏”</td><td>第二十二、二十三式</td></tr>
+          <tr><td>卡片、标签、分隔线、阴影与悬停动效</td><td>第十九、二十四式</td></tr>
+          <tr><td>表单与按钮：输入框、聚焦轮廓、按钮反馈</td><td>第七、十九、二十四式</td></tr>
+          <tr><td>照顾“减少动态效果”的读者、跳过链接</td><td>第十一、二十三式</td></tr>
+        </tbody>
+      </table>
+
+      <h2>动手拆解</h2>
+      <p>
+        下面六步就是成品页 <code>&lt;style&gt;</code> 里的全部内容，按顺序读一遍即可。
+        建议你打开自己的主页，跟着一段段加。
+      </p>
+
+      <h3>第一步 · 变量先行：先把“尺子”定下来</h3>
+      <p>
+        动手写第一条规则之前，先把会重复出现的值收进变量。
+        这一步花五分钟，后面能省一小时的搜索替换。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第一步：设计令牌">
+        :root {
+          --paper: #faf6ec;        /* 页面底 */
+          --card: #fffdf7;         /* 卡片底 */
+          --ink: #2b2a26;          /* 正文 */
+          --soft: #6f6a5e;         /* 次要文字 */
+          --line: #e3dcc8;         /* 分隔线 */
+          --accent: #b03a2e;       /* 强调色 */
+          --accent-soft: #f3e3dd;  /* 强调色的淡底 */
+          --gap: 1rem;             /* 通用间距 */
+          --radius: 12px;          /* 通用圆角 */
+          --measure: 64rem;        /* 内容最大宽度 */
+          --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                  "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+          --serif: "Songti SC", "Noto Serif CJK SC", "STSong", "SimSun", serif;
+        }
+      </script>
+      <p>
+        注意命名用的是<strong>用途</strong>而不是颜色值：<code>--accent</code> 比 <code>--red</code> 耐用——
+        哪天把强调色换成墨蓝，名字不用动。
+      </p>
+
+      <h3>第二步 · 排版与底色</h3>
+      <p>
+        接下来给页面定基调：盒模型统一、底色、字体、行高，以及标题、链接、图片的规矩。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第二步：基础与排版">
+        *, *::before, *::after { box-sizing: border-box; }
+        html { background: var(--paper); }
+        body {
+          /* 直接把 body 当整页容器：不改结构，也能限宽居中 */
+          max-width: var(--measure); margin: 0 auto;
+          padding: clamp(1rem, 3vw, 2.4rem);
+          color: var(--ink); font-family: var(--sans); font-size: 1rem; line-height: 1.8;
+        }
+        h1, h2, h3 { font-family: var(--serif); line-height: 1.3; margin: 0 0 .6rem; }
+        h1 { font-size: clamp(1.8rem, 1.2rem + 2.4vw, 2.6rem); letter-spacing: .04em; }
+        p { margin: 0 0 .9rem; }
+        a { color: var(--accent); }
+        a:hover { color: #8f2f24; }
+        img { max-width: 100%; height: auto; }
+      </script>
+      <p>
+        四个细节值得留意：<code>box-sizing: border-box</code> 让宽高所见即所得（第十六式）；
+        <code>line-height: 1.8</code> 是中文正文的舒适区（第十八式）；
+        标题用流体字号 <code>clamp()</code>，小屏不挤、大屏不飘（第十七、二十三式）；
+        <code>img { max-width: 100% }</code> 让图片永不撑破容器（第四、十六式）。
+        另外注意背景色写在 <code>html</code> 上、限宽与内边距写在 <code>body</code> 上：
+        这样既能让底色铺满整屏，又能让内容居中留白——两件事各归各的元素。
+      </p>
+
+      <h3>第三步 · 用 Grid 搭骨架</h3>
+      <p>
+        这一页最“得意”的一段：<strong>直接让 <code>body</code> 当网格容器</strong>，
+        用模板区域描述整页骨架。这样做的好处是——<strong>一个包装用的 <code>div</code> 都不用加</strong>，
+        HTML 才能和第十二式那版一模一样。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第三步：整页骨架（body 做网格）">
+        body {
+          display: grid; gap: 1.6rem;
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "head"
+            "main"
+            "side"
+            "foot";
+        }
+        .site-head { grid-area: head; }
+        main { grid-area: main; min-width: 0; }
+        .side { grid-area: side; }
+        .site-foot { grid-area: foot; }
+        @media (min-width: 56em) {
+          body {
+            grid-template-columns: minmax(0, 1fr) 16rem;
+            grid-template-areas:
+              "head head"
+              "main side"
+              "foot foot";
+          }
+        }
+      </script>
+      <p>
+        这里有两处“防坑”写法：<code>minmax(0, 1fr)</code> 防止长内容把正文列撑宽
+        （第二十二式讲过 <code>1fr</code> 最小值是 auto 的坑）；
+        侧栏加了 <code>align-self: start</code>，不被拉伸到与正文一样高。
+        整页的响应式只用了一句媒体查询——骨架够简单，就不需要写一堆断点。
+        顺带一提：<code>grid-template-areas</code> 里那些引号中的单词，就是你在
+        <code>grid-area</code> 里用的名字（第二十二式例 4 见过它的画图玩法）。
+      </p>
+
+      <h3>第四步 · 卡片、标签与分隔线</h3>
+      <p>
+        作品与日志都用 <code>.card</code>：纸白底、细边线、圆角、内边距，
+        再给悬停与键盘聚焦一点反馈。这里只动 <code>transform</code> 与阴影，最省性能（第二十四式）。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第四步：卡片与标签">
+        section { margin-bottom: 2rem; }
+        .card {
+          background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+          padding: 1rem 1.1rem; margin-bottom: .9rem;
+          transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+        }
+        .card:hover, .card:focus-within {
+          transform: translateY(-3px); box-shadow: 0 10px 20px rgb(0 0 0 / 12%);
+          border-color: var(--accent);
+        }
+        .card .meta { color: var(--soft); font-size: .85rem; margin: 0 0 .4rem; }
+        .tag {
+          display: inline-block; background: var(--accent-soft); color: #8f2f24;
+          border-radius: 999px; padding: .05rem .6rem; font-size: .78rem;
+        }
+      </script>
+      <p>
+        <code>:focus-within</code> 是这一处的小心思：卡片里任何一个链接被键盘聚焦时，
+        整张卡片都会有反馈，键盘读者不会“迷路”。
+      </p>
+
+      <h3>第五步 · 表单与按钮</h3>
+      <p>
+        表单最容易做得难看又难用。<code>font: inherit</code> 让输入框继承页面字体；
+        聚焦时给一圈清晰的轮廓（第十一式的规矩：<strong>焦点必须看得见</strong>）。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第五步：表单与按钮">
+        .field { margin-bottom: .8rem; }
+        label { display: block; font-size: .9rem; margin-bottom: .2rem; }
+        input, textarea {
+          width: 100%; font: inherit; color: var(--ink); background: #fff;
+          border: 1px solid var(--line); border-radius: 8px; padding: .5rem .7rem;
+        }
+        input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+        button {
+          font: inherit; cursor: pointer; background: var(--accent); color: #fff;
+          border: 1px solid var(--accent); border-radius: 8px; padding: .5rem 1.1rem;
+          transition: background .2s ease-out, transform .2s ease-out;
+        }
+        button:hover { background: #8f2f24; border-color: #8f2f24; transform: translateY(-1px); }
+      </script>
+      <p>
+        按钮做到了 44px 左右的高度（<code>padding: .5rem 1.1rem</code> 加行高），
+        触屏上点得准（第二十三式的触控目标）；输入框宽度 <code>100%</code>，
+        在窄屏上自然铺满，不需要额外断点。
+      </p>
+
+      <h3>第六步 · 收尾：跳过链接与“减少动态效果”</h3>
+      <p>
+        最后两件小事，都是给别人省心的：跳过链接平时藏起来、按 Tab 第一下就现身；
+        动画则在系统要求“减少动态效果”时安静下来。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="第六步：无障碍与偏好适配">
+        .skip-link {
+          position: absolute; left: -9999px; top: 0;
+          background: var(--accent); color: #fff; padding: .5rem .9rem; border-radius: 0 0 8px 0;
+        }
+        .skip-link:focus { left: 0; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .card, button { transition: none; }
+          .card:hover, .card:focus-within, button:hover { transform: none; }
+        }
+      </script>
+
+      <h2>对照验收清单</h2>
+      <p>成品页交付前，逐条过一遍。每一条都能在浏览器里当场验证：</p>
+      <ul>
+        <li><strong>结构没动</strong>：与第十二式那页相比，<strong>标签序列完全一致</strong>
+          （用脚本逐节点比对过），只多了 <code>class</code> 属性；
+          全页<strong>唯一改动的文字</strong>是页脚那一句（把“纯 HTML 手写”改成“手写 HTML 与 CSS”）；</li>
+        <li><strong>键盘可用</strong>：按 Tab 从跳过链接开始走一遍，所有链接、卡片、表单都能到达，
+          焦点都看得见；</li>
+        <li><strong>对比度够</strong>：正文与次要文字在纸底上都读得清（4.5:1 底线）；</li>
+        <li><strong>窄屏不散</strong>：拉到 320px 宽，正文单列、图片不溢出、按钮不跑到屏幕外；</li>
+        <li><strong>宽屏不垮</strong>：拉到 1600px 宽，内容不会拉成一条难以阅读的长线
+          （<code>--measure: 64rem</code> 在守着）；</li>
+        <li><strong>缩放 200%</strong>：浏览器缩放到 200%，内容不重叠、不出现横向滚动条；</li>
+        <li><strong>减少动效</strong>：在系统里打开“减少动态效果”，卡片悬停不再位移；</li>
+        <li><strong>没有行内样式</strong>：成品页里 <code>style="…"</code> 出现次数为 0——
+          样式全部住在样式表里。</li>
+      </ul>
+      <div class="callout warn">
+        <div class="callout-title">心法：样式改到满意，再回头看结构</div>
+        <p style="margin:0">
+          这一式的关键是“<strong>结构一行没动</strong>”。如果为了样式好看，
+          回去把 <code>article</code> 换成 <code>div</code>、把 <code>h2</code> 降成
+          <code>h4</code>，那说明结构当初就没搭对。
+          <strong>好的骨架应该能穿任何衣服</strong>——这也是基础篇先讲 HTML、再讲 CSS 的原因。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>CSS 综合修炼的六步：设计令牌 → 排版底色 → 网格骨架 → 卡片标签 → 表单按钮 → 无障碍与偏好收尾；</li>
+        <li>每一步都对应前面某一式：变量（25）、排版（18）、网格与响应式（22、23）、
+          阴影与动效（19、24）、表单与焦点（7、11）；</li>
+        <li>骨架够简单时，整页只需要一句媒体查询；能靠流体尺寸与网格解决的，就别加断点；</li>
+        <li>交付前过一遍验收清单：结构没动、键盘可用、对比度够、窄屏不散、宽屏不垮、200% 可读、动效可关、无行内样式；</li>
+        <li>CSS 部分到此结束——你已经能独立写出一页结构清楚、看着舒服、谁都能用的主页了。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十六式</div>
+        <ol>
+          <li>照着六步，把你自己第十二式做的个人主页打扮一遍；完成后把两版都留着，对照着看。</li>
+          <li>给成品加一套深色主题：把颜色变量收进 <code>:root</code>，
+            再写一份 <code>[data-theme="dark"]</code> 的值，手动切换试试。</li>
+          <li>思考：为什么最后一步才做“跳过链接”和“减少动态效果”？
+            如果一开始就做，会有什么不同？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <p>
+            没有唯一答案，用上面的验收清单逐条核对。常见的三处失手：
+            ① 卡片里写了 <code>height</code>，结果文字一多就溢出（改成
+            <code>min-height</code> 或者干脆不写）；
+            ② 忘记给图片 <code>max-width: 100%</code>，窄屏被撑破；
+            ③ 悬停效果只写了 <code>:hover</code>，键盘读者没有反馈（补
+            <code>:focus-within</code> / <code>:focus-visible</code>）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="深色主题">
+            :root {
+              --paper: #faf6ec; --card: #fffdf7; --ink: #2b2a26;
+              --soft: #6f6a5e; --line: #e3dcc8; --accent: #b03a2e; --accent-soft: #f3e3dd;
+            }
+            [data-theme="dark"] {
+              --paper: #17181d; --card: #24262e; --ink: #e6e1d2;
+              --soft: #b3ac9a; --line: #35363f; --accent: #d46a5d; --accent-soft: #3a2320;
+            }
+          </script>
+          <p>
+            检查点：把 <code>&lt;html data-theme="dark"&gt;</code> 手动改一下，
+            整页应当立刻换色。凡是没变的地方，就是还写着写死的颜色值——
+            回去把它们换成变量即可。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为它们属于“<strong>先有内容、再谈照顾</strong>”这一类收尾工作：
+            跳过链接要指向正文的 <code>id</code>，而正文的锚点与结构是在前面几步定下来的；
+            减少动效的规则要针对具体的动画属性来写，
+            而动画是第四、五步才加的。放在最后做，可以<strong>一次看清“哪些动的东西需要关掉”</strong>。
+            如果一开始就写，往往写完还得回头改两遍。
+            这和写代码的规律一样：<strong>结构先定、细节后补、无障碍与性能在收尾时统一过一遍</strong>。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>HTML 与 CSS 打完地基——下一式起，正式进入 JavaScript，让页面学会应答。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

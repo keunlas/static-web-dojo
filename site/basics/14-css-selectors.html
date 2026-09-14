@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第十四式 · 选择器大全 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="选择器速查：基础选择器、四种组合器、属性选择器、状态与结构伪类、::before/::after 等伪元素，以及优先级特异性的计算规则。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-14">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        样式写不好，多半不是属性背得少，而是<strong>没有精确选中那个元素</strong>。
+        这一式把 CSS 的选择器摊成一张表：见过的、没见过的都在这儿，方便你以后回来查。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>掌握基础选择器与四种组合器：空格、<code>&gt;</code>、<code>+</code>、<code>~</code></li>
+          <li>会用属性选择器按“属性长什么样”挑元素</li>
+          <li>认得状态伪类与结构伪类，会用 <code>:nth-child()</code> 做斑马纹</li>
+          <li>会用 <code>:not()</code> / <code>:is()</code> / <code>:where()</code> / <code>:has()</code> 写出更短更清楚的规则</li>
+          <li>会用 <code>::before</code> / <code>::after</code> 等伪元素“加内容”，并算得清选择器优先级</li>
+        </ul>
+      </div>
+
+      <h2>基础选择器与组合器</h2>
+      <p>
+        单个选择器只能定位到“某一类元素”，组合器则描述<strong>元素之间的关系</strong>。
+        四种组合器是这一式的重头戏：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>名字</th>
+            <th>含义</th>
+            <th>选中示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ul li</code></td>
+            <td>后代选择器（空格）</td>
+            <td>在 <code>ul</code> <strong>里面</strong>的任意层级</td>
+            <td>列表里所有 <code>li</code>，包括嵌套的</td>
+          </tr>
+          <tr>
+            <td><code>ul &gt; li</code></td>
+            <td>子代选择器（<code>&gt;</code>）</td>
+            <td>只算<strong>直接</strong>子元素，隔一层不算</td>
+            <td>只选最外层的 <code>li</code></td>
+          </tr>
+          <tr>
+            <td><code>h2 + p</code></td>
+            <td>相邻兄弟（<code>+</code>）</td>
+            <td>紧跟在 <code>h2</code> 后面的<strong>那一个</strong>兄弟</td>
+            <td>标题正下方的那段文字</td>
+          </tr>
+          <tr>
+            <td><code>h2 ~ p</code></td>
+            <td>通用兄弟（<code>~</code>）</td>
+            <td><code>h2</code> 之后<strong>所有</strong>同级兄弟</td>
+            <td>标题之后直到结尾的每个段落</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        另外三个基础零件：<code>*</code> 是通配符（选中所有元素，常用于清样式）；
+        <code>.note</code> 是类选择器；<code>#top</code> 是 ID 选择器。
+        把多个选择器用<strong>逗号</strong>连起来就是“分组”，一组成员共享同一份声明：
+        <code>h1, h2, h3 { margin-bottom: .6rem }</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 四种组合器各挑各的（看左边线与底纹落到了谁身上）</div>
+        <div class="demo-preview">
+          <style>
+            /* 后代：所有 li 都有蓝色左边线 */
+            #css14-demo1 li { border-left: 4px solid #2f6db3; padding-left: .5rem; }
+            /* 子代：只有最外层 li 有灰底 */
+            #css14-demo1 .d-row > li { background: #f4edde; }
+            /* 相邻兄弟：紧跟在 .a 后面的那一个 p 变朱砂色 */
+            #css14-demo1 .a + p { color: #b03a2e; font-weight: 700; }
+            /* 通用兄弟：.a 之后的每个 p 都加虚线下边框 */
+            #css14-demo1 .a ~ p { border-bottom: 2px dotted #d4cab0; }
+          </style>
+          <div id="css14-demo1">
+            <ul class="d-row">
+              <li>外层第一项</li>
+              <li>外层第二项
+                <ul>
+                  <li>内层第一项</li>
+                  <li>内层第二项</li>
+                </ul>
+              </li>
+            </ul>
+            <p class="a">段落 A（它后面还有两个兄弟）</p>
+            <p class="b">段落 B（紧挨着 A，所以颜色变了）</p>
+            <p class="c">段落 C（不是紧挨着的，但属于“A 之后的兄弟”）</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css14-demo1">
+              <ul class="d-row">
+                <li>外层第一项</li>
+                <li>外层第二项
+                  <ul>
+                    <li>内层第一项</li>
+                    <li>内层第二项</li>
+                  </ul>
+                </li>
+              </ul>
+              <p class="a">段落 A（它后面还有两个兄弟）</p>
+              <p class="b">段落 B（紧挨着 A，所以颜色变了）</p>
+              <p class="c">段落 C（不是紧挨着的，但属于“A 之后的兄弟”）</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            /* 后代：所有 li 都有蓝色左边线 */
+            #css14-demo1 li { border-left: 4px solid #2f6db3; padding-left: .5rem; }
+            /* 子代：只有最外层 li 有灰底 */
+            #css14-demo1 .d-row > li { background: #f4edde; }
+            /* 相邻兄弟：紧跟在 .a 后面的那一个 p 变朱砂色 */
+            #css14-demo1 .a + p { color: #b03a2e; font-weight: 700; }
+            /* 通用兄弟：.a 之后的每个 p 都加虚线下边框 */
+            #css14-demo1 .a ~ p { border-bottom: 2px dotted #d4cab0; }
+          </script>
+        </div>
+      </div>
+      <p>
+        数一数就明白：四个 <code>li</code> 都有蓝线（后代），但只有两个外层 <code>li</code> 有灰底（子代）；
+        段落 B 变红（相邻），B 和 C 都有虚线（通用兄弟）。
+        <strong>“空格隔开一层层、<code>&gt;</code> 只认亲儿子”</strong>——这两句记住，嵌套布局就少一半困惑。
+      </p>
+
+      <h2>属性选择器：按“长相”挑元素</h2>
+      <p>
+        当 class 不够用时，可以按属性的存在或内容来挑：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>典型用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>[disabled]</code></td><td>有这个属性</td><td>所有被禁用的控件</td></tr>
+          <tr><td><code>[type="email"]</code></td><td>属性值完全等于</td><td>只挑邮箱输入框</td></tr>
+          <tr><td><code>[class~="tag"]</code></td><td>空格分隔的列表中包含该词</td><td>等价于 <code>.tag</code>，但更啰嗦</td></tr>
+          <tr><td><code>[lang|="zh"]</code></td><td>等于该值或以“该值-”开头</td><td>所有中文内容（<code>zh</code>、<code>zh-CN</code>）</td></tr>
+          <tr><td><code>[href^="https://"]</code></td><td>以某段文字<strong>开头</strong></td><td>给站外链接加个小标记</td></tr>
+          <tr><td><code>[href$=".pdf"]</code></td><td>以某段文字<strong>结尾</strong></td><td>给 PDF 链接换图标</td></tr>
+          <tr><td><code>[href*="mdn"]</code></td><td><strong>包含</strong>某段文字</td><td>粗筛；过宽时容易误伤</td></tr>
+          <tr><td><code>[data-state="done" i]</code></td><td>末尾的 <code>i</code> 表示忽略大小写</td><td><code>DONE</code>、<code>Done</code> 都算命中</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 按属性挑元素</div>
+        <div class="demo-preview">
+          <style>
+            #css14-demo2 a[href^="https://"] { background: #f3e3dd; border-radius: 6px; padding: .1rem .45rem; }
+            #css14-demo2 a[href$=".mp3"]::after { content: "（音频）"; color: #6f6a5e; font-size: .85em; }
+            #css14-demo2 li[data-state="done"] { color: #6f6a5e; text-decoration: line-through; }
+            #css14-demo2 li[data-state="doing"]::before { content: "▶ "; color: #b03a2e; }
+          </style>
+          <div id="css14-demo2">
+            <p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML">站外链接：MDN（会带一层淡底）</a></p>
+            <p><a href="14-css-selectors.html">站内链接：本式自己（没有底纹）</a></p>
+            <p><a href="../assets/media/demo-tone.mp3" download>下载音频（会被标出格式）</a></p>
+            <ul>
+              <li data-state="done">抄写页面骨架</li>
+              <li data-state="doing">拆解一个网页</li>
+              <li data-state="todo">写自己的主页</li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css14-demo2">
+              <p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML">站外链接：MDN（会带一层淡底）</a></p>
+              <p><a href="14-css-selectors.html">站内链接：本式自己（没有底纹）</a></p>
+            <p><a href="../assets/media/demo-tone.mp3" download>下载音频（会被标出格式）</a></p>
+              <ul>
+                <li data-state="done">抄写页面骨架</li>
+                <li data-state="doing">拆解一个网页</li>
+                <li data-state="todo">写自己的主页</li>
+              </ul>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css14-demo2 a[href^="https://"] { background: #f3e3dd; border-radius: 6px; padding: .1rem .45rem; }
+            #css14-demo2 a[href$=".mp3"]::after { content: "（音频）"; color: #6f6a5e; font-size: .85em; }
+            #css14-demo2 li[data-state="done"] { color: #6f6a5e; text-decoration: line-through; }
+            #css14-demo2 li[data-state="doing"]::before { content: "▶ "; color: #b03a2e; }
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里那条 <code>[href^="https://"]</code> 是十分常用的套路：一次写出“所有站外链接”，
+        不必给每个链接手动加类名。注意最后那条 <code>[data-state="doing"]</code> 用到了
+        <code>::before</code> 加符号，伪元素马上就会讲到。
+      </p>
+
+      <h2>伪类（一）：状态与顺序</h2>
+      <p>
+        伪类以冒号开头，用来描述元素的<strong>状态</strong>或<strong>位置</strong>——
+        它们不写在 HTML 里，而是由浏览器实时判断。常用的状态伪类：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>伪类</th>
+            <th>何时命中</th>
+            <th>提醒</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:hover</code></td><td>鼠标悬停</td><td>触屏设备上可能永远不触发，别把关键操作只放在悬停里</td></tr>
+          <tr><td><code>:focus</code></td><td>获得焦点（点击或 Tab）</td><td>会被鼠标点击也触发</td></tr>
+          <tr><td><code>:focus-visible</code></td><td>键盘聚焦才显示</td><td>给键盘用户画焦点圈的首选（第十一式）</td></tr>
+          <tr><td><code>:active</code></td><td>正在被按下的一瞬间</td><td>常用来做“按下去”的反馈</td></tr>
+          <tr><td><code>:link</code> / <code>:visited</code></td><td>未访问 / 已访问的链接</td><td><code>:visited</code> 出于隐私只能改少量颜色类属性</td></tr>
+          <tr><td><code>:checked</code></td><td>单选框、复选框被选中</td><td>配合 <code>+ label</code> 能做纯 CSS 的自定义开关</td></tr>
+          <tr><td><code>:disabled</code> / <code>:enabled</code></td><td>禁用 / 可用</td><td>禁用态别忘了把对比度也调淡，别只变灰</td></tr>
+          <tr><td><code>:required</code> / <code>:optional</code></td><td>必填 / 选填</td><td>可用来给必填项加星号提示</td></tr>
+          <tr><td><code>:valid</code> / <code>:invalid</code></td><td>校验通过 / 不通过</td><td>注意“一上来就满脸通红”的坑（第八式）</td></tr>
+          <tr><td><code>:placeholder-shown</code></td><td>输入框正显示 placeholder</td><td>可以判断“还空着”，做浮动标签</td></tr>
+          <tr><td><code>:root</code></td><td>文档根元素（即 <code>html</code>）</td><td>定义 CSS 变量的常用位置（第二十五式）</td></tr>
+          <tr><td><code>:target</code></td><td>网址 <code>#hash</code> 指到它</td><td>做“跳到哪一节就高亮哪一节”</td></tr>
+        </tbody>
+      </table>
+      <p>
+        还有一组专门按“位置”挑人的<strong>结构伪类</strong>，做清单与表格时非常好用：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>伪类</th>
+            <th>含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>:first-child</code> / <code>:last-child</code></td><td>是父元素的第一 / 最后一个子元素</td></tr>
+          <tr><td><code>:nth-child(3)</code></td><td>第 3 个子元素（注意：按“第几个孩子”数，不管类型）</td></tr>
+          <tr><td><code>:nth-child(2n)</code> / <code>:nth-child(odd)</code></td><td>偶数 / 奇数项，斑马纹标配</td></tr>
+          <tr><td><code>:nth-of-type(2)</code></td><td>同类型元素里的第 2 个（<code>p</code> 只跟 <code>p</code> 数）</td></tr>
+          <tr><td><code>:only-child</code></td><td>是父元素唯一的孩子</td></tr>
+          <tr><td><code>:empty</code></td><td>里面什么都没有（连空白文字都没有）</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <code>nth-child</code> 里的公式可以带字母：<code>2n+1</code> 是奇数项，
+        <code>-n+3</code> 是“前三个”，<code>3n</code> 是每三个一组。
+        另外它还支持 <code>:nth-child(2 of .done)</code> 这种“只在符合条件的元素里数”的写法。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 斑马纹与首尾特写（纯 CSS，零脚本）</div>
+        <div class="demo-preview">
+          <style>
+            #css14-demo3 .ledger { border-collapse: collapse; width: 100%; }
+            #css14-demo3 .ledger th, #css14-demo3 .ledger td {
+              border: 1px solid #e3dcc8; padding: .4rem .7rem; text-align: left;
+            }
+            #css14-demo3 .ledger tbody tr:nth-child(odd) { background: #f4edde; }
+            #css14-demo3 .ledger tbody tr:first-child td { color: #b03a2e; font-weight: 700; }
+            #css14-demo3 .ledger tbody tr:last-child td { border-bottom: 3px solid #d4cab0; }
+          </style>
+          <div id="css14-demo3">
+            <table class="ledger">
+              <thead>
+                <tr><th>日期</th><th>功课</th><th>用时</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>9 月 12 日</td><td>抄写骨架</td><td>30 分钟</td></tr>
+                <tr><td>9 月 13 日</td><td>拆解网页</td><td>45 分钟</td></tr>
+                <tr><td>9 月 14 日</td><td>列表与链接</td><td>40 分钟</td></tr>
+                <tr><td>9 月 15 日</td><td>表单练习</td><td>50 分钟</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css14-demo3">
+              <table class="ledger">
+                <thead>
+                  <tr><th>日期</th><th>功课</th><th>用时</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>9 月 12 日</td><td>抄写骨架</td><td>30 分钟</td></tr>
+                  <tr><td>9 月 13 日</td><td>拆解网页</td><td>45 分钟</td></tr>
+                  <tr><td>9 月 14 日</td><td>列表与链接</td><td>40 分钟</td></tr>
+                  <tr><td>9 月 15 日</td><td>表单练习</td><td>50 分钟</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css14-demo3 .ledger { border-collapse: collapse; width: 100%; }
+            #css14-demo3 .ledger th, #css14-demo3 .ledger td {
+              border: 1px solid #e3dcc8; padding: .4rem .7rem; text-align: left;
+            }
+            #css14-demo3 .ledger tbody tr:nth-child(odd) { background: #f4edde; }
+            #css14-demo3 .ledger tbody tr:first-child td { color: #b03a2e; font-weight: 700; }
+            #css14-demo3 .ledger tbody tr:last-child td { border-bottom: 3px solid #d4cab0; }
+          </script>
+        </div>
+      </div>
+      <p>
+        三个选择器做了三件事：<code>:nth-child(odd)</code> 给奇数行铺底色，
+        <code>:first-child</code> 让第一行变红，<code>:last-child</code> 给最后一行加粗底线。
+        <strong>一行脚本都没写，表格已经“活”了</strong>——这就是伪类的价值。
+      </p>
+
+      <h2>伪类（二）：:not、:is、:where、:has</h2>
+      <p>
+        这四个是现代 CSS 的“逻辑运算”，能把又长又闷的选择器变短：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>:not(…)</code></td>
+            <td>排除括号里的条件（可以写多个）</td>
+            <td><code>li:not(.done)</code>：除“已完成”之外的所有项</td>
+          </tr>
+          <tr>
+            <td><code>:is(…)</code></td>
+            <td>满足括号里<strong>任意一个</strong>选择器</td>
+            <td><code>article :is(h2, h3)</code>：文章里的二级与三级标题</td>
+          </tr>
+          <tr>
+            <td><code>:where(…)</code></td>
+            <td>同 <code>:is()</code>，但<strong>优先级为 0</strong></td>
+            <td>写基础样式、又不希望盖掉别人的时候最好用</td>
+          </tr>
+          <tr>
+            <td><code>:has(…)</code></td>
+            <td>自身<strong>含有</strong>括号里的东西（“父选择器”）</td>
+            <td><code>.card:has(img)</code>：所有含图片的卡片</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · :not / :is / :has 一起收拾一张清单</div>
+        <div class="demo-preview">
+          <style>
+            #css14-demo4 .list { list-style: none; padding: 0; margin: 0; }
+            #css14-demo4 .list li { padding: .35rem .6rem; border-bottom: 1px solid #e3dcc8; }
+            /* 除了已完成，其余都加粗 */
+            #css14-demo4 .list li:not(.done) { font-weight: 700; }
+            /* 已完成项变淡并加删除线 */
+            #css14-demo4 .list li.done { color: #9a9486; text-decoration: line-through; }
+            /* 含图片的卡片：加一圈朱砂边框 */
+            #css14-demo4 .d-card:has(img) { border: 2px solid #b03a2e; }
+            /* 卡片标题：h3 或 h4 都算，写一次就够 */
+            #css14-demo4 .d-card :is(h3, h4) { margin: 0 0 .3rem; font-size: 1.05rem; }
+            #css14-demo4 .d-card { border: 2px solid #e3dcc8; border-radius: 8px; padding: .6rem .8rem; margin-top: .6rem; }
+          </style>
+          <div id="css14-demo4">
+            <ul class="list">
+              <li class="done">抄写页面骨架</li>
+              <li>拆解一个网页</li>
+              <li class="done">列表与链接</li>
+              <li>写自己的主页</li>
+            </ul>
+            <div class="d-card">
+              <h3>带图的卡片</h3>
+              <p style="margin: 0">它里面有 img，所以被 :has(img) 抓到了。</p>
+              <img src="../assets/img/demo-frame.svg" alt="示例插图" width="160" height="80">
+            </div>
+            <div class="d-card">
+              <h4>没图的卡片</h4>
+              <p style="margin: 0">它没有图片，因此边框保持默认的浅色。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css14-demo4">
+              <ul class="list">
+                <li class="done">抄写页面骨架</li>
+                <li>拆解一个网页</li>
+                <li class="done">列表与链接</li>
+                <li>写自己的主页</li>
+              </ul>
+              <div class="d-card">
+                <h3>带图的卡片</h3>
+                <p style="margin: 0">它里面有 img，所以被 :has(img) 抓到了。</p>
+                <img src="../assets/img/demo-frame.svg" alt="示例插图" width="160" height="80">
+              </div>
+              <div class="d-card">
+                <h4>没图的卡片</h4>
+                <p style="margin: 0">它没有图片，因此边框保持默认的浅色。</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css14-demo4 .list { list-style: none; padding: 0; margin: 0; }
+            #css14-demo4 .list li { padding: .35rem .6rem; border-bottom: 1px solid #e3dcc8; }
+            /* 除了已完成，其余都加粗 */
+            #css14-demo4 .list li:not(.done) { font-weight: 700; }
+            /* 已完成项变淡并加删除线 */
+            #css14-demo4 .list li.done { color: #9a9486; text-decoration: line-through; }
+            /* 含图片的卡片：加一圈朱砂边框 */
+            #css14-demo4 .d-card:has(img) { border: 2px solid #b03a2e; }
+            /* 卡片标题：h3 或 h4 都算，写一次就够 */
+            #css14-demo4 .d-card :is(h3, h4) { margin: 0 0 .3rem; font-size: 1.05rem; }
+            #css14-demo4 .d-card { border: 2px solid #e3dcc8; border-radius: 8px; padding: .6rem .8rem; margin-top: .6rem; }
+          </script>
+        </div>
+      </div>
+      <p>
+        注意最后两条规则的顺序：<code>.card</code> 的边框写在后面，
+        但因为 <code>:has()</code> 那条的<strong>优先级更高</strong>（多了伪类与元素），
+        带图卡片的边框依然是朱砂色。这正是下面要说的重点。
+      </p>
+
+      <h2>伪元素：凭空造出一小块内容</h2>
+      <p>
+        伪元素用<strong>两个冒号</strong>（旧写法一个冒号也能用，规范建议两个），
+        它能选中“元素的某一部分”或凭空插入内容：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>伪元素</th>
+            <th>作用</th>
+            <th>提醒</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>::before</code> / <code>::after</code></td><td>在内容前后插入装饰或文字</td><td>必须写 <code>content</code> 才出现；内容不建议放重要信息（读屏可能读不到）</td></tr>
+          <tr><td><code>::first-line</code></td><td>段落第一行</td><td>只能改字体、颜色等少数属性</td></tr>
+          <tr><td><code>::first-letter</code></td><td>第一个字（首字下沉）</td><td>只对块级容器生效</td></tr>
+          <tr><td><code>::marker</code></td><td>列表项的符号 / 编号</td><td>能改颜色、字号与 <code>content</code></td></tr>
+          <tr><td><code>::selection</code></td><td>被鼠标选中的文字</td><td>只能改颜色与背景色</td></tr>
+          <tr><td><code>::placeholder</code></td><td>输入框的占位文字</td><td>别把对比度调太低，会看不清</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 首字下沉、序号、标记与选中配色</div>
+        <div class="demo-preview">
+          <style>
+            #css14-demo5 .drop::first-letter { font-size: 2.6rem; font-weight: 700; color: #b03a2e; float: left; margin-right: .3rem; }
+            #css14-demo5 .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+            #css14-demo5 .steps li { margin: .35rem 0; }
+            #css14-demo5 .steps li::before {
+              counter-increment: step; content: "第 " counter(step) " 步：";
+              color: #b03a2e; font-weight: 700;
+            }
+            #css14-demo5 .fruit { padding-left: 1.2rem; }
+            #css14-demo5 .fruit li::marker { color: #2f6db3; content: "◆ "; }
+            #css14-demo5 ::selection { background: #b03a2e; color: #fff; }
+          </style>
+          <div id="css14-demo5">
+            <p class="drop">日拱一卒，功不唐捐。这句话的第一个字被 ::first-letter 放大了，用来做“首字下沉”的版式。</p>
+            <ol class="steps">
+              <li>写骨架</li>
+              <li>填内容</li>
+              <li>穿衣裳</li>
+            </ol>
+            <ul class="fruit">
+              <li>苹果</li>
+              <li>橘子</li>
+            </ul>
+            <p style="margin-bottom: 0">用鼠标选中这一行文字，会看到 ::selection 定下的朱砂底色。</p>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css14-demo5">
+              <p class="drop">日拱一卒，功不唐捐。这句话的第一个字被 ::first-letter 放大了，用来做“首字下沉”的版式。</p>
+              <ol class="steps">
+                <li>写骨架</li>
+                <li>填内容</li>
+                <li>穿衣裳</li>
+              </ol>
+              <ul class="fruit">
+                <li>苹果</li>
+                <li>橘子</li>
+              </ul>
+              <p style="margin-bottom: 0">用鼠标选中这一行文字，会看到 ::selection 定下的朱砂底色。</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css14-demo5 .drop::first-letter { font-size: 2.6rem; font-weight: 700; color: #b03a2e; float: left; margin-right: .3rem; }
+            #css14-demo5 .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+            #css14-demo5 .steps li { margin: .35rem 0; }
+            #css14-demo5 .steps li::before {
+              counter-increment: step; content: "第 " counter(step) " 步：";
+              color: #b03a2e; font-weight: 700;
+            }
+            #css14-demo5 .fruit { padding-left: 1.2rem; }
+            #css14-demo5 .fruit li::marker { color: #2f6db3; content: "◆ "; }
+            #css14-demo5 ::selection { background: #b03a2e; color: #fff; }
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里的“第 N 步”由 <code>counter</code>（计数器）自动生成：
+        <code>counter-reset</code> 开账、<code>counter-increment</code> 加一、
+        <code>content</code> 里用 <code>counter()</code> 取号。想给列表换符号，
+        优先用 <code>::marker</code> 的 <code>content</code>，比“去掉圆点再插伪元素”更干净。
+      </p>
+
+      <h2>优先级：谁说了算</h2>
+      <p>
+        同一个元素被多条规则命中时，浏览器按一套“分量”规则裁决。可以把它想象成四位的计分板：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>分量</th>
+            <th>谁贡献</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>千位</td><td>行内样式</td><td><code>style="color: red"</code></td></tr>
+          <tr><td>百位</td><td>ID 选择器</td><td><code>#top</code></td></tr>
+          <tr><td>十位</td><td>类、属性选择器、伪类</td><td><code>.note</code>、<code>[type="email"]</code>、<code>:hover</code></td></tr>
+          <tr><td>个位</td><td>元素、伪元素</td><td><code>p</code>、<code>::before</code></td></tr>
+        </tbody>
+      </table>
+      <p>
+        比较时从左往右看：百位大的赢，百位相同比十位，以此类推；四位完全相同，
+        <strong>后写的赢</strong>（这就是“层叠”的字面意思）。三条细节特别值得记：
+      </p>
+      <ul>
+        <li>通配符 <code>*</code>、组合器（空格、<code>&gt;</code>、<code>+</code>、<code>~</code>）<strong>不计分</strong>；</li>
+        <li><code>:where(…)</code> 的部分计 <strong>0 分</strong>——它天生“谦让”，适合做基础样式；</li>
+        <li><code>:is()</code>、<code>:not()</code>、<code>:has()</code> 的分数取
+          <strong>括号里最高的那个</strong>，例如 <code>:is(#top, p)</code> 算 ID 的分量。</li>
+      </ul>
+      <div class="callout warn">
+        <div class="callout-title">心法：别靠加重量赢，要靠写清楚赢</div>
+        <p style="margin:0">
+          样式打架时，新手爱用 <code>!important</code> 或一层层加 ID 硬压；
+          那会让下一次修改更难受。更好的做法是：<strong>用类名把规则说清楚、
+          保持权重低而一致</strong>，实在需要覆盖时再考虑
+          <code>:where()</code> 降低自己的分量（第十五式会讲 <code>!important</code> 的正确用法）。
+        </p>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>基础选择器：元素、类 <code>.x</code>、ID <code>#x</code>、通配 <code>*</code>、分组用逗号；</li>
+        <li>组合器四兄弟：空格（后代）、<code>&gt;</code>（子）、<code>+</code>（相邻兄弟）、<code>~</code>（通用兄弟）；</li>
+        <li>属性选择器按“有没有 / 等于 / 开头 / 结尾 / 包含”挑元素，尾部加 <code>i</code> 可忽略大小写；</li>
+        <li>状态伪类管交互（<code>:hover</code>、<code>:focus-visible</code>、<code>:checked</code>…），
+          结构伪类管位置（<code>:nth-child()</code>、<code>:first-child</code>…）；</li>
+        <li><code>:not()</code> 排除、<code>:is()</code> 取并集、<code>:where()</code> 零权重、<code>:has()</code> 看“有没有”；
+        <li>伪元素用两个冒号，<code>::before</code> / <code>::after</code> 记得写 <code>content</code>；</li>
+        <li>优先级四位计分板：行内 &gt; ID &gt; 类/属性/伪类 &gt; 元素/伪元素，同分后写者赢。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第十四式</div>
+        <ol>
+          <li>给定一个列表，用 <code>:not()</code> 与 <code>:nth-child()</code> 写出规则：
+            偶数项淡底、除最后一项外都有下边框。</li>
+          <li>给第十二式主页的“作品”卡片加两条规则：
+            含图片的卡片（<code>:has(img)</code>）加一圈边框；除第一张外的卡片加一点上边距。</li>
+          <li>思考：<code>:where()</code> 把优先级降到 0，这在实际项目里能解决什么问题？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="列表条纹与分隔线">
+            .list li:nth-child(even) { background: #f4edde; }
+            .list li:not(:last-child) { border-bottom: 1px solid #e3dcc8; }
+          </script>
+          <p>
+            要点：<code>nth-child(even)</code> 与 <code>2n</code> 等价；
+            <code>:not(:last-child)</code> 比“给所有项加边框、再单独去掉最后一项”更省事，
+            也不会在最后一行留下一根多余的线。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="css" data-title="作品卡片">
+            #works article:has(img) { border: 2px solid #b03a2e; }
+            #works article:not(:first-child) { margin-top: 1rem; }
+          </script>
+          <p>
+            <code>:has()</code> 让“父元素按子元素断言自己”成为可能——过去这类需求只能靠脚本加类名。
+            现在主流浏览器都已支持，可以放心使用。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            它解决“基础样式不小心赢了别人”的问题。典型场景：你写了一套通用组件样式
+            （比如 <code>.btn { padding: .4rem .9rem }</code>），后来又要在某个页面里写
+            <code>.toolbar button { padding: .2rem .5rem }</code> 微调；
+            权重比较的麻烦就来了。若基础样式用
+            <code>:where(.btn)</code> 包裹，它的分量降为 0——
+            页面里的任何规则都能轻松覆盖它，而不必动用 <code>!important</code> 或加 ID。
+            <strong>把“可以被覆盖”设计进基础样式，是成熟写法的标志。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把“谁说了算”这件事彻底讲清：层叠、继承与优先级。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

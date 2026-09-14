@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十五式 · CSS 变量与主题 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="自定义属性的声明与取值、作用域与继承、回退值与无效值、主题切换实战、与 calc 和 JS 的配合，以及 @property 简介。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-25">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        一个网站里，同一个朱砂色会写几十遍；换一次配色，就得全局搜索替换几十处。
+        CSS 变量就是为这件事准备的：<strong>把会重复的值收进一个名字里，改一处，全站生效</strong>。
+        这一式讲它，也顺便把“主题切换”这件事做完。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会声明 <code>--name: 值</code>、用 <code>var(--name)</code> 取值，理解它“参与继承与层叠”</li>
+          <li>会用作用域做局部覆盖：同一个组件在不同位置长成不同的样子</li>
+          <li>会写回退值 <code>var(--x, 兜底)</code>，并知道“值非法”时会发生什么</li>
+          <li>能自己搭一套主题变量并切换（本站的明暗模式就是这么做的）</li>
+          <li>知道变量与 <code>calc()</code>、JS 的配合方式，以及它会踩的几个坑</li>
+        </ul>
+      </div>
+
+      <h2>自定义属性：声明与取值</h2>
+      <p>
+        它的正式名字叫<strong>自定义属性</strong>（custom property），写法是“<code>--</code> 开头的属性名”：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="先定义，再使用">
+        :root {                     /* 定义在根元素上，全站都能取到 */
+          --cinnabar: #b03a2e;
+          --gap: 1rem;
+          --radius: 10px;
+          --shadow-card: 0 2px 6px rgb(0 0 0 / 12%);
+        }
+
+        .card {
+          border-radius: var(--radius);
+          box-shadow: var(--shadow-card);
+          padding: var(--gap);
+        }
+        .card a { color: var(--cinnabar); }
+      </script>
+      <p>
+        三个和预处理器（Sass/Less）“变量”不同的地方，值得先分清：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>特点</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>浏览器原生支持</td>
+            <td>不需要编译，写完就能用；还能在开发者工具里实时改</td>
+          </tr>
+          <tr>
+            <td><strong>参与层叠与继承</strong></td>
+            <td>谁都能读子孙节点的变量；在某个元素上重新定义，就只影响它和它的子孙</td>
+          </tr>
+          <tr>
+            <td>值可以是“一串东西”</td>
+            <td>不只是颜色和长度，整段值都能装：
+              <code>--shadow-card: 0 2px 6px rgb(0 0 0 / 12%)</code>、
+              <code>--font-title: italic 700 1.5rem/1.3 "Songti SC", serif</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        命名上有两条硬规矩：<strong>必须以 <code>--</code> 开头</strong>（这是它区别于普通属性的标志），
+        而且<strong>区分大小写</strong>（<code>--Color</code> 与 <code>--color</code> 是两个变量）。
+        习惯上用全小写加连字符：<code>--brand-color</code>、<code>--space-md</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 定义一次，多处使用（改一个值，下面的卡片全变）</div>
+        <div class="demo-preview">
+          <style>
+            #css25-demo1 {
+              --brand: #b03a2e;
+              --card-radius: 12px;
+              --card-gap: .8rem;
+            }
+            #css25-demo1 .d-card {
+              background: #fffdf7; border: 1px solid #d4cab0;
+              border-radius: var(--card-radius); padding: var(--card-gap);
+              margin-bottom: .6rem; font-size: .86rem;
+            }
+            #css25-demo1 .d-card h3 { margin: 0 0 .3rem; color: var(--brand); font-size: 1rem; }
+            #css25-demo1 .d-tag {
+              display: inline-block; background: var(--brand); color: #fff;
+              border-radius: 999px; padding: .12rem .6rem; font-size: .75rem;
+            }
+            #css25-demo1 .d-btn {
+              margin-top: .5rem; border: 1px solid var(--brand); background: transparent;
+              color: var(--brand); border-radius: var(--card-radius);
+              padding: .3rem .8rem; font-size: .82rem; cursor: pointer;
+            }
+          </style>
+          <div id="css25-demo1">
+            <div class="d-card">
+              <h3>卡片标题</h3>
+              <p style="margin: 0 0 .4rem">标题颜色、圆角、内边距都来自变量。</p>
+              <span class="d-tag">标签</span>
+              <div><button type="button" class="d-btn">按钮</button></div>
+            </div>
+            <div class="d-card" style="margin-bottom: 0">
+              <h3>第二张卡片</h3>
+              <p style="margin: 0">同一个变量，一改全变——这就是它的价值。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css25-demo1">
+              <div class="d-card">
+                <h3>卡片标题</h3>
+                <p style="margin: 0 0 .4rem">标题颜色、圆角、内边距都来自变量。</p>
+                <span class="d-tag">标签</span>
+                <div><button type="button" class="d-btn">按钮</button></div>
+              </div>
+              <div class="d-card" style="margin-bottom: 0">
+                <h3>第二张卡片</h3>
+                <p style="margin: 0">同一个变量，一改全变——这就是它的价值。</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css25-demo1 {
+              --brand: #b03a2e;
+              --card-radius: 12px;
+              --card-gap: .8rem;
+            }
+            #css25-demo1 .d-card {
+              background: #fffdf7; border: 1px solid #d4cab0;
+              border-radius: var(--card-radius); padding: var(--card-gap);
+              margin-bottom: .6rem; font-size: .86rem;
+            }
+            #css25-demo1 .d-card h3 { margin: 0 0 .3rem; color: var(--brand); font-size: 1rem; }
+            #css25-demo1 .d-tag {
+              display: inline-block; background: var(--brand); color: #fff;
+              border-radius: 999px; padding: .12rem .6rem; font-size: .75rem;
+            }
+            #css25-demo1 .d-btn {
+              margin-top: .5rem; border: 1px solid var(--brand); background: transparent;
+              color: var(--brand); border-radius: var(--card-radius);
+              padding: .3rem .8rem; font-size: .82rem; cursor: pointer;
+            }
+          </script>
+        </div>
+      </div>
+
+      <h2>作用域：在哪儿定义，就管哪儿</h2>
+      <p>
+        这是 CSS 变量最好用的一点：<strong>它天生会继承</strong>。
+        在 <code>:root</code> 上定义是“全站默认”，在某个元素上定义就是“这个元素的子树换一套值”。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 同一个组件，靠局部变量换出两种性格</div>
+        <div class="demo-preview">
+          <style>
+            #css25-demo2 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css25-demo2 .panel {
+              --accent: #2f6db3;              /* 默认配色 */
+              --pad: .6rem .8rem;
+              flex: 1 1 180px; background: #fffdf7; border: 1px solid var(--accent);
+              border-left-width: 4px; border-radius: 8px; padding: var(--pad); font-size: .85rem;
+            }
+            #css25-demo2 .panel .d-badge {
+              display: inline-block; background: var(--accent); color: #fff;
+              padding: .1rem .5rem; border-radius: 999px; font-size: .72rem;
+            }
+            /* 只在这一处重定义变量，整个面板跟着换色 */
+            #css25-demo2 .danger { --accent: #b03a2e; --pad: .8rem 1rem; }
+            #css25-demo2 .calm { --accent: #2e7d32; }
+          </style>
+          <div id="css25-demo2">
+            <div class="panel">
+              <span class="d-badge">默认</span>
+              <p style="margin: .4rem 0 0">蓝色描边、普通内边距。</p>
+            </div>
+            <div class="panel danger">
+              <span class="d-badge">危险</span>
+              <p style="margin: .4rem 0 0">只是重定义了 <code>--accent</code> 与 <code>--pad</code>。</p>
+            </div>
+            <div class="panel calm">
+              <span class="d-badge">平静</span>
+              <p style="margin: .4rem 0 0">同一套结构，换个变量就是另一副面孔。</p>
+            </div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css25-demo2">
+              <div class="panel">
+                <span class="d-badge">默认</span>
+                <p style="margin: .4rem 0 0">蓝色描边、普通内边距。</p>
+              </div>
+              <div class="panel danger">
+                <span class="d-badge">危险</span>
+                <p style="margin: .4rem 0 0">只是重定义了 <code>--accent</code> 与 <code>--pad</code>。</p>
+              </div>
+              <div class="panel calm">
+                <span class="d-badge">平静</span>
+                <p style="margin: .4rem 0 0">同一套结构，换个变量就是另一副面孔。</p>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css25-demo2 { display: flex; gap: 1rem; flex-wrap: wrap; }
+            #css25-demo2 .panel {
+              --accent: #2f6db3;              /* 默认配色 */
+              --pad: .6rem .8rem;
+              flex: 1 1 180px; background: #fffdf7; border: 1px solid var(--accent);
+              border-left-width: 4px; border-radius: 8px; padding: var(--pad); font-size: .85rem;
+            }
+            #css25-demo2 .panel .d-badge {
+              display: inline-block; background: var(--accent); color: #fff;
+              padding: .1rem .5rem; border-radius: 999px; font-size: .72rem;
+            }
+            /* 只在这一处重定义变量，整个面板跟着换色 */
+            #css25-demo2 .danger { --accent: #b03a2e; --pad: .8rem 1rem; }
+            #css25-demo2 .calm { --accent: #2e7d32; }
+          </script>
+        </div>
+      </div>
+      <p>
+        这种做法在组件库里的名字叫“<strong>局部变量（component token）</strong>”：
+        组件内部只认 <code>var(--accent)</code>，用的人通过“给容器设一个 <code>--accent</code>”来定制它。
+        比起让人去覆盖一堆具体属性，这种接口更干净。
+      </p>
+
+      <h2>回退值与“值非法”</h2>
+      <p>
+        <code>var()</code> 的第二个参数是<strong>回退值</strong>：取不到变量时用它。
+        后面所有内容都算回退值（可以带逗号）：
+      </p>
+      <script type="text/plain" data-lang="css" data-title="回退值的写法">
+        .note {
+          color: var(--note-color, #6f6a5e);                  /* 没定义就用灰色 */
+          font-family: var(--font-body, "PingFang SC", sans-serif);  /* 回退值可以是一串 */
+        }
+      </script>
+      <div class="callout warn">
+        <div class="callout-title">坑：回退值救不了“值写错了”</div>
+        <p style="margin:0">
+          回退值只在<strong>变量不存在</strong>时生效。
+          如果变量存在、但替换进去之后<strong>整条声明非法</strong>（比如把一段颜色塞给 <code>padding</code>），
+          浏览器不会退回那个兜底值，而是把这条声明当作 <code>unset</code> 处理——
+          结果往往是“什么都没发生”，比报错更难查。所以变量的值要和使用它的属性对得上号。
+        </p>
+      </div>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 三种情况：有变量、没变量用兜底、值非法</div>
+        <div class="demo-preview">
+          <style>
+            #css25-demo3 .d-row { padding: .5rem .7rem; margin-bottom: .4rem; border: 1px solid #d4cab0; border-radius: 6px; font-size: .85rem; }
+            #css25-demo3 .ok { --tone: #2e7d32; color: var(--tone); }
+            #css25-demo3 .fallback { color: var(--not-defined, #b03a2e); }
+            #css25-demo3 .broken { --tone: "这不是颜色"; color: var(--tone, #2f6db3); }
+          </style>
+          <div id="css25-demo3">
+            <div class="d-row ok">① <code>--tone</code> 已定义：文字是绿色。</div>
+            <div class="d-row fallback">② <code>--not-defined</code> 没定义：于是用了兜底的朱砂色。</div>
+            <div class="d-row broken">③ <code>--tone</code> 定义了、但值不是颜色：这条声明直接作废，兜底也不会生效——所以这行是默认墨色。</div>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css25-demo3">
+              <div class="d-row ok">① <code>--tone</code> 已定义：文字是绿色。</div>
+              <div class="d-row fallback">② <code>--not-defined</code> 没定义：于是用了兜底的朱砂色。</div>
+              <div class="d-row broken">③ <code>--tone</code> 定义了、但值不是颜色：这条声明直接作废，兜底也不会生效——所以这行是默认墨色。</div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css25-demo3 .d-row { padding: .5rem .7rem; margin-bottom: .4rem; border: 1px solid #d4cab0; border-radius: 6px; font-size: .85rem; }
+            #css25-demo3 .ok { --tone: #2e7d32; color: var(--tone); }
+            #css25-demo3 .fallback { color: var(--not-defined, #b03a2e); }
+            #css25-demo3 .broken { --tone: "这不是颜色"; color: var(--tone, #2f6db3); }
+          </script>
+        </div>
+      </div>
+
+      <h2>主题切换：把所有颜色收进一处分</h2>
+      <p>
+        有了变量，换肤这件事就变成了“<strong>换一组变量值</strong>”。
+        最经典的写法是：把变量定义在 <code>:root</code>，再用一个属性选择器整组覆盖。
+      </p>
+      <script type="text/plain" data-lang="css" data-title="两套主题，一份结构">
+        :root {
+          --bg: #faf6ec;  --fg: #2b2a26;  --line: #e3dcc8;  --accent: #b03a2e;
+        }
+        [data-theme="dark"] {
+          --bg: #17181d;  --fg: #e6e1d2;  --line: #35363f;  --accent: #d46a5d;
+        }
+
+        body { background: var(--bg); color: var(--fg); }
+        .card { border: 1px solid var(--line); }
+        a { color: var(--accent); }
+      </script>
+      <p>
+        本站的明暗模式就是这套做法（选择器换成 Bootstrap 约定的
+        <code>html[data-bs-theme="dark"]</code>，好处是 Bootstrap 自己的组件也跟着换）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 主题切换现场（点按钮，整块区域换一套变量）</div>
+        <div class="demo-preview">
+          <style>
+            #css25-demo4 .stage {
+              --bg: #faf6ec; --fg: #2b2a26; --line: #e3dcc8; --accent: #b03a2e;
+              background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+              border-radius: 10px; padding: .8rem .9rem; transition: background .3s, color .3s;
+            }
+            #css25-demo4 .stage[data-demo-theme="dark"] {
+              --bg: #17181d; --fg: #e6e1d2; --line: #35363f; --accent: #d46a5d;
+            }
+            #css25-demo4 .stage h3 { margin: 0 0 .3rem; color: var(--accent); font-size: 1.05rem; }
+            #css25-demo4 .stage p { margin: 0 0 .5rem; font-size: .86rem; }
+            #css25-demo4 .stage a { color: var(--accent); }
+            #css25-demo4 .stage .d-toggle {
+              border: 1px solid var(--line); background: transparent; color: var(--fg);
+              border-radius: 999px; padding: .25rem .8rem; font-size: .82rem; cursor: pointer;
+            }
+          </style>
+          <div id="css25-demo4">
+            <div class="stage" id="css25-demo4-stage">
+              <h3>山不让尘</h3>
+              <p>这一整块的底色、文字色、线色、强调色都来自变量。<a href="#main">这是一个链接</a>。</p>
+              <button type="button" class="d-toggle" id="css25-demo4-btn">切换主题（浅 / 深）</button>
+              <span style="font-size: .78rem; color: var(--fg); opacity: .75" id="css25-demo4-state">当前：浅色</span>
+            </div>
+            <script>
+              var stage4 = document.getElementById('css25-demo4-stage');
+              document.getElementById('css25-demo4-btn').addEventListener('click', function () {
+                var dark = stage4.getAttribute('data-demo-theme') === 'dark';
+                stage4.setAttribute('data-demo-theme', dark ? 'light' : 'dark');
+                document.getElementById('css25-demo4-state').textContent = '当前：' + (dark ? '浅色' : '深色');
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css25-demo4">
+              <div class="stage" id="css25-demo4-stage">
+                <h3>山不让尘</h3>
+                <p>这一整块的底色、文字色、线色、强调色都来自变量。<a href="#main">这是一个链接</a>。</p>
+                <button type="button" class="d-toggle" id="css25-demo4-btn">切换主题（浅 / 深）</button>
+                <span style="font-size: .78rem; color: var(--fg); opacity: .75" id="css25-demo4-state">当前：浅色</span>
+              </div>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css25-demo4 .stage {
+              --bg: #faf6ec; --fg: #2b2a26; --line: #e3dcc8; --accent: #b03a2e;
+              background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+              border-radius: 10px; padding: .8rem .9rem; transition: background .3s, color .3s;
+            }
+            #css25-demo4 .stage[data-demo-theme="dark"] {
+              --bg: #17181d; --fg: #e6e1d2; --line: #35363f; --accent: #d46a5d;
+            }
+            #css25-demo4 .stage h3 { margin: 0 0 .3rem; color: var(--accent); font-size: 1.05rem; }
+            #css25-demo4 .stage p { margin: 0 0 .5rem; font-size: .86rem; }
+            #css25-demo4 .stage a { color: var(--accent); }
+            #css25-demo4 .stage .d-toggle {
+              border: 1px solid var(--line); background: transparent; color: var(--fg);
+              border-radius: 999px; padding: .25rem .8rem; font-size: .82rem; cursor: pointer;
+            }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（切换主题属性，演示用）">
+            var stage4 = document.getElementById('css25-demo4-stage');
+            document.getElementById('css25-demo4-btn').addEventListener('click', function () {
+              var dark = stage4.getAttribute('data-demo-theme') === 'dark';
+              stage4.setAttribute('data-demo-theme', dark ? 'light' : 'dark');
+              document.getElementById('css25-demo4-state').textContent = '当前：' + (dark ? '浅色' : '深色');
+            });
+          </script>
+        </div>
+      </div>
+
+      <h2>与 calc、媒体查询、JS 的配合</h2>
+      <h3>在 calc() 里当数字用</h3>
+      <script type="text/plain" data-lang="css" data-title="把倍数或间距做成变量">
+        .grid {
+          --cols: 3;
+          --gap: 1rem;
+          display: grid;
+          grid-template-columns: repeat(var(--cols), 1fr);   /* 变量可以放进 repeat */
+          gap: var(--gap);
+          /* 变量本身是“无单位数字”时，与单位相乘要显式加上单位 */
+          padding: calc(var(--gap) * 2);
+        }
+      </script>
+      <h3>在媒体查询里换一套值</h3>
+      <script type="text/plain" data-lang="css" data-title="响应式变量">
+        :root { --page-pad: 1rem; --title-size: 1.6rem; }
+        @media (min-width: 48em) {
+          :root { --page-pad: 2.5rem; --title-size: 2.4rem; }
+        }
+        /* 注意：变量不能用在媒体查询的“条件”里，条件只认具体值 */
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 一个变量同时喂给多个属性（拉动滑块看整块区域跟着变）</div>
+        <div class="demo-preview">
+          <style>
+            #css25-demo5 .stage {
+              --scale: 1;
+              padding: calc(.7rem * var(--scale));
+              border-radius: calc(8px * var(--scale));
+              border: calc(1px * var(--scale)) solid #b03a2e;
+              font-size: calc(.85rem * var(--scale));
+              background: #fffdf7; color: #2b2a26;
+              transition: padding .15s ease-out, font-size .15s ease-out;
+            }
+            #css25-demo5 .out { font-size: .8rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </style>
+          <div id="css25-demo5">
+            <div class="stage" id="css25-demo5-stage">
+              拖动下面的滑块：内边距、圆角、字号都会跟着这个变量一起放大（边框粗细也由它算出来，只是浏览器会取整到整数像素）。
+            </div>
+            <p style="margin: .5rem 0 0">
+              <input type="range" id="css25-demo5-range" min="1" max="2" step="0.1" value="1" aria-label="缩放倍数">
+            </p>
+            <p class="out" id="css25-demo5-out">当前 --scale: 1</p>
+            <script>
+              var range5 = document.getElementById('css25-demo5-range');
+              var stage5 = document.getElementById('css25-demo5-stage');
+              range5.addEventListener('input', function () {
+                stage5.style.setProperty('--scale', range5.value);
+                document.getElementById('css25-demo5-out').textContent = '当前 --scale: ' + range5.value;
+              });
+            </script>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div id="css25-demo5">
+              <div class="stage" id="css25-demo5-stage">
+                拖动下面的滑块：内边距、圆角、字号都会跟着这个变量一起放大（边框粗细也由它算出来，只是浏览器会取整到整数像素）。
+              </div>
+              <p style="margin: .5rem 0 0">
+                <input type="range" id="css25-demo5-range" min="1" max="2" step="0.1" value="1" aria-label="缩放倍数">
+              </p>
+              <p class="out" id="css25-demo5-out">当前 --scale: 1</p>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="样式规则">
+            #css25-demo5 .stage {
+              --scale: 1;
+              padding: calc(.7rem * var(--scale));
+              border-radius: calc(8px * var(--scale));
+              border: calc(1px * var(--scale)) solid #b03a2e;
+              font-size: calc(.85rem * var(--scale));
+              background: #fffdf7; color: #2b2a26;
+              transition: padding .15s ease-out, font-size .15s ease-out;
+            }
+            #css25-demo5 .out { font-size: .8rem; color: #6f6a5e; margin: .5rem 0 0; }
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（用 JS 改变量，演示用）">
+            var range5 = document.getElementById('css25-demo5-range');
+            var stage5 = document.getElementById('css25-demo5-stage');
+            range5.addEventListener('input', function () {
+              stage5.style.setProperty('--scale', range5.value);
+              document.getElementById('css25-demo5-out').textContent = '当前 --scale: ' + range5.value;
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        这段演示里 JS 只做了一件事：<code>element.style.setProperty('--scale', 值)</code>。
+        样式表里所有依赖 <code>var(--scale)</code> 的属性会同时更新——
+        <strong>用变量把“状态”集中到一处，是页面脚本与样式最舒服的协作方式</strong>
+        （第三十七式会正式讲 DOM，这里先见一面）。
+      </p>
+
+      <h2>几个值得知道的进阶点</h2>
+      <ul>
+        <li><strong>变量不能当属性名或选择器用</strong>：<code>var(--prop): red</code> 是无效的，
+          选择器里也不能写 <code>var()</code>；</li>
+        <li><strong>可以用 <code>@property</code> 给变量“上户口”</strong>（较新的能力）：
+          声明它的类型、初始值与是否继承，浏览器就能对它做校验甚至动画：</li>
+      </ul>
+      <script type="text/plain" data-lang="css" data-title="@property：给变量声明类型">
+        @property --rotate {
+          syntax: "<angle>";
+          initial-value: 0deg;
+          inherits: false;
+        }
+        /* 声明过的变量可以参与过渡与动画，未声明的只能是“字符串替换” */
+      </script>
+      <ul>
+        <li><strong>命名建议</strong>：按用途而不是颜色值命名——写 <code>--color-link</code>
+          比 <code>--red</code> 耐用，换配色时不用改名字；</li>
+        <li><strong>别把什么都做成变量</strong>：用一次的值直接写就行；
+          值得抽出来的是“会重复出现”“以后可能要统一调整”的那些。</li>
+      </ul>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>声明用 <code>--name: 值</code>，取值用 <code>var(--name)</code>；必须以 <code>--</code> 开头，区分大小写；</li>
+        <li>它参与层叠与继承：<code>:root</code> 上是全站默认，写在某个元素上就只管它的子树；</li>
+        <li>回退值 <code>var(--x, 兜底)</code> 只在变量<strong>不存在</strong>时生效；
+          变量存在但值非法时，整条声明作废（<code>unset</code>），不会退回兜底；</li>
+        <li>主题切换＝换一组变量：<code>[data-theme="dark"] { --bg: …; }</code>，
+          本站的明暗模式正是这套做法；</li>
+        <li>变量可以放进 <code>calc()</code>、<code>repeat()</code> 等函数，也可以在媒体查询里换值，
+          但<strong>不能用在媒体查询的条件里</strong>；</li>
+        <li>JS 用 <code>setProperty()</code> 改变量，是“状态集中管理”的常用搭配；</li>
+        <li><code>@property</code> 能给变量声明类型与初始值，这类变量才能参与动画。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十五式</div>
+        <ol>
+          <li>把第十二式主页的颜色、间距、圆角抽成一组 <code>:root</code> 变量，
+            再写一套深色值（放在 <code>[data-theme="dark"]</code> 里）。</li>
+          <li>给作品卡片加一个 <code>--card-accent</code> 变量，
+            然后只改 HTML 里的 style 属性，让三张卡片呈现三种强调色。</li>
+          <li>思考：为什么回退值救不了“变量存在但值非法”的情况？
+            这样的设计有什么好处？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="css" data-title="一组主题变量">
+            :root {
+              --bg: #faf6ec; --fg: #2b2a26; --soft: #6f6a5e;
+              --accent: #b03a2e; --line: #e3dcc8;
+              --space: 1rem; --radius: 10px;
+            }
+            [data-theme="dark"] {
+              --bg: #17181d; --fg: #e6e1d2; --soft: #b3ac9a;
+              --accent: #d46a5d; --line: #35363f;
+            }
+            body { background: var(--bg); color: var(--fg); }
+            .card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space); }
+          </script>
+          <p>
+            检查点：把 <code>&lt;html data-theme="dark"&gt;</code> 手动改一下，
+            整页应该立刻换色；如果某个地方没变，说明那里还写着写死的颜色值。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="三张卡片，三种强调色">
+            <article class="work" style="--card-accent: #2f6db3">…</article>
+            <article class="work" style="--card-accent: #2e7d32">…</article>
+            <article class="work" style="--card-accent: #b03a2e">…</article>
+          </script>
+          <script type="text/plain" data-lang="css" data-title="组件只认变量">
+            .work { border-left: 4px solid var(--card-accent); }
+            .work .title { color: var(--card-accent); }
+          </script>
+          <p>
+            这正是“局部变量”的用法：组件内部不去猜调用者想要什么颜色，
+            只提供一个变量口子；调用者在自己那一行里给它赋值即可。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为回退值的判断发生在“<strong>变量能不能取到</strong>”这一步，
+            而“值合不合法”要等到替换进属性之后才知道。
+            规范的处理是：替换后若整条声明非法，就把这条声明当作 <code>unset</code> 丢掉——
+            这比“悄悄退回兜底值”更可预测：
+            否则一个拼错的变量名会静默地套用另一套颜色，问题会被藏起来，
+            开发者反而更难发现“我写的变量根本没生效”。
+            <strong>让错误显现出来，通常比替用户兜住更有价值。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，CSS 部分的收官综合修炼：回头给第十二式那页纯 HTML 的主页穿上衣服。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

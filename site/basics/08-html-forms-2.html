@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第八式 · 表单（下） | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="单选、复选、下拉框与 datalist、多行文本、日期颜色范围文件等控件，以及 fieldset 分组与浏览器自带的约束校验。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-08">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        上一式搭好了对话的入口，这一式把剩下的对话方式补齐：
+        让读者在选项里挑、在多行框里写、从日历上选一天，最后再由浏览器帮忙把明显的错误拦在门口。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会用单选 <code>radio</code>、复选 <code>checkbox</code>，并说清“同名互斥”是怎么来的</li>
+          <li>会用 <code>select</code> / <code>optgroup</code> / <code>option</code> 与 <code>datalist</code>、<code>textarea</code></li>
+          <li>认得日期、颜色、范围、文件等专用控件，以及 <code>file</code> 的两个专属属性</li>
+          <li>会写 <code>fieldset</code> / <code>legend</code> 分组与约束校验（<code>required</code>、<code>pattern</code>、<code>min</code> / <code>max</code>）</li>
+        </ul>
+      </div>
+
+      <h2>单选与复选：选择类控件（一）</h2>
+      <p>
+        一组选项里只能选一个，用 <code>radio</code>（单选框）；可以同时选多个，用
+        <code>checkbox</code>（复选框）。它们和上一式的文本框不一样，有三个地方要特别留意：
+      </p>
+      <ul>
+        <li><strong>靠 <code>name</code> 分组</strong>：同一组单选必须写<strong>相同的 name</strong>，
+          浏览器才会让它们互斥；名字不同就各选各的；</li>
+        <li><strong>靠 <code>value</code> 提交</strong>：选中后提交的是 <code>value</code>，
+          所以每个选项都要写清 value，别用“选项一”这种含糊值；</li>
+        <li><strong>靠 <code>label</code> 点击</strong>：单选框很小，点字比点框容易得多；
+          用 <code>for</code> + <code>id</code> 把它们绑起来（第四式的图注讲过同样的道理：结构对，体验自然对）。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 一组互斥的单选，一组可多选的复选</div>
+        <div class="demo-preview">
+          <p class="mb-1"><strong>早课时间（单选）</strong></p>
+          <p>
+            <input type="radio" id="html08-demo1-am" name="time" value="am" checked>
+            <label for="html08-demo1-am">清晨六点</label><br>
+            <input type="radio" id="html08-demo1-pm" name="time" value="pm">
+            <label for="html08-demo1-pm">傍晚六点</label>
+          </p>
+          <p class="mb-1"><strong>想练的功课（复选）</strong></p>
+          <p class="mb-0">
+            <input type="checkbox" id="html08-demo1-stance" name="drill" value="stance" checked>
+            <label for="html08-demo1-stance">站桩</label><br>
+            <input type="checkbox" id="html08-demo1-fist" name="drill" value="fist">
+            <label for="html08-demo1-fist">拳法</label><br>
+            <input type="checkbox" id="html08-demo1-sword" name="drill" value="sword">
+            <label for="html08-demo1-sword">剑法</label>
+          </p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p class="mb-1"><strong>早课时间（单选）</strong></p>
+            <p>
+              <input type="radio" id="html08-demo1-am" name="time" value="am" checked>
+              <label for="html08-demo1-am">清晨六点</label><br>
+              <input type="radio" id="html08-demo1-pm" name="time" value="pm">
+              <label for="html08-demo1-pm">傍晚六点</label>
+            </p>
+            <p class="mb-1"><strong>想练的功课（复选）</strong></p>
+            <p class="mb-0">
+              <input type="checkbox" id="html08-demo1-stance" name="drill" value="stance" checked>
+              <label for="html08-demo1-stance">站桩</label><br>
+              <input type="checkbox" id="html08-demo1-fist" name="drill" value="fist">
+              <label for="html08-demo1-fist">拳法</label><br>
+              <input type="checkbox" id="html08-demo1-sword" name="drill" value="sword">
+              <label for="html08-demo1-sword">剑法</label>
+            </p>
+          </script>
+        </div>
+      </div>
+      <p>
+        小技巧：复选组用同一个 <code>name</code>（上面是 <code>drill</code>），
+        提交时会带着被勾中的每一个值一起走；单选组如果不给 <code>name</code>，
+        浏览器就不知道它们是一伙的，两个都能选中——这是新手最常见的“单选不互斥”。
+      </p>
+
+      <h2>下拉框与候选项（二）</h2>
+      <p>
+        <code>select</code> 是“从列表里挑值”，三种形态各有用途：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>外观与用途</th>
+            <th>要点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>&lt;select&gt;</code></td>
+            <td>点开才展开的下拉框，省地方</td>
+            <td>选项用 <code>option</code>；默认选中第一个</td>
+          </tr>
+          <tr>
+            <td><code>&lt;select multiple&gt;</code></td>
+            <td>直接铺开的列表，可多选</td>
+            <td>配合 <code>size</code> 指定显示几行；多选时要按住 Ctrl / Cmd</td>
+          </tr>
+          <tr>
+            <td><code>&lt;optgroup label="…"&gt;</code></td>
+            <td>给选项分组</td>
+            <td>只能包 <code>option</code>，不能嵌套别的组</td>
+          </tr>
+          <tr>
+            <td><code>&lt;datalist&gt;</code></td>
+            <td><strong>可输入也可挑</strong>的推荐列表</td>
+            <td>配 <code>&lt;input list="id"&gt;</code> 使用；它只是建议，不限制输入</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 单选下拉、可多选列表、以及能自己输入的候选项</div>
+        <div class="demo-preview">
+          <p><label for="html08-demo2-school">所属门派（单选）</label><br>
+            <select id="html08-demo2-school" name="school">
+              <optgroup label="剑宗">
+                <option value="qingcheng">青城</option>
+                <option value="huashan" selected>华山</option>
+              </optgroup>
+              <optgroup label="拳宗">
+                <option value="shaolin">少林</option>
+              </optgroup>
+            </select></p>
+          <p><label for="html08-demo2-city">常住城市（可输入，也有推荐）</label><br>
+            <input type="text" id="html08-demo2-city" name="city" list="html08-demo2-cities" placeholder="试试输入“杭”">
+            <datalist id="html08-demo2-cities">
+              <option value="杭州"></option>
+              <option value="苏州"></option>
+              <option value="成都"></option>
+            </datalist></p>
+          <p class="mb-0"><label for="html08-demo2-arts">兼修科目（按住 Ctrl / Cmd 多选）</label><br>
+            <select id="html08-demo2-arts" name="arts" multiple size="3">
+              <option value="calligraphy" selected>书法</option>
+              <option value="guqin">古琴</option>
+              <option value="tea">茶道</option>
+            </select></p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p><label for="html08-demo2-school">所属门派（单选）</label><br>
+              <select id="html08-demo2-school" name="school">
+                <optgroup label="剑宗">
+                  <option value="qingcheng">青城</option>
+                  <option value="huashan" selected>华山</option>
+                </optgroup>
+                <optgroup label="拳宗">
+                  <option value="shaolin">少林</option>
+                </optgroup>
+              </select></p>
+            <p><label for="html08-demo2-city">常住城市（可输入，也有推荐）</label><br>
+              <input type="text" id="html08-demo2-city" name="city" list="html08-demo2-cities" placeholder="试试输入“杭”">
+              <datalist id="html08-demo2-cities">
+                <option value="杭州"></option>
+                <option value="苏州"></option>
+                <option value="成都"></option>
+              </datalist></p>
+            <p class="mb-0"><label for="html08-demo2-arts">兼修科目（按住 Ctrl / Cmd 多选）</label><br>
+              <select id="html08-demo2-arts" name="arts" multiple size="3">
+                <option value="calligraphy" selected>书法</option>
+                <option value="guqin">古琴</option>
+                <option value="tea">茶道</option>
+              </select></p>
+          </script>
+        </div>
+      </div>
+      <p>
+        “请选择……”这种空选项也很常用：给它一个空 <code>value=""</code>，
+        再在 <code>select</code> 上写 <code>required</code>，用户没选就会被浏览器拦下
+        （本节最后一个演示里有）。
+      </p>
+
+      <h2>多行文本与其它文本控件</h2>
+      <p>
+        <code>textarea</code> 是多行输入框，有一处和 <code>input</code> 截然不同：
+        <strong>它的初始值写在标签之间，而不是 <code>value</code> 属性里</strong>。
+      </p>
+      <script type="text/plain" data-lang="html" data-title="textarea 的写法">
+        <p>
+          <label for="bio">自我介绍</label><br>
+          <textarea id="bio" name="bio" rows="4" cols="40" maxlength="200" placeholder="一百字以内">我来自山西，喜欢爬山。</textarea>
+        </p>
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rows</code> / <code>cols</code></td>
+            <td>初始显示几行、几列宽</td>
+            <td>只是<b>初始</b>视觉尺寸，用户可以拖动右下角改变</td>
+          </tr>
+          <tr>
+            <td><code>maxlength</code> / <code>minlength</code></td>
+            <td>字数上下限</td>
+            <td>中英文都按字符数算</td>
+          </tr>
+          <tr>
+            <td><code>wrap</code></td>
+            <td>换行方式</td>
+            <td>默认 <code>soft</code>（显示换行、提交不换行）；<code>hard</code> 会让提交内容也带换行，需同时写 <code>cols</code></td>
+          </tr>
+          <tr>
+            <td><code>spellcheck</code></td>
+            <td>拼写检查</td>
+            <td>英文内容可留默认，代码或专名多的框建议 <code>spellcheck="false"</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        另外两个常被忽略的元素：<code>output</code>（显示计算结果，如滑块当前值）
+        与 <code>progress</code> / <code>meter</code>（进度条与刻度尺，前者表示“任务进度”，后者表示“某个量落在哪一档”）。
+      </p>
+
+      <h2>日期、颜色、范围与文件</h2>
+      <p>
+        现代浏览器给了一批“专用输入框”，写对了 <code>type</code> 就白得一整套选择器界面：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th><code>type</code></th>
+            <th>用途</th>
+            <th>值得记的细节</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>date</code></td><td>年-月-日</td><td>提交格式固定为 <code>2026-09-14</code>，与你所在地区的显示方式无关</td></tr>
+          <tr><td><code>time</code></td><td>时:分</td><td>格式为 <code>06:30</code>，可加 <code>step</code> 控制秒</td></tr>
+          <tr><td><code>datetime-local</code></td><td>日期 + 时间，不含时区</td><td>适合“预约到店”这类场景</td></tr>
+          <tr><td><code>month</code> / <code>week</code></td><td>只选月 / 只选周</td><td>如信用卡有效期、排班表</td></tr>
+          <tr><td><code>color</code></td><td>取色器</td><td>值统一为 <code>#rrggbb</code> 小写十六进制；没有 alpha 通道</td></tr>
+          <tr><td><code>range</code></td><td>拖动滑块</td><td>只有近似值；要精确数字就用 <code>number</code>；常配 <code>output</code> 显示当前值</td></tr>
+          <tr><td><code>file</code></td><td>选择文件</td><td>配 <code>accept</code> 限定类型、配 <code>multiple</code> 允许一次选多个</td></tr>
+          <tr><td><code>hidden</code></td><td>隐藏字段</td><td>用户看不见但会随表单提交，常放编号；<strong>绝不能用来藏密码或敏感数据</strong>（看源码就能看见）</td></tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 日期、时间、颜色、滑块与文件（拖动滑块看 output 跟着变）</div>
+        <div class="demo-preview">
+          <p><label for="html08-demo3-day">出发日期</label><br>
+            <input type="date" id="html08-demo3-day" name="day" value="2026-09-14"></p>
+          <p><label for="html08-demo3-start">每日功课开始时间</label><br>
+            <input type="time" id="html08-demo3-start" name="start" value="06:30"></p>
+          <p><label for="html08-demo3-color">门派色</label><br>
+            <input type="color" id="html08-demo3-color" name="color" value="#b03a2e"></p>
+          <p><label for="html08-demo3-range">今日用功时长</label>
+            <output id="html08-demo3-out" for="html08-demo3-range">45</output> 分钟<br>
+            <input type="range" id="html08-demo3-range" name="minutes" min="0" max="120" step="15" value="45"></p>
+          <p class="mb-0"><label for="html08-demo3-file">上传练功照片（可多选）</label><br>
+            <input type="file" id="html08-demo3-file" name="photos" accept="image/*" multiple></p>
+          <script>
+            var range3 = document.getElementById('html08-demo3-range');
+            var out3 = document.getElementById('html08-demo3-out');
+            range3.addEventListener('input', function () {
+              out3.textContent = range3.value;
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p><label for="html08-demo3-day">出发日期</label><br>
+              <input type="date" id="html08-demo3-day" name="day" value="2026-09-14"></p>
+            <p><label for="html08-demo3-start">每日功课开始时间</label><br>
+              <input type="time" id="html08-demo3-start" name="start" value="06:30"></p>
+            <p><label for="html08-demo3-color">门派色</label><br>
+              <input type="color" id="html08-demo3-color" name="color" value="#b03a2e"></p>
+            <p><label for="html08-demo3-range">今日用功时长</label>
+              <output id="html08-demo3-out" for="html08-demo3-range">45</output> 分钟<br>
+              <input type="range" id="html08-demo3-range" name="minutes" min="0" max="120" step="15" value="45"></p>
+            <p class="mb-0"><label for="html08-demo3-file">上传练功照片（可多选）</label><br>
+              <input type="file" id="html08-demo3-file" name="photos" accept="image/*" multiple></p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var range3 = document.getElementById('html08-demo3-range');
+            var out3 = document.getElementById('html08-demo3-out');
+            range3.addEventListener('input', function () {
+              out3.textContent = range3.value;
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>file</code> 控件有两条“只能这样”的规矩：一是出于安全，
+        <strong>脚本不能替用户设置文件路径</strong>（也就没法预填）；二是想真正上传文件，
+        <code>form</code> 必须写 <code>enctype="multipart/form-data"</code>，
+        否则送出去的只是文件名。
+      </p>
+
+      <h2>分组与校验：把表单管得清清楚楚</h2>
+      <p>
+        字段一多，表单就会变成一锅粥。两个元素能帮上大忙：
+      </p>
+      <ul>
+        <li><code>fieldset</code> 是“一组字段”的框，<code>legend</code> 是这组字段的标题，
+          读屏软件会念出“报名信息，分组”；</li>
+        <li>给 <code>fieldset</code> 写 <code>disabled</code>，组内<strong>所有</strong>控件一起禁用——
+          比逐个写省事得多。</li>
+      </ul>
+      <p>
+        接下来是浏览器自带的<strong>约束校验</strong>（constraint validation）：
+        只要写了 <code>required</code>、<code>pattern</code>、<code>min</code> / <code>max</code>、
+        <code>minlength</code> / <code>maxlength</code>、正确的 <code>type</code>，
+        提交时浏览器就会先替你检查一遍，不合格就拦下并给出提示气泡——不写一行脚本。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 分组 + 校验（试着直接提交，或故意把手机号写错）</div>
+        <div class="demo-preview">
+          <form id="html08-demo4" action="#" method="get">
+            <fieldset>
+              <legend>报名信息</legend>
+              <p><label for="html08-demo4-name">姓名</label><br>
+                <input type="text" id="html08-demo4-name" name="name" required></p>
+              <p><label for="html08-demo4-tel">手机号</label><br>
+                <input type="tel" id="html08-demo4-tel" name="tel" required pattern="1[3-9]\d{9}" placeholder="11 位手机号"></p>
+              <p><label for="html08-demo4-level">段位</label><br>
+                <select id="html08-demo4-level" name="level" required>
+                  <option value="">请选择</option>
+                  <option value="1">入门</option>
+                  <option value="2">小成</option>
+                </select></p>
+            </fieldset>
+            <p>
+              <button type="submit">提交报名</button>
+              <button type="submit" formnovalidate>先存草稿（跳过校验）</button>
+            </p>
+          </form>
+          <p class="mb-0" id="html08-demo4-out">提交后这里会显示结果（演示用脚本拦下真实提交）。</p>
+          <script>
+            var f4 = document.getElementById('html08-demo4');
+            var out4 = document.getElementById('html08-demo4-out');
+            f4.addEventListener('submit', function (event) {
+              event.preventDefault();
+              var draft = event.submitter && event.submitter.hasAttribute('formnovalidate');
+              out4.textContent = (draft ? '草稿已保存，跳过了校验' : '校验通过，可以提交了')
+                + '：' + (f4.elements.name.value || '未填') + ' / ' + (f4.elements.tel.value || '未填');
+            });
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <form id="html08-demo4" action="#" method="get">
+              <fieldset>
+                <legend>报名信息</legend>
+                <p><label for="html08-demo4-name">姓名</label><br>
+                  <input type="text" id="html08-demo4-name" name="name" required></p>
+                <p><label for="html08-demo4-tel">手机号</label><br>
+                  <input type="tel" id="html08-demo4-tel" name="tel" required pattern="1[3-9]\d{9}" placeholder="11 位手机号"></p>
+                <p><label for="html08-demo4-level">段位</label><br>
+                  <select id="html08-demo4-level" name="level" required>
+                    <option value="">请选择</option>
+                    <option value="1">入门</option>
+                    <option value="2">小成</option>
+                  </select></p>
+              </fieldset>
+              <p>
+                <button type="submit">提交报名</button>
+                <button type="submit" formnovalidate>先存草稿（跳过校验）</button>
+              </p>
+            </form>
+            <p class="mb-0" id="html08-demo4-out">提交后这里会显示结果（演示用脚本拦下真实提交）。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="交互脚本（演示用）">
+            var f4 = document.getElementById('html08-demo4');
+            var out4 = document.getElementById('html08-demo4-out');
+            f4.addEventListener('submit', function (event) {
+              event.preventDefault();
+              var draft = event.submitter && event.submitter.hasAttribute('formnovalidate');
+              out4.textContent = (draft ? '草稿已保存，跳过了校验' : '校验通过，可以提交了')
+                + '：' + (f4.elements.name.value || '未填') + ' / ' + (f4.elements.tel.value || '未填');
+            });
+          </script>
+        </div>
+      </div>
+
+      <p>
+        三个与校验有关的开关，各有各的场合：
+      </p>
+      <ul>
+        <li><code>novalidate</code>（写在 <code>form</code> 上）：整张表单关掉自带校验，
+          适合自己写一套提示；</li>
+        <li><code>formnovalidate</code>（写在提交按钮上）：<strong>只对这一次提交</strong>跳过校验，
+          “保存草稿”按钮的标准做法（例 4 的第二个按钮）；</li>
+        <li><code>:valid</code> / <code>:invalid</code>（CSS 伪类）：按校验状态改样式，
+          例如给不合格的红框。注意一个坑：<strong>页面刚打开时，空的必填项就已经是
+          <code>:invalid</code></strong>，一刀切地标红会让表单“一上来就满脸通红”；
+          更好的做法是配合脚本或新型的 <code>:user-invalid</code>（用户动过之后才算）。</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-title">心法：客户端校验是服务，不是防线</div>
+        <p style="margin:0">
+          浏览器自带的校验只是<strong>帮用户少犯错</strong>：任何人打开开发者工具都能改掉它，
+          甚至绕过页面直接向接口发数据。所以真正的规则必须<strong>在服务端再校验一遍</strong>——
+          前端校验负责体验，后端校验负责安全，两件事缺一不可。
+        </p>
+      </div>
+
+      <script type="text/plain" data-lang="js" data-title="读书笔记：校验的脚本接口（JS 篇会正式讲）">
+        var tel = document.getElementById('tel');
+        tel.checkValidity();          // 这一格是否通过全部约束
+        tel.validity.valueMissing;    // 具体是哪一种不合格（这里指“必填却空着”）
+        tel.setCustomValidity('手机号好像少了一位');  // 自定义提示；清空要传空字符串
+        tel.setCustomValidity('');
+      </script>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>单选靠<strong>同名</strong>互斥、靠 <code>value</code> 提交；复选组也用同名收集多个值；</li>
+        <li><code>select</code> 配 <code>option</code> / <code>optgroup</code>，
+          <code>multiple</code> 多选、<code>size</code> 定行数；<code>datalist</code> 是“可输入 + 给建议”；</li>
+        <li><code>textarea</code> 的初始值写在标签之间；<code>output</code> 显示结果，
+          <code>progress</code> / <code>meter</code> 表示进度与刻度；</li>
+        <li>日期、时间、颜色、滑块、文件各有专用 <code>type</code>；<code>file</code> 需要
+          <code>accept</code> / <code>multiple</code>，上传时表单要写 <code>enctype="multipart/form-data"</code>；</li>
+        <li><code>hidden</code> 字段能被用户看到源码，绝不能放敏感数据；</li>
+        <li><code>fieldset</code> + <code>legend</code> 负责分组；自带校验靠 <code>required</code> /
+          <code>pattern</code> / <code>min</code> / <code>max</code> 等，跳过校验用
+          <code>novalidate</code> 与 <code>formnovalidate</code>；</li>
+        <li><strong>服务端必须再校验一遍</strong>——前端校验是体验，不是安全。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第八式</div>
+        <ol>
+          <li>做一个“入派登记表”：门派（单选下拉，含空选项且必填）、想学的功课（三个复选）、
+            入门日期（<code>type="date"</code>，必填）、自我介绍（<code>textarea</code>，最多 200 字）。</li>
+          <li>给上一题加一个“用功时长”滑块（0–120 分钟，步长 15），
+            并用 <code>output</code> 实时显示当前值。</li>
+          <li>思考：为什么浏览器的校验挡不住恶意提交？如果只靠它，会出现什么后果？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="入派登记表">
+            <form action="#" method="post">
+              <fieldset>
+                <legend>入派登记</legend>
+                <p><label for="join-school">门派</label><br>
+                  <select id="join-school" name="school" required>
+                    <option value="">请选择</option>
+                    <option value="sword">剑宗</option>
+                    <option value="fist">拳宗</option>
+                  </select></p>
+                <p><label for="join-date">入门日期</label><br>
+                  <input type="date" id="join-date" name="date" required></p>
+                <p>想学的功课：<br>
+                  <input type="checkbox" id="join-a" name="drill" value="stance">
+                  <label for="join-a">站桩</label>
+                  <input type="checkbox" id="join-b" name="drill" value="fist">
+                  <label for="join-b">拳法</label>
+                  <input type="checkbox" id="join-c" name="drill" value="sword">
+                  <label for="join-c">剑法</label></p>
+                <p><label for="join-bio">自我介绍（200 字以内）</label><br>
+                  <textarea id="join-bio" name="bio" rows="4" cols="40" maxlength="200"></textarea></p>
+              </fieldset>
+              <p><button type="submit">提交登记</button></p>
+            </form>
+          </script>
+          <p>
+            检查点：<code>select</code> 的第一个选项 <code>value=""</code>（配 <code>required</code> 才能拦住“没选”）；
+            三个复选同名 <code>drill</code> 但 <code>value</code> 各不相同；
+            <code>textarea</code> 的初始内容写在标签之间；<code>fieldset</code> + <code>legend</code> 成对出现。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="html" data-title="滑块与 output">
+            <p><label for="join-minutes">今日用功时长</label>
+              <output id="join-out" for="join-minutes">45</output> 分钟<br>
+              <input type="range" id="join-minutes" name="minutes" min="0" max="120" step="15" value="45"></p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="让 output 跟着滑块走">
+            var slider = document.getElementById('join-minutes');
+            var show = document.getElementById('join-out');
+            slider.addEventListener('input', function () {
+              show.textContent = slider.value;
+            });
+          </script>
+          <p>
+            <code>output</code> 的 <code>for</code> 属性写它“是在算谁”的控件 id；
+            事件要监听 <code>input</code>（拖动过程中就触发）而不是 <code>change</code>
+            （松手才触发）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            因为校验发生在<strong>用户的浏览器里</strong>，而用户对自己的浏览器有完全控制权：
+            改属性、关脚本、甚至不用浏览器、直接给接口发请求（curl 之类的工具一行就能做到）。
+            只靠前端校验的后果很实际：僵尸程序可以提交空白数据、超长数据、
+            伪造的编号；如果服务端照单全收，轻则脏数据，重则绕开业务规则
+            （比如少填一个字段就绕过了本该收的费用）。
+            一句话：<strong>前端校验让好人少犯错，服务端校验让坏人做不了坏事。</strong>
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，从零散的标签升到整页的结构：语义化与技术地标。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

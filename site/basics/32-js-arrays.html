@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第三十二式 · 数组 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="数组的创建与访问、增删改查方法、会/不会改变原数组的区别、查找与迭代方法全家桶、排序、解构与展开，以及方法速查表。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-32">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        一个变量装一个值，那要装一百个怎么办？答案是数组：
+        <strong>一列排好队的数据</strong>。它是前端用得最多的结构——
+        列表、表格、待办、搜索结果，背后都是一个数组。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>会创建、访问、修改数组，知道下标从 0 开始、越界得到 <code>undefined</code></li>
+          <li>分得清哪些方法<strong>会改变原数组</strong>、哪些返回新数组——这是最容易出 bug 的地方</li>
+          <li>会用 <code>map</code>、<code>filter</code>、<code>reduce</code>、<code>find</code>、<code>some</code>、<code>every</code> 处理数据</li>
+          <li>会用 <code>sort</code>（记得传比较函数）、<code>at</code>、<code>flat</code>、解构与展开</li>
+        </ul>
+      </div>
+
+      <h2>创建与访问</h2>
+      <script type="text/plain" data-lang="js" data-title="几种创建方式">
+        const fruits = ["苹果", "橘子", "梨"];        // 字面量：最常用
+        const empty = [];                             // 空数组
+        const mixed = [1, "两个", true, null, [3, 4]];// 什么都能装（但混着放不好读）
+
+        const zeros = new Array(3).fill(0);           // [0, 0, 0]
+        const holes = new Array(3);                   // 长度 3，但里面是“空洞”，不是 undefined
+
+        const fromStr = Array.from("日拱一卒");        // ["日", "拱", "一", "卒"]
+        const seq = Array.from({ length: 5 }, (_, i) => i + 1);  // [1, 2, 3, 4, 5]
+      </script>
+      <table>
+        <thead>
+          <tr>
+            <th>操作</th>
+            <th>写法</th>
+            <th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>按位置取值</td><td><code>fruits[0]</code></td><td>下标从 <strong>0</strong> 开始；越界得到 <code>undefined</code>（不报错）</td></tr>
+          <tr><td>从末尾数</td><td><code>fruits.at(-1)</code></td><td>负号表示从后往前；<code>fruits[-1]</code> 是错的</td></tr>
+          <tr><td>长度</td><td><code>fruits.length</code></td><td>最后一个元素是 <code>length - 1</code></td></tr>
+          <tr><td>按位置改</td><td><code>fruits[1] = "梨"</code></td><td>改一个已存在的位置</td></tr>
+          <tr><td>加一项（超出现有长度）</td><td><code>fruits[9] = "桃"</code></td><td>中间会留下空洞，长度直接变成 10——通常不是你要的</td></tr>
+          <tr><td>清空</td><td><code>fruits.length = 0</code></td><td>比逐个 <code>pop</code> 省事</td></tr>
+          <tr><td>判断是不是数组</td><td><code>Array.isArray(x)</code></td><td><code>typeof []</code> 得到的是 <code>"object"</code>（第二十八式）</td></tr>
+        </tbody>
+      </table>
+
+      <h2>增删改查：先记住哪些会“动到原数组”</h2>
+      <p>
+        这是数组最容易踩的坑：<strong>有些方法直接改原数组，有些返回一个新数组</strong>。
+        先看“会改”的这一批（俗称“变异方法”）：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>做什么</th>
+            <th>返回什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>push(x)</code></td><td>末尾加一项</td><td>新长度</td></tr>
+          <tr><td><code>pop()</code></td><td>删掉末尾一项</td><td>被删掉的那一项</td></tr>
+          <tr><td><code>unshift(x)</code></td><td>开头加一项</td><td>新长度</td></tr>
+          <tr><td><code>shift()</code></td><td>删掉开头一项</td><td>被删掉的那一项</td></tr>
+          <tr><td><code>splice(起点, 删几个, …要插入的)</code></td><td>在任意位置删、插、替换</td><td>被删掉的元素组成的<strong>数组</strong></td></tr>
+          <tr><td><code>sort()</code> / <code>reverse()</code></td><td>排序 / 反转</td><td>改完的原数组本身</td></tr>
+          <tr><td><code>fill(v, 起, 止)</code></td><td>用同一个值填满区间</td><td>改完的原数组本身</td></tr>
+        </tbody>
+      </table>
+      <p>
+        再看“不动原数组、返回新数组”的常用方法：
+        <code>slice</code>、<code>concat</code>、<code>join</code>、<code>map</code>、
+        <code>filter</code>、<code>flat</code>、<code>at</code>、<code>toSorted</code>、
+        <code>toReversed</code>、<code>toSpliced</code>。
+        它们的价值在于“<strong>原数据保持不变</strong>”——调试时少一半困惑。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 增删改查的六步（每一步都看结果）</div>
+        <div class="demo-preview">
+          <ul id="js32-demo1-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list1 = document.getElementById('js32-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            var queue = ["甲", "乙", "丙"];
+            say1('起点：' + JSON.stringify(queue));
+
+            queue.push("丁");
+            say1('push("丁") → ' + JSON.stringify(queue));
+
+            var popped = queue.pop();
+            say1('pop() 删掉了「' + popped + '」→ ' + JSON.stringify(queue));
+
+            queue.unshift("癸");
+            say1('unshift("癸") → ' + JSON.stringify(queue));
+
+            var shifted = queue.shift();
+            say1('shift() 删掉了「' + shifted + '」→ ' + JSON.stringify(queue));
+
+            var removed = queue.splice(1, 1, "乙改", "乙再改");
+            say1('splice(1, 1, "乙改", "乙再改") 删掉 ' + JSON.stringify(removed)
+              + ' → ' + JSON.stringify(queue));
+
+            say1('at(-1) 取最后一项 → ' + queue.at(-1) + '；queue[-1] 是 → ' + queue[-1]);
+            say1('越界访问 queue[99] → ' + queue[99] + '（不报错，得到 undefined）');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js32-demo1-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list1 = document.getElementById('js32-demo1-out');
+            function say1(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list1.appendChild(li);
+            }
+
+            var queue = ["甲", "乙", "丙"];
+            say1('起点：' + JSON.stringify(queue));
+
+            queue.push("丁");
+            say1('push("丁") → ' + JSON.stringify(queue));
+
+            var popped = queue.pop();
+            say1('pop() 删掉了「' + popped + '」→ ' + JSON.stringify(queue));
+
+            queue.unshift("癸");
+            say1('unshift("癸") → ' + JSON.stringify(queue));
+
+            var shifted = queue.shift();
+            say1('shift() 删掉了「' + shifted + '」→ ' + JSON.stringify(queue));
+
+            var removed = queue.splice(1, 1, "乙改", "乙再改");
+            say1('splice(1, 1, "乙改", "乙再改") 删掉 ' + JSON.stringify(removed)
+              + ' → ' + JSON.stringify(queue));
+
+            say1('at(-1) 取最后一项 → ' + queue.at(-1) + '；queue[-1] 是 → ' + queue[-1]);
+            say1('越界访问 queue[99] → ' + queue[99] + '（不报错，得到 undefined）');
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>splice</code> 是这批方法里最灵活、也最容易写错的：
+        记住“<strong>在哪动手、删掉几个、后面全是插入的内容</strong>”这个顺序，
+        再看返回值——它返回的是被删掉的那些元素（可能是一个空数组）。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 会改 vs 不改：同一组数据的两种命运</div>
+        <div class="demo-preview">
+          <table id="js32-demo2-out" style="width: 100%">
+            <thead><tr><th>操作</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody2 = document.querySelector('#js32-demo2-out tbody');
+            function row2(op, result, note) {
+              var tr = document.createElement('tr');
+              [op, result, note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody2.appendChild(tr);
+            }
+
+            var base = [3, 1, 2];
+
+            var a = base.slice();
+            var r1 = a.push(4);
+            row2('a = base.slice(); a.push(4)',
+              '返回新长度 ' + r1 + '；a = ' + JSON.stringify(a) + '，base = ' + JSON.stringify(base),
+              'slice 先复制出新数组，改的是副本');
+
+            var b = base.slice();
+            var r2 = b.map(function (n) { return n * 10; });
+            row2('b.map(n => n * 10)',
+              JSON.stringify(r2) + '；b = ' + JSON.stringify(b),
+              'map 返回新数组，b 自己没动');
+
+            var c = base.slice();
+            var r3 = c.filter(function (n) { return n > 1; });
+            row2('c.filter(n => n > 1)',
+              JSON.stringify(r3) + '；c = ' + JSON.stringify(c),
+              'filter 返回新数组');
+
+            var d = base.slice();
+            var r4 = d.sort(function (x, y) { return x - y; });
+            row2('d.sort((x, y) => x - y)',
+              JSON.stringify(r4) + '；d = ' + JSON.stringify(d),
+              'sort 改的就是 d 自己（原数组 base 没被碰）');
+
+            var e = base.slice();
+            var r5 = e.toSorted(function (x, y) { return x - y; });
+            row2('e.toSorted((x, y) => x - y)',
+              JSON.stringify(r5) + '；e = ' + JSON.stringify(e),
+              'toSorted 返回排好序的新数组');
+
+            var f = base.slice();
+            var r6 = f.splice(1, 1);
+            row2('f = base.slice(); f.splice(1, 1)',
+              '返回被删掉的 ' + JSON.stringify(r6) + '；f = ' + JSON.stringify(f),
+              'splice 直接改它自己——所以先复制是稳妥习惯');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js32-demo2-out" style="width: 100%">
+              <thead><tr><th>操作</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody2 = document.querySelector('#js32-demo2-out tbody');
+            function row2(op, result, note) {
+              var tr = document.createElement('tr');
+              [op, result, note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody2.appendChild(tr);
+            }
+
+            var base = [3, 1, 2];
+
+            var a = base.slice();
+            var r1 = a.push(4);
+            row2('a = base.slice(); a.push(4)',
+              '返回新长度 ' + r1 + '；a = ' + JSON.stringify(a) + '，base = ' + JSON.stringify(base),
+              'slice 先复制出新数组，改的是副本');
+
+            var b = base.slice();
+            var r2 = b.map(function (n) { return n * 10; });
+            row2('b.map(n => n * 10)',
+              JSON.stringify(r2) + '；b = ' + JSON.stringify(b),
+              'map 返回新数组，b 自己没动');
+
+            var c = base.slice();
+            var r3 = c.filter(function (n) { return n > 1; });
+            row2('c.filter(n => n > 1)',
+              JSON.stringify(r3) + '；c = ' + JSON.stringify(c),
+              'filter 返回新数组');
+
+            var d = base.slice();
+            var r4 = d.sort(function (x, y) { return x - y; });
+            row2('d.sort((x, y) => x - y)',
+              JSON.stringify(r4) + '；d = ' + JSON.stringify(d),
+              'sort 改的就是 d 自己（原数组 base 没被碰）');
+
+            var e = base.slice();
+            var r5 = e.toSorted(function (x, y) { return x - y; });
+            row2('e.toSorted((x, y) => x - y)',
+              JSON.stringify(r5) + '；e = ' + JSON.stringify(e),
+              'toSorted 返回排好序的新数组');
+
+            var f = base.slice();
+            var r6 = f.splice(1, 1);
+            row2('f = base.slice(); f.splice(1, 1)',
+              '返回被删掉的 ' + JSON.stringify(r6) + '；f = ' + JSON.stringify(f),
+              'splice 直接改它自己——所以先复制是稳妥习惯');
+          
+          </script>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-title">为什么这件事值得单独记一遍</div>
+        <p style="margin:0">
+          假设一个函数收到数组 <code>list</code>，里面调用了 <code>list.sort()</code> 或
+          <code>list.splice()</code>，那么<strong>调用者的数组也被改了</strong>——
+          这种“在远处发生的变化”最耗排查时间。
+          两条务实建议：<strong>能不修改就不修改</strong>（用 <code>map</code>/<code>filter</code>/
+          <code>toSorted</code>），<strong>需要改就改自己复制出来的那份</strong>（<code>const copy = [...list]</code>）。
+        </p>
+      </div>
+
+      <h2>查找：从“有没有”到“找出来”</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>问什么</th>
+            <th>返回</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>includes(v)</code></td><td>有没有这个值</td><td><code>true</code> / <code>false</code>（<code>NaN</code> 也找得到）</td></tr>
+          <tr><td><code>indexOf(v)</code></td><td>它在第几位</td><td>下标，找不到返回 <code>-1</code>（对 <code>NaN</code> 无效）</td></tr>
+          <tr><td><code>find(fn)</code></td><td>第一个满足条件的<strong>元素</strong></td><td>找到就是它，找不到是 <code>undefined</code></td></tr>
+          <tr><td><code>findIndex(fn)</code></td><td>第一个满足条件的<strong>位置</strong></td><td>下标，找不到返回 <code>-1</code></td></tr>
+          <tr><td><code>findLast(fn)</code></td><td>从后往前找第一个满足的</td><td>与 <code>find</code> 对称</td></tr>
+          <tr><td><code>some(fn)</code></td><td>有没有<strong>任意一个</strong>满足</td><td><code>true</code> / <code>false</code>（找到就停）</td></tr>
+          <tr><td><code>every(fn)</code></td><td>是不是<strong>全部</strong>都满足</td><td><code>true</code> / <code>false</code>（有一个不满足就停）</td></tr>
+          <tr><td><code>filter(fn)</code></td><td>把所有满足的<strong>收集起来</strong></td><td>新数组（可能为空）</td></tr>
+        </tbody>
+      </table>
+      <p>
+        两个容易踩的点：<code>every</code> 对<strong>空数组</strong>返回 <code>true</code>
+        （“全部都满足”在“一个都没有”时逻辑上成立）；
+        <code>indexOf</code> 用严格相等比较，所以 <code>[NaN].indexOf(NaN)</code> 是 <code>-1</code>，
+        想找 <code>NaN</code> 得用 <code>includes</code> 或 <code>findIndex</code> 配 <code>Number.isNaN</code>。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 迭代全家桶：同一组数据，六种问法</div>
+        <div class="demo-preview">
+          <table id="js32-demo3-out" style="width: 100%">
+            <thead><tr><th>方法</th><th>结果</th><th>说明</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <script>
+            "use strict";
+            var tbody3 = document.querySelector('#js32-demo3-out tbody');
+            function row3(method, result, note) {
+              var tr = document.createElement('tr');
+              [method, result, note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+
+            var nums = [4, 9, 16, 25];
+
+            var visited = [];
+            nums.forEach(function (n) { visited.push(n * 2); });
+            row3('forEach', '看到的顺序：' + visited.join('、'), '只为“做点什么”，返回 undefined');
+
+            row3('map', JSON.stringify(nums.map(function (n) { return Math.sqrt(n); })),
+              '一一变换，长度不变，返回新数组');
+
+            row3('filter', JSON.stringify(nums.filter(function (n) { return n % 2 === 0; })),
+              '按条件筛，长度会变');
+
+            row3('reduce', String(nums.reduce(function (sum, n) { return sum + n; }, 0)),
+              '把一串合成一个：4+9+16+25');
+
+            row3('some', String(nums.some(function (n) { return n > 20; })),
+              '有没有大于 20 的');
+
+            row3('every', String(nums.every(function (n) { return n > 0; })),
+              '是不是都大于 0');
+
+            row3('every（空数组）', String([].every(function (n) { return n > 0; })),
+              '空数组的 every 是 true');
+
+            var words = ["日拱一卒", "功不唐捐"];
+            row3('reduce（拼字符串）', words.reduce(function (acc, w) { return acc + w; }, ""),
+              '累加器不一定是数字');
+
+            row3('reduce 求最大值', String(nums.reduce(function (max, n) { return n > max ? n : max; })),
+              '不传初始值时，第一个元素当起点');
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <table id="js32-demo3-out" style="width: 100%">
+              <thead><tr><th>方法</th><th>结果</th><th>说明</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var tbody3 = document.querySelector('#js32-demo3-out tbody');
+            function row3(method, result, note) {
+              var tr = document.createElement('tr');
+              [method, result, note].forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              tbody3.appendChild(tr);
+            }
+
+            var nums = [4, 9, 16, 25];
+
+            var visited = [];
+            nums.forEach(function (n) { visited.push(n * 2); });
+            row3('forEach', '看到的顺序：' + visited.join('、'), '只为“做点什么”，返回 undefined');
+
+            row3('map', JSON.stringify(nums.map(function (n) { return Math.sqrt(n); })),
+              '一一变换，长度不变，返回新数组');
+
+            row3('filter', JSON.stringify(nums.filter(function (n) { return n % 2 === 0; })),
+              '按条件筛，长度会变');
+
+            row3('reduce', String(nums.reduce(function (sum, n) { return sum + n; }, 0)),
+              '把一串合成一个：4+9+16+25');
+
+            row3('some', String(nums.some(function (n) { return n > 20; })),
+              '有没有大于 20 的');
+
+            row3('every', String(nums.every(function (n) { return n > 0; })),
+              '是不是都大于 0');
+
+            row3('every（空数组）', String([].every(function (n) { return n > 0; })),
+              '空数组的 every 是 true');
+
+            var words = ["日拱一卒", "功不唐捐"];
+            row3('reduce（拼字符串）', words.reduce(function (acc, w) { return acc + w; }, ""),
+              '累加器不一定是数字');
+
+            row3('reduce 求最大值', String(nums.reduce(function (max, n) { return n > max ? n : max; })),
+              '不传初始值时，第一个元素当起点');
+          </script>
+        </div>
+      </div>
+      <p>
+        这六兄弟的分工可以用一句话记住：
+        <strong><code>forEach</code> 看一遍、<code>map</code> 逐个换、<code>filter</code> 挑出来、
+        <code>reduce</code> 合成一个、<code>some</code> 问“有没有”、<code>every</code> 问“是不是都”</strong>。
+        它们的回调都能拿到三个参数：<code>(元素, 下标, 数组本身)</code>——
+        需要下标时不必另写 <code>for</code> 循环。
+      </p>
+
+      <h2>排序与其它常用方法</h2>
+      <p>
+        <code>sort</code> 有一个著名的坑：<strong>不传比较函数时，它把元素转成字符串再排序</strong>，
+        于是 <code>[10, 9, 1]</code> 会排成 <code>[1, 10, 9]</code>（因为 <code>"10"</code> 排在 <code>"9"</code> 前面）。
+        数字排序必须写比较函数：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="排序的两种写法">
+        const scores = [10, 9, 1, 100];
+
+        scores.slice().sort();                    // [1, 10, 100, 9]  ← 默认按字符串比，通常不是你要的
+        scores.slice().sort((a, b) => a - b);     // 升序：返回负数表示 a 在前
+        scores.slice().sort((a, b) => b - a);     // 降序
+        scores.slice().toSorted((a, b) => a - b); // 不改原数组的版本（较新的方法）
+
+        const people = [{ age: 30 }, { age: 20 }];
+        people.slice().sort((a, b) => a.age - b.age);   // 对象数组：比较你关心的字段
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 4 · 排序、查找与那几个好用的新方法</div>
+        <div class="demo-preview">
+          <ul id="js32-demo4-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list4 = document.getElementById('js32-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var scores = [10, 9, 1, 100];
+            say4('默认 sort() → ' + JSON.stringify(scores.slice().sort()) + '（把元素当字符串比）');
+            say4('传比较函数 sort((a, b) => a - b) → ' + JSON.stringify(scores.slice().sort(function (a, b) { return a - b; })));
+            say4('toSorted 不碰原数组：结果是 ' + JSON.stringify(scores.toSorted(function (a, b) { return a - b; }))
+              + '，原数组仍是 ' + JSON.stringify(scores));
+
+            var names = ["墨白", "路人甲", "小乙", "阿丁"];
+            say4('中文按 Unicode 码点排序 → ' + JSON.stringify(names.slice().sort()));
+            say4('按字符长度排序 → ' + JSON.stringify(names.slice().sort(function (a, b) { return a.length - b.length; })));
+
+            var numbers = [5, 12, 8, 130, 44];
+            say4('查找：includes(12) → ' + numbers.includes(12) + '；indexOf(8) → ' + numbers.indexOf(8));
+            say4('find 第一个大于 10 的 → ' + numbers.find(function (n) { return n > 10; })
+              + '；findIndex 它的位置 → ' + numbers.findIndex(function (n) { return n > 10; }));
+            say4('findLast 从后往前第一个偶数 → ' + numbers.findLast(function (n) { return n % 2 === 0; }));
+            say4('at(-1) 与 at(1) → ' + numbers.at(-1) + ' 与 ' + numbers.at(1));
+            say4('slice(1, 3) 取一段（不改原数组）→ ' + JSON.stringify(numbers.slice(1, 3)));
+            say4('join(" / ") → ' + numbers.join(" / "));
+            say4('flat：[[1, 2], [3, [4]]].flat() → ' + JSON.stringify([[1, 2], [3, [4]]].flat())
+              + '；flat(2) → ' + JSON.stringify([[1, 2], [3, [4]]].flat(2)));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js32-demo4-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list4 = document.getElementById('js32-demo4-out');
+            function say4(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list4.appendChild(li);
+            }
+
+            var scores = [10, 9, 1, 100];
+            say4('默认 sort() → ' + JSON.stringify(scores.slice().sort()) + '（把元素当字符串比）');
+            say4('传比较函数 sort((a, b) => a - b) → ' + JSON.stringify(scores.slice().sort(function (a, b) { return a - b; })));
+            say4('toSorted 不碰原数组：结果是 ' + JSON.stringify(scores.toSorted(function (a, b) { return a - b; }))
+              + '，原数组仍是 ' + JSON.stringify(scores));
+
+            var names = ["墨白", "路人甲", "小乙", "阿丁"];
+            say4('中文按 Unicode 码点排序 → ' + JSON.stringify(names.slice().sort()));
+            say4('按字符长度排序 → ' + JSON.stringify(names.slice().sort(function (a, b) { return a.length - b.length; })));
+
+            var numbers = [5, 12, 8, 130, 44];
+            say4('查找：includes(12) → ' + numbers.includes(12) + '；indexOf(8) → ' + numbers.indexOf(8));
+            say4('find 第一个大于 10 的 → ' + numbers.find(function (n) { return n > 10; })
+              + '；findIndex 它的位置 → ' + numbers.findIndex(function (n) { return n > 10; }));
+            say4('findLast 从后往前第一个偶数 → ' + numbers.findLast(function (n) { return n % 2 === 0; }));
+            say4('at(-1) 与 at(1) → ' + numbers.at(-1) + ' 与 ' + numbers.at(1));
+            say4('slice(1, 3) 取一段（不改原数组）→ ' + JSON.stringify(numbers.slice(1, 3)));
+            say4('join(" / ") → ' + numbers.join(" / "));
+            say4('flat：[[1, 2], [3, [4]]].flat() → ' + JSON.stringify([[1, 2], [3, [4]]].flat())
+              + '；flat(2) → ' + JSON.stringify([[1, 2], [3, [4]]].flat(2)));
+          </script>
+        </div>
+      </div>
+
+      <h2>解构与展开：把数组拆开、把数组摊平</h2>
+      <p>
+        数组有两个“语法糖”，写起来短、读起来清楚，值得早点掌握：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="解构与展开">
+        // 解构：按位置把元素取出来
+        const pair = ["墨白", 21];
+        const [name, days] = pair;              // name = "墨白"，days = 21
+        const [first, ...rest] = [1, 2, 3, 4];  // first = 1，rest = [2, 3, 4]
+        const [a = 0, b = 0] = [5];             // 不足的位置用默认值：a = 5，b = 0
+        const [, second] = ["跳过", "要我"];      // 用逗号跳过不想取的元素
+
+        // 交换两个变量：不用再借第三个杯子
+        let x = 1, y = 2;
+        [x, y] = [y, x];
+
+        // 展开：把数组“铺开”
+        const origin = [1, 2, 3];
+        const copy = [...origin];               // 浅复制一份新数组
+        const merged = [...origin, 4, 5];       // 拼出新数组
+        const chars = [..."日拱一卒"];           // 字符串也能展开
+        Math.max(...origin);                    // 当作参数铺开 → 3
+      </script>
+
+      <div class="demo">
+        <div class="demo-caption">例 5 · 解构、rest、展开与复制</div>
+        <div class="demo-preview">
+          <ul id="js32-demo5-out" style="margin: 0"></ul>
+          <script>
+            "use strict";
+            var list5 = document.getElementById('js32-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var pair5 = ["墨白", 21];
+            var [nickName, dayCount] = pair5;
+            say5('解构 pair → nickName = ' + nickName + '，dayCount = ' + dayCount);
+
+            var [firstItem, ...restItems] = [1, 2, 3, 4];
+            say5('解构 + rest → firstItem = ' + firstItem + '，restItems = ' + JSON.stringify(restItems));
+
+            var [scoreA = 0, scoreB = 0] = [5];
+            say5('不足的位置用默认值 → scoreA = ' + scoreA + '，scoreB = ' + scoreB);
+
+            var swapX = 1, swapY = 2;
+            [swapX, swapY] = [swapY, swapX];
+            say5('交换变量（解构写法）→ swapX = ' + swapX + '，swapY = ' + swapY);
+
+            var originArr = [1, 2, 3];
+            var copiedArr = [...originArr];
+            copiedArr.push(4);
+            say5('展开复制再改 → 副本 ' + JSON.stringify(copiedArr) + '，原数组 ' + JSON.stringify(originArr));
+
+            var sharedArr = originArr;
+            sharedArr.push(99);
+            say5('直接赋值再改 → 原数组也变成 ' + JSON.stringify(originArr) + '（这就是引用）');
+
+            say5('展开做参数：Math.max(...[3, 7, 2]) → ' + Math.max(...[3, 7, 2]));
+            say5('展开字符串 → ' + JSON.stringify([... "日拱一卒"]));
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js32-demo5-out" style="margin: 0"></ul>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            "use strict";
+            var list5 = document.getElementById('js32-demo5-out');
+            function say5(text) {
+              var li = document.createElement('li');
+              li.textContent = text;
+              list5.appendChild(li);
+            }
+
+            var pair5 = ["墨白", 21];
+            var [nickName, dayCount] = pair5;
+            say5('解构 pair → nickName = ' + nickName + '，dayCount = ' + dayCount);
+
+            var [firstItem, ...restItems] = [1, 2, 3, 4];
+            say5('解构 + rest → firstItem = ' + firstItem + '，restItems = ' + JSON.stringify(restItems));
+
+            var [scoreA = 0, scoreB = 0] = [5];
+            say5('不足的位置用默认值 → scoreA = ' + scoreA + '，scoreB = ' + scoreB);
+
+            var swapX = 1, swapY = 2;
+            [swapX, swapY] = [swapY, swapX];
+            say5('交换变量（解构写法）→ swapX = ' + swapX + '，swapY = ' + swapY);
+
+            var originArr = [1, 2, 3];
+            var copiedArr = [...originArr];
+            copiedArr.push(4);
+            say5('展开复制再改 → 副本 ' + JSON.stringify(copiedArr) + '，原数组 ' + JSON.stringify(originArr));
+
+            var sharedArr = originArr;
+            sharedArr.push(99);
+            say5('直接赋值再改 → 原数组也变成 ' + JSON.stringify(originArr) + '（这就是引用）');
+
+            say5('展开做参数：Math.max(...[3, 7, 2]) → ' + Math.max(...[3, 7, 2]));
+            say5('展开字符串 → ' + JSON.stringify([... "日拱一卒"]));
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里的「直接赋值」那一条，正是第二十八式讲的<strong>引用</strong>：
+        <code>var shared = origin</code> 不是复制，而是给同一个数组起了第二个名字。
+        想真正拿到独立的一份，用 <code>[...origin]</code> 或 <code>origin.slice()</code>
+        （这叫<strong>浅复制</strong>：数组本身是新的，里面的对象还是同一批）。
+      </p>
+
+      <h2>方法速查表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>想要</th>
+            <th>用</th>
+            <th>会改原数组吗</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>末尾加减</td><td><code>push</code> / <code>pop</code></td><td><strong>会</strong></td></tr>
+          <tr><td>开头加减</td><td><code>unshift</code> / <code>shift</code></td><td><strong>会</strong></td></tr>
+          <tr><td>任意位置增删</td><td><code>splice</code> / <code>toSpliced</code></td><td><code>splice</code> 会；<code>toSpliced</code> 不会</td></tr>
+          <tr><td>取一段</td><td><code>slice</code></td><td>不会</td></tr>
+          <tr><td>找位置 / 找元素</td><td><code>indexOf</code> / <code>find</code> / <code>findIndex</code> / <code>findLast</code></td><td>不会</td></tr>
+          <tr><td>判断有没有</td><td><code>includes</code> / <code>some</code> / <code>every</code></td><td>不会</td></tr>
+          <tr><td>逐项变换</td><td><code>map</code> / <code>flatMap</code></td><td>不会</td></tr>
+          <tr><td>筛选</td><td><code>filter</code></td><td>不会</td></tr>
+          <tr><td>汇总成一个值</td><td><code>reduce</code></td><td>不会</td></tr>
+          <tr><td>只为遍历</td><td><code>forEach</code></td><td>不会（但回调里可以改）</td></tr>
+          <tr><td>排序 / 反转</td><td><code>sort</code> / <code>reverse</code>，或 <code>toSorted</code> / <code>toReversed</code></td><td>前者会，后者不会</td></tr>
+          <tr><td>拼成字符串</td><td><code>join</code></td><td>不会</td></tr>
+          <tr><td>拍平嵌套</td><td><code>flat</code> / <code>flatMap</code></td><td>不会</td></tr>
+          <tr><td>取某一项（支持负数）</td><td><code>at</code></td><td>不会</td></tr>
+          <tr><td>复制 / 合并</td><td><code>[...arr]</code> / <code>concat</code></td><td>不会</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="callout-title">类数组与稀疏数组，两句带过</div>
+        <ul style="margin:0">
+          <li><strong>类数组</strong>：<code>arguments</code>、<code>NodeList</code>（<code>querySelectorAll</code> 的结果）
+            长得像数组、能用下标和 <code>length</code>，但没有 <code>map</code>/<code>filter</code>。
+            想用数组方法就先转：<code>Array.from(nodeList)</code> 或 <code>[...nodeList]</code>（第三十七式常用）；</li>
+          <li><strong>稀疏数组</strong>：用 <code>new Array(3)</code> 或 <code>delete arr[1]</code> 会留下“空洞”，
+            <code>map</code>、<code>forEach</code> 会跳过它们，行为别扭。日常别制造空洞——
+            要占位就填 <code>null</code> 或空字符串。</li>
+        </ul>
+      </div>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>数组按下标访问，从 0 开始；越界得 <code>undefined</code>；<code>at(-1)</code> 取最后一项；</li>
+        <li><code>push/pop/unshift/shift/splice/sort/reverse</code> 会改原数组；
+          <code>slice/map/filter/join/concat/toSorted</code> 等返回新数组；</li>
+        <li>能用不改原数组的方法就用；需要改就先复制 <code>[...arr]</code>；</li>
+        <li>查找工具按需求选：<code>includes</code> / <code>indexOf</code> / <code>find</code> /
+          <code>findIndex</code> / <code>some</code> / <code>every</code> / <code>filter</code>；</li>
+        <li>迭代六兄弟：<code>forEach</code> 看、<code>map</code> 换、<code>filter</code> 挑、
+          <code>reduce</code> 合、<code>some</code> 问有没有、<code>every</code> 问是不是都（空数组为 true）；</li>
+        <li><code>sort</code> 默认按字符串比，数字一定传 <code>(a, b) =&gt; a - b</code>；</li>
+        <li>解构用来拆数组（还能交换变量、设默认值），展开用来复制与合并；
+          直接赋值只是起了第二个名字（引用）。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第三十二式</div>
+        <ol>
+          <li>给定 <code>const prices = [12, 5, 30, 8, 21]</code>：
+            用 <code>filter</code> 取出大于 10 的价格，用 <code>map</code> 给它们打八折，
+            再用 <code>reduce</code> 求总价（保留两位小数）。</li>
+          <li>写一个函数 <code>topN(list, n)</code>：返回分数最高的前 n 个，
+            要求<strong>不修改传入的数组</strong>（提示：想清楚该用 <code>sort</code> 还是 <code>toSorted</code>）。</li>
+          <li>思考：<code>const list = [1, 2, 3]; list.push(4);</code> 是合法的，
+            但 <code>const list = [1, 2, 3]; list = [4];</code> 会报错。这和
+            <code>const</code> 的作用有什么关系？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="js" data-title="筛 → 打折 → 求和">
+            "use strict";
+
+            const prices = [12, 5, 30, 8, 21];
+
+            const expensive = prices.filter((p) => p > 10);          // [12, 30, 21]
+            const discounted = expensive.map((p) => p * 0.8);        // [9.6, 24, 16.8]
+            const total = discounted.reduce((sum, p) => sum + p, 0); // 50.4
+
+            console.log(expensive, discounted, total.toFixed(2));    // ... "50.40"
+          </script>
+          <p>
+            三点值得注意：每一步都<strong>返回新数组</strong>，原来的 <code>prices</code> 分毫未动；
+            <code>reduce</code> 一定要带初始值 <code>0</code>，否则空数组会直接报错；
+            金额最后统一用 <code>toFixed(2)</code> 收尾（浮点数的精度问题第三十四式细讲）。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <script type="text/plain" data-lang="js" data-title="取前 N 名（不改原数组）">
+            "use strict";
+
+            function topN(list, n) {
+              if (!Array.isArray(list) || n <= 0) return [];
+              return list.toSorted((a, b) => b - a).slice(0, n);
+              // 老环境下没有 toSorted，就写 list.slice().sort((a, b) => b - a).slice(0, n)
+            }
+
+            const scores = [88, 95, 60, 72];
+            console.log(topN(scores, 2));   // [95, 88]
+            console.log(scores);            // [88, 95, 60, 72] —— 原数组没变
+          </script>
+          <p>
+            关键就是那句“不修改传入的数组”：函数拿到的数组属于调用者，
+            在里面 <code>sort</code> 会悄悄改掉别人的数据。
+            <code>toSorted</code> 或 <code>slice().sort()</code> 都能避免这件事——
+            这也是第二十九式“写得让人放心”的思路在数组上的体现。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            <code>const</code> 锁住的是“<strong>变量与值之间的绑定</strong>”，不是值本身。
+            <code>list.push(4)</code> 改的是数组<strong>里面的内容</strong>，
+            变量仍然指向同一个数组，所以合法；
+            <code>list = [4]</code> 则是让变量改指向另一个数组，属于“重新赋值”，
+            因此被 <code>const</code> 拒绝（报 <code>TypeError: Assignment to constant variable</code>）。
+            想让数组内容也改不了，得用 <code>Object.freeze(list)</code>——
+            但要注意它只是<strong>浅冻结</strong>：数组里如果装着对象，那些对象的属性照样能改
+            （第三十三式会讲这个细节）。
+          </p>
+        </details>
+      </div>
+
+      <blockquote>下一式，把现实世界的东西装进对象：对象与 Map/Set。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -9,7 +9,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ├── index.html               # 首页 · 修行地图（data-page="home"）
 ├── 404.html                 # 迷路页（data-page="404"，未入 SECTIONS；见 §2 末段）
 ├── sitemap.xml              # 站点地图（部署时由 tools/gen-sitemap.py 生成，不入库）
-├── basics/index.html        # 第一回 · 基础篇（MDN 引路）
+├── basics/                  # 第一回 · 基础篇（43 式：HTML 12 + CSS 14 + JS 16 + 结业 1）
+│   └── index.html           # 卷首语 + 三部分速览 + 章节卡片（site.js 注入）
 ├── bootstrap/               # 第二回 · Bootstrap 篇（18 式：正篇 16 + 补遗 2）
 ├── jquery/                  # 第三回 · jQuery 篇（14 式：正篇 10 + 补遗 4）
 ├── archive/                 # 第四回 · 藏经阁（离线文档/示例集/图标大全）
@@ -20,6 +21,10 @@ site/                        # 部署根目录（唯一需要上传的部分）
 │   ├── bootstrap-docs/      # Bootstrap 离线文档镜像（脚本生成，gitignore）
 │   └── examples/            # 官方示例集（脚本生成，gitignore）
 ├── demo/                    # 整页示例（综合修炼章配套，独立打开）
+│   ├── html-home/           #   基础篇第十二式成品：纯 HTML 个人主页（无样式，CSS 篇再打扮）
+│   ├── html-home-styled/    #   基础篇第二十六式成品：同一页 HTML + 一份样式表（结构逐节点一致）
+│   ├── portfolio/           #   Bootstrap 篇第十六式成品：作品集主页
+│   └── todo/                #   jQuery 篇第十式成品：待办清单
 ├── data/                    # Ajax 章用的本地数据（notes.json、getScript 演示脚本）
 ├── playground/index.html    # 练功场（data-page="playground"，页头自写）
 └── assets/
@@ -37,8 +42,13 @@ site/                        # 部署根目录（唯一需要上传的部分）
 
 - `tools/` 一览：`sync-assets.sh`（同步 vendor/藏经阁）、`gen-icons-page.py`（图标大全）、
   `gen-search-index.py`（搜索索引）、`gen-sitemap.py`（站点地图）、`check-offline.sh`
-  （离线纯净扫描）、`check-links.py`（内部链接检查）、`check-demo-parity.py`
-  （演示源码块与预览一致性检查）、`verify-cdp.js`（双模式渲染验证）、`page-template.html`（作者模板）。
+  （离线纯净扫描：资源引用 + 调用 `check-offline-tech.py` 做“脚本感知”的禁用 API 扫描）
+  、`check-offline-tech.py`（只看真实 `<script>` 里的 type=module / fetch / XMLHttpRequest）
+  、`check-links.py`（内部链接检查）、`check-demo-parity.py`
+  （演示源码块与预览一致性检查）、`verify-cdp.js`（双模式渲染验证）、
+  `verify/cdp-eval.js`（在无头 Chromium 里跑单条表达式，做演示断言）、
+  `verify/cdp-shot.js`（整页截图，人工目检）、`check-demo-classes.py`
+  （基础篇演示类名撞 Bootstrap 检查）、`page-template.html`（作者模板）。
 - 仓库根目录 `deploy.sh`：**一键部署准备**——按部署顺序执行 sync-assets →
   gen-icons-page → gen-search-index → gen-sitemap（参数原样透传，如 `--base`）→
   check-offline → check-links，任一步失败即停止；它不是构建系统，`site/` 仍零构建。
@@ -85,7 +95,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 - `PAGES`：由 SECTIONS 平铺出的阅读顺序，驱动“上一式 / 下一式”翻页。
 - 页面通过 `<body data-page="...">` 声明身份，id 规则：
   - `home`、`basics`、`bootstrap`、`jquery`、`archive`（卷首/分卷页）
-  - `bootstrap-01`…`bootstrap-16`、`jquery-01`…`jquery-10`（章节页，与 slug 一致）
+  - `basics-01`…`basics-43`、`bootstrap-01`…`bootstrap-18`、`jquery-01`…`jquery-14`
+    （章节页，data-page 与文件名前缀一致）
   - `archive-icons`（藏经阁·图标大全，登记时用章节条目的 `pageId` 字段指定）
   - `archive-reference`（藏经阁·工具类速查，同上；页头由 site.js 正常注入——只有
     `home`/`archive`/`playground` 三个 id 被 injectHeader 跳过）
@@ -125,7 +136,8 @@ site/                        # 部署根目录（唯一需要上传的部分）
 
 - `site/sitemap.xml` 由 `tools/gen-sitemap.py` 生成：从 site.js 的 `SECTIONS`
   （单一数据源）按序提取全部 href，前置首页 `index.html`，追加 `EXTRA_PAGES`
-  （SECTIONS 之外的 `demo/portfolio`、`demo/todo` 整页示例）；错误页不收录。
+  （SECTIONS 之外的 `demo/html-home`、`demo/html-home-styled`、`demo/portfolio`、
+  `demo/todo` 整页示例）；错误页不收录。
 - **不入库**（.gitignore 已忽略）：它是部署时生成物，内含部署域名（基址），
   必须在部署前用真实域名现生成——`deploy.sh` 的第 4 步会自动做这件事；
   仓库里只有生成器 `tools/gen-sitemap.py`。
@@ -180,8 +192,11 @@ site/                        # 部署根目录（唯一需要上传的部分）
 ## 6. 离线约束（file:// 兼容清单）
 
 - 相对路径；经典 script；无 `type="module"`；无 fetch/XHR（file:// 下会被 CORS 拦截）。
-- 唯一例外：jQuery Ajax 章——本地 JSON 演示在 file:// 下失败，章节内必须明示
-  “需 `python3 -m http.server` 或部署后可用”。
+- 已知例外（都是浏览器的本地文件安全策略，章节内必须明示“需本地服务器或部署后可用”）：
+  ① jQuery Ajax 章——本地 JSON 演示在 file:// 下失败；
+  ② 基础篇第五式的基础篇媒体演示——`<video>` 的 `<track>` 字幕轨在 file:// 下被
+  当作跨源请求拦下（视频/音频/iframe 本身不受影响，已实测）。
+  坑档案见 `bug-fix/file-protocol-track-blocked.md`。
 - Bootstrap 5.3.8 本身无 Web 字体（系统字体栈），icons 字体随 vendor 复制，因此全站零外部字体请求。
 
 ## 7. 关键设计决策记录
@@ -199,6 +214,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | sitemap 由生成器从 SECTIONS 派生、基址用 --base 传入 | 保住“单一数据源”铁律；域名/子目录部署不定，占位基址 + 部署前重生成 |
 | 正篇之外增设“补遗”章（Bootstrap 17/18、jQuery 11–14） | 对照前身查缺补漏：图片媒体、命名规律、工具函数、链式、插件、性能都补回教程，又不动正篇（综合修炼为第 16/10 式）的收束节奏 |
 | 藏经阁增设《jQuery 方法速查》，与《工具类速查》对称 | 让“入门之后当字典查”对两门技术都成立；方法的存在性/弃用状态以浏览器实测为准 |
+| 基础篇由“MDN 引路”改为 43 式全程教程（MDN 降为每部分末尾的「课外阅读」） | 因用户指令调整（2026-09-14 新目标）：引路破坏学习连贯性，新手也需要能当字典查的完整基础教程；HTML 12 式 / CSS 14 式 / JS 16 式 / 结业 1 式，每部分以“综合修炼”收束 |
 | 演示一致性交给 `tools/check-demo-parity.py` 机器校验（2026-09 升级为标签 + 全部属性 + 文本 + CSS + JS 逐节点比对） | 用户要求“源码块与预览逐字一致”，人工核对会漏（首轮查出 4 处历史遗漏，升级后又抓出 3 处文字/属性差异） |
 
 ## 8. 踩坑索引
@@ -221,5 +237,7 @@ site/                        # 部署根目录（唯一需要上传的部分）
 | 404 页被“原地”渲染在深路径时相对引用全失效（含 loader 自身） | `bug-fix/404-deep-path-relative-links.md` |
 | 把“弃用”当“移除”：`.bind/.delegate/$.proxy` 仍在，移除清单被 grep 误判 | `bug-fix/jquery4-removed-api-misjudgment.md` |
 | 滚动监听 id 挂在小标题上，标题滑出视野后高亮全灭 | `bug-fix/scrollspy-anchor-id-on-heading.md` |
+| file:// 下 `<track>` 字幕轨被当作跨源请求拦下（字幕不显示） | `bug-fix/file-protocol-track-blocked.md` |
+| 演示类名撞 Bootstrap（`.row`/`.card`…）被框架规则悄悄改写，效果与源码对不上 | `bug-fix/demo-class-name-collision-with-bootstrap.md` |
 
 新坑的登记规范见 `bug-fix/README.md`（模板 + 索引表 + 使用约定）。

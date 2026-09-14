@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二十七式 · JavaScript 初识 | 第一回 基础篇 | 纯静态网页的修行</title>
+<meta name="description" content="JavaScript 能做什么、三种引入方式与脚本位置、控制台的用法、注释与分号、严格模式，以及怎么读懂第一段报错。">
+<script src="../assets/js/loader.js"></script>
+</head>
+<body data-page="basics-27">
+<a class="skip-link" href="#main">跳到正文</a>
+<div class="layout">
+  <aside class="sidebar" id="sidebar" aria-label="全站目录"></aside>
+  <div class="content">
+    <main id="main">
+
+      <p class="chapter-lead">
+        HTML 立了骨架，CSS 裁了外衣，接下来轮到“灵魂”了。
+        JavaScript 让页面从一张画变成一件工具：按钮点得动、表单算得出、数据记得住。
+        这一式先不急着写复杂逻辑，只把“脚本怎么进页面、怎么跑、怎么看结果”说清楚。
+      </p>
+
+      <div class="callout">
+        <div class="callout-title">本式要点</div>
+        <ul style="margin:0">
+          <li>知道 JavaScript 负责什么，和 HTML / CSS 各管哪一段</li>
+          <li>会用三种引入方式，特别是外部脚本；知道脚本该放在哪里、<code>defer</code> 有什么用</li>
+          <li>会打开控制台看输出与报错，知道 <code>console.log</code> 是最常用的“探照灯”</li>
+          <li>认得语句、注释、分号与严格模式，并能读懂三类常见错误</li>
+        </ul>
+      </div>
+
+      <h2>JavaScript 负责什么</h2>
+      <p>
+        三件套的分工，一句话就能记住：
+        <strong>HTML 是骨架（有什么）、CSS 是外衣（长什么样）、JavaScript 是灵魂（会做什么）</strong>。
+        具体到页面上，JavaScript 常干这些事：
+      </p>
+      <ul>
+        <li><strong>响应操作</strong>：点击、输入、滚动时做点什么；</li>
+        <li><strong>改动页面</strong>：改文字、加类名、插入或删除元素（第三十七式）；</li>
+        <li><strong>计算与校验</strong>：算总价、算字数、检查表单填得对不对；</li>
+        <li><strong>存取数据</strong>：把读者的选择记在浏览器里，下次打开还在（第四十式）；</li>
+        <li><strong>与服务器交谈</strong>：拿数据、提交数据（第四十式会讲，且受 file:// 限制）。</li>
+      </ul>
+      <p>
+        它是<strong>编程语言</strong>，和 HTML / CSS 有本质区别：
+        HTML 是“描述”，CSS 是“声明”，而 JavaScript 是<strong>一步步下命令</strong>——
+        会判断、会循环、会记住东西。这也是为什么它是三样里最难、也最值得的那一样。
+      </p>
+
+      <h2>脚本怎么进页面</h2>
+      <p>
+        三种写法，第三种要避开：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>样子</th>
+            <th>什么时候用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>外部脚本</strong>（推荐）</td>
+            <td><code>&lt;script src="app.js" defer&gt;&lt;/script&gt;</code></td>
+            <td>正式项目：一份文件管多页，浏览器能缓存</td>
+          </tr>
+          <tr>
+            <td>内部脚本</td>
+            <td><code>&lt;script&gt;…&lt;/script&gt;</code> 直接写在页面里</td>
+            <td>只属于这一页的小逻辑、教程演示</td>
+          </tr>
+          <tr>
+            <td><s>元素事件属性</s></td>
+            <td><code>&lt;button onclick="doSomething()"&gt;</code></td>
+            <td>老写法，把结构与行为混在一起，新代码不要用</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        位置与时机是新手最容易撞墙的地方。回忆第十式那张表，这里换个角度再说一遍：
+      </p>
+      <ul>
+        <li><strong>放在 <code>&lt;/body&gt;</code> 之前</strong>：页面内容都解析完了，脚本想找谁就找谁，最直观；</li>
+        <li><strong>放在 <code>head</code> 里但加 <code>defer</code></strong>：边下载边解析，等页面就绪后按顺序执行——
+          想在 <code>head</code> 里写脚本时用它；</li>
+        <li><strong>不加 <code>defer</code> 就放在 <code>head</code> 里</strong>：脚本会立刻执行，那时候
+          <code>body</code> 还没解析出来，你去取元素只会拿到 <code>null</code>——这是新手第一个“灵异事件”。</li>
+      </ul>
+
+      <div class="demo">
+        <div class="demo-caption">例 1 · 第一个脚本：把结果写进页面，同时在控制台留个脚印</div>
+        <div class="demo-preview">
+          <p id="js27-demo1-out">（脚本还没跑）</p>
+          <script>
+            var out1 = document.getElementById('js27-demo1-out');
+            out1.textContent = '你好，江湖！这段文字是 JavaScript 写进去的。';
+            console.log('【第二十七式演示】脚本跑完了，写进去的内容长度：', out1.textContent.length);
+          </script>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <p id="js27-demo1-out">（脚本还没跑）</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本（紧跟在元素之后）">
+            var out1 = document.getElementById('js27-demo1-out');
+            out1.textContent = '你好，江湖！这段文字是 JavaScript 写进去的。';
+            console.log('【第二十七式演示】脚本跑完了，写进去的内容长度：', out1.textContent.length);
+          </script>
+        </div>
+      </div>
+      <p>
+        三行代码做了三件事：<strong>找到那个段落</strong>（<code>getElementById</code>）、
+        <strong>改它的文字</strong>（<code>textContent</code>）、
+        <strong>往控制台打一行日志</strong>（<code>console.log</code>）。
+        现在按 <kbd>F12</kbd> 打开开发者工具，切到 Console，你就能看到那行带“【第二十七式演示】”的输出——
+        <strong>控制台是写 JavaScript 时最亮的探照灯</strong>，以后会天天用到。
+      </p>
+
+      <h2>控制台：你的第二双眼睛</h2>
+      <p>打开方式（三种任选）：</p>
+      <ol>
+        <li>按 <kbd>F12</kbd>，或 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>；</li>
+        <li>在页面上右键 →“检查”，再切到 <strong>Console（控制台）</strong>标签；</li>
+        <li>菜单里找“更多工具 → 开发者工具”。</li>
+      </ol>
+      <p>
+        控制台能干三件事，每一件都很重要：
+      </p>
+      <ul>
+        <li><strong>看输出</strong>：<code>console.log()</code> 打出来的内容都在这里；</li>
+        <li><strong>看报错</strong>：脚本出错时会显示<strong>错误类型、说明与行号</strong>，点行号还能跳到出错那一行；</li>
+        <li><strong>当场试代码</strong>：在控制台里直接输入 <code>1 + 1</code> 回车，会立刻回你 <code>2</code>——
+          想验证一个小想法时，不必改文件、不必刷新。</li>
+      </ul>
+      <div class="callout warn">
+        <div class="callout-title">心法：报错不是失败，是坐标</div>
+        <p style="margin:0">
+          “Uncaught ReferenceError: x is not defined” 这样的红字，新手看着像判决书，
+          其实是<strong>浏览器在告诉你迷路的位置</strong>：类型、原因、哪一行。
+          读它三秒钟，比盲改代码三十分钟有用。
+        </p>
+      </div>
+
+      <h2>脚本的位置：一次看得见的实验</h2>
+      <p>
+        下面这个演示故意把脚本放在元素<strong>之前</strong>：第一句话报告“找不到元素”，
+        第二句话用 <code>DOJO.ready</code> 等到页面就绪后再报一次。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 2 · 脚本执行时，元素到底在不在？</div>
+        <div class="demo-preview">
+          <p id="js27-demo2-out">（等待脚本）</p>
+          <script>
+            var box2 = document.getElementById('js27-demo2-box');
+            var out2 = document.getElementById('js27-demo2-out');
+            out2.textContent = '脚本刚刚执行时，目标元素在不在？——' + (box2 ? '在' : '还没被解析出来（拿到的是 null）');
+
+            DOJO.ready(function () {
+              var box2later = document.getElementById('js27-demo2-box');
+              out2.textContent += ' ｜ 等页面就绪后再看：' + (box2later ? '在，可以放心操作了' : '仍然不在');
+            });
+          </script>
+          <p id="js27-demo2-box" style="margin: .5rem 0 0">我在这段脚本的后面，所以它第一次找我时我还不存在。</p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构（注意顺序：脚本在前，元素在后）">
+            <p id="js27-demo2-out">（等待脚本）</p>
+            <!-- 脚本就写在这个位置（见下面的“脚本”源码块） -->
+            <p id="js27-demo2-box" style="margin: .5rem 0 0">我在这段脚本的后面，所以它第一次找我时我还不存在。</p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本">
+            var box2 = document.getElementById('js27-demo2-box');
+            var out2 = document.getElementById('js27-demo2-out');
+            out2.textContent = '脚本刚刚执行时，目标元素在不在？——' + (box2 ? '在' : '还没被解析出来（拿到的是 null）');
+
+            DOJO.ready(function () {
+              var box2later = document.getElementById('js27-demo2-box');
+              out2.textContent += ' ｜ 等页面就绪后再看：' + (box2later ? '在，可以放心操作了' : '仍然不在');
+            });
+          </script>
+        </div>
+      </div>
+      <p>
+        <code>DOJO.ready</code> 是<strong>本站演示用的排队工具</strong>：它把函数排进队列，
+        等整站资源（jQuery、Bootstrap、站点脚本）都就绪后再统一执行。
+        你在自己的页面里不需要它——只要把脚本放在 <code>&lt;/body&gt;</code> 之前，
+        或者写成 <code>&lt;script src="app.js" defer&gt;&lt;/script&gt;</code>，时机问题就解决了。
+        （第三回 jQuery 篇里的 <code>$(function(){ … })</code> 是同一个思路。）
+      </p>
+
+      <h2>语句、注释与分号</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>写法</th>
+            <th>含义</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>语句</td>
+            <td>一条命令，按顺序从上到下执行</td>
+            <td><code>var n = 1;</code></td>
+          </tr>
+          <tr>
+            <td>行注释</td>
+            <td>两个斜杠之后的这一行都被忽略</td>
+            <td><code>// 这是注释</code></td>
+          </tr>
+          <tr>
+            <td>块注释</td>
+            <td>斜杠星号包起来，可以跨多行</td>
+            <td><code>/* 多行\n注释 */</code></td>
+          </tr>
+          <tr>
+            <td>分号</td>
+            <td>语句结束符；不写多数时候也能跑（自动补分号），但<strong>建议写</strong></td>
+            <td><code>var a = 1;</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        为什么建议写分号？因为“自动补分号”（ASI）在少数换行位置上会补错地方。经典例子：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="一个真实的分号陷阱">
+        // 想表达的是：先赋值，再对下一行做别的运算
+        var a = 1
+        [1, 2, 3].forEach(function (n) { console.log(n); });
+
+        // 浏览器却把它读成了：var a = 1[1, 2, 3].forEach(…) —— 直接报错
+      </script>
+      <p>
+        记住一句话就够：<strong>语句写完了就补个分号</strong>，一秒钟的事，省下的是排查时间。
+      </p>
+      <p>
+        还有一个“像注释但不是注释”的坑：CSS 里用 <code>/* */</code>，
+        JavaScript 里两者都支持；但反过来，<strong>CSS 里写 <code>//</code> 不是注释</strong>（第十三式提过）。
+        语言不同，规矩不同。
+      </p>
+
+      <h2>严格模式：让浏览器少替你兜底</h2>
+      <p>
+        JavaScript 早期设计留了不少“宽容”的地方，比如给没声明的变量赋值会自动造一个全局变量、
+        删除不可删除的属性静默失败。这些宽容是 bug 的温床。于是在脚本开头写一行：
+      </p>
+      <script type="text/plain" data-lang="js" data-title="严格模式">
+        "use strict";   // 必须是整个脚本或函数的第一条语句
+
+        // 从此以后：
+        // undeclared = 1;   ← 直接报错，而不是偷偷造一个全局变量
+        // delete Object.prototype; ← 报错，而不是静默失败
+      </script>
+      <p>
+        三个补充：其一，<strong>现代 JavaScript 里很多地方默认就是严格模式</strong>——
+        ES 模块（<code>type="module"</code>）与类（<code>class</code>）内部都自动严格，
+        不必再写那一行；其二，本站页面刻意不使用 ES 模块（离线 file:// 需要），
+        所以我们的脚本都会老老实实写上 <code>"use strict";</code>；
+        其三，严格模式不是“更难的另一种语言”，它只是<strong>把错误提前到该出错的地方</strong>。
+      </p>
+
+      <h2>第一段报错长什么样</h2>
+      <p>
+        报错信息读起来有固定格式：<strong>类型 + 说明 + 位置</strong>。
+        常见的三类先认识，以后看到不再心慌：
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>错误类型</th>
+            <th>常见原因</th>
+            <th>例子</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>ReferenceError</code></td>
+            <td>用了一个不存在的名字（拼错、忘了声明）</td>
+            <td><code>Uncaught ReferenceError: tital is not defined</code></td>
+          </tr>
+          <tr>
+            <td><code>TypeError</code></td>
+            <td>把没有的东西当有来用（最常见：对 <code>null</code> 取属性/调用方法）</td>
+            <td><code>Uncaught TypeError: Cannot read properties of null (reading 'textContent')</code></td>
+          </tr>
+          <tr>
+            <td><code>SyntaxError</code></td>
+            <td>语法本身写错了（少括号、少引号、中文标点）</td>
+            <td><code>Uncaught SyntaxError: missing ) after argument list</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 把两种常见错误抓来当面看（用 try…catch 安全捕获）</div>
+        <div class="demo-preview">
+          <ul id="js27-demo3-out" style="margin: 0"></ul>
+          <script>
+            var list3 = document.getElementById('js27-demo3-out');
+            function show3(label, fn) {
+              var li = document.createElement('li');
+              try {
+                fn();
+                li.textContent = label + '：没有报错（这不对，应该报错才对）';
+              } catch (err) {
+                li.textContent = label + ' → ' + err.name + '：' + err.message;
+              }
+              list3.appendChild(li);
+            }
+            show3('引用一个不存在的名字', function () { return tital; });
+            show3('对 null 取属性', function () { var nothing = null; return nothing.textContent; });
+            show3('调用不存在的方法', function () { return (123).toFixeds(2); });
+          </script>
+          <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+            第三条是拼错方法名的典型后果：数字当然没有 <code>toFixeds</code>，只有 <code>toFixed</code>。
+          </p>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <ul id="js27-demo3-out" style="margin: 0"></ul>
+            <p class="mt-2 mb-0" style="font-size: .82rem; color: #6f6a5e">
+              第三条是拼错方法名的典型后果：数字当然没有 <code>toFixeds</code>，只有 <code>toFixed</code>。
+            </p>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="脚本（用 try…catch 安全捕获错误）">
+            var list3 = document.getElementById('js27-demo3-out');
+            function show3(label, fn) {
+              var li = document.createElement('li');
+              try {
+                fn();
+                li.textContent = label + '：没有报错（这不对，应该报错才对）';
+              } catch (err) {
+                li.textContent = label + ' → ' + err.name + '：' + err.message;
+              }
+              list3.appendChild(li);
+            }
+            show3('引用一个不存在的名字', function () { return tital; });
+            show3('对 null 取属性', function () { var nothing = null; return nothing.textContent; });
+            show3('调用不存在的方法', function () { return (123).toFixeds(2); });
+          </script>
+        </div>
+      </div>
+      <p>
+        演示里的 <code>try { … } catch (err) { … }</code> 是“试着做，出错就接住”的写法，
+        <code>err.name</code> 是错误类型、<code>err.message</code> 是说明——
+        这正是控制台里那两行红字的来源。第三十六式会专门讲错误处理，
+        现在只要记住：<strong>报错信息里的类型与说明，就是排查的起点</strong>。
+      </p>
+
+      <h2>本式小结</h2>
+      <ul>
+        <li>HTML 结构、CSS 样式、JavaScript 行为；JS 是编程语言，逐步下命令；</li>
+        <li>引入方式首选外部脚本 <code>&lt;script src="…" defer&gt;</code>；避免 <code>onclick="…"</code> 这类老写法；</li>
+        <li>脚本放 <code>&lt;/body&gt;</code> 之前，或放 <code>head</code> 里加 <code>defer</code>；
+          否则执行时元素还没解析出来，只能拿到 <code>null</code>；</li>
+        <li>控制台三件事：看输出、看报错、当场试代码；<code>console.log</code> 是最常用的探照灯；</li>
+        <li>注释是 <code>//</code> 与 <code>/* */</code>；语句结尾建议写分号，避开自动补分号的坑；</li>
+        <li>脚本开头写 <code>"use strict";</code> 让错误暴露得更早（模块与类内部自动严格）；</li>
+        <li>报错格式是“类型 + 说明 + 位置”：认得 <code>ReferenceError</code>、
+          <code>TypeError</code>、<code>SyntaxError</code> 这三类，就已经能解决大半问题。</li>
+      </ul>
+
+      <div class="practice">
+        <div class="practice-title">练功 · 第二十七式</div>
+        <ol>
+          <li>新建一个 <code>app.js</code>，用 <code>defer</code> 引进页面，
+            在里面用 <code>console.log</code> 打印一句问候，再把它写进页面上某个元素里。</li>
+          <li>打开控制台，故意写错一个变量名（把 <code>title</code> 写成 <code>tital</code>），
+            读一读报错信息：类型是什么？它说找不到什么？行号指向哪里？</li>
+          <li>思考：为什么“把脚本放在 <code>&lt;/body&gt;</code> 之前”和
+            “放在 <code>head</code> 里加 <code>defer</code>”都能解决问题？它们解决的是同一件事吗？</li>
+        </ol>
+        <details class="answer">
+          <summary>参考答案 1</summary>
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <!doctype html>
+            <html lang="zh-CN">
+            <head>
+              <meta charset="utf-8">
+              <title>我的第一个脚本</title>
+              <script src="app.js" defer><\/script>
+            </head>
+            <body>
+              <h1>你好，江湖！</h1>
+              <p id="greeting">（这段文字稍后会被脚本替换）</p>
+            </body>
+            </html>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="app.js">
+            "use strict";
+
+            console.log("脚本已经开始工作");
+            document.getElementById("greeting").textContent = "这句问候来自 app.js。";
+          </script>
+          <p>
+            检查点：打开控制台能看到“脚本已经开始工作”；页面上那段占位文字被换掉了；
+            把 <code>defer</code> 去掉再试一次，多半会看到
+            <code>Cannot read properties of null</code>——那正是这一式讲的位置问题。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 2</summary>
+          <p>
+            报错大致长这样：<code>Uncaught ReferenceError: tital is not defined</code>。
+            拆开读：类型是 <strong>ReferenceError</strong>（引用错误），
+            说明是“<strong>tital 没被定义</strong>”，行号指向那一行。
+            信息里已经写清了“我找不到叫 tital 的东西”——所以排查动作很明确：
+            检查拼写，或者确认那个变量是否真的声明过。
+          </p>
+        </details>
+        <details class="answer">
+          <summary>参考答案 3</summary>
+          <p>
+            它们解决的是同一件事的两个做法：<strong>让脚本在页面结构就绪之后再执行</strong>。
+            放到 <code>&lt;/body&gt;</code> 之前，是因为浏览器从上往下解析，
+            走到这里时上面的元素已经全部存在了；
+            加 <code>defer</code>，则是浏览器帮你把这个“等一等”的活儿接了过去——
+            脚本照常提前下载，但等页面解析完再按顺序执行。
+            实战建议：<strong>能用 <code>defer</code> 就用它</strong>，
+            脚本写在 <code>head</code> 里、结构更整齐，也不会因为后来有人挪动代码而失效。
+          </p>
+        </details>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">课外阅读</div>
+        <p style="margin:0">
+          想先知道 JavaScript 这门语言的全貌，可以翻
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript">MDN 的 JavaScript 栏目</a>；
+          本教程会从下一式开始，一个主题一个主题地把它讲完。
+        </p>
+      </div>
+
+      <blockquote>下一式，从最基础的砖块开始：变量与数据类型。</blockquote>
+
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+</div>
+</body>
+</html>
