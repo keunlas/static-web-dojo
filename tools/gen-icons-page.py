@@ -61,7 +61,7 @@ page = f"""<!doctype html>
 
       <div class="icon-toolbar">
         <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
           <input type="search" id="icon-filter" class="form-control" placeholder="输入图标名过滤，如 heart、house、arrow…" aria-label="过滤图标">
         </div>
         <button type="button" id="icon-clear" class="btn btn-outline-primary">清空</button>

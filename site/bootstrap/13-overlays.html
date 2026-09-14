@@ -264,8 +264,8 @@
       <div class="practice">
         <div class="practice-title">练功 · 第十三式</div>
         <ol>
-          <li>给例 1 再加一个 <code>data-bs-placement="left"</code> 的 tooltip 按钮，并在
-            <code>DOJO.ready</code> 里为它初始化（提示：选择器命中了它吗？）。</li>
+          <li>给例 1 再加一个按钮（<code>data-bs-placement="left"</code>，文案写“左方第二枚”），
+            并说明为什么初始化脚本一行都不用改（提示：选择器命中了它吗？）。</li>
           <li>把例 2 的 popover 触发方式改成 <code>data-bs-trigger="hover"</code>，观察鼠标移入移出的效果；
             再想想：这对手机用户友好吗？</li>
           <li>思考题：为什么 Bootstrap 不给 tooltip / popover 做自动初始化，而 modal / dropdown 却可以
@@ -274,9 +274,27 @@
 
         <details class="answer">
           <summary>参考答案 1</summary>
-          <script type="text/plain" data-lang="html" data-title="页面结构（新增一个按钮）">
-            <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
-                    data-bs-placement="left" title="左方提示">左方</button>
+          <script type="text/plain" data-lang="html" data-title="五枚按钮的完整容器">
+            <div class="d-flex flex-wrap gap-2" id="bs13-demo1">
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="top" title="上方提示">上方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="right" title="右方提示">右方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="bottom" title="下方提示">下方</button>
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="left" title="左方提示">左方</button>
+              <!-- 新增的第五枚：照抄一枚按钮，只改文案与 title -->
+              <button type="button" class="btn btn-primary" data-bs-toggle="tooltip"
+                      data-bs-placement="left" title="左方提示">左方第二枚</button>
+            </div>
+          </script>
+          <script type="text/plain" data-lang="js" data-title="初始化脚本（一行未改）">
+            DOJO.ready(function () {
+              document.querySelectorAll('#bs13-demo1 [data-bs-toggle="tooltip"]').forEach(function (el) {
+                new bootstrap.Tooltip(el);
+              });
+            });
           </script>
           <p>
             例 1 的初始化脚本用的是 <code>#bs13-demo1</code> 容器内全局选择器，只要新按钮放在

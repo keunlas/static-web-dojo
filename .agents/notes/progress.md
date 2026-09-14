@@ -40,8 +40,8 @@
   basics“本回是重头戏”；首页 4 枚装饰图标补 `aria-hidden`；速查页“二級”错字、
   d-none 读屏说明（改为“读屏也读不到；要 visually-hidden”）、jQuery 速查 `.hover` 补弃用注记。
 - **新坑档案**：`bug-fix/unwrap-parent-not-stage.md`、`bug-fix/uniquesort-not-for-numbers.md`，
-  索引表已同步；`conventions.md` §7 新增“check-demo-parity 盲区（只比标签+class，
-  文字与属性需人工/深比对）”警示。
+  索引表已同步；`conventions.md` §7 新增“check-demo-parity 旧版盲区（只比标签+class，
+  文字与属性需人工/深比对）”警示（该盲区随后由工具升级消除，见第二批收尾）。
 - **验证证据**：`check-demo-parity` ✔ 41 页 125 演示（新增第 15 式例 3）；
   自建深比对 ✔ 0 差异；`check-offline` ✔；`check-links` ✔ 44 页；页内 id / 锚点扫描仅剩
   “教学占位符”误报；`search-index.js` 已重新生成；
@@ -49,14 +49,31 @@
   交互断言：unwrap 四路径、uniqueSort → `A、B、C`、第 15 式弹性演示
   （flex / wrap / center / gap=8px / ms-auto 推到右缘）全部通过。
 
-剩余（非阻塞，待用户决定）：
+**第二批收尾（同一轮内继续完成，用户要求“直到没问题为止”）**：
 
-- 练功答案里 3 处“插入式”写法（12-carousel 加第四页、13-overlays 新增按钮、16-project
-  “改动的这一行”）性质上是“改动说明”，若按最严标准可再补全；
-- jQuery 篇 JS 源码块仍普遍省略 `$(function(){…})` / `DOJO.ready(…)` 外壳（既有约定允许、
-  校验器会归一化；若要“整段复制即运行”可批量补外壳）；
-- `tools/check-demo-parity.py` 升级为“文字 + 属性”级比对（本轮未动 tools/，
-  深比对脚本仍是临时工具）。
+- **练功答案去“节选化”（4 处）**：08-forms 答案 1 补成完整的“口令”字段块；
+  12-carousel 答案 1 补成完整的四页轮播（指示器 + 四页 + 控制按钮）；
+  13-overlays 答案 1 补成五枚按钮的完整容器 + 未改动的初始化脚本
+  （并把题干从“再加一个 left”改成“再加一枚‘左方第二枚’”，消除与新按钮重复的歧义）；
+  16-project 答案 2 补成完整的项目网格（六张卡 + 改后的 `row-cols-1 row-cols-lg-3`）。
+- **jQuery 演示 JS 源码块全部补齐 `$(function(){…})` 外壳（54 块）**：
+  预览里的脚本都有 ready 外壳、源码块却没有，整段复制到 `<head>` 会报错；
+  本轮批量补齐（只动 `.demo-source` 里的 JS 文本块，不碰预览脚本），
+  现在“HTML 块 + JS 块”拼起来即可 100% 还原预览；核验：仍缺外壳的演示 JS 块为 0。
+- **`tools/check-demo-parity.py` 升级为深比对**（旧版只比“标签 + class 多重集”）：
+  现在逐节点比对 **标签 + 全部属性（class 乱序等价、style 归一化）+ 文本 + CSS 块 + JS 块**；
+  JS 允许省略 ready 外壳，且**每个源码块各自剥壳后再拼**（兼容 13-plugins 那种一演示多 JS 块）。
+  自测：临时拉出一份改属性的副本与一份改文字的副本，工具都能定位到具体节点；退出码 0/1 正确。
+  文档同步：conventions §7 的“盲区”说明改为“已升级 + 仍不检查 JS 行为”，
+  architecture.md 决策表同步。
+- **图标大全生成器**：搜索框的装饰图标补 `aria-hidden="true"`（与本教程第十四式的无障碍写法一致），
+  重新生成 `site/archive/icons/index.html`（仅此 1 行差异）。
+- **结构块标签配平新增自查**：对全站 `data-lang="html"` 的源码块/结构块做开闭标签配平扫描，
+  （识别 `<\/script>` 转义）结果 0 不平衡——四处补全后的练功答案也在此列。
+- **复验**：升级后的 `check-demo-parity` ✔ 41 页 125 演示；`search-index.js` 再次生成（幂等）；
+  静态三件套（offline / links / parity）与双模式浏览器复验全部重跑通过。
+
+本轮之后：审查清单全部处理完毕，无可选项遗留。
 
 ### 🕘 上一轮（全站内容审查 · 只审查不改文件，清单已在本轮修复）
 

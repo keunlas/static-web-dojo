@@ -160,11 +160,12 @@ python3 tools/check-demo-parity.py
 python3 tools/check-demo-parity.py site/jquery/10-todo.html
 ```
 
-⚠️ **该工具的已知盲区**（2026-09 内容审查时确认）：它只比对
-「标签名 + class 多重集」与归一化后的 JS，**不比对正文文字、id、href、
-`data-bs-*`、style 等属性**。因此：
+说明（2026-09 升级，工具已补盲区）：`tools/check-demo-parity.py` 现在逐节点比对
+**标签 + 全部属性（class 忽略顺序、style 归一化）+ 文本内容 + CSS 块 + JS 块**
+（JS 允许省略 `$(function(){…})` / `DOJO.ready(…)` 外壳，且每个源码块各自剥壳后再拼，
+兼容一个演示拆成多个 JS 块）。升级前旧版只比「标签名 + class 多重集」，
+曾漏过 3 处文字/属性差异（03-grid-2 例 7、11-collapse 例 1、14-icons 例 1），
+升级后均能被机器抓出。
 
-- 预览与源码块“文字不同 / 属性不同”的问题它抓不到（历史上已漏过 3 处：
-  03-grid-2 例 7 少一句文案、11-collapse 例 1 少半句、14-icons 例 1 的 href 写成 `#`）；
-- 写完或改完演示，除跑本脚本外，还要**人工比对文字与属性**（或临时用更严格的
-  标签+属性+文字级比对脚本）；发现新盲区时优先考虑把比对升级进工具。
+它仍然**不检查 JS 行为**：演示的交互效果要靠 `skills/verify-offline/SKILL.md` 的
+操作级断言（点一遍、查 DOM、看控制台）来把关。

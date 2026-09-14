@@ -90,18 +90,22 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="注册插件">
-            $.fn.extend({
-              highlight: function (color) {
-                return this.css('background-color', color || '#ffe9a8').addClass('rounded px-1');
-              }
+            $(function () {
+              $.fn.extend({
+                highlight: function (color) {
+                  return this.css('background-color', color || '#ffe9a8').addClass('rounded px-1');
+                }
+              });
             });
           </script>
           <script type="text/plain" data-lang="js" data-title="调用插件">
-            $('#jq13-mark').on('click', function () {
-              $('.jq13-quote').highlight().addClass('fw-bold');
-            });
-            $('#jq13-unmark').on('click', function () {
-              $('.jq13-quote').css('background-color', '').removeClass('rounded px-1 fw-bold');
+            $(function () {
+              $('#jq13-mark').on('click', function () {
+                $('.jq13-quote').highlight().addClass('fw-bold');
+              });
+              $('#jq13-unmark').on('click', function () {
+                $('.jq13-quote').css('background-color', '').removeClass('rounded px-1 fw-bold');
+              });
             });
           </script>
         </div>
@@ -199,28 +203,32 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="注册插件（带选项）">
-            $.fn.tagIt = function (options) {
-              var settings = $.extend({
-                label: '已阅',
-                color: 'primary'
-              }, options);
+            $(function () {
+              $.fn.tagIt = function (options) {
+                var settings = $.extend({
+                  label: '已阅',
+                  color: 'primary'
+                }, options);
 
-              return this.each(function () {
-                $(this).append(
-                  $('<span>').addClass('badge text-bg-' + settings.color + ' ms-2 jq13-badge').text(settings.label)
-                );
-              });
-            };
+                return this.each(function () {
+                  $(this).append(
+                    $('<span>').addClass('badge text-bg-' + settings.color + ' ms-2 jq13-badge').text(settings.label)
+                  );
+                });
+              };
+            });
           </script>
           <script type="text/plain" data-lang="js" data-title="调用插件">
-            $('#jq13-stamp').on('click', function () {
-              $('#jq13-tasks > li').tagIt();
-            });
-            $('#jq13-stamp-red').on('click', function () {
-              $('#jq13-tasks > li').tagIt({ label: '紧要', color: 'danger' });
-            });
-            $('#jq13-unstamp').on('click', function () {
-              $('#jq13-tasks .jq13-badge').remove();
+            $(function () {
+              $('#jq13-stamp').on('click', function () {
+                $('#jq13-tasks > li').tagIt();
+              });
+              $('#jq13-stamp-red').on('click', function () {
+                $('#jq13-tasks > li').tagIt({ label: '紧要', color: 'danger' });
+              });
+              $('#jq13-unstamp').on('click', function () {
+                $('#jq13-tasks .jq13-badge').remove();
+              });
             });
           </script>
         </div>
@@ -289,34 +297,38 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="扩展全局工具">
-            $.extend({
-              maxOf: function () {
-                return Math.max.apply(null, arguments);
-              },
-              sum: function (arr) {
-                return $.map(arr, function (n) { return n; })
-                  .reduce(function (a, b) { return a + b; }, 0);
-              },
-              once: function (fn) {
-                var done = false;
-                return function () {
-                  if (done) { return '（已执行过，不再重复）'; }
-                  done = true;
-                  return fn.apply(this, arguments);
-                };
-              }
+            $(function () {
+              $.extend({
+                maxOf: function () {
+                  return Math.max.apply(null, arguments);
+                },
+                sum: function (arr) {
+                  return $.map(arr, function (n) { return n; })
+                    .reduce(function (a, b) { return a + b; }, 0);
+                },
+                once: function (fn) {
+                  var done = false;
+                  return function () {
+                    if (done) { return '（已执行过，不再重复）'; }
+                    done = true;
+                    return fn.apply(this, arguments);
+                  };
+                }
+              });
             });
           </script>
           <script type="text/plain" data-lang="js" data-title="调用">
-            $('#jq13-maxof').on('click', function () {
-              $('#jq13-log').text('$.maxOf(3, 9, 5) → ' + $.maxOf(3, 9, 5));
-            });
-            $('#jq13-sum').on('click', function () {
-              $('#jq13-log').text('$.sum([2, 4, 6]) → ' + $.sum([2, 4, 6]));
-            });
-            var firstTime = $.once(function () { return '第一次执行，开工！'; });
-            $('#jq13-once').on('click', function () {
-              $('#jq13-log').text('$.once 的结果：' + firstTime());
+            $(function () {
+              $('#jq13-maxof').on('click', function () {
+                $('#jq13-log').text('$.maxOf(3, 9, 5) → ' + $.maxOf(3, 9, 5));
+              });
+              $('#jq13-sum').on('click', function () {
+                $('#jq13-log').text('$.sum([2, 4, 6]) → ' + $.sum([2, 4, 6]));
+              });
+              var firstTime = $.once(function () { return '第一次执行，开工！'; });
+              $('#jq13-once').on('click', function () {
+                $('#jq13-log').text('$.once 的结果：' + firstTime());
+              });
             });
           </script>
         </div>

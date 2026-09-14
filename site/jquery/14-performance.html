@@ -91,29 +91,31 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq14-bench-data').text('场上放着 200 个练功桩，两个按钮各跑 2000 次');
-            var $field = $('#jq14-field');
-            for (var i = 0; i < 200; i++) {
-              $field.append($('<span class="badge text-bg-secondary jq14-post" style="width:8px;height:8px"></span>'));
-            }
-
-            $('#jq14-slow').on('click', function () {
-              var t0 = performance.now();
-              for (var k = 0; k < 2000; k++) {
-                $('.jq14-post').addClass('text-bg-danger');   // 每次都重新在文档里找
+            $(function () {
+              $('#jq14-bench-data').text('场上放着 200 个练功桩，两个按钮各跑 2000 次');
+              var $field = $('#jq14-field');
+              for (var i = 0; i < 200; i++) {
+                $field.append($('<span class="badge text-bg-secondary jq14-post" style="width:8px;height:8px"></span>'));
               }
-              var slow = performance.now() - t0;
-              $('#jq14-bench').text('不缓存：' + slow.toFixed(1) + ' ms（2000 次查询 + 2000 次改类）');
-            });
 
-            $('#jq14-fast').on('click', function () {
-              var $posts = $('.jq14-post');                    // 只查这一次
-              var t0 = performance.now();
-              for (var k = 0; k < 2000; k++) {
-                $posts.addClass('text-bg-danger');             // 反复用的是同一个对象
-              }
-              var fast = performance.now() - t0;
-              $('#jq14-bench').text('先缓存：' + fast.toFixed(1) + ' ms（1 次查询 + 2000 次改类）');
+              $('#jq14-slow').on('click', function () {
+                var t0 = performance.now();
+                for (var k = 0; k < 2000; k++) {
+                  $('.jq14-post').addClass('text-bg-danger');   // 每次都重新在文档里找
+                }
+                var slow = performance.now() - t0;
+                $('#jq14-bench').text('不缓存：' + slow.toFixed(1) + ' ms（2000 次查询 + 2000 次改类）');
+              });
+
+              $('#jq14-fast').on('click', function () {
+                var $posts = $('.jq14-post');                    // 只查这一次
+                var t0 = performance.now();
+                for (var k = 0; k < 2000; k++) {
+                  $posts.addClass('text-bg-danger');             // 反复用的是同一个对象
+                }
+                var fast = performance.now() - t0;
+                $('#jq14-bench').text('先缓存：' + fast.toFixed(1) + ' ms（1 次查询 + 2000 次改类）');
+              });
             });
           </script>
         </div>
@@ -218,19 +220,21 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq14-global').on('click', function () {
-              var $found = $('.jq14-post-b');
-              $found.addClass('text-bg-danger');
-              $('#jq14-scope-log').text('全站查找命中 ' + $found.length + ' 个（甲乙两院都在内）');
-            });
-            $('#jq14-scoped').on('click', function () {
-              var $found = $('#jq14-yard-a').find('.jq14-post-b');
-              $found.addClass('text-bg-success');
-              $('#jq14-scope-log').text('限定甲院命中 ' + $found.length + ' 个（范围小、更准）');
-            });
-            $('#jq14-clearb').on('click', function () {
-              $('.jq14-post-b').removeClass('text-bg-danger text-bg-success');
-              $('#jq14-scope-log').text('标记已擦掉，再点上面两个按钮对比。');
+            $(function () {
+              $('#jq14-global').on('click', function () {
+                var $found = $('.jq14-post-b');
+                $found.addClass('text-bg-danger');
+                $('#jq14-scope-log').text('全站查找命中 ' + $found.length + ' 个（甲乙两院都在内）');
+              });
+              $('#jq14-scoped').on('click', function () {
+                var $found = $('#jq14-yard-a').find('.jq14-post-b');
+                $found.addClass('text-bg-success');
+                $('#jq14-scope-log').text('限定甲院命中 ' + $found.length + ' 个（范围小、更准）');
+              });
+              $('#jq14-clearb').on('click', function () {
+                $('.jq14-post-b').removeClass('text-bg-danger text-bg-success');
+                $('#jq14-scope-log').text('标记已擦掉，再点上面两个按钮对比。');
+              });
             });
           </script>
         </div>
@@ -297,29 +301,31 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq14-onebyone').on('click', function () {
-              $('#jq14-list').empty();
-              var t0 = performance.now();
-              for (var k = 1; k <= 500; k++) {
-                $('#jq14-list').append('<li>第 ' + k + ' 条</li>');   // 每次都改 DOM
-              }
-              var cost = performance.now() - t0;
-              $('#jq14-dom-log').text('逐条插入：' + cost.toFixed(1) + ' ms（500 次 DOM 改动）');
-            });
-            $('#jq14-batch').on('click', function () {
-              $('#jq14-list').empty();
-              var t0 = performance.now();
-              var html = '';
-              for (var k = 1; k <= 500; k++) {
-                html += '<li>第 ' + k + ' 条</li>';                    // 先拼好
-              }
-              $('#jq14-list').append(html);                            // 一次插入
-              var cost = performance.now() - t0;
-              $('#jq14-dom-log').text('一次插入：' + cost.toFixed(1) + ' ms（1 次 DOM 改动 + 拼字符串）');
-            });
-            $('#jq14-clear').on('click', function () {
-              $('#jq14-list').empty();
-              $('#jq14-dom-log').text('列表已清空。');
+            $(function () {
+              $('#jq14-onebyone').on('click', function () {
+                $('#jq14-list').empty();
+                var t0 = performance.now();
+                for (var k = 1; k <= 500; k++) {
+                  $('#jq14-list').append('<li>第 ' + k + ' 条</li>');   // 每次都改 DOM
+                }
+                var cost = performance.now() - t0;
+                $('#jq14-dom-log').text('逐条插入：' + cost.toFixed(1) + ' ms（500 次 DOM 改动）');
+              });
+              $('#jq14-batch').on('click', function () {
+                $('#jq14-list').empty();
+                var t0 = performance.now();
+                var html = '';
+                for (var k = 1; k <= 500; k++) {
+                  html += '<li>第 ' + k + ' 条</li>';                    // 先拼好
+                }
+                $('#jq14-list').append(html);                            // 一次插入
+                var cost = performance.now() - t0;
+                $('#jq14-dom-log').text('一次插入：' + cost.toFixed(1) + ' ms（1 次 DOM 改动 + 拼字符串）');
+              });
+              $('#jq14-clear').on('click', function () {
+                $('#jq14-list').empty();
+                $('#jq14-dom-log').text('列表已清空。');
+              });
             });
           </script>
         </div>

@@ -142,9 +142,11 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('.jq07-mark').on('click', function () {
-              // 从按钮出发向上爬，找到最近的 .card，给它加/去高亮类
-              $(this).closest('.card').toggleClass('border-danger bg-danger-subtle');
+            $(function () {
+              $('.jq07-mark').on('click', function () {
+                // 从按钮出发向上爬，找到最近的 .card，给它加/去高亮类
+                $(this).closest('.card').toggleClass('border-danger bg-danger-subtle');
+              });
             });
           </script>
         </div>
@@ -254,15 +256,17 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq07-stripe').on('click', function () {
-              $('#jq07-tbl tbody tr').each(function (index) {
-                if (index % 2 === 1) {
-                  $(this).addClass('table-secondary'); // index 为奇数 = 第 2、4 行
-                }
+            $(function () {
+              $('#jq07-stripe').on('click', function () {
+                $('#jq07-tbl tbody tr').each(function (index) {
+                  if (index % 2 === 1) {
+                    $(this).addClass('table-secondary'); // index 为奇数 = 第 2、4 行
+                  }
+                });
               });
-            });
-            $('#jq07-stripe-clear').on('click', function () {
-              $('#jq07-tbl tbody tr').removeClass('table-secondary');
+              $('#jq07-stripe-clear').on('click', function () {
+                $('#jq07-tbl tbody tr').removeClass('table-secondary');
+              });
             });
           </script>
         </div>
@@ -310,13 +314,15 @@
             <p id="jq07-joined" class="mt-3 mb-0 text-body-secondary">点上面的按钮，看结果。</p>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq07-join').on('click', function () {
-              var names = [];
-              $('#jq07-movelist li').each(function (index) {
-                // $(this).text() 取当前项文字，index + 1 变成从 1 数的编号
-                names.push('第' + (index + 1) + '式·' + $(this).text());
+            $(function () {
+              $('#jq07-join').on('click', function () {
+                var names = [];
+                $('#jq07-movelist li').each(function (index) {
+                  // $(this).text() 取当前项文字，index + 1 变成从 1 数的编号
+                  names.push('第' + (index + 1) + '式·' + $(this).text());
+                });
+                $('#jq07-joined').text(names.join('，'));
               });
-              $('#jq07-joined').text(names.join('，'));
             });
           </script>
         </div>
@@ -456,36 +462,38 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            function clearMark() {
-              $('#jq07-demo4 li').removeClass('border border-danger shadow-sm');
-            }
-            function mark($el) {
-              clearMark();
-              $el.addClass('border border-danger shadow-sm');
-            }
-            $('#jq07-not').on('click', function () {
-              mark($('#jq07-demo4 .jq07-n4').not('[data-done]'));
-              $('#jq07-n4-log').text('not([data-done]) 挑出 3 个没做成的。');
-            });
-            $('#jq07-is').on('click', function () {
-              var done = $('#jq07-demo4 .jq07-n4').first().is('[data-done]');
-              $('#jq07-n4-log').text('第一个是完成状态吗？is() 回答：' + done + '（返回布尔值，不是集合）。');
-            });
-            $('#jq07-has').on('click', function () {
-              mark($('#jq07-demo4 li').has('ul'));
-              $('#jq07-n4-log').text('has("ul") 找到 1 个：只有“门派名册”里藏着子名单。');
-            });
-            $('#jq07-until').on('click', function () {
-              mark($('#jq07-a2').nextUntil('#jq07-a4'));
-              $('#jq07-n4-log').text('nextUntil("#jq07-a4") 从吐纳之后走到轻功之前，命中剑法一个（不含终点）。');
-            });
-            $('#jq07-addback').on('click', function () {
-              mark($('#jq07-a2').nextUntil('#jq07-a4').addBack());
-              $('#jq07-n4-log').text('addBack() 把起点“吐纳”也加回来，现在是两个。');
-            });
-            $('#jq07-n4-reset').on('click', function () {
-              clearMark();
-              $('#jq07-n4-log').text('标记已擦掉。');
+            $(function () {
+              function clearMark() {
+                $('#jq07-demo4 li').removeClass('border border-danger shadow-sm');
+              }
+              function mark($el) {
+                clearMark();
+                $el.addClass('border border-danger shadow-sm');
+              }
+              $('#jq07-not').on('click', function () {
+                mark($('#jq07-demo4 .jq07-n4').not('[data-done]'));
+                $('#jq07-n4-log').text('not([data-done]) 挑出 3 个没做成的。');
+              });
+              $('#jq07-is').on('click', function () {
+                var done = $('#jq07-demo4 .jq07-n4').first().is('[data-done]');
+                $('#jq07-n4-log').text('第一个是完成状态吗？is() 回答：' + done + '（返回布尔值，不是集合）。');
+              });
+              $('#jq07-has').on('click', function () {
+                mark($('#jq07-demo4 li').has('ul'));
+                $('#jq07-n4-log').text('has("ul") 找到 1 个：只有“门派名册”里藏着子名单。');
+              });
+              $('#jq07-until').on('click', function () {
+                mark($('#jq07-a2').nextUntil('#jq07-a4'));
+                $('#jq07-n4-log').text('nextUntil("#jq07-a4") 从吐纳之后走到轻功之前，命中剑法一个（不含终点）。');
+              });
+              $('#jq07-addback').on('click', function () {
+                mark($('#jq07-a2').nextUntil('#jq07-a4').addBack());
+                $('#jq07-n4-log').text('addBack() 把起点“吐纳”也加回来，现在是两个。');
+              });
+              $('#jq07-n4-reset').on('click', function () {
+                clearMark();
+                $('#jq07-n4-log').text('标记已擦掉。');
+              });
             });
           </script>
         </div>

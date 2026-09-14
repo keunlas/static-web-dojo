@@ -239,14 +239,16 @@
             <p class="mt-2 mb-0 small text-body-secondary">点任务本体试试，再点点 ✕。</p>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            $('#jq10-d3-list').on('click', 'li', function (e) {
-              if ($(e.target).closest('.btn-del').length) return; // 点的是 ✕，让路
-              $(this).toggleClass('done text-decoration-line-through text-body-secondary');
-            });
+            $(function () {
+              $('#jq10-d3-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return; // 点的是 ✕，让路
+                $(this).toggleClass('done text-decoration-line-through text-body-secondary');
+              });
 
-            // 点击 ✕：删除所在任务（事件委托，新加项同样有效）
-            $('#jq10-d3-list').on('click', '.btn-del', function () {
-              $(this).closest('li').remove();
+              // 点击 ✕：删除所在任务（事件委托，新加项同样有效）
+              $('#jq10-d3-list').on('click', '.btn-del', function () {
+                $(this).closest('li').remove();
+              });
             });
           </script>
         </div>
@@ -343,50 +345,52 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
-            function updateStats() {
-              $('#jq10-d4-total').text($('#jq10-d4-list li').length);          // 总数
-              $('#jq10-d4-done').text($('#jq10-d4-list li.done').length);      // 已完成数
-              $('#jq10-d4-clear').prop('disabled',                            // 无可清空时禁用按钮
-                $('#jq10-d4-list li.done').length === 0);
-            }
-
-            function add() {
-              var text = $('#jq10-d4-input').val().trim();
-              if (!text) {                                                    // 空值拦截
-                $('#jq10-d4-input').addClass('is-invalid').trigger('focus');
-                return;
+            $(function () {
+              function updateStats() {
+                $('#jq10-d4-total').text($('#jq10-d4-list li').length);          // 总数
+                $('#jq10-d4-done').text($('#jq10-d4-list li.done').length);      // 已完成数
+                $('#jq10-d4-clear').prop('disabled',                            // 无可清空时禁用按钮
+                  $('#jq10-d4-list li.done').length === 0);
               }
-              $('#jq10-d4-input').removeClass('is-invalid');
-              $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
-                .append($('<span>').text(text))
-                .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }))
-                .appendTo('#jq10-d4-list');
-              $('#jq10-d4-input').val('').trigger('focus');
-              updateStats();                                                  // 添加之后更新统计
-            }
 
-            $('#jq10-d4-add').on('click', add);
-            $('#jq10-d4-input').on('keydown', function (e) {
-              if (e.key === 'Enter') add();
+              function add() {
+                var text = $('#jq10-d4-input').val().trim();
+                if (!text) {                                                    // 空值拦截
+                  $('#jq10-d4-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d4-input').removeClass('is-invalid');
+                $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
+                  .append($('<span>').text(text))
+                  .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }))
+                  .appendTo('#jq10-d4-list');
+                $('#jq10-d4-input').val('').trigger('focus');
+                updateStats();                                                  // 添加之后更新统计
+              }
+
+              $('#jq10-d4-add').on('click', add);
+              $('#jq10-d4-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();
+              });
+
+              $('#jq10-d4-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return;              // 点的是 ✕，让路
+                $(this).toggleClass('done text-decoration-line-through text-body-secondary');
+                updateStats();                                                   // 切换之后更新统计
+              });
+
+              $('#jq10-d4-list').on('click', '.btn-del', function () {
+                $(this).closest('li').remove();
+                updateStats();                                                   // 删除之后更新统计
+              });
+
+              $('#jq10-d4-clear').on('click', function () {
+                $('#jq10-d4-list li.done').remove();   // 选中已完成的，全部删掉
+                updateStats();
+              });
+
+              updateStats();                             // 页面打开先算一次，初始数字才准确
             });
-
-            $('#jq10-d4-list').on('click', 'li', function (e) {
-              if ($(e.target).closest('.btn-del').length) return;              // 点的是 ✕，让路
-              $(this).toggleClass('done text-decoration-line-through text-body-secondary');
-              updateStats();                                                   // 切换之后更新统计
-            });
-
-            $('#jq10-d4-list').on('click', '.btn-del', function () {
-              $(this).closest('li').remove();
-              updateStats();                                                   // 删除之后更新统计
-            });
-
-            $('#jq10-d4-clear').on('click', function () {
-              $('#jq10-d4-list li.done').remove();   // 选中已完成的，全部删掉
-              updateStats();
-            });
-
-            updateStats();                             // 页面打开先算一次，初始数字才准确
           </script>
         </div>
       </div>
@@ -514,86 +518,88 @@
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本（完整版）">
-            var KEY = 'dojo-demo-todo';
+            $(function () {
+              var KEY = 'dojo-demo-todo';
 
-            function addItem(text, done) {
-              var $li = $('<li>')
-                .addClass('list-group-item d-flex justify-content-between align-items-center')
-                .append($('<span>').addClass('todo-text').text(text))
-                .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }));
-              if (done) $li.addClass('done text-decoration-line-through text-body-secondary');
-              $('#jq10-d5-list').append($li);
-            }
+              function addItem(text, done) {
+                var $li = $('<li>')
+                  .addClass('list-group-item d-flex justify-content-between align-items-center')
+                  .append($('<span>').addClass('todo-text').text(text))
+                  .append($('<button>', { type: 'button', class: 'btn btn-sm btn-outline-danger btn-del', text: '✕', 'aria-label': '删除' }));
+                if (done) $li.addClass('done text-decoration-line-through text-body-secondary');
+                $('#jq10-d5-list').append($li);
+              }
 
-            function updateStats() {
-              $('#jq10-d5-total').text($('#jq10-d5-list li').length);
-              $('#jq10-d5-done').text($('#jq10-d5-list li.done').length);
-              $('#jq10-d5-clear').prop('disabled', $('#jq10-d5-list li.done').length === 0);
-            }
+              function updateStats() {
+                $('#jq10-d5-total').text($('#jq10-d5-list li').length);
+                $('#jq10-d5-done').text($('#jq10-d5-list li.done').length);
+                $('#jq10-d5-clear').prop('disabled', $('#jq10-d5-list li.done').length === 0);
+              }
 
-            function save() {
-              var items = [];
-              $('#jq10-d5-list li').each(function () {
-                items.push({
-                  text: $(this).find('.todo-text').text(),
-                  done: $(this).hasClass('done')
+              function save() {
+                var items = [];
+                $('#jq10-d5-list li').each(function () {
+                  items.push({
+                    text: $(this).find('.todo-text').text(),
+                    done: $(this).hasClass('done')
+                  });
                 });
-              });
-              localStorage.setItem(KEY, JSON.stringify(items));
-            }
+                localStorage.setItem(KEY, JSON.stringify(items));
+              }
 
-            function load() {
-              var raw = localStorage.getItem(KEY);
-              if (!raw) {
-                addItem('读一遍《纯静态网页的修行》', false);
-                addItem('练完 jQuery 第十式', true);
+              function load() {
+                var raw = localStorage.getItem(KEY);
+                if (!raw) {
+                  addItem('读一遍《纯静态网页的修行》', false);
+                  addItem('练完 jQuery 第十式', true);
+                  save();
+                  return;
+                }
+                JSON.parse(raw).forEach(function (item) {
+                  addItem(item.text, item.done);
+                });
+              }
+
+              function add() {
+                var text = $('#jq10-d5-input').val().trim();
+                if (!text) {
+                  $('#jq10-d5-input').addClass('is-invalid').trigger('focus');
+                  return;
+                }
+                $('#jq10-d5-input').removeClass('is-invalid');
+                addItem(text, false);
+                $('#jq10-d5-input').val('').trigger('focus');
+                updateStats();
                 save();
-                return;
               }
-              JSON.parse(raw).forEach(function (item) {
-                addItem(item.text, item.done);
+
+              $('#jq10-d5-add').on('click', add);
+              $('#jq10-d5-input').on('keydown', function (e) {
+                if (e.key === 'Enter') add();
               });
-            }
-
-            function add() {
-              var text = $('#jq10-d5-input').val().trim();
-              if (!text) {
-                $('#jq10-d5-input').addClass('is-invalid').trigger('focus');
-                return;
-              }
-              $('#jq10-d5-input').removeClass('is-invalid');
-              addItem(text, false);
-              $('#jq10-d5-input').val('').trigger('focus');
-              updateStats();
-              save();
-            }
-
-            $('#jq10-d5-add').on('click', add);
-            $('#jq10-d5-input').on('keydown', function (e) {
-              if (e.key === 'Enter') add();
-            });
-            $('#jq10-d5-list').on('click', 'li', function (e) {
-              if ($(e.target).closest('.btn-del').length) return;
-              $(this).toggleClass('done text-decoration-line-through text-body-secondary');
-              updateStats();
-              save();
-            });
-            $('#jq10-d5-list').on('click', '.btn-del', function () {
-              var $li = $(this).closest('li');
-              $li.fadeOut(120, function () {   // 第六式的小把戏：淡出后再摘牌
-                $li.remove();
+              $('#jq10-d5-list').on('click', 'li', function (e) {
+                if ($(e.target).closest('.btn-del').length) return;
+                $(this).toggleClass('done text-decoration-line-through text-body-secondary');
                 updateStats();
                 save();
               });
-            });
-            $('#jq10-d5-clear').on('click', function () {
-              $('#jq10-d5-list li.done').remove();
-              updateStats();
-              save();
-            });
+              $('#jq10-d5-list').on('click', '.btn-del', function () {
+                var $li = $(this).closest('li');
+                $li.fadeOut(120, function () {   // 第六式的小把戏：淡出后再摘牌
+                  $li.remove();
+                  updateStats();
+                  save();
+                });
+              });
+              $('#jq10-d5-clear').on('click', function () {
+                $('#jq10-d5-list li.done').remove();
+                updateStats();
+                save();
+              });
 
-            load();
-            updateStats();
+              load();
+              updateStats();
+            });
           </script>
         </div>
       </div>
