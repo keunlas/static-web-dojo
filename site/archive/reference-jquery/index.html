@@ -120,7 +120,7 @@
           <tr><td><code>.on('click', '选择器', 函数)</code></td><td>事件委托：动态元素一出生就响应</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
           <tr><td><code>.one('click', 函数)</code></td><td>只响应一次，之后自动解绑</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
           <tr><td><code>.trigger('事件名')</code> / <code>.triggerHandler('事件名')</code></td><td>主动触发（含默认行为）/ 只跑处理函数</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
-          <tr><td><code>.hover(进入, 离开)</code></td><td><code>mouseenter</code> + <code>mouseleave</code> 的快捷写法</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
+          <tr><td><code>.hover(进入, 离开)</code></td><td><code>mouseenter</code> + <code>mouseleave</code> 的快捷写法（自 jQuery 3.3 起弃用，新代码请用 <code>on()</code> 分别绑定）</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
           <tr><td><code>$(function () {…})</code></td><td>文档就绪后执行（<code>$(document).ready</code> 的简写）</td><td><a href="../../jquery/01-intro.html">第一式</a></td></tr>
           <tr><td>事件名（部分）</td><td><code>click</code> <code>dblclick</code> <code>mouseenter</code> <code>mouseleave</code> <code>mousemove</code> <code>keydown</code> <code>keyup</code> <code>submit</code> <code>change</code> <code>input</code> <code>focus</code> <code>blur</code> <code>scroll</code> <code>resize</code></td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
           <tr><td>事件对象</td><td><code>e.preventDefault()</code> 拦默认行为、<code>e.stopPropagation()</code> 截冒泡、<code>e.stopImmediatePropagation()</code> 连同级后续处理函数一并拦下、<code>e.target</code> 事件源头</td><td><a href="../../jquery/05-events.html">第五式</a></td></tr>
@@ -170,7 +170,7 @@
           <tr><td><code>$.each(obj, fn)</code></td><td>遍历数组或对象，回调 <code>(index, value)</code></td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
           <tr><td><code>$.map(arr, fn)</code> / <code>$.grep(arr, fn)</code></td><td>映射成新数组 / 按条件筛选（都返回新数组）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
           <tr><td><code>$.inArray(v, arr)</code></td><td>找下标，找不到返回 <code>-1</code></td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
-          <tr><td><code>$.merge(a, b)</code> / <code>$.makeArray(obj)</code> / <code>$.uniqueSort(arr)</code></td><td>合并（原地）/ 类数组转真数组 / 去重排序</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
+          <tr><td><code>$.merge(a, b)</code> / <code>$.makeArray(obj)</code> / <code>$.uniqueSort(arr)</code></td><td>合并（原地）/ 类数组转真数组 / 给 DOM 元素数组去重排序（普通数字、字符串数组会原样返回）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
           <tr><td><code>$.extend([true,] 目标, 源…)</code></td><td>合并对象；第一个参数传 <code>true</code> 为深合并（插件默认选项就靠它）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
           <tr><td><code>$.isEmptyObject(obj)</code> / <code>$.isPlainObject(obj)</code></td><td>判空对象 / 判纯对象</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
           <tr><td><code>$.param(obj)</code></td><td>对象转查询串（自动 URL 编码）</td><td><a href="../../jquery/11-utilities.html">第十一式</a></td></tr>
@@ -208,7 +208,7 @@
           <tr><td><code>$.type()</code>、<code>$.isArray()</code>、<code>$.isFunction()</code>、<code>$.isNumeric()</code>、<code>$.isWindow()</code>、<code>$.nodeName()</code>、<code>$.camelCase()</code>、<code>.live()</code>、<code>.die()</code></td>
             <td><code>typeof</code> / <code>Array.isArray()</code> / 原生判断；事件用 <code>on()</code> / <code>off()</code></td></tr>
           <tr><td><strong>仍在、已弃用</strong></td>
-            <td><code>.bind()</code>、<code>.unbind()</code>、<code>.delegate()</code>、<code>.undelegate()</code>、<code>$.proxy()</code></td>
+            <td><code>.bind()</code>、<code>.unbind()</code>、<code>.delegate()</code>、<code>.undelegate()</code>、<code>.hover()</code>、<code>$.proxy()</code></td>
             <td><code>on()</code> / <code>off()</code>、原生 <code>Function#bind</code>——功能还能用，但写新代码就用新写法</td></tr>
         </tbody>
       </table>

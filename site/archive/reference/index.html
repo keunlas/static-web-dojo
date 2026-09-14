@@ -106,7 +106,7 @@
           <tr><td><code>text-lowercase</code> / <code>text-uppercase</code> / <code>text-capitalize</code></td><td>小写 / 大写 / 首字母大写</td></tr>
           <tr><td><code>text-wrap</code> / <code>text-nowrap</code></td><td>自动换行（默认）/ 禁止换行</td></tr>
           <tr><td><code>text-break</code> / <code>text-truncate</code></td><td>任意处可断行 / 单行溢出变省略号</td></tr>
-          <tr><td><code>text-body</code> / <code>text-body-secondary</code> / <code>text-body-tertiary</code></td><td>正文色 / 二級弱化 / 三级弱化</td></tr>
+          <tr><td><code>text-body</code> / <code>text-body-secondary</code> / <code>text-body-tertiary</code></td><td>正文色 / 二级弱化 / 三级弱化</td></tr>
         </tbody>
       </table>
 
@@ -160,11 +160,12 @@
         <div class="callout-title">心法：显隐开关</div>
         <p style="margin:0">
           <code>d-none d-md-block</code> = 默认隐藏、md 起显示；<code>d-md-none</code> = 默认显示、md 起隐藏。
-          注意显隐类只管<strong>视觉</strong>，内容仍在 HTML 里，读屏软件照样能读到。
+          注意：<code>d-none</code>（<code>display:none</code>）是把元素从布局里整个移除，
+          读屏软件也读不到它；想要“视觉隐藏、读屏可读”，请用 <code>visually-hidden</code>。
         </p>
       </div>
 
-      <h2>弹性布局：flex-* 与 gap-*</h2>
+      <h2 id="flex">弹性布局：flex-* 与 gap-*</h2>
       <table>
         <thead>
           <tr><th>类名</th><th>效果</th></tr>
@@ -291,7 +292,7 @@
           <tr><td>按钮 <code>btn</code></td><td>八色、<code>btn-outline-*</code>、<code>btn-link</code>、<code>btn-sm/lg</code>、<code>active</code>、<code>disabled</code></td></tr>
           <tr><td>按钮组</td><td><code>btn-group</code>、<code>btn-group-vertical</code>、<code>btn-toolbar</code></td></tr>
           <tr><td>徽章 <code>badge</code></td><td><code>text-bg-*</code> 八色、<code>rounded-pill</code> 胶囊</td></tr>
-          <tr><td>提示框 <code>alert</code></td><td>八色、<code>alert-dismissible</code> + <code>btn-close</code>（深底上配 <code>btn-close-white</code>）、<code>alert-heading</code></td></tr>
+          <tr><td>提示框 <code>alert</code></td><td>八色、<code>alert-dismissible</code> + <code>btn-close</code>（深底上给容器加 <code>data-bs-theme="dark"</code>，关闭按钮自动变白）、<code>alert-heading</code></td></tr>
           <tr><td>引用 <code>blockquote</code></td><td>站点皮肤自带纸墨样式；署名行可加 <code>blockquote-footer</code></td></tr>
           <tr><td>表单控件</td><td><code>form-control-sm/lg</code>、<code>form-control-plaintext</code>、<code>form-control-color</code>、<code>form-range</code>、<code>form-floating</code>、<code>is-valid</code> / <code>is-invalid</code></td></tr>
           <tr><td>选择控件</td><td><code>form-select</code>（<code>-sm/lg</code>）、<code>form-check</code>、<code>form-switch</code>、<code>form-check-inline</code></td></tr>

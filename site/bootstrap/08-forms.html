@@ -25,7 +25,7 @@
           <li>form-label 与 form-control 的基本搭档</li>
           <li>会用 select 与 checkbox/radio 写选择类控件</li>
           <li>用 input-group 给输入框加前后缀</li>
-          <li>用 needs-validation 与 was-validated 做校验反馈</li>
+        <li>搞清 needs-validation、was-validated 与 novalidate 的分工</li>
           <li>认识 form-floating、控件尺寸、form-control-color、form-range 与 is-valid / is-invalid</li>
         </ul>
       </div>
@@ -35,7 +35,7 @@
         Bootstrap 表单的头号搭档：<strong>标签</strong>用 <code>form-label</code>，
         <strong>输入框</strong>用 <code>form-control</code>——宽度铺满、圆角、聚焦时亮一圈光晕。
         <code>placeholder</code> 是框内的占位提示，但<strong>不能替代 label</strong>：
-        提示会随输入消失，读屏器也不读它。辅助说明文字放 <code>form-text</code> 里，
+        输入一开始它就消失，读屏器对它的朗读也并不可靠。辅助说明文字放 <code>form-text</code> 里，
         紧跟在控件下面，像一行小字批注。
       </p>
       <p>两个原生属性也常上场：</p>
@@ -140,11 +140,16 @@
 
       <p>校验的戏法拆开来看，一共四步：</p>
       <ol>
-        <li><strong>挂旗子</strong>：表单写 <code>needs-validation</code>，表示“此地需要校验”；</li>
+        <li><strong>挂旗子</strong>：表单写 <code>needs-validation</code> 作标记——这个类本身不带样式，
+          官方示例里用它当脚本钩子（选中“需要校验的表单”）；本演示为了直观，脚本直接按 id 绑定了表单；</li>
         <li><strong>定规则</strong>：字段写 <code>required</code>、<code>minlength</code> 等原生校验属性，下面配一条 <code>invalid-feedback</code> 写错误文案（通过的文案用 <code>valid-feedback</code>）；</li>
         <li><strong>按开关</strong>：提交时由脚本阻止默认提交，并给表单加上 <code>was-validated</code>——这个类一出现，红框与错误文案才亮出来；</li>
         <li><strong>留后门</strong>：<code>novalidate</code> 关掉浏览器自带的报错气泡，让报错样式统一交给 Bootstrap，全场一个画风。</li>
       </ol>
+      <p>
+        也就是说：真正把红框与错误文案亮出来的是 <code>was-validated</code>，<code>needs-validation</code>
+        只是命名约定。要用它当钩子，把脚本里的选择器写成 <code>$('.needs-validation')</code> 即可。
+      </p>
       <p>
         背后的原理很朴素：Bootstrap 用 <code>:invalid</code>/<code>:valid</code> 伪类给控件上色，
         <code>was-validated</code> 只是决定这些样式“何时可见”，而
@@ -586,7 +591,7 @@
         <li><code>form-label</code> + <code>form-control</code> 是标签与输入框的标准搭档，<code>form-text</code> 放辅助说明；</li>
         <li><code>input-group</code>/<code>input-group-text</code> 拼接前后缀，<code>form-select</code> 与 <code>form-check</code> 各管各的选择控件；</li>
         <li><code>row g-3</code> + <code>col-*</code> 直接栅格化表单，移动端自动堆叠；</li>
-        <li>校验四步：<code>needs-validation</code> 挂旗、<code>required</code> 定规则、脚本加 <code>was-validated</code>、<code>novalidate</code> 统一画风；</li>
+        <li>校验要点：<code>required</code> 定规则、脚本加 <code>was-validated</code> 亮样式、<code>novalidate</code> 统一画风（<code>needs-validation</code> 只是命名约定，方便脚本找表单）；</li>
         <li>配件速览：<code>form-floating</code>（input 在前、带 placeholder）、<code>form-control-sm/lg</code>、<code>form-control-color</code>、<code>form-range</code>；<code>is-valid</code> / <code>is-invalid</code> 可单独判定某个控件。</li>
       </ul>
 

@@ -35,8 +35,10 @@
         三个方法分工明确：<code>$.each(arr, fn)</code> 逐个走一遍（只管“看”）；
         <code>$.map(arr, fn)</code> 把每个元素变换成新值，返回<strong>新数组</strong>；
         <code>$.grep(arr, fn)</code> 按条件筛选，返回<strong>通过考验的那些元素</strong>。
-        回调都写成 <code>function (index, value)</code> 的形式——先下标、后值，和 <code>$(...).each()</code> 不同，
-        别记混。
+        回调的参数顺序分两派，别记混：<code>$.each</code>（和 <code>$(...).each()</code> 一样）是
+        <code>function (index, value)</code>，下标在前；<code>$.map</code> 与 <code>$.grep</code> 则是
+        <code>function (value, index)</code>，值在前。只用一个参数时拿到的都是元素本身，
+        要同时用两个参数时才见分晓。
       </p>
 
       <div class="demo">
@@ -132,7 +134,7 @@
           <tr><td><code>$.inArray(v, arr)</code></td><td>找值在数组中的下标，找不到返回 <code>-1</code></td><td><code>$.inArray('剑', bag)</code></td></tr>
           <tr><td><code>$.merge(a, b)</code></td><td>把 b 并进 a（<strong>改动 a 并返回它</strong>，不是新数组）</td><td><code>$.merge([1,2],[3])</code></td></tr>
           <tr><td><code>$.makeArray(obj)</code></td><td>把类数组（DOM 集合、arguments）转成真数组</td><td><code>$.makeArray(document.querySelectorAll('li'))</code></td></tr>
-          <tr><td><code>$.uniqueSort(arr)</code></td><td>去重并排序（主要给 DOM 元素数组用）</td><td><code>$.uniqueSort([3,1,3])</code></td></tr>
+          <tr><td><code>$.uniqueSort(arr)</code></td><td>给 <strong>DOM 元素数组</strong>去重并按文档顺序排序；普通数字、字符串数组会原样返回，不会“去重排序”</td><td><code>$.uniqueSort($('li').toArray())</code></td></tr>
         </tbody>
       </table>
 
@@ -147,6 +149,9 @@
               <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-unique">$.uniqueSort</button>
             </div>
             <pre class="mb-0"><code id="jq11-log">点上面的按钮，结果显示在这里。</code></pre>
+            <p class="small text-body-secondary mt-2 mb-0">
+              桩：<span id="jq11-post-a">A</span> · <span id="jq11-post-b">B</span> · <span id="jq11-post-c">C</span>
+            </p>
           </div>
           <script>
             $(function () {
@@ -166,8 +171,15 @@
                 log('$.makeArray(元素集合) 是真数组吗？' + Array.isArray(arr) + '，长度 ' + arr.length);
               });
               $('#jq11-unique').on('click', function () {
-                var arr = $.uniqueSort([3, 1, 2, 3, 1]);
-                log('$.uniqueSort([3,1,2,3,1]) → [' + arr.join(', ') + ']');
+                // 顺序打乱 + 故意重复：C、A、B、A
+                var shuffled = [
+                  $('#jq11-post-c')[0], $('#jq11-post-a')[0],
+                  $('#jq11-post-b')[0], $('#jq11-post-a')[0]
+                ];
+                var sorted = $.uniqueSort(shuffled);
+                log('$.uniqueSort([C, A, B, A]) → ' +
+                  $.map(sorted, function (el) { return $(el).text(); }).join('、') +
+                  '（重复的 A 只留一个，并按文档顺序排好）');
               });
             });
           </script>
@@ -182,6 +194,9 @@
                 <button type="button" class="btn btn-sm btn-outline-primary" id="jq11-unique">$.uniqueSort</button>
               </div>
               <pre class="mb-0"><code id="jq11-log">点上面的按钮，结果显示在这里。</code></pre>
+              <p class="small text-body-secondary mt-2 mb-0">
+                桩：<span id="jq11-post-a">A</span> · <span id="jq11-post-b">B</span> · <span id="jq11-post-c">C</span>
+              </p>
             </div>
           </script>
           <script type="text/plain" data-lang="js" data-title="交互脚本">
@@ -201,8 +216,15 @@
               log('$.makeArray(元素集合) 是真数组吗？' + Array.isArray(arr) + '，长度 ' + arr.length);
             });
             $('#jq11-unique').on('click', function () {
-              var arr = $.uniqueSort([3, 1, 2, 3, 1]);
-              log('$.uniqueSort([3,1,2,3,1]) → [' + arr.join(', ') + ']');
+              // 顺序打乱 + 故意重复：C、A、B、A
+              var shuffled = [
+                $('#jq11-post-c')[0], $('#jq11-post-a')[0],
+                $('#jq11-post-b')[0], $('#jq11-post-a')[0]
+              ];
+              var sorted = $.uniqueSort(shuffled);
+              log('$.uniqueSort([C, A, B, A]) → ' +
+                $.map(sorted, function (el) { return $(el).text(); }).join('、') +
+                '（重复的 A 只留一个，并按文档顺序排好）');
             });
           </script>
         </div>
@@ -357,7 +379,7 @@
           <tr><td><code>$.parseJSON(s)</code></td><td><code>JSON.parse(s)</code></td></tr>
           <tr><td><code>$.now()</code></td><td><code>Date.now()</code></td></tr>
           <tr><td><code>$.nodeName()</code> / <code>$.camelCase()</code></td><td>原生属性判断 / 自行处理字符串</td></tr>
-          <tr><td><code>.live()</code> / <code>.die()</code></td><td><code>on()</code> / <code>off()</code>（1.9 起就已废弃）</td></tr>
+          <tr><td><code>.live()</code> / <code>.die()</code></td><td><code>on()</code> / <code>off()</code>（1.7 起弃用、1.9 起移除）</td></tr>
         </tbody>
       </table>
 
@@ -424,7 +446,7 @@
 
       <h2>本式小结</h2>
       <ul>
-        <li><code>$.each</code> 遍历、<code>$.map</code> 变换、<code>$.grep</code> 筛选，前两者返回“原位”，后两者返回新数组；</li>
+        <li><code>$.each</code> 遍历（返回原集合）、<code>$.map</code> / <code>$.grep</code> 变换与筛选（返回新数组）；</li>
         <li><code>$.inArray</code> 找不到返回 <code>-1</code>；<code>$.merge</code> 是原地改动，别拿它当“复制”；</li>
         <li><code>$.extend</code> 合并配置，嵌套结构记得加 <code>true</code> 深合并并传入空对象当目标；</li>
         <li><code>$.param</code> 生成查询串，配合 Ajax 的 GET 请求刚好；</li>

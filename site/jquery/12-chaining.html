@@ -58,7 +58,7 @@
           <div class="border rounded p-3">
             <div class="row g-3">
               <div class="col-md-6">
-                <p class="mb-1"><strong>不加 .end()</strong>：整行都跟着段落一起被操作</p>
+                <p class="mb-1"><strong>不加 .end()</strong>：边框落在段落上，容器保持原样</p>
                 <div class="bg-body-tertiary rounded p-2" id="jq12-noend">
                   <p class="mb-0">我是段落</p>
                 </div>
@@ -96,7 +96,7 @@
             <div class="border rounded p-3">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <p class="mb-1"><strong>不加 .end()</strong>：整行都跟着段落一起被操作</p>
+                  <p class="mb-1"><strong>不加 .end()</strong>：边框落在段落上，容器保持原样</p>
                   <div class="bg-body-tertiary rounded p-2" id="jq12-noend">
                     <p class="mb-0">我是段落</p>
                   </div>
@@ -348,7 +348,7 @@
               .append('<small class="text-body-secondary">链式追加的一行小字</small>');
           </script>
           <p>
-            两个 <code>end()</code> 的落点要看清楚：第一个 <code>end()</code> 从“段落”退回“容器”；
+            <code>end()</code> 的落点要看清楚：它把操作对象从“段落”退回“容器”；
             之后的操作都在容器上，直到链条结束。写成多行、对齐缩进，读起来像一段小剧本。
           </p>
         </details>

@@ -239,7 +239,7 @@
             <button type="button" class="btn btn-primary" id="jq08-clone">clone() 复制</button>
             <button type="button" class="btn btn-primary" id="jq08-clonetrue">clone(true) 复制</button>
           </div>
-          <p class="text-muted small mt-2 mb-0">复制后点击各卡片：只有原版和 clone(true) 复制品会“已阅”变红。</p>
+          <p class="text-body-secondary small mt-2 mb-0">复制后点击各卡片：只有原版和 clone(true) 复制品会“已阅”变红。</p>
           <div id="jq08-deck" class="d-flex flex-wrap gap-3 mt-3">
             <div class="card jq08-card" style="max-width:16rem;">
               <div class="card-body">
@@ -269,7 +269,7 @@
               <button type="button" class="btn btn-primary" id="jq08-clone">clone() 复制</button>
               <button type="button" class="btn btn-primary" id="jq08-clonetrue">clone(true) 复制</button>
             </div>
-            <p class="text-muted small mt-2 mb-0">复制后点击各卡片：只有原版和 clone(true) 复制品会“已阅”变红。</p>
+            <p class="text-body-secondary small mt-2 mb-0">复制后点击各卡片：只有原版和 clone(true) 复制品会“已阅”变红。</p>
             <div id="jq08-deck" class="d-flex flex-wrap gap-3 mt-3">
               <div class="card jq08-card" style="max-width:16rem;">
                 <div class="card-body">
@@ -362,8 +362,16 @@
                 log('wrapInner()：外壳（徽章）没变，里面的文字被套上了粗体。');
               });
               $('#jq08-unwrap').on('click', function () {
-                $('#jq08-wrap-stage .jq08-note').parent().unwrap();
-                log('parent().unwrap()：把字条的父级拆掉——外衣没了，字条还在。');
+                var $notes = $('#jq08-wrap-stage .jq08-note');
+                // unwrap() 拆掉的是「被选中元素的父级」——
+                // 父级直接是舞台，说明现在没穿外衣，先别动手
+                if ($notes.parent().is('#jq08-wrap-stage')) {
+                  log('字条现在没穿外衣——先点一种包法，再来拆。');
+                  return;
+                }
+                // 选中的是字条本身，所以拆掉的正是它们的外衣
+                $notes.unwrap();
+                log('unwrap()：外衣没了，字条还在，舞台也没动。');
               });
               $('#jq08-replace').on('click', function () {
                 $('#jq08-wrap-stage .jq08-note').first().replaceWith('<span class="badge text-bg-danger jq08-note">改练剑法</span>');
@@ -415,8 +423,16 @@
               log('wrapInner()：外壳（徽章）没变，里面的文字被套上了粗体。');
             });
             $('#jq08-unwrap').on('click', function () {
-              $('#jq08-wrap-stage .jq08-note').parent().unwrap();
-              log('parent().unwrap()：把字条的父级拆掉——外衣没了，字条还在。');
+              var $notes = $('#jq08-wrap-stage .jq08-note');
+              // unwrap() 拆掉的是「被选中元素的父级」——
+              // 父级直接是舞台，说明现在没穿外衣，先别动手
+              if ($notes.parent().is('#jq08-wrap-stage')) {
+                log('字条现在没穿外衣——先点一种包法，再来拆。');
+                return;
+              }
+              // 选中的是字条本身，所以拆掉的正是它们的外衣
+              $notes.unwrap();
+              log('unwrap()：外衣没了，字条还在，舞台也没动。');
             });
             $('#jq08-replace').on('click', function () {
               $('#jq08-wrap-stage .jq08-note').first().replaceWith('<span class="badge text-bg-danger jq08-note">改练剑法</span>');

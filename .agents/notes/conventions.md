@@ -38,7 +38,8 @@
 ## 2. 章节五段式（每章固定结构）
 
 1. **章首语**：`<p class="chapter-lead">` 一两句有味道的开场（1–3 句）；
-2. **本式要点**：`<div class="callout"><div class="callout-title">本式要点</div><ul>3–4 条</ul></div>`；
+2. **本式要点**：`<div class="callout"><div class="callout-title">本式要点</div><ul>3–5 条</ul></div>`；
+   （内容单一时 3–4 条即可；组件/方法密集的章节实测多为 5 条，以“说全要点”优先，不硬凑不硬删）
 3. **讲解与演示**：3–6 个 h2 小节，先讲道理（通俗、准确），再放现场演示。全章 ≥3 个 `.demo`；
    **例外**：收尾的“综合修炼”章（Bootstrap 16、jQuery 10）以代码拆解 + 完整成品链接为主，
    按任务要求可 0 个 .demo；
@@ -158,3 +159,12 @@ python3 -c "open('<你写的文件>','rb').read().decode('utf-8')"
 python3 tools/check-demo-parity.py
 python3 tools/check-demo-parity.py site/jquery/10-todo.html
 ```
+
+⚠️ **该工具的已知盲区**（2026-09 内容审查时确认）：它只比对
+「标签名 + class 多重集」与归一化后的 JS，**不比对正文文字、id、href、
+`data-bs-*`、style 等属性**。因此：
+
+- 预览与源码块“文字不同 / 属性不同”的问题它抓不到（历史上已漏过 3 处：
+  03-grid-2 例 7 少一句文案、11-collapse 例 1 少半句、14-icons 例 1 的 href 写成 `#`）；
+- 写完或改完演示，除跑本脚本外，还要**人工比对文字与属性**（或临时用更严格的
+  标签+属性+文字级比对脚本）；发现新盲区时优先考虑把比对升级进工具。

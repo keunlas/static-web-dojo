@@ -51,6 +51,8 @@
 | `404-deep-path-relative-links.md` | 404 页被“原地”渲染在深路径时相对引用全失效（含 loader 自身），需逐级上探 + SITE_ROOT 改写 |
 | `jquery4-removed-api-misjudgment.md` | 把“弃用”当“移除”：`.bind/.delegate/$.proxy` 其实仍在，移除清单被 grep 误判 |
 | `scrollspy-anchor-id-on-heading.md` | 滚动监听的 id 挂在小标题上，标题滑出视野后高亮全灭；id 应挂整节容器 |
+| `unwrap-parent-not-stage.md` | `unwrap()` 拆的是“被选中元素的父级”，选错了对象会把演示的舞台容器整个拆掉 |
+| `uniquesort-not-for-numbers.md` | `$.uniqueSort` 只对 DOM 元素数组去重排序，数字数组原样返回，演示“点了没反应” |
 
 ## 使用约定
 

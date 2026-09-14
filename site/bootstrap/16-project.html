@@ -31,7 +31,7 @@
       <h2>成品先看</h2>
       <p>
         本式的成品是一个修行主题的作品集单页：作者假名“墨白”，六个假项目，全部用图标与色块代替图片，
-        响应式折叠导航，零外链、离线可用，只用本地 Bootstrap 与十几行点缀样式。
+        响应式折叠导航，零外链、离线可用，只用本地 Bootstrap 与一小段点缀样式（约四十行 CSS）。
       </p>
       <p>
         建议先在新标签打开完整成品：<a href="../demo/portfolio/index.html" target="_blank" rel="noopener">demo/portfolio/index.html</a>。
@@ -53,13 +53,15 @@
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>墨白 · 作品集</title>
+          <title>墨白 · 作品集 | 纯静态网页的修行</title>
+          <meta name="description" content="墨白的作品集主页：纯静态、零外链，由 Bootstrap 5.3.8 手写而成。">
           <link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
           <link rel="stylesheet" href="../../assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
           <style>
-            /* 少量点缀：项目色块与头像 */
+            /* 一小段点缀样式：纸底、项目色块、头像与印章 */
+            body { background: #faf6ec; }
             .project-thumb { height: 160px; display: flex; align-items: center;
-                             justify-content: center; font-size: 3rem; }
+                             justify-content: center; font-size: 3rem; color: #2b2a26; }
             .project-a { background: #f4edde; }
             .project-b { background: #e9f0e4; }
             .project-c { background: #e8edf5; }
@@ -69,18 +71,22 @@
             .portrait { width: 140px; height: 140px; margin: 0 auto;
                         display: flex; align-items: center; justify-content: center;
                         border: 2px solid #b03a2e; border-radius: 50%;
-                        color: #b03a2e; font-size: 2.2rem; }
+                        background: #fffdf7; color: #b03a2e;
+                        font-family: Georgia, "Songti SC", "Noto Serif CJK SC", "SimSun", serif;
+                        font-size: 2.2rem; letter-spacing: .2em; }
+            .seal { color: #b03a2e; letter-spacing: .3em; }
           </style>
         </head>
         <body>
-          <!-- 导航、英雄区、项目、关于、页脚依次放在这里 -->
+          <!-- 导航、英雄区、项目、关于、页脚依次放在这里（见下面五步） -->
           <script src="../../assets/vendor/bootstrap/bootstrap.bundle.min.js"><\/script>
         </body>
         </html>
       </script>
       <p>
-        整页只有一处“自定义”点缀样式（项目色块和圆形头像），其余全靠 Bootstrap 类名完成——
-        这正是本教程主张的写法：能用类名解决的，不写 CSS。
+        整页的自定义样式只有这一小段（纸底、项目色块、圆形头像与印章），其余全靠 Bootstrap 类名完成——
+        这正是本教程主张的写法：能用类名解决的，不写 CSS。（成品页的 <code>&lt;head&gt;</code> 里还内嵌了
+        一枚 SVG favicon，与布局无关，这里不展开。）
       </p>
 
       <h3>第二步 · navbar 导航</h3>
@@ -124,7 +130,7 @@
       <script type="text/plain" data-lang="html" data-title="hero 英雄区">
         <header id="hero" class="py-5 text-center">
           <div class="container py-4">
-            <p class="mb-2"><i class="bi bi-feather" aria-hidden="true"></i> 修行笔记</p>
+            <p class="seal mb-2"><i class="bi bi-feather" aria-hidden="true"></i> 修行笔记</p>
             <h1 class="display-4">墨白</h1>
             <p class="lead">一个在代码与山水之间行走的前端修行者。</p>
             <p class="mt-4 mb-0">
@@ -147,12 +153,14 @@
       <p>
         六个假项目用第六式的 <code>card</code> 排成网格。妙处全在一行：
         <code>row-cols-1 row-cols-md-2 row-cols-lg-3</code> 让网格自己完成
-        “手机 1 列 → 平板 2 列 → 桌面 3 列”的响应式切换，每张卡片不必各写 <code>col</code> 类：
+        “手机 1 列 → 平板 2 列 → 桌面 3 列”的响应式切换，每张卡片只需写一个不带数字的
+        <code>col</code>，宽度全交给这一行：
       </p>
       <script type="text/plain" data-lang="html" data-title="项目卡片网格">
         <section id="projects" class="py-5">
           <div class="container">
-            <h2 class="text-center mb-4">我的作品</h2>
+            <h2 class="text-center mb-1">我的作品</h2>
+            <p class="text-center text-body-secondary mb-4">六件练手之作，皆为纯静态页面，零外链。</p>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
               <div class="col">
@@ -249,7 +257,7 @@
         <code>col-md-8</code> 放自我介绍与技能徽章，<code>align-items-center</code> 让两栏垂直居中：
       </p>
       <script type="text/plain" data-lang="html" data-title="关于我（两栏）">
-        <section id="about" class="py-5">
+        <section id="about" class="py-5 bg-white border-top border-bottom">
           <div class="container">
             <div class="row align-items-center g-4">
               <div class="col-md-4 text-center">
@@ -258,17 +266,16 @@
               </div>
               <div class="col-md-8">
                 <h2>关于我</h2>
-                <p>白天写页面，夜里读源码。相信好的网页应该像宣纸上的字：
-                   结构清晰，留白得当，离线也能打开。</p>
-                <p>本站即是我的一次修行：只用 Bootstrap 与几行点缀样式手写而成，
-                   没有框架，没有构建工具，也没有任何外网请求。</p>
+                <p>白天写页面，夜里读源码。相信好的网页应该像宣纸上的字：结构清晰，留白得当，离线也能打开。</p>
+                <p>本站即是我的一次修行：只用 Bootstrap 与一小段点缀样式手写而成，没有框架，没有构建工具，也没有任何外网请求。</p>
                 <p class="mb-1"><i class="bi bi-envelope me-1" aria-hidden="true"></i>mubai@example.com</p>
                 <p class="mb-3"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>江湖某处</p>
                 <p class="mb-0">
                   <span class="badge text-bg-primary me-1">HTML</span>
                   <span class="badge text-bg-primary me-1">CSS</span>
                   <span class="badge text-bg-primary me-1">JavaScript</span>
-                  <span class="badge text-bg-primary">Bootstrap</span>
+                  <span class="badge text-bg-primary me-1">Bootstrap</span>
+                  <span class="badge text-bg-primary">jQuery</span>
                 </p>
               </div>
             </div>
@@ -285,7 +292,7 @@
         收尾最简单：一条上边框，居中几枚图标链接与一行小字：
       </p>
       <script type="text/plain" data-lang="html" data-title="页脚">
-        <footer class="border-top py-4 mt-5 bg-white">
+        <footer class="border-top py-4 bg-white">
           <div class="container text-center">
             <p class="mb-2">
               <a class="text-decoration-none mx-2" href="#hero" aria-label="回到顶部">
@@ -298,9 +305,7 @@
                 <i class="bi bi-envelope" aria-hidden="true"></i>
               </a>
             </p>
-            <p class="small text-body-secondary mb-0">
-              手写于纸上，渲染于浏览器 · 纯静态 · 零外链
-            </p>
+            <p class="small text-body-secondary mb-0">手写于纸上，渲染于浏览器 · 纯静态 · 零外链 · 由 Bootstrap 5.3.8 驱动</p>
           </div>
         </footer>
       </script>
@@ -316,7 +321,7 @@
           <li><strong>先骨架，后填充</strong>：五个 <code>section</code> 依次排开，每块独立成型，再逐块打磨；</li>
           <li><strong>响应式只在两处动刀</strong>：导航的 <code>navbar-expand-lg</code> 与项目网格的 <code>row-cols</code>，其余布局天然自适应；</li>
           <li><strong>图标与色块代替图片</strong>：页面零外链、零图片依赖，离线照样完整；</li>
-          <li><strong>不写一行手写 JavaScript</strong>：折叠菜单靠 <code>data-bs-*</code> 属性自动生效，bundle 脚本只是按需加载。</li>
+          <li><strong>不写一行手写 JavaScript</strong>：折叠菜单靠 <code>data-bs-*</code> 属性自动生效，bundle 脚本负责这些组件的交互。</li>
         </ul>
       </div>
       <p>

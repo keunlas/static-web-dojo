@@ -3,7 +3,149 @@
 > 写给 AI 代理：接手长期任务时先读本文件，判断哪些已完成、哪些待办。
 > **更新规则：每完成一批工作，立即更新本文件的“当前状态”小节。**
 
-## 当前状态（全站完成 ✅ · 最后更新：对照前身查缺补漏 + 入门审查 + 字典强化）
+## 当前状态（全站完成 ✅ · 最后更新：内容审查问题修复）
+
+### 🆕 最新一轮（内容审查问题修复 · 用户批准执行）
+
+承接上一轮审查清单（见下一条），逐项修复（未动公共机制文件）：
+
+- **三处高优先错误**：
+  `jquery/08` 例 4 unwrap 演示——改为对**字条本身**调 `unwrap()`，并加“父级就是舞台说明没穿外衣、
+  不动手”的保护；CDP 实测四条路径（先拆 / wrap 后拆 / wrapAll 后拆 / 还原）全部正常、舞台不再消失；
+  `jquery/11` 例 2 `$.uniqueSort`——演示改用 DOM 元素数组（新增 A/B/C 三个桩，打乱且重复的
+  `[C,A,B,A]` → `A、B、C`），表格与速查页补“只对 DOM 元素数组生效，数字数组原样返回”；
+  `jquery/11` 回调签名——改为实测结论：`$.each`（同 `$(...).each`）是 `(index, value)`，
+  `$.map` / `$.grep` 是 `(value, index)`。
+- **三处“预览 ≠ 源码”**（check-demo-parity 的文字/属性盲区，深比对抓出）：
+  `03-grid-2` 例 7 补回预览多出的那句文案、`11-collapse` 例 1 补回半句（练功答案 1 同步）、
+  `14-icons` 例 1 源码块三个 `href="#"` 改为 `#bs14-demo1`。
+- **第 16 式拆解块与成品 `demo/portfolio` 对齐**：骨架 CSS 补齐纸底 / `.seal` / `.portrait`
+  字体底色字距 / `project-thumb` 颜色；hero 补 `class="seal"`；项目区补副标题并改 `<h2>` 类；
+  关于区补 section 类与 jQuery 徽章；页脚去 `mt-5` 并补“由 Bootstrap 5.3.8 驱动”；
+  同步修三处表述（“每张卡片不必各写 col 类”→“只需写一个不带数字的 col”、
+  “十几行点缀样式”→“约四十行 CSS”、“bundle 按需加载”→“bundle 负责交互”）；
+  成品页一处文案（“十几行点缀样式”→“一小段”）同步微调；拆解块仅“内嵌 SVG favicon”未收录，
+  已在正文注明。
+- **弃用类清理**：`text-muted` → `text-body-secondary`，共 41 处（jquery 07/08/09/10、
+  demo/todo，含第 10 式正文里点名该类的句子）；速查页删除 `btn-close-white` 推荐，
+  改注“深底给容器加 `data-bs-theme="dark"`”。
+- **事实与交叉引用**：第 14 式“整套才几个 KB”→“约一百多 KB”；
+  第 4 式“主题定制留到第十五式”→指向离线文档 Customize（该节真实存在）；
+  第 15 式**新增《补遗：弹性工具类》一节 + 例 3 演示**（d-flex / flex-wrap / align-items /
+  justify-content / gap / ms-auto），使第 1、4 式对 d-flex 的交叉引用成真；
+  第 2 式断点表“无前缀｜<576px”→“所有宽度（基础款）”；第 3 式 order 0–5、去直引号；
+  第 8 式 placeholder 措辞与 `needs-validation` 说明（实测 CSS/JS 均无该类，改为“标记 + 钩子”两段说清）；
+  第 9 式 data API 首见指向第五式；第 12 式图标章改指第十四式；jquery 06 重复的“例 4”改例 5；
+  jquery 12 答案“两个 end()”与例 1 文案；jquery 11 `.live/.die` 版本说法与小结句；
+  basics“本回是重头戏”；首页 4 枚装饰图标补 `aria-hidden`；速查页“二級”错字、
+  d-none 读屏说明（改为“读屏也读不到；要 visually-hidden”）、jQuery 速查 `.hover` 补弃用注记。
+- **新坑档案**：`bug-fix/unwrap-parent-not-stage.md`、`bug-fix/uniquesort-not-for-numbers.md`，
+  索引表已同步；`conventions.md` §7 新增“check-demo-parity 盲区（只比标签+class，
+  文字与属性需人工/深比对）”警示。
+- **验证证据**：`check-demo-parity` ✔ 41 页 125 演示（新增第 15 式例 3）；
+  自建深比对 ✔ 0 差异；`check-offline` ✔；`check-links` ✔ 44 页；页内 id / 锚点扫描仅剩
+  “教学占位符”误报；`search-index.js` 已重新生成；
+  CDP **http:// 44/44 页零 JS 报错**、改动过的 26 页 **file:// 零报错**；
+  交互断言：unwrap 四路径、uniqueSort → `A、B、C`、第 15 式弹性演示
+  （flex / wrap / center / gap=8px / ms-auto 推到右缘）全部通过。
+
+剩余（非阻塞，待用户决定）：
+
+- 练功答案里 3 处“插入式”写法（12-carousel 加第四页、13-overlays 新增按钮、16-project
+  “改动的这一行”）性质上是“改动说明”，若按最严标准可再补全；
+- jQuery 篇 JS 源码块仍普遍省略 `$(function(){…})` / `DOJO.ready(…)` 外壳（既有约定允许、
+  校验器会归一化；若要“整段复制即运行”可批量补外壳）；
+- `tools/check-demo-parity.py` 升级为“文字 + 属性”级比对（本轮未动 tools/，
+  深比对脚本仍是临时工具）。
+
+### 🕘 上一轮（全站内容审查 · 只审查不改文件，清单已在本轮修复）
+
+用户要求对全站教程内容做仔细审查（错别字与语法、教程内容正确性、示例代码与实例是否完全一致、
+新人难懂处是否讲清）。本轮为**只审查不改文件**（除本进度记录），产出问题清单；
+清单已由用户拍板、在下一轮全部修复（见上一条），本节保留为审查过程与证据的记录。
+审查方法与证据：
+
+- 机器体检（全部通过，未发现新问题）：`check-offline.sh`、`check-links.py`（44 页）、
+  `check-demo-parity.py`（41 页 124 演示）、逐页“重复 id / 悬空锚点引用”扫描、
+  章节预览里用到的 Bootstrap 类名（curated 清单）与全部 `bi-*` 图标类名存在性核对、
+  图标大全计数（2078 = CSS 类数）、`site/data/notes.json` 字段与条数。
+- 自建临时工具（在 /tmp，不入库）：`parity-deep.py`——把 check-demo-parity 的盲区
+  （文字内容与 class 以外属性）也纳入比对；`cdp-eval.js`——无头 Chromium 的通用求值脚本；
+  `jq-lab*.html`——jQuery 4.0.0 行为实测页。
+- 浏览器实测：Ajax 章 http:// 全链路（getJSON/serialize/getScript/load/全局 ajax 事件）、
+  jQuery 方法/选择器存在性 100+ 项、`$.each/$.map/$.grep` 回调签名、`$.uniqueSort`、
+  `:checked` 语义、`css('width')`、动画速度表、浮动标签空 placeholder、
+  jquery/08 例 4 wrap/unwrap、jquery/11 例 2 各按钮输出。
+
+**确认的问题（按严重度，行号为审查时快照）**：
+
+1. [高] `jquery/08-manipulation.html:365` 例 4 “unwrap”按钮逻辑错误：
+   `$('#jq08-wrap-stage .jq08-note').parent().unwrap()` 拆掉的是**舞台容器**
+   （实测 `#jq08-wrap-stage` 消失），与按钮文案“外衣没了、字条还在”相反；
+   且此后同演示所有按钮（依赖 `#jq08-wrap-stage`）全部失效。正确写法应为
+   `$('#jq08-wrap-stage .jq08-note').unwrap()`。
+2. [高] `jquery/11-utilities.html:135、169` `$.uniqueSort` 演示与描述错误：
+   实测 `$.uniqueSort([3,1,2,3,1])` 在 jQuery 4.0.0 里**原样返回**（该方法只对
+   DOM 元素数组去重排序）；按钮点下去什么也没发生，新手必然困惑。
+3. [高] `jquery/11-utilities.html:38` 回调签名说法错误：称三者回调都是
+   `function (index, value)`“和 $(...).each() 不同”。实测：`$.each` 与 `$(...).each`
+   都是 (index, element)；`$.map`、`$.grep` 是 (value, index)。
+4. [高] 第 16 式拆解块与成品 `demo/portfolio` 不一致（读者照抄得不到成品）：
+   骨架 CSS 缺 `body` 纸底、`.seal`、`.portrait` 的字体/底色/字距、`project-thumb` 颜色
+   （`16-project.html:61-75` vs `demo/portfolio/index.html:20-40`）；
+   hero 少 `class="seal"`；项目区 `<h2>` 类名不同且缺一副标题；
+   关于我 section 少 `bg-white border-top border-bottom`、技能徽章少 jQuery；
+   页脚多 `mt-5`、少“· 由 Bootstrap 5.3.8 驱动”；正文“每张卡片不必各写 col 类”
+   与代码里每张卡都写 `<div class="col">` 矛盾；`16-project.html:319`“bundle 脚本只是按需加载”
+   与常规 `<script src>` 加载不符。
+5. [高] 三处 check-demo-parity 盲区内的“预览 ≠ 源码”（文字/属性级）：
+   `bootstrap/03-grid-2.html:399 vs 420`（预览多“把窗口拖窄，侧边栏会落到下方。”）；
+   `bootstrap/11-collapse.html:60 vs 81`（预览多“每日晨起挥剑三百，风雨无阻，三年可成。”）；
+   `bootstrap/14-icons.html:158-160`（预览 `href="#bs14-demo1"`，源码写 `href="#"` ×3）。
+6. [中] `bootstrap/14-icons.html:41`“整套才几个 KB”与事实不符：
+   vendor 里 `bootstrap-icons.woff2` 132KB、`woff` 176KB。
+7. [中] 弃用类仍在教：
+   - `.text-muted`（官方 5.3 迁移文档明示弃用，替代 `text-body-secondary`）在
+     `jquery/07`（2 处）、`jquery/08`（2 处）、`jquery/09`（8 处）、`jquery/10`（26 处）、
+     `demo/todo`（3 处）；
+   - `archive/reference/index.html:294` 仍推荐 `btn-close-white`（5.3 已弃用，改用 `data-bs-theme="dark"`）。
+8. [中] `archive/reference/index.html:163` 显隐说明写反：“内容仍在 HTML 里，读屏软件照样能读到”
+   ——`display:none`（d-none）会把内容移出无障碍树，读屏读不到；视觉隐藏但可读应用
+   `visually-hidden`。
+9. [中] 交叉引用落空：`bootstrap/04-typography.html:149` 称“主题定制原理留到第十五式”，
+   但全书没有任何章节讲主题定制/CSS 变量；`01-intro.html:151` 与 `04:232` 把 `d-flex`
+   指到第十五式，但第十五式与全书正文都没有正式讲它（示例却大量使用）。
+10. [中] `bootstrap/08-forms.html:59、143、589` `needs-validation` 的作用被夸大：
+    实测 bootstrap.min.css 与 bundle.min.js 都**不含**该字符串——它只是官方示例里的
+    JS 选择器钩子，本章演示也没有用它做钩子；真正生效的是 `was-validated`。
+11. [中] `archive/reference/index.html:109` 错别字：`二級弱化`（“級”为繁体，应为“级”）——
+    全站正文扫描（排除第三方镜像）仅此 1 处繁体混入。
+12. [中] `jquery/06-effects.html:331` 两个演示都编号“例 4”（应为例 4/例 5）；
+    `jquery/12-chaining.html:351` 答案说“两个 end()”，代码只有一个；
+    `jquery/12-chaining.html:61、99` 例 1“不加 .end()：整行都跟着段落一起被操作”与
+    实际效果（边框落在段落上、容器不变）不符。
+13. [低] `bootstrap/03-grid-2.html:161`“order 取值 1–5”缺 0（CSS 实测 `.order-0`–`.order-5`）；
+    `02-grid-1.html:204` 断点表“无前缀 | <576px”与同章 216 行“无前缀对所有屏幕生效”冲突；
+    `01-intro.html:169` “第三、四式会专门讲颜色体系”（应为第四、五式）；
+    `09-navs.html:41`“第一式就见过 data API 的把戏”（首个 data-bs-* 在第五式）；
+    `12-carousel.html:166`“下一式之后专门修炼图标”（实际是第十四式，表述含糊）；
+    `jquery/11-utilities.html:360`“1.9 起就已废弃”（.live/.die 是 1.7 弃用、1.9 移除）；
+    `jquery/11-utilities.html:427` 小结“前两者返回原位，后两者返回新数组”句意混乱
+    （三者是 $.each 返回原集合、$.map/$.grep 返回新数组）；
+    `archive/reference-jquery/index.html:123` 把已弃用的 `.hover()` 列在常用表里且
+    末尾“弃用清单”未收它（conventions 已认定 .hover 为“仍在但弃用”）。
+14. [低] `bootstrap/08-forms.html:38`“placeholder……读屏器也不读它”表述过绝对
+    （多数读屏器会朗读 placeholder，但确实不该替代 label）；
+    `bootstrap/10-modal-dropdown.html:349` 禁用下拉项用 `<button class="disabled" aria-disabled>`
+    而未加 `disabled` 属性（鼠标被 pointer-events 拦住、键盘仍可触发），与第五式“按钮用 disabled 属性”的教导不一致。
+15. [低] 系统性写法（非错误，待用户决定）：jQuery 篇 108 个 JS 源码块中 104 个省略了
+    `$(function () { … })` / `DOJO.ready(…)` 外壳（预览里有、源码块没有；
+    check-demo-parity 按约定归一化，故机器检查通过）。第一章刚教“整体包在 $(function(){}) 里”，
+    源码块却普遍不带——新手整段复制到 head 会踩坑，建议补外壳或加一句注明。
+
+**备注**：第 1–5 条为“实打实的错误/不一致”，建议尽快修；第 6–12 条为事实性错误或
+交叉引用错误；第 13–15 条为表述精度/风格问题。修复后需重跑三个 check 脚本并补
+bug-fix 档案（unwrap 演示、uniqueSort 演示两坑）。本轮未改动任何教程文件。
 
 ### 🆕 最新一轮（对照前身查缺补漏 · 新人入门审查 · 字典化）
 
@@ -361,7 +503,9 @@ CDP 实测：暗色下 `color-scheme: dark`、`scrollbar-color: rgb(75,79,92)`�
 
 ### 📝 待办
 
-- 无阻塞项。全部页面已完成并通过双模式终验（见上）。
+- 其余无阻塞项。全部页面已完成并通过双模式终验（见上）。
+- 可选收尾（见顶部“最新一轮”末段）：3 处插入式练功答案是否补全、jQuery JS 源码块是否批量补
+  `$(function(){…})` 外壳、`tools/check-demo-parity.py` 是否升级为“文字 + 属性”级比对。
 
 ## 章节登记清单（site.js SECTIONS）
 

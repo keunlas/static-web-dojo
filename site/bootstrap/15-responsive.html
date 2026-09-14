@@ -26,6 +26,7 @@
           <li>记住五大断点（sm / md / lg / xl / xxl）与类名前缀的对应</li>
           <li>会用 <code>d-none</code>、<code>d-md-block</code> 等显隐工具类</li>
           <li>掌握“栅格断点 + 工具类”的组合套路</li>
+          <li>补上 <code>d-flex</code> 家族的弹性工具类（前面几式演示的常客）</li>
         </ul>
       </div>
 
@@ -202,6 +203,59 @@
         navbar 组件把“显隐”心法内置好了，我们只需选一个断点。
       </p>
 
+      <h2>补遗：弹性工具类（前面演示里的常客）</h2>
+      <p>
+        从第四式起，演示里就常出现 <code>d-flex</code>、<code>flex-wrap</code>、
+        <code>align-items-center</code>、<code>justify-content-between</code>、<code>gap-2</code>
+        这些类名——它们是把 CSS 的 Flexbox 打包成的工具类，也是 Bootstrap 栅格系统的地基。
+        最常用的五个成员：
+      </p>
+      <table>
+        <thead>
+          <tr><th>类名</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>d-flex</code> / <code>d-inline-flex</code></td><td>开启弹性布局：子元素默认横向排开（块级 / 行内块级两种身份）</td></tr>
+          <tr><td><code>flex-wrap</code></td><td>一行放不下时允许换行（不写则默认不换行、硬挤）</td></tr>
+          <tr><td><code>align-items-*</code></td><td>横向排列时管“垂直对齐”：<code>center</code> 居中，<code>start</code> / <code>end</code> 顶 / 底</td></tr>
+          <tr><td><code>justify-content-*</code></td><td>管“水平分布”，取值与第三式的行对齐完全同一套</td></tr>
+          <tr><td><code>gap-0</code>–<code>gap-5</code></td><td>子项之间的固定间距，比给每个子项写 margin 省事</td></tr>
+        </tbody>
+      </table>
+      <p>
+        还有一位配角 <code>ms-auto</code>（自动左外边距）：在弹性行里常用来把某个元素“推”到最右边。
+        取值记不全没关系，<a href="../archive/reference/index.html#flex">工具类速查</a>里有弹性布局专节。
+      </p>
+
+      <div class="demo">
+        <div class="demo-caption">例 3 · 弹性工具类五件套：一行头部，缩窄窗口看换行</div>
+        <div class="demo-preview">
+          <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+            <span class="badge text-bg-primary">品牌</span>
+            <span class="badge text-bg-secondary">目录</span>
+            <span class="badge text-bg-secondary">关于</span>
+            <span class="badge text-bg-light border ms-auto">右侧的按钮</span>
+          </div>
+        </div>
+        <div class="demo-source">
+          <script type="text/plain" data-lang="html" data-title="页面结构">
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="badge text-bg-primary">品牌</span>
+              <span class="badge text-bg-secondary">目录</span>
+              <span class="badge text-bg-secondary">关于</span>
+              <span class="badge text-bg-light border ms-auto">右侧的按钮</span>
+            </div>
+          </script>
+        </div>
+      </div>
+
+      <p>
+        五种类名各管一段：<code>d-flex</code> 让子元素并排、<code>flex-wrap</code> 允许换行、
+        <code>align-items-center</code> 把它们垂直居中、<code>gap-2</code> 拉开间距、
+        <code>ms-auto</code> 把最后一个元素推到最右。把窗口拖窄，“右侧的按钮”会掉到下一行——
+        这就是它和栅格一样“跟屏幕走”的底气。
+      </p>
+
       <div class="practice">
         <div class="practice-title">练功 · 第十五式</div>
         <ol>
@@ -230,15 +284,16 @@
           <summary>参考答案 2</summary>
           <script type="text/plain" data-lang="html" data-title="手机 2 列、桌面 4 列">
             <div class="row g-2 text-center">
-              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第一格</div></div>
-              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第二格</div></div>
-              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第三格</div></div>
-              <div class="col-6 col-md-6 col-xl-3"><div class="p-3 border rounded">第四格</div></div>
+              <div class="col-6 col-xl-3"><div class="p-3 border rounded">第一格</div></div>
+              <div class="col-6 col-xl-3"><div class="p-3 border rounded">第二格</div></div>
+              <div class="col-6 col-xl-3"><div class="p-3 border rounded">第三格</div></div>
+              <div class="col-6 col-xl-3"><div class="p-3 border rounded">第四格</div></div>
             </div>
           </script>
           <p>
-            <code>col-6</code> 让手机上一行放两个格子；md 档继续用 <code>col-md-6</code> 保持两列，
-            到 <code>col-xl-3</code> 再展开成四列。体会一下“基础款改观感、断点款改档位”的分工。
+            <code>col-6</code> 让手机上一行放两个格子，这条基础款会一直生效到 xl 之前，
+            所以平板自然也是两列；到 <code>col-xl-3</code> 再展开成四列。体会一下
+            “基础款管小屏、断点款管大屏”的分工——没有写到的档位，自动沿用更小一档的样式。
           </p>
         </details>
 
@@ -259,6 +314,7 @@
         <li>移动优先 = 先写手机版，再用断点逐级增强，断点一律 min-width；</li>
         <li>五大断点：sm ≥576 / md ≥768 / lg ≥992 / xl ≥1200 / xxl ≥1400；</li>
         <li><code>d-none d-md-block</code> 表示“md 起显示”，<code>d-md-none</code> 表示“md 起隐藏”；</li>
+        <li>弹性五件套：<code>d-flex</code> 开启、<code>flex-wrap</code> 换行、<code>align-items-*</code> 管垂直、<code>justify-content-*</code> 管水平、<code>gap-*</code> 管间距；<code>ms-auto</code> 推到最右；</li>
         <li>套路就三招：栅格断点分列、显隐类切内容、间距字号随行，最后缩放窗口实测。</li>
       </ul>
 
