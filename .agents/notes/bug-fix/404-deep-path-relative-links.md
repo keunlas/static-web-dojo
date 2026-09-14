@@ -69,5 +69,6 @@
 ## 相关
 
 - 文件：`site/404.html`、`tools/check-links.py`（检查覆盖）
-- 关联：`notes/architecture.md`（§2 加载机制、目录结构）、`notes/progress.md`（本轮记录）、
+- 关联：`notes/architecture.md`（§2 加载机制、目录结构）、
+  `notes/progress/10.sitemap-and-404-page.md`（归档记录）、
   `skills/verify-offline/SKILL.md`（CDP 双模式验证流程）

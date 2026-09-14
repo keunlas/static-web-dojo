@@ -16,7 +16,8 @@ description: 从章节大纲产出一章合格教程页（site/bootstrap 与 sit
 
 ## 输入
 
-- slug（文件名与 data-page，见 `.agents/notes/progress.md` 清单）
+- slug（文件名与 data-page：登记在 `site/assets/js/site.js` 的 `SECTIONS` 里，
+  新页面按 `skills/register-chapter/SKILL.md` 登记）
 - 章节号与标题
 - 内容大纲（讲哪些知识点、安排哪些演示）
 
@@ -33,9 +34,11 @@ description: 从章节大纲产出一章合格教程页（site/bootstrap 与 sit
 6. **自查**：跑 conventions.md 第 7 节的检查命令 + `python3 tools/check-demo-parity.py`
    （源码块必须能还原预览）；浏览器双模式验证（`skills/verify-offline/SKILL.md`），
    新演示逐条做交互断言。
-7. **更新** `.agents/notes/progress.md` 中对应章节状态为 ✅。
-   **注意**：并行多代理场景下，共享文档（含 progress.md）一律由协调者（父代理）统一更新，
-   子代理只在自己的交付报告里说明，不要直接改（见 `skills/doc-sync/SKILL.md`）；独立单人工作时可自行更新。
+7. **收尾归档**：按 `skills/doc-sync/SKILL.md` 的流程，把本批记录归档为
+   `.agents/notes/progress/<编号>.<英文名>.md`（文件名用英文），并更新 `.agents/notes/progress.md` 的
+   当前待办与归档索引。
+   **注意**：并行多代理场景下，共享文档（含 progress.md 与 progress/ 归档）一律由
+   协调者（父代理）统一更新，子代理只在自己的交付报告里说明，不要直接改；独立单人工作时可自行更新。
 
 ## 验收清单（全部满足才算完成）
 
